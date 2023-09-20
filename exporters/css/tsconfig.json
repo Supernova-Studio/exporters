@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "es6",
+    "outDir": "build",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "typeRoots": [
+      "src/*",
+      "types/*"
+    ]
+  }
+}

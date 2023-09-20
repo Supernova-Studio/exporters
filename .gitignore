@@ -128,3 +128,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Anything prefixed with `._`
+._*
+
+# Build folders
+build/
+DerivedData/

@@ -1,0 +1,17 @@
+{
+    "id": "io.supernova.exporters.css",
+    "name": "CSS",
+    "description": "CSS token and style exporter",
+    "author": "Jiri Trecak",
+    "organization": "Supernova.io",
+    "homepage": "https://supernova.io",
+    "version": "1.0.0",
+    "usesBrands": true,
+    "executable": "/dist/build.js",
+    "engine": "latest",
+    "tags": [
+        "CSS",
+        "Tokens",
+        "Styles"
+    ]
+}
