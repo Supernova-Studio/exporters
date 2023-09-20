@@ -7,30 +7,30 @@
   </a>
 </p>
 
-[Supernova](https://supernova.io/) allows you to generate production code out of your design systems with ease. You'll find all available exporters - packages that control how the code gets exported to your codebase - in this repository. For tutorials how to work with the exporters or even build your own, see our [developer docs](https://developers-next.supernova.io).
+[Supernova](https://supernova.io/) makes generation and delivery of production code from your design systems a breeze. In this repository, you'll find all available exporters—packages that control how code is exported to your codebase. For tutorials on working with these exporters, or even building your own, consult our [developer docs](https://developers-next.supernova.io).
 
-![Exporters](images/exporters.png)
+![Header Image](images/exporters.png)
 
 ## Getting Started
 
-Few resources to help you get started:
+Here are a few resources to help you get started:
 
-- Watch ["intro to exporters" video](https://tbd.com/) to understand the power of exporters
-- Watch ["building your first exporter" video](https://tbd.com/) to learn how to build and modify them
-- Read [developer documentation](https://developers-next.supernova.io) for all the details you might need
-- Learn by example by going through the exporters [we've built for you](./exporters)
-- Join our [Slack community](https://community.supernova.io/) to talk about any of this with Supernova team and your fellow developers
+- Watch the ["Intro to Exporters" video](https://tbd.com/) to understand the capabilities of exporters
+- Watch the ["Building Your First Exporter" video](https://tbd.com/) to learn how to create and modify exporters
+- Read our [developer documentation](https://developers-next.supernova.io) for any additional details you might need
+- Learn by example by exploring the exporters [we've built for you](./exporters)
+- Join our [Slack community](https://community.supernova.io/) to discuss any topics with the Supernova team and other developers
 
-## Helping us build better product
+## Help Us Build a Better Product
 
-Our community is everything to us - and we want to hear what you have to say, good or bad. If you have:
+Your input is invaluable to us—whether it's positive or negative. If you have:
 
-- A suggestion to improve developer experience
-- You have encountered some unfortunate bug
-- Something in the docs is unclear / incorrect
+- Suggestions for improving the developer experience
+- Encountered any bugs
+- Found unclear or incorrect information in the documentation
 
-then please open a new [GitHub issue](https://github.com/Supernova-Studio/exporters/issues/new/choose). As always, you can do all of this through our community as well:
+please open a new [GitHub issue](https://github.com/Supernova-Studio/exporters/issues/new/choose). You can also share your thoughts through our community channels.
 
 ## Community
 
-We have lively [Slack community](https://community.supernova.io) where the entire Supernova team and also your fellow developers exchange ideas and talk to each other, and we would love to have you as well!
+We have an active [Slack community](https://community.supernova.io) where both the Supernova team and your fellow developers exchange ideas and engage in discussions. Come join us to shape the future of design systems!
