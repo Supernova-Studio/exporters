@@ -1,44 +1,21 @@
-import { ExportHelper } from "./helpers/ExportHelper"
-import { Supernova, TokenType, Pulsar, PulsarContext, AnyOutputFile, OutputTextFile } from "@supernova-studio/pulsar-next"
+import { OutputTextFile, Supernova, PulsarContext, RemoteVersionIdentifier } from "@supernova-studio/pulsar-next"
+import { AllTokenTypes } from "./helpers/constants"
+import { indexOutputFile } from "./files/index-file"
+import { styleOutputFile } from "./files/style-file"
 
-Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  // Fetch color tokens
-  const tokens = await sdk.tokens.getTokens({
+Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<OutputTextFile>> => {
+  // Fetch data from design system that is currently being exported (context)
+  const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
     versionId: context.versionId,
-  })
+  }
 
-  console.log("Something to console")
+  // Fetch the necessary data
+  const tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
+  const tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
 
-  // Process files per token type
-  return [
-    tokenFileFromType(tokens, TokenType.color),
-    tokenFileFromType(tokens, TokenType.typography),
-    tokenFileFromType(tokens, TokenType.shadow),
-    tokenFileFromType(tokens, TokenType.dimension),
-    tokenFileFromType(tokens, TokenType.size),
-    tokenFileFromType(tokens, TokenType.space),
-  ]
+  // Generate output files
+  // - one file per token type
+  // - one file that imports all other files
+  return [...AllTokenTypes.map((type) => styleOutputFile(type, tokens, tokenGroups)), indexOutputFile(tokens)]
 })
-
-function tokenFileFromType(tokens: Array<any>, type: TokenType): OutputTextFile {
-  // Filter tokens by type
-  const typedTokens = tokens.filter((token) => token.tokenType === type)
-
-  // Create variables
-  const content = typedTokens
-    .map((token) => {
-      return `--vars(my-token-${token.name})`
-    })
-    .join("\n")
-
-  return textFile(content, `${type}.css`)
-}
-
-function textFile(content: string, name: string): OutputTextFile {
-  return ExportHelper.outputTextFile({
-    relativePath: "./styles",
-    name: name,
-    content: content,
-  })
-}

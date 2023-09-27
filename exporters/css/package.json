@@ -4,14 +4,13 @@
     "description": "Supernova.io | CSS exporter",
     "main": "index.js",
     "scripts": {
-        "watch:release": "npx webpack --mode=production --watch",
-        "watch:dev": "npx webpack --mode=development --watch",
+        "dev": "npx webpack --mode=development --watch",
         "build": "npx webpack --mode=production"
     },
     "author": "Supernova.io",
     "license": "MIT",
     "dependencies": {
-        "@supernova-studio/pulsar-next": "latest"
+        "@supernova-studio/pulsar-next": "2.0.17"
     },
     "devDependencies": {
         "prettier": "3.0.3",

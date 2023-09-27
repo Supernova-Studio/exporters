@@ -140,3 +140,4 @@ dist
 # Build folders
 build/
 DerivedData/
+.build
