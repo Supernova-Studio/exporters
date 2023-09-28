@@ -1,5 +1,8 @@
 import { TokenType } from "@supernova-studio/pulsar-next"
 
+/**
+ * Main configuration of the exporter. Changes top-level behavior of the exporter in various ways.
+ */
 export const config = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: true,
@@ -8,7 +11,7 @@ export const config = {
   /** When enabled, file with all css style files imported will be generated */
   generateIndexFile: true,
   /** When enabled, empty style files will be generated. Otherwise empty are omitted */
-  generateEmptyFiles: true,
+  generateEmptyFiles: false,
   /** When enabled, token description will be shown as code comments for every exported token */
   showDescriptions: true,
   /** Style of exported token names. Allowed are: "kebab-case", "snake-case", "camel-case", "original" */

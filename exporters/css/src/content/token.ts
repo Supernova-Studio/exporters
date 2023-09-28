@@ -10,7 +10,7 @@ export function convertedToken(token: Token, tokens: Array<Token>, tokenGroups: 
 
   if (config.showDescriptions && token.description) {
     // Generate token with comments
-    return `/* ${indentString}${token.description}\n${indentString}--${name}: ${value};`
+    return `${indentString}/* ${token.description.trim()} */\n${indentString}--${name}: ${value};`
   } else {
     // Generate tokens without comments
     return `${indentString}--${name}: ${value};`

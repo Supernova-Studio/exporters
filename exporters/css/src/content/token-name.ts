@@ -29,14 +29,10 @@ export function readableVariableName(token: Token, tokenGroup: TokenGroup, prefi
   // only allow letters, digits, underscore and hyphen
   sentence = sentence.replace(/[^a-zA-Z0-9_-]/g, "_")
 
-  console.log("readable var name")
-
   // prepend underscore if it starts with digit
   if (/^\d/.test(sentence)) {
     sentence = "_" + sentence
   }
-
-  console.log(sentence)
 
   return sentence
 }

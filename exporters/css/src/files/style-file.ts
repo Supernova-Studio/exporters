@@ -3,9 +3,14 @@ import { config } from "../config"
 import { convertedToken } from "../content/token"
 import { ExportHelper } from "../helpers/ExportHelper"
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile {
+export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile | null {
   // Filter tokens by top level type
   const tokensOfType = tokens.filter((token) => token.tokenType === type)
+
+  // Filter out files where there are no tokens, if enabled
+  if (!config.generateEmptyFiles && tokensOfType.length === 0) {
+    return null
+  }
 
   // Convert all tokens to CSS variables
   const cssVariables = tokensOfType.map((token) => convertedToken(token, tokens, tokenGroups)).join("\n")
