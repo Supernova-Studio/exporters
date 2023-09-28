@@ -1,4 +1,5 @@
-import { OutputFileType, OutputTextFile, Token } from "@supernova-studio/pulsar-next"
+import { FileHelper } from "@supernova-studio/export-helpers"
+import { OutputTextFile, Token } from "@supernova-studio/pulsar-next"
 import { config } from "../config"
 import { AllTokenTypes } from "../helpers/constants"
 
@@ -21,11 +22,9 @@ export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
     // Add disclaimer to index file if enabled
     content = `/* ${config.disclaimer} */\n${content}`
   }
-
-  return {
-    path: config.baseIndexFilePath,
-    name: config.indexFileName,
-    type: OutputFileType.text,
+  return FileHelper.createTextFile({
+    relativePath: config.baseIndexFilePath,
+    fileName: config.indexFileName,
     content: content,
-  }
+  })
 }

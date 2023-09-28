@@ -1,7 +1,7 @@
-import { OutputFileType, OutputTextFile, Token, TokenGroup, TokenType } from "@supernova-studio/pulsar-next"
+import { FileHelper } from "@supernova-studio/export-helpers"
+import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernova-studio/pulsar-next"
 import { config } from "../config"
 import { convertedToken } from "../content/token"
-import { ExportHelper } from "../helpers/ExportHelper"
 
 export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile | null {
   // Filter tokens by top level type
@@ -22,7 +22,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   }
 
   // Retrieve content as file which content will be directly written to the output
-  return ExportHelper.outputTextFile({
+  return FileHelper.createTextFile({
     relativePath: config.baseStyleFilePath,
     fileName: config.styleFileNames[type],
     content: content,
