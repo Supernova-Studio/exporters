@@ -1,4 +1,4 @@
-import { NamingHelper } from "@supernova-studio/export-helpers"
+import { NamingHelper, StringCase } from "@supernova-studio/export-helpers"
 import { Token, TokenGroup } from "@supernova-studio/pulsar-next"
 import { config } from "../config"
 import { tokenValue } from "./token-value"
@@ -22,3 +22,4 @@ export function convertedToken(token: Token, tokens: Array<Token>, tokenGroups: 
     return `${indentString}--${name}: ${value};`
   }
 }
+//

@@ -19,6 +19,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
 
+  // console.log(tokenGroups.splice(0, 10))
+
   // Filter by brand, if specified
   if (context.brandId) {
     tokens = tokens.filter((token) => token.brandId === context.brandId)

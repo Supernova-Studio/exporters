@@ -20,7 +20,7 @@ export const config = {
   /** Style of exported token names */
   tokenNameStyle: StringCase.camelCase,
   /** Format of the exported colors */
-  colorFormat: ColorFormat.smartRgba,
+  colorFormat: ColorFormat.smartHashHex,
   /** Max number of decimals in colors */
   colorPrecision: 3,
   /** Number of spaces used to indent every css variables */

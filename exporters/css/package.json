@@ -11,7 +11,7 @@
     "license": "MIT",
     "dependencies": {
         "@supernova-studio/pulsar-next": "2.0.17",
-        "@supernova-studio/export-helpers": "0.0.7"
+        "@supernova-studio/export-helpers": "0.0.9"
     },
     "devDependencies": {
         "prettier": "3.0.3",

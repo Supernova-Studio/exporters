@@ -27,7 +27,6 @@ export function tokenValue(token: Token, tokens: Array<Token>, tokenGroups: Arra
 }
 
 export function colorTokenValue(value: ColorTokenValue, mappedTokens: Map<string, Token>): string {
-  console.log("Formatting color")
   // Use color helper to convert color to desired format.
   // Will also replace any color or opacity tokens with their variable names if color references other tokens
   return ColorHelper.formattedColorOrVariableName(
