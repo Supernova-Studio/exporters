@@ -1,3 +1,4 @@
+import { StringCase } from "@supernova-studio/export-helpers"
 import { TokenType } from "@supernova-studio/pulsar-next"
 
 /**
@@ -14,8 +15,8 @@ export const config = {
   generateEmptyFiles: false,
   /** When enabled, token description will be shown as code comments for every exported token */
   showDescriptions: true,
-  /** Style of exported token names. Allowed are: "kebab-case", "snake-case", "camel-case", "original" */
-  tokenNameStyle: "kebab-case",
+  /** Style of exported token names */
+  tokenNameStyle: StringCase.camelCase,
   /** Number of spaces used to indent every css variables */
   indent: 2,
   /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
