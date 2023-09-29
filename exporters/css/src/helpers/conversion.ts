@@ -1,28 +1,5 @@
-import { ColorTokenValue } from "@supernova-studio/pulsar-next"
-import { ShadowToken } from "@supernova-studio/pulsar-next"
+import { ShadowToken, Token } from "@supernova-studio/pulsar-next"
 import { colorTokenValue } from "../content/token-value"
-
-export function colorValueToHex6(value: ColorTokenValue): string {
-  return `#${[value.color.r, value.color.g, value.color.b]
-    .map((x) => {
-      const hex = x.toString(16)
-
-      return hex.length === 1 ? `0${hex}` : hex
-    })
-    .join("")
-    .toLowerCase()}`
-}
-
-export function colorValueToHex8(value: ColorTokenValue): string {
-  return `#${[value.color.r, value.color.g, value.color.b, Math.round(value.opacity.measure * 255)]
-    .map((x) => {
-      const hex = x.toString(16)
-
-      return hex.length === 1 ? `0${hex}` : hex
-    })
-    .join("")
-    .toLowerCase()}`
-}
 
 export function findAliases(token, allTokens) {
   let aliases = allTokens.filter((t) => t.value.referencedToken && t.value.referencedToken.id === token.id)
@@ -42,6 +19,7 @@ export function gradientAngle(from: { x: number; y: number }, to: { x: number; y
 }
 
 /** Describe complex shadow token */
+/*
 export function shadowDescription(shadowToken: ShadowToken) {
   let connectedShadow = "transparent"
   if (shadowToken.shadowLayers) {
@@ -59,7 +37,8 @@ export function shadowDescription(shadowToken: ShadowToken) {
 }
 
 /** Convert complex shadow value to CSS representation */
-export function shadowTokenValue(shadowToken) {
+/*
+export function shadowTokenValue(shadowToken, mappedTokens: Map<string, Token>) {
   var blurRadius = getValueWithCorrectUnit(nonNegativeValue(shadowToken.value.radius.measure))
   var offsetX = getValueWithCorrectUnit(shadowToken.value.x.measure)
   var offsetY = getValueWithCorrectUnit(shadowToken.value.y.measure)
@@ -69,6 +48,7 @@ export function shadowTokenValue(shadowToken) {
     shadowToken.value
   )}`
 }
+*/
 
 export function getValueWithCorrectUnit(value) {
   if (value === 0) {

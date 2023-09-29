@@ -1,4 +1,4 @@
-import { StringCase } from "@supernova-studio/export-helpers"
+import { StringCase, ColorFormat } from "@supernova-studio/export-helpers"
 import { TokenType } from "@supernova-studio/pulsar-next"
 
 /**
@@ -15,8 +15,14 @@ export const config = {
   generateEmptyFiles: false,
   /** When enabled, token description will be shown as code comments for every exported token */
   showDescriptions: true,
+  /** When enabled, values will use references to other tokens where applicable */
+  useReferences: true,
   /** Style of exported token names */
   tokenNameStyle: StringCase.camelCase,
+  /** Format of the exported colors */
+  colorFormat: ColorFormat.smartRgba,
+  /** Max number of decimals in colors */
+  colorPrecision: 3,
   /** Number of spaces used to indent every css variables */
   indent: 2,
   /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
