@@ -10,8 +10,8 @@
     "author": "Supernova.io",
     "license": "MIT",
     "dependencies": {
-        "@supernova-studio/pulsar-next": "2.0.17",
-        "@supernova-studio/export-helpers": "0.0.9"
+        "@supernova-studio/pulsar-next": "2.0.19",
+        "@supernova-studio/export-helpers": "0.0.12"
     },
     "devDependencies": {
         "prettier": "3.0.3",

@@ -13,7 +13,9 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   }
 
   // Convert all tokens to CSS variables
-  const cssVariables = tokensOfType.map((token) => convertedToken(token, tokens, tokenGroups)).join("\n")
+  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
+  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups)).join("\n")
+
   // Create file content
   let content = `:root {\n${cssVariables}\n}`
   if (config.showGeneratedFileDisclaimer) {

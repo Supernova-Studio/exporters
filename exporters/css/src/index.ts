@@ -1,5 +1,4 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile } from "@supernova-studio/pulsar-next"
-import { AllTokenTypes } from "./helpers/constants"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, AllTokenTypes } from "@supernova-studio/pulsar-next"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 
@@ -18,8 +17,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Fetch the necessary data
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
-
-  // console.log(tokenGroups.splice(0, 10))
 
   // Filter by brand, if specified
   if (context.brandId) {

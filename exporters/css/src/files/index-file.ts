@@ -1,7 +1,6 @@
 import { FileHelper } from "@supernova-studio/export-helpers"
-import { OutputTextFile, Token } from "@supernova-studio/pulsar-next"
+import { AllTokenTypes, OutputTextFile, Token } from "@supernova-studio/pulsar-next"
 import { config } from "../config"
-import { AllTokenTypes } from "../helpers/constants"
 
 export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
   // Generate import statement for every token type there is
