@@ -1,13 +1,13 @@
 import { FileHelper } from "@supernova-studio/export-helpers"
 import { AllTokenTypes, OutputTextFile, Token } from "@supernova-studio/pulsar-next"
-import { config } from "../config"
+import { exportConfiguration } from ".."
 
 export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
   // Generate import statement for every token type there is
   // Filter out files where there are no tokens, if enabled
   let content = AllTokenTypes.map((type) => {
-    const importStatement = `@import "./${config.styleFileNames[type]}";`
-    if (config.generateEmptyFiles) {
+    const importStatement = `@import "./${exportConfiguration.styleFileNames[type]}";`
+    if (exportConfiguration.generateEmptyFiles) {
       return importStatement
     } else {
       const tokensOfType = tokens.filter((token) => token.tokenType === type)
@@ -17,13 +17,13 @@ export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
     .filter((c) => c !== null)
     .join("\n")
 
-  if (config.showGeneratedFileDisclaimer) {
+  if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to index file if enabled
-    content = `/* ${config.disclaimer} */\n${content}`
+    content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
   return FileHelper.createTextFile({
-    relativePath: config.baseIndexFilePath,
-    fileName: config.indexFileName,
+    relativePath: exportConfiguration.baseIndexFilePath,
+    fileName: exportConfiguration.indexFileName,
     content: content,
   })
 }

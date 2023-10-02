@@ -1,6 +1,6 @@
 import { NamingHelper, CSSHelper } from "@supernova-studio/export-helpers"
 import { Token, TokenGroup } from "@supernova-studio/pulsar-next"
-import { config } from "../config"
+import { exportConfiguration } from ".."
 
 export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
   // First creating the name of the token, using helper function which turns any token name / path into a valid variable name
@@ -8,16 +8,16 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 
   // Then creating the value of the token, using another helper function
   const value = CSSHelper.tokenToCSS(token, mappedTokens, {
-    allowReferences: config.useReferences,
-    decimals: config.colorPrecision,
-    colorFormat: config.colorFormat,
+    allowReferences: exportConfiguration.useReferences,
+    decimals: exportConfiguration.colorPrecision,
+    colorFormat: exportConfiguration.colorFormat,
     tokenToVariableRef: (t) => {
       return `var(--${tokenVariableName(t, tokenGroups)})`
     },
   })
-  const indentString = " ".repeat(config.indent)
+  const indentString = " ".repeat(exportConfiguration.indent)
 
-  if (config.showDescriptions && token.description) {
+  if (exportConfiguration.showDescriptions && token.description) {
     // Generate token with comments
     return `${indentString}/* ${token.description.trim()} */\n${indentString}--${name}: ${value};`
   } else {
@@ -27,7 +27,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 }
 
 function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
-  const prefix = config.tokenPrefixes[token.tokenType]
+  const prefix = exportConfiguration.tokenPrefixes[token.tokenType]
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
-  return NamingHelper.codeSafeVariableNameForToken(token, config.tokenNameStyle, parent, prefix)
+  return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent, prefix)
 }
