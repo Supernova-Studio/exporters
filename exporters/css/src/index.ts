@@ -1,11 +1,7 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, AllTokenTypes } from "@supernova-studio/pulsar-next"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernova-studio/pulsar-next"
 import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
-
-function config<T extends object>(): T {
-  return {} as T
-}
 
 /**
  * Export entrypoint.
@@ -44,11 +40,13 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Generate output files
   return [
     // One file per token type
-    ...(AllTokenTypes.map((type) => styleOutputFile(type, tokens, tokenGroups)).filter((f) => f !== null) as Array<AnyOutputFile>),
+    ...([TokenType.dimension, TokenType.color]
+      .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      .filter((f) => f !== null) as Array<AnyOutputFile>),
     // One file that imports all other files, if enabled
     indexOutputFile(tokens),
   ]
 })
 
-/** Config declaration, so it can be used with types */
-export const exportConfiguration = config<ExporterConfiguration>()
+/** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
+export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
