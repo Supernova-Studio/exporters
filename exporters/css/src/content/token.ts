@@ -6,8 +6,6 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   // First creating the name of the token, using helper function which turns any token name / path into a valid variable name
   const name = tokenVariableName(token, tokenGroups)
 
-  console.log(exportConfiguration.colorFormat)
-
   // Then creating the value of the token, using another helper function
   const value = CSSHelper.tokenToCSS(token, mappedTokens, {
     allowReferences: exportConfiguration.useReferences,

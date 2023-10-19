@@ -1,11 +1,11 @@
-import { FileHelper } from "@supernova-studio/export-helpers"
-import { OutputTextFile, Token, TokenType } from "@supernova-studio/pulsar-next"
+import { FileHelper, Iterators } from "@supernova-studio/export-helpers"
+import { OutputTextFile, Token } from "@supernova-studio/pulsar-next"
 import { exportConfiguration } from ".."
 
 export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
   // Generate import statement for every token type there is
   // Filter out files where there are no tokens, if enabled
-  let content = [TokenType.dimension, TokenType.color]
+  let content = Iterators.allTokenTypes()
     .map((type) => {
       const importStatement = `@import "./${exportConfiguration.styleFileNames[type]}";`
       if (exportConfiguration.generateEmptyFiles) {
