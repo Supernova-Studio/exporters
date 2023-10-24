@@ -1,0 +1,7 @@
+[{
+    "key": "todo",
+    "type": "boolean",
+    "default": true,
+    "title": "TODO title",
+    "description": "TODO description"
+}]
