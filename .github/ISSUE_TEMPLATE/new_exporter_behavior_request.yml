@@ -1,0 +1,32 @@
+name: "🔧 New Exporter Behavior Request"
+description: Suggest a new exporter behavior that everyone would benefit from
+labels: ["exporter", "behavior request", "feature request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping us making the developer experience better by providing your idea for how existing exporter should behave! Please update the title above to describe the exporter behavior at glance.
+  - type: input
+    id: exporter-name
+    attributes:
+      label: Exporter Name
+      description: |
+        Please provide the name of the exporter that is bugged.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        Please provide the detailed description of your idea. 
+    validations:
+      required: true
+  - type: textarea
+    id: code-example
+    attributes:
+      label: Code Output Example
+      description: |
+        Consider adding code examples to explain it better. This can be anything from how the output should be structured, how it should look like and what options it should have.
+    validations:
+      required: false

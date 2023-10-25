@@ -56,12 +56,12 @@ function exportDestination(asset: RenderedAsset): {
 
   if (path.length > 0) {
     return {
-      name: `${name}${duplicates}.${extension}`,
+      name: `${name}${duplicates}-mod.${extension}`,
       path: resultingPath,
     }
   } else {
     return {
-      name: `${name}${duplicates}.${extension}`,
+      name: `${name}${duplicates}-mod.${extension}`,
       path: "./",
     }
   }
