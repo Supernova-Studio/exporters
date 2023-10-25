@@ -1,5 +1,5 @@
-import { NamingHelper, CSSHelper } from "@supernova-studio/export-helpers"
-import { Token, TokenGroup } from "@supernova-studio/pulsar-next"
+import { NamingHelper, CSSHelper } from "@supernovaio/export-helpers"
+import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 
 export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {

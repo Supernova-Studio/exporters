@@ -1,5 +1,5 @@
-import { FileHelper } from "@supernova-studio/export-helpers"
-import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernova-studio/pulsar-next"
+import { FileHelper } from "@supernovaio/export-helpers"
+import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 
