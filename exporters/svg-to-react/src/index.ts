@@ -1,4 +1,4 @@
-import { FileHelper } from "@supernova-studio/export-helpers"
+import { FileHelper } from "@supernovaio/export-helpers"
 import {
   Supernova,
   PulsarContext,
@@ -7,7 +7,7 @@ import {
   AssetFormat,
   AssetScale,
   RenderedAsset,
-} from "@supernova-studio/pulsar-next"
+} from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
 
 /**
@@ -16,22 +16,16 @@ import { ExporterConfiguration } from "../config"
  * Context contains information about the design system and version that is currently being exported.
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  console.log("X")
   // Fetch data from design system that is currently being exported (context)
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
     versionId: context.versionId,
   }
-  console.log(remoteVersionIdentifier)
 
   // Fetch the necessary data
   let assets = await sdk.assets.getAssets(remoteVersionIdentifier)
 
-  console.log("Z")
-
   let assetGroups = await sdk.assets.getAssetGroups(remoteVersionIdentifier)
-
-  console.log("F")
 
   // Render assets
   let renderedAssets = await sdk.assets.getRenderedAssets(remoteVersionIdentifier, assets, assetGroups, AssetFormat.svg, AssetScale.x1)
