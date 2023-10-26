@@ -1,11 +1,11 @@
 {
-    "id": "io.supernova.exporters.svg-to-react",
+    "id": "supernovaio.svg-to-react",
     "name": "SVG to React",
     "description": "SVG to React exporter",
     "author": "Jiri Trecak",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "usesBrands": true,
     "usesThemes": false,
     "executable": "/dist/build.js",

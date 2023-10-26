@@ -1,7 +1,7 @@
 ### CSS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
-## 2.0.0 - 2023-11-15
+## 2.0.0 - 2023-11-07
 
 ### 🚀 New
 
