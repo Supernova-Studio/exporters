@@ -10,15 +10,18 @@
     "author": "Supernova.io",
     "license": "MIT",
     "dependencies": {
-        "@supernovaio/sdk-exporters": "2.0.1",
-        "@supernovaio/export-helpers": "0.1.0"
+        "@supernovaio/export-helpers": "1.0.3",
+        "@supernovaio/sdk-exporters": "2.0.4",
+        "svgo": "3.0.2"
     },
     "devDependencies": {
+        "@types/node": "^20.8.9",
+        "@types/node-fetch": "^2.6.7",
         "prettier": "3.0.3",
-        "ts-loader": "^7.0.5",
-        "typescript": "^5.2.2",
+        "terser-webpack-plugin": "5.3.9",
+        "ts-loader": "9.5.0",
+        "typescript": "5.2.2",
         "webpack": "5.88.2",
-        "webpack-cli": "^5.1.4",
-        "terser-webpack-plugin": "5.3.9"
+        "webpack-cli": "5.1.4"
     }
 }

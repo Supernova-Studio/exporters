@@ -3,13 +3,13 @@
     "baseUrl": "./",
     "target": "es2021",
     "outDir": "build",
-    "module": "commonjs",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "strictNullChecks": true,
     "typeRoots": [
       "src/*",
       "types/*"
     ],
-    "lib": ["ES2021", "dom"],
+    "lib": ["ES2021", "DOM"],
   }
 }

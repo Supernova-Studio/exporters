@@ -1,14 +1,7 @@
-import { FileHelper } from "@supernovaio/export-helpers"
-import {
-  Supernova,
-  PulsarContext,
-  RemoteVersionIdentifier,
-  AnyOutputFile,
-  AssetFormat,
-  AssetScale,
-  RenderedAsset,
-} from "@supernovaio/sdk-exporters"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, AssetFormat } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
+import { convertRenderedAssetsToComponentsInBatches, convertRenderedAssetsToOriginalSVG, convertRenderedAssetsToIndexFile } from "./files"
+import { isPathFilteredOut } from "./paths"
 
 /**
  * Export entrypoint.
@@ -22,50 +15,44 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     versionId: context.versionId,
   }
 
-  // Fetch the necessary data
+  // Render all assets in the library
   let assets = await sdk.assets.getAssets(remoteVersionIdentifier)
-
   let assetGroups = await sdk.assets.getAssetGroups(remoteVersionIdentifier)
+  let renderedAssets = await sdk.assets.getRenderedAssets(
+    remoteVersionIdentifier,
+    assets,
+    assetGroups,
+    AssetFormat.svg,
+    exportConfiguration.svgScale
+  )
 
-  // Render assets
-  let renderedAssets = await sdk.assets.getRenderedAssets(remoteVersionIdentifier, assets, assetGroups, AssetFormat.svg, AssetScale.x1)
+  let resultingFiles: Array<AnyOutputFile> = []
 
-  // Generate output files
-  return renderedAssets.map((a) => {
-    const destination = exportDestination(a)
-    return FileHelper.createCopyRemoteFile({
-      url: a.sourceUrl,
-      relativePath: destination.path,
-      fileName: destination.name,
-    })
-  })
-})
-
-function exportDestination(asset: RenderedAsset): {
-  name: string
-  path: string
-} {
-  const extension = asset.format.toString()
-  const duplicates = asset.previouslyDuplicatedNames > 0 ? "-" + asset.previouslyDuplicatedNames : ""
-  const name = asset.originalName.toLowerCase().replaceAll(" ", "-")
-
-  // Create full path
-  const path = [...asset.group.path]
-  path.push(asset.group.name)
-  const resultingPath = path.join("/").replaceAll(" ", "-").toLowerCase()
-
-  if (path.length > 0) {
-    return {
-      name: `${name}${duplicates}-mod.${extension}`,
-      path: resultingPath,
-    }
-  } else {
-    return {
-      name: `${name}${duplicates}-mod.${extension}`,
-      path: "./",
-    }
+  // Filter out assets that don't belong to the selected platform
+  if (exportConfiguration.ignoredAssetPaths.length > 0) {
+    renderedAssets = renderedAssets.filter(
+      (a) => !isPathFilteredOut(exportConfiguration.ignoredAssetPaths, [...a.group.path, a.group.name])
+    )
   }
-}
+
+  // Generate React components
+  const components = await convertRenderedAssetsToComponentsInBatches(renderedAssets, sdk, exportConfiguration)
+  resultingFiles = [...resultingFiles, ...components]
+
+  // Add SVG definitions to the output if enabled
+  if (exportConfiguration.keepOriginalSvgs) {
+    const svgs = await convertRenderedAssetsToOriginalSVG(renderedAssets, exportConfiguration)
+    resultingFiles = [...resultingFiles, ...svgs]
+  }
+
+  // Add index file to the output if enabled
+  if (exportConfiguration.generateIndex) {
+    const indexFile = await convertRenderedAssetsToIndexFile(renderedAssets, exportConfiguration)
+    resultingFiles.push(indexFile)
+  }
+
+  return resultingFiles
+})
 
 /** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
