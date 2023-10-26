@@ -1,4 +1,4 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, ALL_TOKEN_TYPES } from "@supernovaio/sdk-exporters"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
@@ -40,7 +40,9 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Generate output files
   return [
     // One file per token type
-    ...(ALL_TOKEN_TYPES.map((type) => styleOutputFile(type, tokens, tokenGroups)).filter((f) => f !== null) as Array<AnyOutputFile>),
+    ...(Object.values(TokenType)
+      .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      .filter((f) => f !== null) as Array<AnyOutputFile>),
     // One file that imports all other files, if enabled
     indexOutputFile(tokens),
   ]
