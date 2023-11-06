@@ -1,4 +1,4 @@
-![CSS Exporter](./resources/header.png)
+![CSS Exporter](https://raw.githubusercontent.com/Supernova-Studio/exporters/main/exporters/css/resources/header.png)
 
 # CSS Exporter
 
