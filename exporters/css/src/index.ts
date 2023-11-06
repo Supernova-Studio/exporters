@@ -3,12 +3,18 @@ import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 
+/** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
+export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
+
 /**
  * Export entrypoint.
  * When running `export` through extensions or pipelines, this function will be called.
  * Context contains information about the design system and version that is currently being exported.
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
+  console.log(`---- Configuration`)
+  console.log(exportConfiguration)
+  console.log(`----`)
   // Fetch data from design system that is currently being exported (context)
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
@@ -47,6 +53,3 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     indexOutputFile(tokens),
   ]
 })
-
-/** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
-export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
