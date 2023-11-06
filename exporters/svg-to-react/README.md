@@ -1,4 +1,4 @@
-![SVG to React Exporter](./resources/header.png)
+![SVG to React Exporter](https://raw.githubusercontent.com/Supernova-Studio/exporters/main/exporters/svg-to-react/resources/header.png)
 
 # SVG to React Exporter
 
