@@ -14,6 +14,8 @@ export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
   console.log(`---- Configuration`)
   console.log(exportConfiguration)
+  console.log(`---- Context`)
+  console.log(context)
   console.log(`----`)
   // Fetch data from design system that is currently being exported (context)
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
@@ -24,6 +26,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Fetch the necessary data
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
+  console.log(`Fetched tokens: ${tokens.length}, groups: ${tokenGroups.length}`)
 
   // Filter by brand, if specified
   if (context.brandId) {
@@ -35,12 +38,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
     tokens = tokens.filter((token) => token.brandId === brand.id)
     tokenGroups = tokenGroups.filter((tokenGroup) => tokenGroup.brandId === brand.id)
+    console.log(`Filtered tokens: ${tokens.length}, groups: ${tokenGroups.length}, brand: ${context.brandId}`)
   }
 
   // Apply theme, if specified
   if (context.themeId) {
     const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
     const theme = themes.find((theme) => theme.id === context.themeId)
+    console.log(`Total themes: ${themes.length}`)
     if (theme) {
       tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, [theme])
     } else {
