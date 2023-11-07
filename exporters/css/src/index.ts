@@ -27,8 +27,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
   // Filter by brand, if specified
   if (context.brandId) {
-    tokens = tokens.filter((token) => token.brandId === context.brandId)
-    tokenGroups = tokenGroups.filter((tokenGroup) => tokenGroup.brandId === context.brandId)
+    const brands = await sdk.brands.getBrands(remoteVersionIdentifier)
+    const brand = brands.find((brand) => brand.id === context.brandId || brand.idInVersion === context.brandId)
+    if (!brand) {
+      throw new Error(`Unable to find brand ${context.brandId}.`)
+    }
+
+    tokens = tokens.filter((token) => token.brandId === brand.id)
+    tokenGroups = tokenGroups.filter((tokenGroup) => tokenGroup.brandId === brand.id)
   }
 
   // Apply theme, if specified
