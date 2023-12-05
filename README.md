@@ -11,9 +11,7 @@
 
 Here are a few resources to help you get started:
 
-- Watch the ["Intro to Exporters" video](https://tbd.com/) to understand the capabilities of exporters
-- Watch the ["Using and customizing the default exporters" video](https://tbd.com/) to learn how to use the exporters we created for you
-- Watch the ["Building Your First Exporter" video](https://tbd.com/) to learn how to create and modify exporters
+- Watch the ["Building Exporters (deep dive)" video](https://www.youtube.com/watch?v=4BvoWLPbOMo&ab_channel=Supernova) to learn how to use, create, and modify exporters so they work exactly how you need them to!
 - Read our [developer documentation](https://developers.supernova.io) for any additional details you might need
 - Learn by example by exploring the exporters [we've built for you](./exporters)
 - Join our [Slack community](https://community.supernova.io/) to discuss any topics with the Supernova team and other developers
