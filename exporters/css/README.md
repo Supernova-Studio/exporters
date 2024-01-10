@@ -46,7 +46,7 @@ With configurations:
     "disclaimer": "This file was automatically generated. Do not modify manually.",
     "showDescriptions": true,
     "useReferences": true,
-    "tokenNameStyle": "kebabCase",
+    "tokenNameStyle": "paramCase",
     "colorFormat": "hex",
     "indent": 2
 }
