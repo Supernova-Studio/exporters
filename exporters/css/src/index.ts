@@ -44,7 +44,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Apply theme, if specified
   if (context.themeId) {
     const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
-    const theme = themes.find((theme) => theme.id === context.themeId || theme.idInVersion === context.themeId)
+    const theme = themes.find((theme) => theme.id === context.themeId || theme.idInVersion == context.themeId)
     console.log(`Total themes: ${themes.length}`)
     if (theme) {
       tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, [theme])
