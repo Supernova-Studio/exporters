@@ -137,3 +137,6 @@ out
 build/
 DerivedData/
 .build
+
+# Supernova extension file
+supernova.json
