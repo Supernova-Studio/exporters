@@ -7,7 +7,7 @@ export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
   // Filter out files where there are no tokens, if enabled
   let content = Object.values(TokenType)
     .map((type) => {
-      const importStatement = `@import "./${exportConfiguration.styleFileNames[type]}";`
+      const importStatement = `@import './${exportConfiguration.styleFileNames[type]}';`
       if (exportConfiguration.generateEmptyFiles) {
         return importStatement
       } else {

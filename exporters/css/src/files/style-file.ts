@@ -33,7 +33,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
   // Add stylelint rules on top of file
-  content = `${contentRules}\n${content}`
+  content = `${contentRules}\n${content}\n`
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
