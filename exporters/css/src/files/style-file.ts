@@ -12,7 +12,7 @@ export function styleOutputFile(
   type: TokenType,
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  theme: string | null
+  theme: string
 ): OutputTextFile | null {
   // Filter tokens by top level type
   const tokensOfType = tokens.filter((token) => token.tokenType === type);
@@ -29,10 +29,7 @@ export function styleOutputFile(
     .join("\n");
 
   // Create file content
-  /*const theme = exportConfiguration.baseStyleFilePath.includes("dark")
-    ? "dark"
-    : "light";*/
-  let content = `[data-theme="${theme}"] {\n${cssVariables}\n}`;
+  let content = `[data-theme="${theme.toLowerCase()}"] {\n${cssVariables}\n}`;
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`;

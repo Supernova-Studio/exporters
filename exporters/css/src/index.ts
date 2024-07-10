@@ -50,6 +50,7 @@ Pulsar.export(
     }
 
     // Apply theme, if specified
+    let themeName = "light";
     if (context.themeId) {
       const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier);
       const theme = themes.find(
@@ -60,6 +61,7 @@ Pulsar.export(
         tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, [
           theme,
         ]);
+        themeName = theme.name;
       } else {
         // Don't allow applying theme which doesn't exist in the system
         throw new Error(
@@ -72,9 +74,7 @@ Pulsar.export(
     return [
       // One file per token type
       ...(Object.values(TokenType)
-        .map((type) =>
-          styleOutputFile(type, tokens, tokenGroups, context.themeId)
-        )
+        .map((type) => styleOutputFile(type, tokens, tokenGroups, themeName))
         .filter((f) => f !== null) as Array<AnyOutputFile>),
       // One file that imports all other files, if enabled
       indexOutputFile(tokens),
