@@ -31,7 +31,7 @@ export function styleOutputFile(
   const theme = exportConfiguration.baseStyleFilePath.includes("dark")
     ? "dark"
     : "light";
-  let content = `[data-theme="${theme}"] {\n${cssVariables}\n}`;
+  let content = `[data-theme="${exportConfiguration.baseStyleFilePath}"] {\n${cssVariables}\n}`;
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`;
