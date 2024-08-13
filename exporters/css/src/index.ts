@@ -47,7 +47,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // Generate output files
-  return [
+  /** NO LONGER USED 
+   * return [
     // One file per token type
     ...(Object.values(TokenType)
       .map((type) => styleOutputFile(type, tokens, tokenGroups))
@@ -55,4 +56,21 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     // One file that imports all other files, if enabled
     indexOutputFile(tokens),
   ]
+  */
+  const result = [
+    // One file per token type
+    ...(Object.values(TokenType)
+      .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      .filter((f) => f !== null) as Array<AnyOutputFile>),
+    // One file that imports all other files, if enabled
+    indexOutputFile(tokens),
+  ]
+
+  sdk.network.fetch("my-delivery-endpoint", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      },
+      body: JSON.stringify(result),
+        
 })
