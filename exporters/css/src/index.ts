@@ -66,11 +66,13 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     indexOutputFile(tokens),
   ]
 
-  sdk.network.fetch("my-delivery-endpoint", {
+  await sdk.network.fetch("my-delivery-endpoint", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      },
-      body: JSON.stringify(result),
-        
+    },
+    body: JSON.stringify(result),
+  })
+
+  return result
 })
