@@ -17,6 +17,8 @@ export type ExporterConfiguration = {
   showDescriptions: boolean
   /** When enabled, values will use references to other tokens where applicable */
   useReferences: boolean
+  /** When enabled, font weight values will be resolved as numbers if possible */
+  useFontWeightAsNumbers: boolean
   /** Style of exported token names */
   tokenNameStyle: StringCase
   /** Format of the exported colors */
