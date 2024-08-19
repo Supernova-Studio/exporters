@@ -1,5 +1,5 @@
 import { NamingHelper, CSSHelper } from "@supernovaio/export-helpers"
-import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
+import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 
 export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
@@ -7,7 +7,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   const name = tokenVariableName(token, tokenGroups)
 
   // Then creating the value of the token, using another helper function
-  const value = CSSHelper.tokenToCSS(token, mappedTokens, {
+  let value: string | number = CSSHelper.tokenToCSS(token, mappedTokens, {
     allowReferences: exportConfiguration.useReferences,
     decimals: exportConfiguration.colorPrecision,
     colorFormat: exportConfiguration.colorFormat,
@@ -15,6 +15,12 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
       return `var(--${tokenVariableName(t, tokenGroups)})`
     },
   })
+
+  if (exportConfiguration.useFontWeightAsNumbers && token.tokenType === TokenType.fontWeight) {
+    let candidate = +(value?.replaceAll('"', ''))
+    value = Number.isNaN(candidate) ? value : candidate
+  }
+
   const indentString = " ".repeat(exportConfiguration.indent)
 
   if (exportConfiguration.showDescriptions && token.description) {
