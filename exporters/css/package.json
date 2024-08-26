@@ -1,6 +1,6 @@
 {
     "name": "@supernovaio/exporter-css",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "Export your design system tokens into CSS variables and definitions using Supernova.io export engine",
     "main": "index.js",
     "scripts": {
@@ -11,7 +11,7 @@
     "license": "MIT",
     "dependencies": {
         "@supernovaio/sdk-exporters": "2.0.9",
-        "@supernovaio/export-helpers": "1.0.8"
+        "@supernovaio/export-helpers": "1.0.10"
     },
     "devDependencies": {
         "prettier": "3.0.3",
