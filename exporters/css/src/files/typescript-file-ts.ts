@@ -32,7 +32,7 @@ export function typescriptOutputFile(
     .map((token) => convertedTypeScriptToken(token, mappedTokens, tokenGroups))
     .join("\n");
   const tsVariables = tokensOfType
-    .map((token) => `\t${tokenTypeScriptVariableName(token, tokenGroups)}`)
+    .map((token) => `    ${tokenTypeScriptVariableName(token, tokenGroups)}`)
     .join(",\n");
 
   // Create file content

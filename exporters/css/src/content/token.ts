@@ -52,7 +52,7 @@ export function convertedTypeScriptToken(
     },
   });
 
-  return `const ${name} = "${value}";`;
+  return `const ${name} = "${value.replace(/"/g, '\\"')}";`;
 }
 
 function tokenStyleVariableName(

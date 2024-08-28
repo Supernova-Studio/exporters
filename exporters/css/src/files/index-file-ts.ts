@@ -10,9 +10,9 @@ export function indexTypeScriptOutputFile(
   // Filter out files where there are no tokens, if enabled
   let content = Object.values(TokenType)
     .map((type) => {
-      const importStatement = `import {${capitalizeFirstLetter(
+      const importStatement = `import { ${capitalizeFirstLetter(
         exportConfiguration.typeScriptFileNames[type]
-      )}} from './js/${exportConfiguration.typeScriptFileNames[type]}';`;
+      )} } from './js/${exportConfiguration.typeScriptFileNames[type]}';`;
       if (exportConfiguration.generateEmptyFiles) {
         return importStatement;
       } else {
@@ -25,7 +25,7 @@ export function indexTypeScriptOutputFile(
 
   let exportContent = Object.values(TokenType)
     .map((type) => {
-      const importStatement = `\t${
+      const importStatement = `    ${
         exportConfiguration.typeScriptFileNames[type]
       }: ${capitalizeFirstLetter(
         exportConfiguration.typeScriptFileNames[type]
@@ -40,7 +40,7 @@ export function indexTypeScriptOutputFile(
     .filter((c) => c !== null)
     .join("\n");
 
-  content += `${content}\n\nexport const Theme = {\n${exportContent}\n};`;
+  content += `\n\nexport const Theme = {\n${exportContent}\n};`;
 
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to index file if enabled
