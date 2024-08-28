@@ -2,7 +2,7 @@ import { FileHelper } from "@supernovaio/export-helpers";
 import { OutputTextFile, Token, TokenType } from "@supernovaio/sdk-exporters";
 import { exportConfiguration } from "..";
 
-export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
+export function indexStyleOutputFile(tokens: Array<Token>): OutputTextFile {
   // Generate import statement for every token type there is
   // Filter out files where there are no tokens, if enabled
   let content = Object.values(TokenType)
@@ -24,7 +24,7 @@ export function indexOutputFile(tokens: Array<Token>): OutputTextFile {
   }
   return FileHelper.createTextFile({
     relativePath: exportConfiguration.baseIndexFilePath,
-    fileName: exportConfiguration.indexFileName,
+    fileName: exportConfiguration.styleFileName,
     content: content,
   });
 }

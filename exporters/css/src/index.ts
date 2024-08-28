@@ -6,8 +6,10 @@ import {
   TokenType,
 } from "@supernovaio/sdk-exporters";
 import { ExporterConfiguration } from "../config";
-import { indexOutputFile } from "./files/index-file";
-import { styleOutputFile } from "./files/style-file";
+import { indexStyleOutputFile } from "./files/index-file-css";
+import { styleOutputFile } from "./files/style-file-css";
+import { indexTypeScriptOutputFile } from "./files/index-file-ts";
+import { typescriptOutputFile } from "./files/typescript-file-ts";
 
 /** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>();
@@ -76,8 +78,14 @@ Pulsar.export(
       ...(Object.values(TokenType)
         .map((type) => styleOutputFile(type, tokens, tokenGroups, themeName))
         .filter((f) => f !== null) as Array<AnyOutputFile>),
+      ...(Object.values(TokenType)
+        .map((type) =>
+          typescriptOutputFile(type, tokens, tokenGroups, themeName)
+        )
+        .filter((f) => f !== null) as Array<AnyOutputFile>),
       // One file that imports all other files, if enabled
-      indexOutputFile(tokens),
+      indexStyleOutputFile(tokens),
+      indexTypeScriptOutputFile(tokens),
     ];
   }
 );

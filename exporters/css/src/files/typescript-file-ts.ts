@@ -6,9 +6,13 @@ import {
   TokenType,
 } from "@supernovaio/sdk-exporters";
 import { exportConfiguration } from "..";
-import { convertedToken } from "../content/token";
+import {
+  convertedTypeScriptToken,
+  tokenTypeScriptVariableName,
+} from "../content/token";
+import { capitalizeFirstLetter } from "src/content/utils";
 
-export function styleOutputFile(
+export function typescriptOutputFile(
   type: TokenType,
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
@@ -24,12 +28,17 @@ export function styleOutputFile(
 
   // Convert all tokens to CSS variables
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]));
-  const cssVariables = tokensOfType
-    .map((token) => convertedToken(token, mappedTokens, tokenGroups))
+  const tsVariablesAndValues = tokensOfType
+    .map((token) => convertedTypeScriptToken(token, mappedTokens, tokenGroups))
     .join("\n");
+  const tsVariables = tokensOfType
+    .map((token) => `\t${tokenTypeScriptVariableName(token, tokenGroups)}`)
+    .join(",\n");
 
   // Create file content
-  let content = `[data-theme="${theme.toLowerCase()}"] {\n${cssVariables}\n}`;
+  let content = `${tsVariablesAndValues}\n\nexport const ${capitalizeFirstLetter(
+    exportConfiguration.typeScriptFileNames[type]
+  )} = {\n${tsVariables},\n}`;
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`;
@@ -37,8 +46,8 @@ export function styleOutputFile(
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
-    relativePath: exportConfiguration.baseStyleFilePath,
-    fileName: exportConfiguration.styleFileNames[type],
+    relativePath: exportConfiguration.baseTypeScriptFilePath,
+    fileName: `${exportConfiguration.typeScriptFileNames[type]}.ts`,
     content: content,
   });
 }

@@ -97,10 +97,17 @@
         "description": "Number of spaces used to indent every css variables"
     },
     {
-        "key": "indexFileName",
+        "key": "styleFileName",
         "type": "string",
         "default": "index.css",
-        "title": "Index File Name",
+        "title": "Index Style File Name",
+        "description": "Name of the index file that will be generated"
+    },
+    {
+        "key": "typeScriptFileName",
+        "type": "string",
+        "default": "index.ts",
+        "title": "Index TypeScript File Name",
         "description": "Name of the index file that will be generated"
     },
     {
@@ -108,6 +115,13 @@
         "type": "string",
         "default": "./styles",
         "title": "Base Style File Path",
+        "description": "All files will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension)"
+    },
+    {
+        "key": "baseTypeScriptFilePath",
+        "type": "string",
+        "default": "./js",
+        "title": "Base TypeScript File Path",
         "description": "All files will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension)"
     },
     {
@@ -148,6 +162,72 @@
             "TextDecoration": "text-decorations.css",
             "Visibility": "visibility.css",
             "Blur": "blurs.css"
+        },
+        "allowedKeys": {
+            "options": [
+                "Color",
+                "Typography",
+                "Dimension",
+                "Size",
+                "Space",
+                "Opacity",
+                "FontSize",
+                "LineHeight",
+                "LetterSpacing",
+                "ParagraphSpacing",
+                "BorderWidth",
+                "BorderRadius",
+                "Duration",
+                "ZIndex",
+                "Shadow",
+                "Border",
+                "Gradient",
+                "String",
+                "ProductCopy",
+                "FontFamily",
+                "FontWeight",
+                "TextCase",
+                "TextDecoration",
+                "Visibility",
+                "Blur"
+            ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
+    },
+    {
+        "key": "typeScriptFileNames",
+        "type": "object",
+        "title": "TypeScript File Names",
+        "description": "Name of each file that will be generated. Tokens are grouped by the type and will land in each of those files",
+        "default": {
+            "Color": "colors",
+            "Typography": "typography",
+            "Dimension": "dimensions",
+            "Size": "sizes",
+            "Space": "spaces",
+            "Opacity": "opacities",
+            "FontSize": "font-sizes",
+            "LineHeight": "line-heights",
+            "LetterSpacing": "letter-spacings",
+            "ParagraphSpacing": "paragraph-spacings",
+            "BorderWidth": "border-widths",
+            "BorderRadius": "radii",
+            "Duration": "durations",
+            "ZIndex": "z-indices",
+            "Shadow": "shadows",
+            "Border": "borders",
+            "Gradient": "gradients",
+            "String": "strings",
+            "ProductCopy": "product-copy",
+            "FontFamily": "font-families",
+            "FontWeight": "font-weights",
+            "TextCase": "text-cases",
+            "TextDecoration": "text-decorations",
+            "Visibility": "visibility",
+            "Blur": "blurs"
         },
         "allowedKeys": {
             "options": [
