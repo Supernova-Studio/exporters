@@ -10,7 +10,7 @@ import {
   convertedTypeScriptToken,
   tokenTypeScriptVariableName,
 } from "../content/token";
-import { capitalizeFirstLetter } from "src/content/utils";
+import { capitalizeFirstLetter } from "../content/utils";
 
 export function typescriptOutputFile(
   type: TokenType,
