@@ -46,7 +46,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return acc
     }, [])
 
-    tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, themesToApply)
+    tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, themesToApply)
   }
 
   // Generate output files
