@@ -53,6 +53,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     console.log("tokens", tokens)
   }
 
+  throw new Error("test")
+
   // Generate output files
   return [
     // One file per token type
