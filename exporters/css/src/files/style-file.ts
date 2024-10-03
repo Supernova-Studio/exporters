@@ -3,7 +3,7 @@ import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@super
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes?: Array<string>): OutputTextFile | null {
+export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes: Array<string> | null, theme: string | null): OutputTextFile | null {
   // Filter tokens by top level type
   const tokensOfType = tokens.filter((token) => token.tokenType === type)
 
@@ -23,7 +23,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
 
-  content = `${content}\n${themes ? themes.join("\n") : "no themes"}`
+  content = `${content}\n${themes?.toString() ?? "no themes provided"}\n${theme ?? "no theme provided"}}`
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
