@@ -46,20 +46,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return acc
     }, [])
 
-    console.log("themesToApply", themesToApply)
-
     tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-
-    console.log("tokens", tokens)
   }
-
-  throw new Error("test")
 
   // Generate output files
   return [
     // One file per token type
     ...(Object.values(TokenType)
-      .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      .map((type) => styleOutputFile(type, tokens, tokenGroups, context.themeIds ?? undefined))
       .filter((f) => f !== null) as Array<AnyOutputFile>),
     // One file that imports all other files, if enabled
     indexOutputFile(tokens),

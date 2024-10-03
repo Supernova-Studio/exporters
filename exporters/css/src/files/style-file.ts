@@ -1,9 +1,9 @@
 import { FileHelper } from "@supernovaio/export-helpers"
-import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile | null {
+export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes?: Array<string>): OutputTextFile | null {
   // Filter tokens by top level type
   const tokensOfType = tokens.filter((token) => token.tokenType === type)
 
@@ -22,6 +22,8 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
+
+  content = `${content}\n${themes ? themes.join("\n") : "no themes"}`
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
