@@ -46,7 +46,11 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return acc
     }, [])
 
+    console.log("themesToApply", themesToApply)
+
     tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+
+    console.log("tokens", tokens)
   }
 
   // Generate output files
