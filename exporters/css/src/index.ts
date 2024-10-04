@@ -53,7 +53,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   return [
     // One file per token type
     ...(Object.values(TokenType)
-      .map((type) => styleOutputFile(type, tokens, tokenGroups, context.themeIds, context.themeId))
+      .map((type) => styleOutputFile(type, tokens, tokenGroups, context))
       .filter((f) => f !== null) as Array<AnyOutputFile>),
     // One file that imports all other files, if enabled
     indexOutputFile(tokens),
