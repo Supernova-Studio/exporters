@@ -23,7 +23,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
 
-  content = `${content}\n${context.toString()}`
+  content = `${content}\n${JSON.stringify(context)}`
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
