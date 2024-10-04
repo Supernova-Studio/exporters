@@ -35,19 +35,19 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // Apply themes, if specified
-  if (context.themeIds?.length) {
-    const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
-    const themesToApply = context.themeIds.reduce<TokenTheme[]>((acc, themeId) => {
-      const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
-      if (!theme) {
-        throw new Error(`Unable to apply theme ${themeId} which doesn't exist in the system.`) 
-      }
-      acc.push(theme)
-      return acc
-    }, [])
+  // if (context.themeIds?.length) {
+  //   const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
+  //   const themesToApply = context.themeIds.reduce<TokenTheme[]>((acc, themeId) => {
+  //     const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
+  //     if (!theme) {
+  //       throw new Error(`Unable to apply theme ${themeId} which doesn't exist in the system.`) 
+  //     }
+  //     acc.push(theme)
+  //     return acc
+  //   }, [])
 
-    tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-  }
+  //   tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+  // }
 
   // Generate output files
   return [
