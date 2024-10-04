@@ -3,7 +3,7 @@ import { OutputTextFile, PulsarContext, Token, TokenGroup, TokenTheme, TokenType
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, context: PulsarContext): OutputTextFile | null {
+export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile | null {
   // Filter tokens by top level type
   const tokensOfType = tokens.filter((token) => token.tokenType === type)
 
@@ -22,8 +22,6 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
-
-  content = `${content}\n${JSON.stringify(context)}`
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
