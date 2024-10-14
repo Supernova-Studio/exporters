@@ -1,4 +1,4 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
@@ -37,7 +37,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Apply themes, if specified
   if (context.themeIds && context.themeIds.length > 0) {
     const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
-    const themesToApply = themes.filter((theme) => context.themeIds!.includes(theme.id))
+
+    const themesToApply = context.themeIds.reduce((acc, themeId) => {
+      const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
+      if (theme) {
+        acc.push(theme)
+      }
+      return acc
+    }, [] as TokenTheme[])
     
     tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
   }
