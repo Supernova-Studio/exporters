@@ -1,5 +1,5 @@
 import { FileHelper } from "@supernovaio/export-helpers"
-import { OutputTextFile, PulsarContext, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 
