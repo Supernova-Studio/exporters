@@ -1,4 +1,4 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
@@ -34,16 +34,19 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     tokenGroups = tokenGroups.filter((tokenGroup) => tokenGroup.brandId === brand.id)
   }
 
-  // Apply theme, if specified
-  if (context.themeId) {
+  // Apply themes, if specified
+  if (context.themeIds && context.themeIds.length > 0) {
     const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
-    const theme = themes.find((theme) => theme.id === context.themeId || theme.idInVersion === context.themeId)
-    if (theme) {
-      tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, [theme])
-    } else {
-      // Don't allow applying theme which doesn't exist in the system
-      throw new Error("Unable to apply theme which doesn't exist in the system.")
-    }
+
+    const themesToApply = context.themeIds.map((themeId) => {
+      const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
+      if (!theme) {
+        throw new Error(`Unable to find theme ${themeId}.`)
+      }
+      return theme
+    })
+    
+    tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
   }
 
   // Generate output files
