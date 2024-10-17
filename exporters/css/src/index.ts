@@ -11,6 +11,7 @@ import { styleOutputFile } from "./files/style-file-css";
 import { indexTypeScriptOutputFile } from "./files/index-file-ts";
 import { typescriptOutputFile } from "./files/typescript-file-ts";
 
+
 /** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>();
 
@@ -53,23 +54,20 @@ Pulsar.export(
 
     // Apply theme, if specified
     let themeName = "light";
-    if (context.themeId) {
+    if (context.themeIds && context.themeIds.length > 0) {
       const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier);
-      const theme = themes.find(
-        (theme) =>
-          theme.id === context.themeId || theme.idInVersion === context.themeId
-      );
-      if (theme) {
-        tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, [
-          theme,
-        ]);
-        themeName = theme.name;
-      } else {
-        // Don't allow applying theme which doesn't exist in the system
-        throw new Error(
-          "Unable to apply theme which doesn't exist in the system."
-        );
-      }
+
+
+      const themesToApply = context.themeIds.map((themeId) => {
+        const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
+        if (!theme) {
+          throw new Error(`Unable to find theme ${themeId}.`)
+        }
+        return theme
+      })
+
+      tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+      themeName = themesToApply[0].name;
     }
 
     // Generate output files
