@@ -1,0 +1,19 @@
+{
+    "id": "supernovaio.exporter-dtcg",
+    "name": "CSS w/ theme support",
+    "description": "Export your design system tokens into DTCG definitions.",
+    "author": "Jiri Trecak",
+    "organization": "Supernova.io",
+    "homepage": "https://supernova.io",
+    "version": "2.0.0",
+    "usesBrands": true,
+    "usesThemes": true,
+    "executable": "/dist/build.js",
+    "engine": "latest",
+    "tags": [
+        "Tokens",
+        "Design System",
+        "DTCG",
+        "Design Tokens Community Group"
+    ]
+}
