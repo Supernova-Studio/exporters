@@ -10,8 +10,8 @@
   "author": "Supernova.io",
   "license": "MIT",
   "dependencies": {
-    "@supernovaio/sdk-exporters": "2.0.28",
-    "@supernovaio/export-helpers": "1.0.28"
+    "@supernovaio/sdk-exporters": "2.0.29",
+    "@supernovaio/export-helpers": "1.0.29"
   },
   "devDependencies": {
     "prettier": "3.0.3",
