@@ -57,7 +57,7 @@
             "sentenceCase",
             "snakeCase"
         ],
-        "default": "snakeCase",
+        "default": "kebabCase",
         "title": "Token Name Style",
         "description": "Style of exported token names"
     },
