@@ -1,4 +1,5 @@
-[{
+[
+    {
         "key": "showGeneratedFileDisclaimer",
         "type": "boolean",
         "default": true,
@@ -56,7 +57,7 @@
             "sentenceCase",
             "snakeCase"
         ],
-        "default": "camelCase",
+        "default": "snakeCase",
         "title": "Token Name Style",
         "description": "Style of exported token names"
     },
