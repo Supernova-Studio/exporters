@@ -320,6 +320,28 @@
         "category": "Style files"
     },
     {
+        "key": "exportThemesAs",
+        "type": "enum",
+        "default": "separateFiles",
+        "title": "Theme export style",
+        "description": "Controls how themes are exported in the CSS files",
+        "category": "Themes",
+        "options": {
+            "applyDirectly": {
+                "label": "Apply themes directly",
+                "description": "Apply selected themes directly to token values"
+            },
+            "separateFiles": {
+                "label": "Separate file per theme",
+                "description": "Generate a separate CSS file for each selected theme"
+            },
+            "combinedTheme": {
+                "label": "Combined theme file",
+                "description": "Generate base file without themes and one file with all selected themes applied"
+            }
+        }
+    },
+    {
         "key": "themeSelector",
         "type": "string",
         "default": ".theme-{theme}",
@@ -344,28 +366,6 @@
         "category": "Other",
         "dependsOn": {
             "showGeneratedFileDisclaimer": true
-        }
-    },
-    {
-        "key": "exportThemesAs",
-        "type": "enum",
-        "default": "separateFiles",
-        "title": "Theme Export Style",
-        "description": "Controls how themes are exported in the CSS files",
-        "category": "Themes",
-        "options": {
-            "applyDirectly": {
-                "label": "Apply themes directly",
-                "description": "Apply selected themes directly to token values"
-            },
-            "separateFiles": {
-                "label": "Separate file per theme",
-                "description": "Generate a separate CSS file for each selected theme"
-            },
-            "combinedTheme": {
-                "label": "Combined theme file",
-                "description": "Generate base file without themes and one file with all selected themes applied"
-            }
         }
     }
 ]
