@@ -172,7 +172,7 @@
     {
         "key": "baseStyleFilePath",
         "type": "string",
-        "default": "./styles",
+        "default": "./base",
         "title": "Base style file path",
         "description": "All files will be written to this directory relative to export root as set by the exporter, pipeline configuration, or VSCode extension.",
         "category": "Style files"
@@ -320,6 +320,14 @@
         "category": "Style files"
     },
     {
+        "key": "themeSelector",
+        "type": "string",
+        "default": ".theme-{theme}",
+        "title": "CSS Selector for themes",
+        "description": "The CSS selector used in theme files. Use {theme} placeholder which will be replaced with the theme name (e.g. .theme-{theme}, [data-theme='{theme}'])",
+        "category": "Themes"
+    },
+    {
         "key": "showGeneratedFileDisclaimer",
         "type": "boolean",
         "default": true,
@@ -336,6 +344,28 @@
         "category": "Other",
         "dependsOn": {
             "showGeneratedFileDisclaimer": true
+        }
+    },
+    {
+        "key": "exportThemesAs",
+        "type": "enum",
+        "default": "separateFiles",
+        "title": "Theme Export Style",
+        "description": "Controls how themes are exported in the CSS files",
+        "category": "Themes",
+        "options": {
+            "applyDirectly": {
+                "label": "Apply themes directly",
+                "description": "Apply selected themes directly to token values"
+            },
+            "separateFiles": {
+                "label": "Separate file per theme",
+                "description": "Generate a separate CSS file for each selected theme"
+            },
+            "combinedTheme": {
+                "label": "Combined theme file",
+                "description": "Generate base file without themes and one file with all selected themes applied"
+            }
         }
     }
 ]

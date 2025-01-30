@@ -4,6 +4,12 @@ import { TokenType } from "@supernovaio/sdk-exporters"
 /**
  * Main configuration of the exporter - type interface. Default values for it can be set through `config.json` and users can override the behavior when creating the pipelines.
  */
+export enum ThemeExportStyle {
+    ApplyDirectly = "applyDirectly",
+    SeparateFiles = "separateFiles",
+    CombinedTheme = "combinedTheme"
+}
+
 export type ExporterConfiguration = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: boolean
@@ -37,4 +43,8 @@ export type ExporterConfiguration = {
   baseIndexFilePath: string
   /** CSS selector where variables will be defined */
   cssSelector: string
+  /** CSS selector pattern for themes, {theme} will be replaced with theme name */
+  themeSelector: string
+  /** Controls how themes are exported in the CSS files */
+  exportThemesAs: ThemeExportStyle
 }

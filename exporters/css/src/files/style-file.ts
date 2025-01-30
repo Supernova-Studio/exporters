@@ -3,7 +3,7 @@ import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-e
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile | null {
+export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = ''): OutputTextFile | null {
   // Filter tokens by top level type
   const tokensOfType = tokens.filter((token) => token.tokenType === type)
 
@@ -17,15 +17,23 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups)).join("\n")
 
   // Create file content
-  let content = `${exportConfiguration.cssSelector} {\n${cssVariables}\n}`
+  const selector = themePath 
+    ? exportConfiguration.themeSelector.replace('{theme}', themePath)
+    : exportConfiguration.cssSelector
+  let content = `${selector} {\n${cssVariables}\n}`
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
   }
 
+  // Get the full path including theme folder if provided
+  const relativePath = themePath
+    ? `./${themePath}`
+    : exportConfiguration.baseStyleFilePath
+
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
-    relativePath: exportConfiguration.baseStyleFilePath,
+    relativePath: relativePath,
     fileName: exportConfiguration.styleFileNames[type],
     content: content,
   })

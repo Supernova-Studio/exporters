@@ -1,5 +1,5 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
-import { ExporterConfiguration } from "../config"
+import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 
@@ -46,7 +46,47 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return theme
     })
     
-    tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+    switch (exportConfiguration.exportThemesAs) {
+      case ThemeExportStyle.ApplyDirectly:
+        // Apply all themes directly to tokens
+        tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+        return [
+          ...(Object.values(TokenType)
+            .map((type) => styleOutputFile(type, tokens, tokenGroups))
+            .filter((f) => f !== null) as Array<AnyOutputFile>),
+          indexOutputFile(tokens),
+        ]
+
+      case ThemeExportStyle.SeparateFiles:
+        // Generate a file for each theme
+        const themeFiles = themesToApply.flatMap((theme) => {
+          const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
+          return Object.values(TokenType)
+            .map((type) => styleOutputFile(type, themedTokens, tokenGroups, theme.name.toLowerCase()))
+            .filter((f) => f !== null) as Array<AnyOutputFile>
+        })
+        
+        // Generate base files without themes
+        const baseFiles = Object.values(TokenType)
+          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          .filter((f) => f !== null) as Array<AnyOutputFile>
+
+        return [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
+
+      case ThemeExportStyle.CombinedTheme:
+        // Generate base files without themes
+        const baseTokenFiles = Object.values(TokenType)
+          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          .filter((f) => f !== null) as Array<AnyOutputFile>
+
+        // Generate one file with all themes applied
+        const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+        const combinedThemeFiles = Object.values(TokenType)
+          .map((type) => styleOutputFile(type, themedTokens, tokenGroups, 'themed'))
+          .filter((f) => f !== null) as Array<AnyOutputFile>
+
+        return [...baseTokenFiles, ...combinedThemeFiles, indexOutputFile(tokens, ['themed'])]
+    }
   }
 
   // Generate output files
