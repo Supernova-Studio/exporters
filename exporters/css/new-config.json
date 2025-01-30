@@ -1,0 +1,254 @@
+[
+    {
+      "key": "boolean1",
+      "type": "boolean",
+      "default": true,
+      "title": "Boolean 1",
+      "description": "Boolean option",
+      "category": "Booleans"
+    },
+    {
+      "key": "disclaimer",
+      "type": "string",
+      "default": "Some default text",
+      "title": "Disclaimer",
+      "description": "This should display only when boolean1 is true, category is ignored (category comes from the dependsOn key)",
+      "category": "Booleans",
+      "dependsOn": {
+        "boolean1": true
+      }
+    },
+    {
+      "key": "boolean2",
+      "type": "boolean",
+      "default": true,
+      "title": "Boolean 2",
+      "description": "Some description for boolean 2",
+      "category": "Booleans"
+    },
+    {
+      "key": "noCategoryBoolean",
+      "type": "boolean",
+      "default": true,
+      "title": "No category boolean",
+      "description": "Some description for boolean 2"
+    },
+    {
+      "key": "deprecatedEnumOption",
+      "type": "enum",
+      "options": [
+        "camelCase",
+        "capitalCase",
+        "constantCase",
+        "dotCase",
+        "headerCase",
+        "noCase",
+        "paramCase",
+        "pascalCase",
+        "pathCase",
+        "sentenceCase",
+        "snakeCase"
+      ],
+      "default": "camelCase",
+      "title": "Deprecated enum option",
+      "description": "This option uses options array that was later replaced by an object",
+      "category": "Enums"
+    },
+    {
+      "key": "enumOption",
+      "type": "enum",
+      "title": "V2 Enum Option",
+      "description": "This is a new enum option",
+      "default": "camelCase",
+      "options": {
+        "camelCase": {
+          "label": "Camel case",
+          "description": "Example: myVariableName"
+        },
+        "capitalCase": {
+          "label": "Capital case",
+          "description": "Example: My Variable Name"
+        },
+        "constantCase": {
+          "label": "Constant case",
+          "description": "Example: MY_VARIABLE_NAME"
+        },
+        "dotCase": {
+          "label": "Dot case",
+          "description": "Example: my.variable.name"
+        },
+        "headerCase": {
+          "label": "Header case",
+          "description": "Example: My-Variable-Name"
+        },
+        "noCase": {
+          "label": "No case",
+          "description": "Example: my variable name"
+        },
+        "paramCase": {
+          "label": "Param case",
+          "description": "Example: my-variable-name"
+        },
+        "pascalCase": {
+          "label": "Pascal case",
+          "description": "Example: MyVariableName"
+        },
+        "pathCase": {
+          "label": "Path case",
+          "description": "Example: my/variable/name"
+        },
+        "sentenceCase": {
+          "label": "Sentence case",
+          "description": "Example: My variable name"
+        },
+        "snakeCase": {
+          "label": "Snake case",
+          "description": "Example: my_variable_name"
+        }
+      }
+    },
+    {
+      "key": "enumDependingOnBoolean1",
+      "type": "enum",
+      "options": {
+        "option1": {
+          "label": "Option 1",
+          "description": "First option"
+        },
+        "option2": {
+          "label": "Option 2",
+          "description": "Second option" 
+        }
+      },
+      "default": "option1",
+      "title": "Enum with boolean1 dependency",
+      "description": "This enum is only shown when boolean1 is true",
+      "category": "Enums",
+      "dependsOn": {
+        "boolean1": true
+      }
+    },
+    {
+      "key": "number1",
+      "type": "number",
+      "default": 3,
+      "title": "Number 1",
+      "description": "A number",
+      "category": "Numbers"
+    },
+    {
+      "key": "number2",
+      "type": "number",
+      "default": 2,
+      "title": "Number 2",
+      "description": "A number",
+      "category": "Numbers"
+    },
+    {
+      "key": "number3",
+      "type": "number",
+      "default": 3.14,
+      "title": "Number 3",
+      "description": "A number with decimals",
+      "category": "Numbers"
+    },
+    {
+      "key": "simpleString",
+      "type": "string",
+      "default": "Hello world",
+      "title": "Simple text string",
+      "description": "A basic text string without any special characters",
+      "category": "Strings"
+    },
+    {
+      "key": "multilineString",
+      "type": "string",
+      "default": "First line\nSecond line\nThird line",
+      "title": "Multiline text string",
+      "isMultiline": true,
+      "description": "A text string that contains multiple lines",
+      "category": "Strings"
+    },
+    {
+      "key": "specialCharString",
+      "type": "string", 
+      "default": "Hello @ world! #$%",
+      "title": "Special characters string",
+      "description": "A text string containing special characters",
+      "category": "Strings"
+    },
+    {
+      "key": "urlString",
+      "type": "string",
+      "default": "https://example.com/path?param=value",
+      "title": "URL string",
+      "description": "A string containing a URL with parameters",
+      "category": "Strings"
+    },
+    {
+      "key": "styleFileNames",
+      "type": "object",
+      "title": "Style file names",
+      "description": "Name of each file that will be generated. Tokens are grouped by the type and will land in each of those files",
+      "default": {
+        "Color": "colors.css",
+        "Typography": "typography.css",
+        "Dimension": "dimensions.css",
+        "Size": "sizes.css",
+        "Space": "spaces.css",
+        "Opacity": "opacities.css",
+        "FontSize": "font-sizes.css",
+        "LineHeight": "line-heights.css",
+        "LetterSpacing": "letter-spacings.css",
+        "ParagraphSpacing": "paragraph-spacings.css",
+        "BorderWidth": "border-widths.css",
+        "BorderRadius": "radii.css",
+        "Duration": "durations.css",
+        "ZIndex": "z-indices.css",
+        "Shadow": "shadows.css",
+        "Border": "borders.css",
+        "Gradient": "gradients.css",
+        "String": "strings.css",
+        "ProductCopy": "product-copy.css",
+        "FontFamily": "font-families.css",
+        "FontWeight": "font-weights.css",
+        "TextCase": "text-cases.css",
+        "TextDecoration": "text-decorations.css",
+        "Visibility": "visibility.css",
+        "Blur": "blurs.css"
+      },
+      "allowedKeys": {
+        "options": [
+          "Color",
+          "Typography",
+          "Dimension",
+          "Size",
+          "Space",
+          "Opacity",
+          "FontSize",
+          "LineHeight",
+          "LetterSpacing",
+          "ParagraphSpacing",
+          "BorderWidth",
+          "BorderRadius",
+          "Duration",
+          "ZIndex",
+          "Shadow",
+          "Border",
+          "Gradient",
+          "String",
+          "ProductCopy",
+          "FontFamily",
+          "FontWeight",
+          "TextCase",
+          "TextDecoration",
+          "Visibility",
+          "Blur"
+        ],
+        "type": "string"
+      },
+      "allowedValues": {
+        "type": "string"
+      }
+    }
+  ]
