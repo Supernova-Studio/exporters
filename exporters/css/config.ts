@@ -35,4 +35,6 @@ export type ExporterConfiguration = {
   baseStyleFilePath: string
   /** Index file will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
   baseIndexFilePath: string
+  /** CSS selector where variables will be defined */
+  cssSelector: string
 }

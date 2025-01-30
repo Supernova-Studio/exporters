@@ -116,25 +116,6 @@
         "category": "Formatting"
     },
     {
-        "key": "showGeneratedFileDisclaimer",
-        "type": "boolean",
-        "default": true,
-        "title": "Show file disclaimer",
-        "description": "When enabled, a message explaining that the file was automatically generated will appear in all style files.",
-        "category": "Disclaimer"
-    },
-    {
-        "key": "disclaimer",
-        "type": "string",
-        "default": "This file was generated automatically and should not be changed manually.",
-        "title": "Disclaimer message",
-        "description": "When enabled, a message explaining that the file was automatically generated will appear in all style files.",
-        "category": "Disclaimer",
-        "dependsOn": {
-            "showGeneratedFileDisclaimer": true
-        }
-    },
-    {
         "key": "showDescriptions",
         "type": "boolean",
         "default": true,
@@ -328,6 +309,33 @@
         },
         "allowedValues": {
             "type": "string"
+        }
+    },
+    {
+        "key": "cssSelector",
+        "type": "string",
+        "default": ":root",
+        "title": "CSS Selector",
+        "description": "The CSS selector where the custom properties (variables) will be defined (e.g. :root, .theme-light, #app)",
+        "category": "Style files"
+    },
+    {
+        "key": "showGeneratedFileDisclaimer",
+        "type": "boolean",
+        "default": true,
+        "title": "Show file disclaimer",
+        "description": "When enabled, a message explaining that the file was automatically generated will appear in all style files.",
+        "category": "Other"
+    },
+    {
+        "key": "disclaimer",
+        "type": "string",
+        "default": "This file was generated automatically and should not be changed manually.",
+        "title": "Disclaimer message",
+        "description": "When enabled, a message explaining that the file was automatically generated will appear in all style files.",
+        "category": "Other",
+        "dependsOn": {
+            "showGeneratedFileDisclaimer": true
         }
     }
 ]

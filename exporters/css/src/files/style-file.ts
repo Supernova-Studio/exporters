@@ -17,7 +17,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups)).join("\n")
 
   // Create file content
-  let content = `:root {\n${cssVariables}\n}`
+  let content = `${exportConfiguration.cssSelector} {\n${cssVariables}\n}`
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     // Add disclaimer to every file if enabled
     content = `/* ${exportConfiguration.disclaimer} */\n${content}`
