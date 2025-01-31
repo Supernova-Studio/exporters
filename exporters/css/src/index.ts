@@ -89,7 +89,13 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
           return Object.values(TokenType)
-            .map((type) => styleOutputFile(type, themedTokens, tokenGroups, theme.name.toLowerCase()))
+            .map((type) => styleOutputFile(
+              type, 
+              themedTokens, 
+              tokenGroups, 
+              theme.name.toLowerCase(), 
+              theme  // Pass the theme object for override filtering
+            ))
         })
         
         // Generate base files without themes
@@ -116,7 +122,13 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         // - Scenarios where themes need to be applied on top of brand-specific tokens
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         const combinedThemeFiles = Object.values(TokenType)
-          .map((type) => styleOutputFile(type, themedTokens, tokenGroups, 'themed'))
+          .map((type) => styleOutputFile(
+            type, 
+            themedTokens, 
+            tokenGroups, 
+            'themed',
+            themesToApply[0]  // Pass the first theme as reference for overrides
+          ))
 
         const combinedFiles = [...baseTokenFiles, ...combinedThemeFiles, indexOutputFile(tokens, ['themed'])]
         return processOutputFiles(combinedFiles)

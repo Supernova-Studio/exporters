@@ -40,12 +40,12 @@
     {
         "key": "colorFormat",
         "type": "enum",
-        "default": "smartHex",
+        "default": "smartHashHex",
         "title": "Color format",
         "description": "Export color token values in the selected color format.",
         "category": "Formatting",
         "options": {
-            "smartHex": {
+            "smartHashHex": {
                 "label": "Smart hex",
                 "description": "Automatically choose between #RRGGBB and #RRGGBBAA"
             },
@@ -60,10 +60,6 @@
             "smartOklch": {
                 "label": "Smart OKLCH",
                 "description": "Automatically choose between oklch() and oklch() with alpha"
-            },
-            "smartUIColor": {
-                "label": "Smart UI Color",
-                "description": "Automatically choose UI color format"
             },
             "hashHex6": {
                 "label": "Hex (6 digits)",
@@ -315,9 +311,9 @@
         "key": "cssSelector",
         "type": "string",
         "default": ":root",
-        "title": "CSS Selector",
+        "title": "CSS selector",
         "description": "The CSS selector where the custom properties (variables) will be defined (e.g. :root, .theme-light, #app)",
-        "category": "Style files"
+        "category": "CSS selectors"
     },
     {
         "key": "exportThemesAs",
@@ -342,12 +338,20 @@
         }
     },
     {
+        "key": "exportOnlyThemedTokens",
+        "type": "boolean",
+        "default": false,
+        "title": "Export only themed tokens",
+        "description": "When enabled, themed files will only include tokens that have different values from the base theme",
+        "category": "Themes"
+    },
+    {
         "key": "themeSelector",
         "type": "string",
         "default": ".theme-{theme}",
-        "title": "CSS Selector for themes",
+        "title": "CSS selector for themes",
         "description": "The CSS selector used in theme files. Use {theme} placeholder which will be replaced with the theme name (e.g. .theme-{theme}, [data-theme='{theme}'])",
-        "category": "Themes"
+        "category": "CSS selectors"
     },
     {
         "key": "showGeneratedFileDisclaimer",

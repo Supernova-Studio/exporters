@@ -2,10 +2,22 @@ import { FileHelper } from "@supernovaio/export-helpers"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
+import { TokenTheme } from "@supernovaio/sdk-exporters"
+import { filterThemedTokens } from "../utils/theme-utils"
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = ''): OutputTextFile | null {
+export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
   // Filter tokens by top level type
-  const tokensOfType = tokens.filter((token) => token.tokenType === type)
+  let tokensOfType = tokens.filter((token) => token.tokenType === type)
+
+  // If this is a theme file, handle themed tokens
+  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
+    tokensOfType = filterThemedTokens(tokensOfType, theme)
+    
+    // If no tokens are themed, don't generate the file at all
+    if (tokensOfType.length === 0) {
+      return null
+    }
+  }
 
   // Filter out files where there are no tokens, if enabled
   if (!exportConfiguration.generateEmptyFiles && tokensOfType.length === 0) {

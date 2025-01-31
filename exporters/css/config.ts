@@ -47,4 +47,6 @@ export type ExporterConfiguration = {
   themeSelector: string
   /** Controls how themes are exported in the CSS files */
   exportThemesAs: ThemeExportStyle
+  /** When enabled, themed files will only include tokens that have different values from the base theme */
+  exportOnlyThemedTokens: boolean
 }
