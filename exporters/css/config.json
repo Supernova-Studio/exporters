@@ -19,8 +19,8 @@
                 "label": "Flat case",
                 "description": "Example: --myvariablename"
             },
-            "headerCase": {
-                "label": "Header case",
+            "trainCase": {
+                "label": "Train case",
                 "description": "Example: --My-Variable-Name"
             },
             "kebabCase": {
@@ -30,6 +30,10 @@
             "pascalCase": {
                 "label": "Pascal case",
                 "description": "Example: --MyVariableName"
+            },
+            "pascalSnakeCase": {
+                "label": "Pascal snake case",
+                "description": "Example: --My_Variable_Name"
             },
             "snakeCase": {
                 "label": "Snake case",
@@ -46,7 +50,7 @@
         "category": "Formatting",
         "options": {
             "smartHashHex": {
-                "label": "Smart hex",
+                "label": "Smart HEX",
                 "description": "Automatically choose between #RRGGBB and #RRGGBBAA"
             },
             "smartRgb": {
@@ -62,11 +66,11 @@
                 "description": "Automatically choose between oklch() and oklch() with alpha"
             },
             "hashHex6": {
-                "label": "Hex (6 digits)",
+                "label": "HEX (6 digits)",
                 "description": "Example: #ff0000"
             },
             "hashHex8": {
-                "label": "Hex (8 digits)",
+                "label": "HEX (8 digits)",
                 "description": "Example: #ff0000ff"
             },
             "rgb": {
