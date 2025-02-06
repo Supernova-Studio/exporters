@@ -42,6 +42,13 @@ function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string
 }
 
 function addGlobalPrefix(name: string): string {
-  const prefix = exportConfiguration.globalNamePrefix.trim()
-  return prefix ? `${prefix}-${name}` : name
+  if (!exportConfiguration.globalNamePrefix) {
+    return name
+  }
+  // Format the global prefix using the same NamingHelper
+  const formattedPrefix = NamingHelper.codeSafeVariableName(
+    exportConfiguration.globalNamePrefix.trim(),
+    exportConfiguration.tokenNameStyle
+  )
+  return `${formattedPrefix}-${name}`
 }
