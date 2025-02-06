@@ -10,6 +10,10 @@ export type TokenToCSSOptions = {
     colorFormat: ColorFormat;
     /** Function to convert token to variable reference. Only used when allowReferences is true and reference is detected */
     tokenToVariableRef: (token: Token) => string;
+    /** Force conversion of pixel values to rem */
+    forceRemUnit?: boolean;
+    /** Base value for rem conversion (default: 16) */
+    remBase?: number;
 };
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 export declare class CSSHelper {
@@ -23,6 +27,7 @@ export declare class CSSHelper {
     static shadowTokenValueToCSS(shadows: Array<ShadowTokenValue>, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static shadowLayerToCSS(value: ShadowTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static fontWeightTokenValueToCSS(value: AnyStringTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
+    private static normalizeTextWeight;
     static stringTokenValueToCSS(value: AnyStringTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static optionTokenValueToCSS(option: AnyOptionTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions, tokenType: TokenType): string;
     static blurTokenValueToCSS(blur: BlurTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;

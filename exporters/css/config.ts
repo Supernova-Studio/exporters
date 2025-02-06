@@ -49,4 +49,10 @@ export type ExporterConfiguration = {
   exportThemesAs: ThemeExportStyle
   /** When enabled, themed files will only include tokens that have different values from the base theme */
   exportOnlyThemedTokens: boolean
+  /** When enabled, base token values will be exported along with themes */
+  exportBaseValues: boolean
+  /** When enabled, converts pixel values to rem units */
+  forceRemUnit: boolean
+  /** Base pixel value for rem conversion (default: 16) */
+  remBase: number
 }

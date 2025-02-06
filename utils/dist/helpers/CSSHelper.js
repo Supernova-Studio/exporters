@@ -124,6 +124,12 @@ class CSSHelper {
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
+        // Handle unit conversion if needed
+        if (options.forceRemUnit && dimension.unit === sdk_exporters_1.Unit.pixels) {
+            const remBase = options.remBase || 16;
+            const remValue = dimension.measure / remBase;
+            return `${ColorHelper_1.ColorHelper.roundToDecimals(remValue, options.decimals)}rem`;
+        }
         return `${ColorHelper_1.ColorHelper.roundToDecimals(dimension.measure, options.decimals)}${this.unitToCSS(dimension.unit)}`;
     }
     static shadowTokenValueToCSS(shadows, allTokens, options) {
@@ -134,7 +140,16 @@ class CSSHelper {
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        return `${value.type === sdk_exporters_1.ShadowType.inner ? 'inset ' : ''}${value.x}px ${value.y}px ${value.radius}px ${value.spread}px ${this.colorTokenValueToCSS({
+        // Convert pixel values to rem if needed
+        const convertToRem = (px) => {
+            if (options.forceRemUnit) {
+                const remBase = options.remBase || 16;
+                const remValue = px / remBase;
+                return `${ColorHelper_1.ColorHelper.roundToDecimals(remValue, options.decimals)}rem`;
+            }
+            return `${px}px`;
+        };
+        return `${value.type === sdk_exporters_1.ShadowType.inner ? 'inset ' : ''}${convertToRem(value.x)} ${convertToRem(value.y)} ${convertToRem(value.radius)} ${convertToRem(value.spread)} ${this.colorTokenValueToCSS({
             ...value.color,
             ...(value.opacity && { opacity: value.opacity })
         }, allTokens, options)}`;
@@ -144,7 +159,56 @@ class CSSHelper {
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        return `${value.text}`;
+        // Convert text weights to numerical values
+        const normalizedWeight = this.normalizeTextWeight(value.text);
+        return `${normalizedWeight}`;
+    }
+    static normalizeTextWeight(weight) {
+        // Convert to lowercase for case-insensitive comparison
+        const normalizedText = weight.toLowerCase().trim();
+        // First check if it's already a valid number
+        const numericWeight = parseInt(normalizedText);
+        if (!isNaN(numericWeight)) {
+            return numericWeight;
+        }
+        // Map common weight names to their numeric values
+        switch (normalizedText) {
+            case 'thin':
+                return 100;
+            case 'hairline':
+                return 100;
+            case 'extra light':
+            case 'extralight':
+            case 'ultra light':
+            case 'ultralight':
+                return 200;
+            case 'light':
+                return 300;
+            case 'normal':
+            case 'regular':
+            case 'book':
+                return 400;
+            case 'medium':
+                return 500;
+            case 'semi bold':
+            case 'semibold':
+            case 'demi bold':
+            case 'demibold':
+                return 600;
+            case 'bold':
+                return 700;
+            case 'extra bold':
+            case 'extrabold':
+            case 'ultra bold':
+            case 'ultrabold':
+                return 800;
+            case 'black':
+            case 'heavy':
+                return 900;
+            default:
+                // Default to normal weight (400) if the value is not recognized
+                return 400;
+        }
     }
     static stringTokenValueToCSS(value, allTokens, options) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
@@ -187,7 +251,9 @@ class CSSHelper {
         const caseReference = (0, TokenHelper_1.sureOptionalReference)(typography.textCase.referencedTokenId, allTokens, options.allowReferences);
         const data = {
             fontFamily: fontFamilyReference ? options.tokenToVariableRef(fontFamilyReference) : typography.fontFamily.text,
-            fontWeight: fontWeightReference ? options.tokenToVariableRef(fontWeightReference) : typography.fontWeight.text,
+            fontWeight: fontWeightReference
+                ? options.tokenToVariableRef(fontWeightReference)
+                : this.normalizeTextWeight(typography.fontWeight.text),
             textDecoration: decorationReference
                 ? options.tokenToVariableRef(decorationReference)
                 : typography.textDecoration.value === sdk_exporters_1.TextDecoration.original

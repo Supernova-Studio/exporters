@@ -98,20 +98,24 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
             ))
         })
         
-        // Generate base files without themes
+        // Generate base files without themes only if exportBaseValues is true
         // These files contain the default token values before any theme is applied
-        const baseFiles = Object.values(TokenType)
-          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+        const baseFiles = exportConfiguration.exportBaseValues
+          ? Object.values(TokenType)
+              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          : []
 
         const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
         return processOutputFiles(separateFiles)
 
       case ThemeExportStyle.MergedTheme:
-        // Generate base files without themes
+        // Generate base files without themes only if exportBaseValues is true
         // These files contain the default token values in the root selector
         // For multi-brand setups, these would be the brand's base tokens
-        const baseTokenFiles = Object.values(TokenType)
-          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+        const baseTokenFiles = exportConfiguration.exportBaseValues
+          ? Object.values(TokenType)
+              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          : []
 
         // Generate themed files with all themes applied
         // Creates a single set of files with all themed tokens
@@ -137,8 +141,10 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
   // Default case: Generate files without themes
   const defaultFiles = [
-    ...Object.values(TokenType)
-      .map((type) => styleOutputFile(type, tokens, tokenGroups)),
+    ...(exportConfiguration.exportBaseValues
+      ? Object.values(TokenType)
+          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      : []),
     indexOutputFile(tokens),
   ]
   return processOutputFiles(defaultFiles)

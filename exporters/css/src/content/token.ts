@@ -11,6 +11,8 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     allowReferences: exportConfiguration.useReferences,
     decimals: exportConfiguration.colorPrecision,
     colorFormat: exportConfiguration.colorFormat,
+    forceRemUnit: exportConfiguration.forceRemUnit,
+    remBase: exportConfiguration.remBase,
     tokenToVariableRef: (t) => {
       return `var(--${tokenVariableName(t, tokenGroups)})`
     },

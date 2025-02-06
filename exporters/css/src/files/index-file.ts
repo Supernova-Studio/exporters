@@ -12,10 +12,12 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Get all unique token types
   const types = [...new Set(tokens.map((token) => token.tokenType))]
 
-  // Create imports for each type
-  const imports = types
-    .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${exportConfiguration.styleFileNames[type]}";`)
-    .join("\n")
+  // Create imports for each type - only if exportBaseValues is true
+  const imports = exportConfiguration.exportBaseValues 
+    ? types
+        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${exportConfiguration.styleFileNames[type]}";`)
+        .join("\n")
+    : ''
 
   // Add theme imports if any
   const themeImports = themes.map((theme) => {
@@ -36,10 +38,13 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
       .join("\n")
   }).join("\n")
 
+  // Only add newlines between base imports and theme imports if both exist
+  const separator = imports && themeImports ? "\n\n" : ""
+
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
     relativePath: exportConfiguration.baseIndexFilePath,
     fileName: exportConfiguration.indexFileName,
-    content: imports + (themeImports ? "\n\n" + themeImports : ""),
+    content: imports + separator + themeImports,
   })
 }

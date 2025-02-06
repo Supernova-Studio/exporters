@@ -44,6 +44,10 @@ import {
     colorFormat: ColorFormat
     /** Function to convert token to variable reference. Only used when allowReferences is true and reference is detected */
     tokenToVariableRef: (token: Token) => string
+    /** Force conversion of pixel values to rem */
+    forceRemUnit?: boolean
+    /** Base value for rem conversion (default: 16) */
+    remBase?: number
   }
   
   /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
@@ -206,6 +210,14 @@ import {
       if (reference) {
         return options.tokenToVariableRef(reference)
       }
+  
+      // Handle unit conversion if needed
+      if (options.forceRemUnit && dimension.unit === Unit.pixels) {
+        const remBase = options.remBase || 16
+        const remValue = dimension.measure / remBase
+        return `${ColorHelper.roundToDecimals(remValue, options.decimals)}rem`
+      }
+  
       return `${ColorHelper.roundToDecimals(dimension.measure, options.decimals)}${this.unitToCSS(dimension.unit)}`
     }
   
@@ -222,9 +234,20 @@ import {
       if (reference) {
         return options.tokenToVariableRef(reference)
       }
-      return `${value.type === ShadowType.inner ? 'inset ' : ''}${value.x}px ${value.y}px ${value.radius}px ${
-        value.spread
-      }px ${this.colorTokenValueToCSS(
+  
+      // Convert pixel values to rem if needed
+      const convertToRem = (px: number): string => {
+        if (options.forceRemUnit) {
+          const remBase = options.remBase || 16
+          const remValue = px / remBase
+          return `${ColorHelper.roundToDecimals(remValue, options.decimals)}rem`
+        }
+        return `${px}px`
+      }
+  
+      return `${value.type === ShadowType.inner ? 'inset ' : ''}${convertToRem(value.x)} ${convertToRem(value.y)} ${convertToRem(value.radius)} ${
+        convertToRem(value.spread)
+      } ${this.colorTokenValueToCSS(
         {
           ...value.color,
           ...(value.opacity && { opacity: value.opacity })
@@ -243,7 +266,60 @@ import {
       if (reference) {
         return options.tokenToVariableRef(reference)
       }
-      return `${value.text}`
+
+      // Convert text weights to numerical values
+      const normalizedWeight = this.normalizeTextWeight(value.text)
+      return `${normalizedWeight}`
+    }
+  
+    private static normalizeTextWeight(weight: string): number {
+      // Convert to lowercase for case-insensitive comparison
+      const normalizedText = weight.toLowerCase().trim()
+
+      // First check if it's already a valid number
+      const numericWeight = parseInt(normalizedText)
+      if (!isNaN(numericWeight)) {
+        return numericWeight
+      }
+
+      // Map common weight names to their numeric values
+      switch (normalizedText) {
+        case 'thin':
+          return 100
+        case 'hairline':
+          return 100
+        case 'extra light':
+        case 'extralight':
+        case 'ultra light':
+        case 'ultralight':
+          return 200
+        case 'light':
+          return 300
+        case 'normal':
+        case 'regular':
+        case 'book':
+          return 400
+        case 'medium':
+          return 500
+        case 'semi bold':
+        case 'semibold':
+        case 'demi bold':
+        case 'demibold':
+          return 600
+        case 'bold':
+          return 700
+        case 'extra bold':
+        case 'extrabold':
+        case 'ultra bold':
+        case 'ultrabold':
+          return 800
+        case 'black':
+        case 'heavy':
+          return 900
+        default:
+          // Default to normal weight (400) if the value is not recognized
+          return 400
+      }
     }
   
     static stringTokenValueToCSS(
@@ -322,7 +398,9 @@ import {
   
       const data = {
         fontFamily: fontFamilyReference ? options.tokenToVariableRef(fontFamilyReference) : typography.fontFamily.text,
-        fontWeight: fontWeightReference ? options.tokenToVariableRef(fontWeightReference) : typography.fontWeight.text,
+        fontWeight: fontWeightReference 
+          ? options.tokenToVariableRef(fontWeightReference) 
+          : this.normalizeTextWeight(typography.fontWeight.text),
         textDecoration: decorationReference
           ? options.tokenToVariableRef(decorationReference)
           : typography.textDecoration.value === TextDecoration.original

@@ -5,7 +5,7 @@
         "default": "kebabCase",
         "title": "Token name style",
         "description": "Export token names in the selected case.",
-        "category": "Formatting",
+        "category": "Name format",
         "options": {
             "camelCase": {
                 "label": "Camel case",
@@ -43,7 +43,7 @@
         "default": "smartHashHex",
         "title": "Color format",
         "description": "Export color token values in the selected color format.",
-        "category": "Formatting",
+        "category": "Value format",
         "options": {
             "smartHashHex": {
                 "label": "Smart HEX",
@@ -96,20 +96,31 @@
         }
     },
     {
+        "key": "forceRemUnit",
+        "type": "boolean",
+        "default": false,
+        "title": "Force REM units",
+        "description": "When enabled, converts pixel values to REM units",
+        "category": "Value format"
+    },
+    {
+        "key": "remBase",
+        "type": "number",
+        "default": 16,
+        "title": "REM base value",
+        "description": "Base pixel value for REM conversion (default: 16)",
+        "category": "Value format",
+        "dependsOn": {
+            "forceRemUnit": true
+        }
+    },
+    {
         "key": "colorPrecision",
         "type": "number",
         "default": 3,
         "title": "Color precision",
         "description": "Maximum number of decimals in colors.",
-        "category": "Formatting"
-    },
-    {
-        "key": "indent",
-        "type": "number",
-        "default": 2,
-        "title": "Indentation",
-        "description": "Number of spaces used to indent CSS variables.",
-        "category": "Formatting"
+        "category": "Value format"
     },
     {
         "key": "showDescriptions",
@@ -125,7 +136,7 @@
         "default": true,
         "title": "Use token references",
         "description": "When enabled, values will use references to other tokens where applicable.",
-        "category": "Token information"
+        "category": "Value format"
     },
     {
         "key": "generateIndexFile",
@@ -245,7 +256,7 @@
         "type": "object",
         "title": "Token prefixes",
         "description": "Each token of a specific type is prefixed with the following identifier.",
-        "category": "Token information",
+        "category": "Name",
         "default": {
             "Color": "color",
             "Typography": "typography", 
@@ -346,6 +357,14 @@
         "category": "Themes"
     },
     {
+        "key": "exportBaseValues",
+        "type": "boolean",
+        "default": true,
+        "title": "Export base values",
+        "description": "When enabled, base token values will be exported along with themes",
+        "category": "Themes"
+    },
+    {
         "key": "themeSelector",
         "type": "string",
         "default": ".theme-{theme}",
@@ -371,5 +390,13 @@
         "dependsOn": {
             "showGeneratedFileDisclaimer": true
         }
+    },
+    {
+        "key": "indent",
+        "type": "number",
+        "default": 2,
+        "title": "Indentation",
+        "description": "Number of spaces used to indent CSS variables.",
+        "category": "Other"
     }
 ]

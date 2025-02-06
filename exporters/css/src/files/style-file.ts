@@ -6,6 +6,11 @@ import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { filterThemedTokens } from "../utils/theme-utils"
 
 export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
+  // Skip base token files if exportBaseValues is false and this is not a theme file
+  if (!exportConfiguration.exportBaseValues && !themePath) {
+    return null
+  }
+
   // Filter tokens by top level type
   let tokensOfType = tokens.filter((token) => token.tokenType === type)
 
