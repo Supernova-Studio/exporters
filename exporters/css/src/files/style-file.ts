@@ -1,4 +1,4 @@
-import { FileHelper } from "@supernovaio/export-helpers"
+import { FileHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"

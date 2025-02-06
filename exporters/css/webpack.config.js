@@ -32,7 +32,6 @@ module.exports = (env, argv) => ({
             "crypto-browserify": false,
         },
     },
-
     output: {
         filename: "build.js",
         path: path.resolve(__dirname, "./dist/"),

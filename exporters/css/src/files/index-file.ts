@@ -1,5 +1,5 @@
-import { FileHelper } from "@supernovaio/export-helpers"
-import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
+import { FileHelper } from "@supernovaio/export-utils"
+import { OutputTextFile, Token, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { hasThemedTokens } from "../utils/theme-utils"
 

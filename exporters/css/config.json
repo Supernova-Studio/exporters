@@ -31,10 +31,6 @@
                 "label": "Pascal case",
                 "description": "Example: --MyVariableName"
             },
-            "pascalSnakeCase": {
-                "label": "Pascal snake case",
-                "description": "Example: --My_Variable_Name"
-            },
             "snakeCase": {
                 "label": "Snake case",
                 "description": "Example: --my_variable_name"
@@ -53,11 +49,11 @@
                 "label": "Smart HEX",
                 "description": "Automatically choose between #RRGGBB and #RRGGBBAA"
             },
-            "smartRgb": {
+            "smartRgba": {
                 "label": "Smart RGB",
                 "description": "Automatically choose between rgb() and rgba()"
             },
-            "smartHsl": {
+            "smartHsla": {
                 "label": "Smart HSL",
                 "description": "Automatically choose between hsl() and hsla()"
             },
@@ -335,9 +331,9 @@
                 "label": "Separate file per theme",
                 "description": "Generate a separate CSS file for each selected theme"
             },
-            "combinedTheme": {
-                "label": "Combined theme file",
-                "description": "Generate base file without themes and one file with all selected themes applied"
+            "mergedTheme": {
+                "label": "Merged theme file",
+                "description": "Generate one file with all themes deeply merged together"
             }
         }
     },

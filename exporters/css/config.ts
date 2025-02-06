@@ -1,4 +1,4 @@
-import { StringCase, ColorFormat } from "@supernovaio/export-helpers"
+import { StringCase, ColorFormat } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 
 /**
@@ -7,7 +7,7 @@ import { TokenType } from "@supernovaio/sdk-exporters"
 export enum ThemeExportStyle {
     ApplyDirectly = "applyDirectly",
     SeparateFiles = "separateFiles",
-    CombinedTheme = "combinedTheme"
+    MergedTheme = "mergedTheme"
 }
 
 export type ExporterConfiguration = {

@@ -1,4 +1,4 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
@@ -106,7 +106,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
         return processOutputFiles(separateFiles)
 
-      case ThemeExportStyle.CombinedTheme:
+      case ThemeExportStyle.MergedTheme:
         // Generate base files without themes
         // These files contain the default token values in the root selector
         // For multi-brand setups, these would be the brand's base tokens
@@ -121,7 +121,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         // - When you want to keep brand-specific theme variations together
         // - Scenarios where themes need to be applied on top of brand-specific tokens
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const combinedThemeFiles = Object.values(TokenType)
+        const mergedThemeFiles = Object.values(TokenType)
           .map((type) => styleOutputFile(
             type, 
             themedTokens, 
@@ -130,8 +130,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
             themesToApply[0]  // Pass the first theme as reference for overrides
           ))
 
-        const combinedFiles = [...baseTokenFiles, ...combinedThemeFiles, indexOutputFile(tokens, ['themed'])]
-        return processOutputFiles(combinedFiles)
+        const mergedFiles = [...baseTokenFiles, ...mergedThemeFiles, indexOutputFile(tokens, ['themed'])]
+        return processOutputFiles(mergedFiles)
     }
   }
 

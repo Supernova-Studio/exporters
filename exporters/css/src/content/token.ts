@@ -1,4 +1,4 @@
-import { NamingHelper, CSSHelper } from "@supernovaio/export-helpers"
+import { NamingHelper, CSSHelper } from "@supernovaio/export-utils"
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 
