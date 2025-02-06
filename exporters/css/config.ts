@@ -55,4 +55,8 @@ export type ExporterConfiguration = {
   forceRemUnit: boolean
   /** Base pixel value for rem conversion (default: 16) */
   remBase: number
+  /** When enabled, allows customization of style file names */
+  customizeStyleFileNames: boolean
+  /** When enabled, allows customization of token prefixes */
+  customizeTokenPrefixes: boolean
 }

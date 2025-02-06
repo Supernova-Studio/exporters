@@ -1,7 +1,8 @@
 import { FileHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenTheme } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { hasThemedTokens } from "../utils/theme-utils"
+import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 
 export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
   // Skip if disabled
@@ -12,10 +13,17 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Get all unique token types
   const types = [...new Set(tokens.map((token) => token.tokenType))]
 
+  // Get default style file names if customization is disabled
+  const getStyleFileName = (type: TokenType) => {
+    return exportConfiguration.customizeStyleFileNames
+      ? exportConfiguration.styleFileNames[type]
+      : DEFAULT_STYLE_FILE_NAMES[type]
+  }
+
   // Create imports for each type - only if exportBaseValues is true
   const imports = exportConfiguration.exportBaseValues 
     ? types
-        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${exportConfiguration.styleFileNames[type]}";`)
+        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${getStyleFileName(type)}";`)
         .join("\n")
     : ''
 
@@ -33,7 +41,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
       .map((type, index) => {
         // Add theme name comment only before the first import of the theme
         const themeComment = index === 0 ? `\n/* Theme: ${themeName} */\n` : ''
-        return `${themeComment}@import "./${themePath}/${exportConfiguration.styleFileNames[type]}";`
+        return `${themeComment}@import "./${themePath}/${getStyleFileName(type)}";`
       })
       .join("\n")
   }).join("\n")

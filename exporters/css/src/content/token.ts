@@ -1,6 +1,13 @@
 import { NamingHelper, CSSHelper } from "@supernovaio/export-utils"
-import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
+import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
+import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
+
+export function getTokenPrefix(tokenType: TokenType): string {
+  return exportConfiguration.customizeTokenPrefixes
+    ? exportConfiguration.tokenPrefixes[tokenType]
+    : DEFAULT_TOKEN_PREFIXES[tokenType]
+}
 
 export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
   // First creating the name of the token, using helper function which turns any token name / path into a valid variable name
@@ -29,7 +36,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 }
 
 function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
-  const prefix = exportConfiguration.tokenPrefixes[token.tokenType]
+  const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
   return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent, prefix)
 }

@@ -4,6 +4,7 @@ import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { filterThemedTokens } from "../utils/theme-utils"
+import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 
 export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
   // Skip base token files if exportBaseValues is false and this is not a theme file
@@ -48,10 +49,20 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     ? `./${themePath}`
     : exportConfiguration.baseStyleFilePath
 
+  // Use default style file names if customization is disabled
+  let fileName = exportConfiguration.customizeStyleFileNames
+    ? exportConfiguration.styleFileNames[type]
+    : DEFAULT_STYLE_FILE_NAMES[type]
+
+  // Ensure filename ends with .css
+  if (!fileName.toLowerCase().endsWith('.css')) {
+    fileName += '.css'
+  }
+
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
     relativePath: relativePath,
-    fileName: exportConfiguration.styleFileNames[type],
+    fileName: fileName,
     content: content,
   })
 }

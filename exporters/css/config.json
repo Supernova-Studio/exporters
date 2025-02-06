@@ -185,11 +185,22 @@
         "category": "Style files"
     },
     {
+        "key": "customizeStyleFileNames",
+        "type": "boolean",
+        "default": false,
+        "title": "Customize style file names",
+        "description": "When enabled, allows customization of the file names for each token type.",
+        "category": "Style files"
+    },
+    {
         "key": "styleFileNames",
         "type": "object",
         "title": "Style file names",
         "description": "Name of each file that will be generated, grouped by token type.",
         "category": "Style files",
+        "dependsOn": {
+            "customizeStyleFileNames": true
+        },
         "default": {
             "Color": "color.css",
             "Typography": "typography.css",
@@ -252,11 +263,22 @@
         }
     },
     {
+        "key": "customizeTokenPrefixes",
+        "type": "boolean",
+        "default": false,
+        "title": "Customize token prefixes",
+        "description": "When enabled, allows customization of the prefixes used for each token type.",
+        "category": "Name format"
+    },
+    {
         "key": "tokenPrefixes",
         "type": "object",
         "title": "Token prefixes",
         "description": "Each token of a specific type is prefixed with the following identifier.",
-        "category": "Name",
+        "category": "Name format",
+        "dependsOn": {
+            "customizeTokenPrefixes": true
+        },
         "default": {
             "Color": "color",
             "Typography": "typography", 
