@@ -5,7 +5,7 @@
         "default": "kebabCase",
         "title": "Token name style",
         "description": "Export token names in the selected case.",
-        "category": "Name format",
+        "category": "Token names",
         "options": {
             "camelCase": {
                 "label": "Camel case",
@@ -43,7 +43,7 @@
         "default": "smartHashHex",
         "title": "Color format",
         "description": "Export color token values in the selected color format.",
-        "category": "Token value format",
+        "category": "Token values",
         "options": {
             "smartHashHex": {
                 "label": "Smart HEX",
@@ -101,7 +101,7 @@
         "default": false,
         "title": "Force REM units",
         "description": "When enabled, converts all pixel values to REM units",
-        "category": "Token value format"
+        "category": "Token values"
     },
     {
         "key": "remBase",
@@ -109,18 +109,10 @@
         "default": 16,
         "title": "REM base value",
         "description": "Base pixel value for REM conversion",
-        "category": "Token value format",
+        "category": "Token values",
         "dependsOn": {
             "forceRemUnit": true
         }
-    },
-    {
-        "key": "colorPrecision",
-        "type": "number",
-        "default": 3,
-        "title": "Color precision",
-        "description": "Maximum number of decimals in colors.",
-        "category": "Token value format"
     },
     {
         "key": "useReferences",
@@ -128,7 +120,53 @@
         "default": true,
         "title": "Use token references",
         "description": "When enabled, values will use references to other tokens where applicable.",
-        "category": "Token value format"
+        "category": "Token values"
+    },
+    {
+        "key": "colorPrecision",
+        "type": "number",
+        "default": 3,
+        "title": "Color precision",
+        "description": "Maximum number of decimals in colors.",
+        "category": "Token values"
+    },
+    {
+        "key": "exportThemesAs",
+        "type": "enum",
+        "default": "separateFiles",
+        "title": "Theme export style",
+        "description": "Controls how themes are exported in the CSS files",
+        "category": "Themes",
+        "options": {
+            "applyDirectly": {
+                "label": "Apply themes directly",
+                "description": "Apply selected themes directly to token values"
+            },
+            "separateFiles": {
+                "label": "Separate file per theme",
+                "description": "Generate a separate CSS file for each selected theme"
+            },
+            "mergedTheme": {
+                "label": "Merged theme file",
+                "description": "Generate one file with all themes deeply merged together"
+            }
+        }
+    },
+    {
+        "key": "exportOnlyThemedTokens",
+        "type": "boolean",
+        "default": false,
+        "title": "Export only themed tokens",
+        "description": "When enabled, themed files will only include tokens that have different values from the base theme",
+        "category": "Themes"
+    },
+    {
+        "key": "exportBaseValues",
+        "type": "boolean",
+        "default": true,
+        "title": "Export base values",
+        "description": "When enabled, base token values will be exported along with themes",
+        "category": "Themes"
     },
     {
         "key": "generateIndexFile",
@@ -267,8 +305,8 @@
         "type": "string",
         "default": "",
         "title": "Global name prefix",
-        "description": "When set, all token variable names will be prefixed with this value (e.g., '--prefix-color-primary')",
-        "category": "Token name format"
+        "description": "When set, all token variable names will be prefixed with this value (e.g., '--ds-color-primary')",
+        "category": "Token names"
     },
     {
         "key": "customizeTokenPrefixes",
@@ -276,14 +314,14 @@
         "default": false,
         "title": "Customize prefixes for types",
         "description": "When enabled, allows customization of the prefixes used for each token type.",
-        "category": "Token name format"
+        "category": "Token names"
     },
     {
         "key": "tokenPrefixes",
         "type": "object",
         "title": "Token prefixes",
         "description": "Each token of a specific type is prefixed with the following identifier.",
-        "category": "Token name format",
+        "category": "Token names",
         "dependsOn": {
             "customizeTokenPrefixes": true
         },
@@ -347,44 +385,6 @@
         "allowedValues": {
             "type": "string"
         }
-    },
-    {
-        "key": "exportThemesAs",
-        "type": "enum",
-        "default": "separateFiles",
-        "title": "Theme export style",
-        "description": "Controls how themes are exported in the CSS files",
-        "category": "Themes",
-        "options": {
-            "applyDirectly": {
-                "label": "Apply themes directly",
-                "description": "Apply selected themes directly to token values"
-            },
-            "separateFiles": {
-                "label": "Separate file per theme",
-                "description": "Generate a separate CSS file for each selected theme"
-            },
-            "mergedTheme": {
-                "label": "Merged theme file",
-                "description": "Generate one file with all themes deeply merged together"
-            }
-        }
-    },
-    {
-        "key": "exportOnlyThemedTokens",
-        "type": "boolean",
-        "default": false,
-        "title": "Export only themed tokens",
-        "description": "When enabled, themed files will only include tokens that have different values from the base theme",
-        "category": "Themes"
-    },
-    {
-        "key": "exportBaseValues",
-        "type": "boolean",
-        "default": true,
-        "title": "Export base values",
-        "description": "When enabled, base token values will be exported along with themes",
-        "category": "Themes"
     },
     {
         "key": "cssSelector",
