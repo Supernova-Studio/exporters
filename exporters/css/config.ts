@@ -59,4 +59,6 @@ export type ExporterConfiguration = {
   customizeStyleFileNames: boolean
   /** When enabled, allows customization of token prefixes */
   customizeTokenPrefixes: boolean
+  /** Global prefix for all token names. When set, all tokens will be prefixed with this value */
+  globalNamePrefix: string
 }

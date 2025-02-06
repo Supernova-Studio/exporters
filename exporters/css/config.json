@@ -43,7 +43,7 @@
         "default": "smartHashHex",
         "title": "Color format",
         "description": "Export color token values in the selected color format.",
-        "category": "Value format",
+        "category": "Token value format",
         "options": {
             "smartHashHex": {
                 "label": "Smart HEX",
@@ -100,16 +100,16 @@
         "type": "boolean",
         "default": false,
         "title": "Force REM units",
-        "description": "When enabled, converts pixel values to REM units",
-        "category": "Value format"
+        "description": "When enabled, converts all pixel values to REM units",
+        "category": "Token value format"
     },
     {
         "key": "remBase",
         "type": "number",
         "default": 16,
         "title": "REM base value",
-        "description": "Base pixel value for REM conversion (default: 16)",
-        "category": "Value format",
+        "description": "Base pixel value for REM conversion",
+        "category": "Token value format",
         "dependsOn": {
             "forceRemUnit": true
         }
@@ -120,15 +120,7 @@
         "default": 3,
         "title": "Color precision",
         "description": "Maximum number of decimals in colors.",
-        "category": "Value format"
-    },
-    {
-        "key": "showDescriptions",
-        "type": "boolean",
-        "default": true,
-        "title": "Show token descriptions",
-        "description": "Show the token description as a code comment for every exported token.",
-        "category": "Token information"
+        "category": "Token value format"
     },
     {
         "key": "useReferences",
@@ -136,7 +128,7 @@
         "default": true,
         "title": "Use token references",
         "description": "When enabled, values will use references to other tokens where applicable.",
-        "category": "Value format"
+        "category": "Token value format"
     },
     {
         "key": "generateIndexFile",
@@ -161,12 +153,20 @@
         "key": "baseIndexFilePath",
         "type": "string",
         "default": "./",
-        "title": "Base index file path",
-        "description": "Index file will be written to this directory relative to export root as set by the exporter, pipeline configuration, or VSCode extension.",
+        "title": "Path to index file",
+        "description": "Index file will be written to this directory relative to export root.",
         "category": "Index file",
         "dependsOn": {
             "generateIndexFile": true
         }
+    },
+    {
+        "key": "showDescriptions",
+        "type": "boolean",
+        "default": true,
+        "title": "Show token descriptions",
+        "description": "Show the token description as a code comment for every exported token.",
+        "category": "Style files"
     },
     {
         "key": "generateEmptyFiles",
@@ -180,8 +180,8 @@
         "key": "baseStyleFilePath",
         "type": "string",
         "default": "./base",
-        "title": "Base style file path",
-        "description": "All files will be written to this directory relative to export root as set by the exporter, pipeline configuration, or VSCode extension.",
+        "title": "Path to base style files",
+        "description": "All files will be written to this directory relative to export root.",
         "category": "Style files"
     },
     {
@@ -263,19 +263,27 @@
         }
     },
     {
+        "key": "globalNamePrefix",
+        "type": "string",
+        "default": "",
+        "title": "Global name prefix",
+        "description": "When set, all token variable names will be prefixed with this value (e.g., '--prefix-color-primary')",
+        "category": "Token name format"
+    },
+    {
         "key": "customizeTokenPrefixes",
         "type": "boolean",
         "default": false,
-        "title": "Customize token prefixes",
+        "title": "Customize prefixes for types",
         "description": "When enabled, allows customization of the prefixes used for each token type.",
-        "category": "Name format"
+        "category": "Token name format"
     },
     {
         "key": "tokenPrefixes",
         "type": "object",
         "title": "Token prefixes",
         "description": "Each token of a specific type is prefixed with the following identifier.",
-        "category": "Name format",
+        "category": "Token name format",
         "dependsOn": {
             "customizeTokenPrefixes": true
         },
@@ -341,14 +349,6 @@
         }
     },
     {
-        "key": "cssSelector",
-        "type": "string",
-        "default": ":root",
-        "title": "CSS selector",
-        "description": "The CSS selector where the custom properties (variables) will be defined (e.g. :root, .theme-light, #app)",
-        "category": "CSS selectors"
-    },
-    {
         "key": "exportThemesAs",
         "type": "enum",
         "default": "separateFiles",
@@ -385,6 +385,14 @@
         "title": "Export base values",
         "description": "When enabled, base token values will be exported along with themes",
         "category": "Themes"
+    },
+    {
+        "key": "cssSelector",
+        "type": "string",
+        "default": ":root",
+        "title": "CSS selector",
+        "description": "The CSS selector where the custom properties (variables) will be defined (e.g. :root, .theme-light, #app)",
+        "category": "CSS selectors"
     },
     {
         "key": "themeSelector",

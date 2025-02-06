@@ -21,17 +21,17 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     forceRemUnit: exportConfiguration.forceRemUnit,
     remBase: exportConfiguration.remBase,
     tokenToVariableRef: (t) => {
-      return `var(--${tokenVariableName(t, tokenGroups)})`
+      return `var(--${addGlobalPrefix(tokenVariableName(t, tokenGroups))})`
     },
   })
   const indentString = " ".repeat(exportConfiguration.indent)
 
   if (exportConfiguration.showDescriptions && token.description) {
     // Generate token with comments
-    return `${indentString}/* ${token.description.trim()} */\n${indentString}--${name}: ${value};`
+    return `${indentString}/* ${token.description.trim()} */\n${indentString}--${addGlobalPrefix(name)}: ${value};`
   } else {
     // Generate tokens without comments
-    return `${indentString}--${name}: ${value};`
+    return `${indentString}--${addGlobalPrefix(name)}: ${value};`
   }
 }
 
@@ -39,4 +39,9 @@ function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string
   const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
   return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent, prefix)
+}
+
+function addGlobalPrefix(name: string): string {
+  const prefix = exportConfiguration.globalNamePrefix.trim()
+  return prefix ? `${prefix}-${name}` : name
 }
