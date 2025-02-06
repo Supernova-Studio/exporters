@@ -45,10 +45,9 @@ function addGlobalPrefix(name: string): string {
   if (!exportConfiguration.globalNamePrefix) {
     return name
   }
-  // Format the global prefix using the same NamingHelper
-  const formattedPrefix = NamingHelper.codeSafeVariableName(
-    exportConfiguration.globalNamePrefix.trim(),
+  // Format the global prefix and combine with name using the same NamingHelper
+  return NamingHelper.codeSafeVariableName(
+    `${exportConfiguration.globalNamePrefix.trim()} ${name}`,
     exportConfiguration.tokenNameStyle
   )
-  return `${formattedPrefix}-${name}`
 }
