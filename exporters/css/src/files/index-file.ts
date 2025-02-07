@@ -49,10 +49,16 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Only add newlines between base imports and theme imports if both exist
   const separator = imports && themeImports ? "\n\n" : ""
 
+  // Ensure indexFileName ends with .css
+  let fileName = exportConfiguration.indexFileName
+  if (!fileName.toLowerCase().endsWith('.css')) {
+    fileName += '.css'
+  }
+
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
     relativePath: exportConfiguration.baseIndexFilePath,
-    fileName: exportConfiguration.indexFileName,
+    fileName: fileName,
     content: imports + separator + themeImports,
   })
 }
