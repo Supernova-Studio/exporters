@@ -12,16 +12,12 @@
                 "description": "Example: --myVariableName"
             },
             "constantCase": {
-                "label": "Constant case",
+                "label": "Constant case", 
                 "description": "Example: --MY_VARIABLE_NAME"
             },
             "flatCase": {
                 "label": "Flat case",
                 "description": "Example: --myvariablename"
-            },
-            "trainCase": {
-                "label": "Train case",
-                "description": "Example: --My-Variable-Name"
             },
             "kebabCase": {
                 "label": "Kebab case",
@@ -34,6 +30,10 @@
             "snakeCase": {
                 "label": "Snake case",
                 "description": "Example: --my_variable_name"
+            },
+            "trainCase": {
+                "label": "Train case",
+                "description": "Example: --My-Variable-Name"
             }
         }
     },
@@ -46,19 +46,19 @@
         "category": "Token values",
         "options": {
             "smartHashHex": {
-                "label": "Smart HEX",
+                "label": "HEX (auto)",
                 "description": "Automatically choose between #RRGGBB and #RRGGBBAA"
             },
             "smartRgba": {
-                "label": "Smart RGB",
+                "label": "RGB (auto)",
                 "description": "Automatically choose between rgb() and rgba()"
             },
             "smartHsla": {
-                "label": "Smart HSL",
+                "label": "HSL (auto)",
                 "description": "Automatically choose between hsl() and hsla()"
             },
             "smartOklch": {
-                "label": "Smart OKLCH",
+                "label": "OKLCH (auto)",
                 "description": "Automatically choose between oklch() and oklch() with alpha"
             },
             "hashHex6": {
@@ -100,7 +100,7 @@
         "type": "boolean",
         "default": false,
         "title": "Force REM units",
-        "description": "When enabled, converts all pixel values to REM units",
+        "description": "Convert all pixel values to REM units.",
         "category": "Token values"
     },
     {
@@ -108,7 +108,7 @@
         "type": "number",
         "default": 16,
         "title": "REM base value",
-        "description": "Base pixel value for REM conversion",
+        "description": "Base pixel value for REM conversion.",
         "category": "Token values",
         "dependsOn": {
             "forceRemUnit": true
@@ -119,7 +119,7 @@
         "type": "boolean",
         "default": true,
         "title": "Use token references",
-        "description": "When enabled, values will use references to other tokens where applicable.",
+        "description": "Values will use references to other tokens (where applicable).",
         "category": "Token values"
     },
     {
@@ -134,21 +134,21 @@
         "key": "exportThemesAs",
         "type": "enum",
         "default": "separateFiles",
-        "title": "Theme export style",
-        "description": "Controls how themes are exported in the CSS files",
+        "title": "Theme export format",
+        "description": "Control how themes are exported in the CSS files.",
         "category": "Themes",
         "options": {
+            "separateFiles": {
+                "label": "Separate files per theme",
+                "description": "Generate a separate CSS file for each selected theme"
+            },
             "applyDirectly": {
                 "label": "Apply themes directly",
                 "description": "Apply selected themes directly to token values"
             },
-            "separateFiles": {
-                "label": "Separate file per theme",
-                "description": "Generate a separate CSS file for each selected theme"
-            },
             "mergedTheme": {
                 "label": "Merged theme file",
-                "description": "Generate one file with all themes deeply merged together"
+                "description": "Generate theme variables with all themes applied together"
             }
         }
     },
@@ -157,7 +157,7 @@
         "type": "boolean",
         "default": false,
         "title": "Export only themed tokens",
-        "description": "When enabled, themed files will only include tokens that have different values from the base theme",
+        "description": "Theme files will only include tokens that have different values from the base value.",
         "category": "Themes"
     },
     {
@@ -165,7 +165,7 @@
         "type": "boolean",
         "default": true,
         "title": "Export base values",
-        "description": "When enabled, base token values will be exported along with themes",
+        "description": "Base token values will be exported along with themes.",
         "category": "Themes"
     },
     {
@@ -173,7 +173,7 @@
         "type": "boolean",
         "default": true,
         "title": "Generate index file",
-        "description": "When enabled, a file will be generated that imports all style files.",
+        "description": "Generate a file with imports for all base and theme style files.",
         "category": "Index file"
     },
     {
@@ -199,19 +199,11 @@
         }
     },
     {
-        "key": "showDescriptions",
-        "type": "boolean",
-        "default": true,
-        "title": "Show token descriptions",
-        "description": "Show the token description as a code comment for every exported token.",
-        "category": "Style files"
-    },
-    {
         "key": "generateEmptyFiles",
         "type": "boolean",
         "default": false,
         "title": "Generate empty style files",
-        "description": "When enabled, empty style files will be generated instead of omitted.",
+        "description": "Generate empty style files instead of omitting them.",
         "category": "Style files"
     },
     {
@@ -227,7 +219,7 @@
         "type": "boolean",
         "default": false,
         "title": "Customize style file names",
-        "description": "When enabled, allows customization of the file names for each token type.",
+        "description": "Customize the file names for each token type.",
         "category": "Style files"
     },
     {
@@ -304,16 +296,16 @@
         "key": "globalNamePrefix",
         "type": "string",
         "default": "",
-        "title": "Global name prefix",
-        "description": "When set, all token variable names will be prefixed with this value (e.g., '--ds-color-primary')",
+        "title": "Global prefix",
+        "description": "Prefix all variable names (e.g., '--ds-color-primary').",
         "category": "Token names"
     },
     {
         "key": "customizeTokenPrefixes",
         "type": "boolean",
         "default": false,
-        "title": "Customize prefixes for types",
-        "description": "When enabled, allows customization of the prefixes used for each token type.",
+        "title": "Customize type prefixes",
+        "description": "Customize the prefixes for each design token type.",
         "category": "Token names"
     },
     {
@@ -326,31 +318,31 @@
             "customizeTokenPrefixes": true
         },
         "default": {
+            "Blur": "blur",
+            "Border": "border",
+            "BorderRadius": "borderRadius",
+            "BorderWidth": "borderWidth",
             "Color": "color",
-            "Typography": "typography", 
             "Dimension": "dimension",
+            "Duration": "duration",
+            "FontFamily": "fontFamily",
+            "FontSize": "fontSize",
+            "FontWeight": "fontWeight",
+            "Gradient": "gradient",
+            "LetterSpacing": "letterSpacing",
+            "LineHeight": "lineHeight",
+            "Opacity": "opacity",
+            "ParagraphSpacing": "paragraphSpacing",
+            "ProductCopy": "productCopy",
+            "Shadow": "shadow",
             "Size": "size",
             "Space": "space",
-            "Opacity": "opacity",
-            "FontSize": "fontSize",
-            "LineHeight": "lineHeight",
-            "LetterSpacing": "letterSpacing",
-            "ParagraphSpacing": "paragraphSpacing",
-            "BorderWidth": "borderWidth",
-            "BorderRadius": "borderRadius",
-            "Duration": "duration",
-            "ZIndex": "zIndex",
-            "Shadow": "shadow",
-            "Border": "border",
-            "Gradient": "gradient",
             "String": "string",
-            "ProductCopy": "productCopy",
-            "FontFamily": "fontFamily",
-            "FontWeight": "fontWeight",
             "TextCase": "textCase",
             "TextDecoration": "textDecoration",
+            "Typography": "typography",
             "Visibility": "visibility",
-            "Blur": "blur"
+            "ZIndex": "zIndex"
         },
         "allowedKeys": {
             "options": [
@@ -391,7 +383,7 @@
         "type": "string",
         "default": ":root",
         "title": "CSS selector",
-        "description": "The CSS selector where the custom properties (variables) will be defined (e.g. :root, .theme-light, #app)",
+        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
         "category": "CSS selectors"
     },
     {
@@ -399,15 +391,23 @@
         "type": "string",
         "default": ".theme-{theme}",
         "title": "CSS selector for themes",
-        "description": "The CSS selector used in theme files. Use {theme} placeholder which will be replaced with the theme name (e.g. .theme-{theme}, [data-theme='{theme}'])",
+        "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
         "category": "CSS selectors"
+    },
+    {
+        "key": "showDescriptions",
+        "type": "boolean",
+        "default": true,
+        "title": "Show token descriptions",
+        "description": "Show the token description as a code comment for every exported token.",
+        "category": "Other"
     },
     {
         "key": "showGeneratedFileDisclaimer",
         "type": "boolean",
         "default": true,
         "title": "Show file disclaimer",
-        "description": "When enabled, a message explaining that the file was automatically generated will appear in all style files.",
+        "description": "A message explaining that the file was automatically generated will appear in all style files.",
         "category": "Other"
     },
     {
@@ -415,7 +415,7 @@
         "type": "string",
         "default": "This file was generated automatically and should not be changed manually.",
         "title": "Disclaimer message",
-        "description": "When enabled, a message explaining that the file was automatically generated will appear in all style files.",
+        "description": "A message explaining that the file was automatically generated will appear in all style files.",
         "category": "Other",
         "dependsOn": {
             "showGeneratedFileDisclaimer": true
