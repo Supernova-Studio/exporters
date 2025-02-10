@@ -1,4 +1,5 @@
 import { Token, TokenTheme, TokenType } from "@supernovaio/sdk-exporters";
+import { StringCase } from "../enums/StringCase";
 export declare class ThemeHelper {
     /**
      * Checks if token type has any themed tokens in given theme
@@ -18,9 +19,10 @@ export declare class ThemeHelper {
     /**
      * Gets theme identifier for file organization
      * @param theme - Theme object or string
-     * @returns Normalized theme identifier in kebab-case
+     * @param stringCase - Case style to apply to the identifier (defaults to kebabCase)
+     * @returns Normalized theme identifier in specified case
      */
-    static getThemeIdentifier(theme: TokenTheme | string): string;
+    static getThemeIdentifier(theme: TokenTheme | string, stringCase?: StringCase): string;
     /**
      * Gets display name for theme
      * @param theme - Theme object or string

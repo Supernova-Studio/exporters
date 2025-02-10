@@ -30,12 +30,13 @@ export class ThemeHelper {
   /**
    * Gets theme identifier for file organization
    * @param theme - Theme object or string
-   * @returns Normalized theme identifier in kebab-case
+   * @param stringCase - Case style to apply to the identifier (defaults to kebabCase)
+   * @returns Normalized theme identifier in specified case
    */
-  static getThemeIdentifier(theme: TokenTheme | string): string {
+  static getThemeIdentifier(theme: TokenTheme | string, stringCase: StringCase = StringCase.kebabCase): string {
     if (typeof theme === 'string') return theme
     const identifier = theme.codeName || theme.name
-    return NamingHelper.codeSafeVariableName(identifier, StringCase.kebabCase)
+    return NamingHelper.codeSafeVariableName(identifier, stringCase)
   }
 
   /**

@@ -29,13 +29,14 @@ class ThemeHelper {
     /**
      * Gets theme identifier for file organization
      * @param theme - Theme object or string
-     * @returns Normalized theme identifier in kebab-case
+     * @param stringCase - Case style to apply to the identifier (defaults to kebabCase)
+     * @returns Normalized theme identifier in specified case
      */
-    static getThemeIdentifier(theme) {
+    static getThemeIdentifier(theme, stringCase = StringCase_1.StringCase.kebabCase) {
         if (typeof theme === 'string')
             return theme;
         const identifier = theme.codeName || theme.name;
-        return NamingHelper_1.NamingHelper.codeSafeVariableName(identifier, StringCase_1.StringCase.kebabCase);
+        return NamingHelper_1.NamingHelper.codeSafeVariableName(identifier, stringCase);
     }
     /**
      * Gets display name for theme

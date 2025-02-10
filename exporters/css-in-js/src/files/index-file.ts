@@ -1,4 +1,4 @@
-import { FileHelper, ThemeHelper } from "@supernovaio/export-utils"
+import { FileHelper, StringCase, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
@@ -47,7 +47,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
     
     // Theme tokens
     themes.forEach(theme => {
-      const themeId = ThemeHelper.getThemeIdentifier(theme)
+      const themeId = ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
       imports.push(`export { default as ${themeId} } from "./${themeId}";`)
     })
 
@@ -70,7 +70,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
 
     // Generate imports for themed tokens
     themes.forEach(theme => {
-      const themeId = ThemeHelper.getThemeIdentifier(theme)
+      const themeId = ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
       Object.values(TokenType)
         .filter(type => usedTokenTypes.has(type))
         .forEach(type => {

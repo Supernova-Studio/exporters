@@ -4,7 +4,7 @@ import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 import { typesOutputFile } from "./files/types-file"
 import { folderIndexOutputFile } from "./files/folder-index-file"
-import { ThemeHelper } from "@supernovaio/export-utils"
+import { StringCase, ThemeHelper } from "@supernovaio/export-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -72,7 +72,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       case ThemeExportStyle.SeparateFiles:
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-          const themePath = ThemeHelper.getThemeIdentifier(theme)
+          const themePath = ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
           const files = Object.values(TokenType)
             .map((type) => styleOutputFile(
               type, 
