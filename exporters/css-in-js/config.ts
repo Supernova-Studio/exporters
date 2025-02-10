@@ -29,23 +29,19 @@ export type ExporterConfiguration = {
   colorFormat: ColorFormat
   /** Max number of decimals in colors */
   colorPrecision: number
-  /** Number of spaces used to indent every css variables */
+  /** Number of spaces used for indentation in generated files */
   indent: number
-  /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
+  /** When set, will prefix each token name with this identifier */
   tokenPrefixes: Record<TokenType, string>
-  /** Name of each file that will be generated. Tokens are grouped by the type and will land in each of those files */
+  /** Name of each file that will be generated. Tokens are grouped by type */
   styleFileNames: Record<TokenType, string>
   /** Name of the index file that will be generated */
   indexFileName: string
-  /** All files will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
+  /** All files will be written to this directory (relative to export root) */
   baseStyleFilePath: string
-  /** Index file will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
+  /** Index file will be written to this directory (relative to export root) */
   baseIndexFilePath: string
-  /** CSS selector where variables will be defined */
-  cssSelector: string
-  /** CSS selector pattern for themes, {theme} will be replaced with theme name */
-  themeSelector: string
-  /** Controls how themes are exported in the CSS files */
+  /** Controls how themes are exported in the generated files */
   exportThemesAs: ThemeExportStyle
   /** When enabled, themed files will only include tokens that have different values from the base theme */
   exportOnlyThemedTokens: boolean

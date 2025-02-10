@@ -125,14 +125,14 @@
     {
         "key": "exportThemesAs",
         "type": "enum",
-        "default": "mergedTheme",
+        "default": "separateFiles",
         "title": "Theme export format",
-        "description": "Control how themes are exported in the CSS files.",
+        "description": "Control how themes are exported in the generated files.",
         "category": "Themes",
         "options": {
             "separateFiles": {
                 "label": "Separate files per theme",
-                "description": "Generate a separate CSS file for each selected theme"
+                "description": "Generate a separate file for each selected theme"
             },
             "applyDirectly": {
                 "label": "Apply themes directly",
@@ -140,7 +140,7 @@
             },
             "mergedTheme": {
                 "label": "Merged theme file",
-                "description": "Generate theme variables with all themes applied together"
+                "description": "Generate theme object with all themes applied together"
             }
         }
     },
@@ -171,7 +171,7 @@
     {
         "key": "indexFileName",
         "type": "string",
-        "default": "index.css",
+        "default": "index.ts",
         "title": "Index filename",
         "description": "The name of the index file that will be generated.",
         "category": "Index file",
@@ -224,31 +224,31 @@
             "customizeStyleFileNames": true
         },
         "default": {
-            "Color": "color.css",
-            "Typography": "typography.css",
-            "Dimension": "dimension.css",
-            "Size": "size.css",
-            "Space": "space.css",
-            "Opacity": "opacity.css",
-            "FontSize": "font-size.css",
-            "LineHeight": "line-height.css",
-            "LetterSpacing": "letter-spacing.css",
-            "ParagraphSpacing": "paragraph-spacing.css",
-            "BorderWidth": "border-width.css",
-            "BorderRadius": "border-radius.css",
-            "Duration": "duration.css",
-            "ZIndex": "z-index.css",
-            "Shadow": "shadow.css",
-            "Border": "border.css",
-            "Gradient": "gradient.css",
-            "String": "string.css",
-            "ProductCopy": "product-copy.css",
-            "FontFamily": "font-family.css",
-            "FontWeight": "font-weight.css",
-            "TextCase": "text-case.css",
-            "TextDecoration": "text-decoration.css",
-            "Visibility": "visibility.css",
-            "Blur": "blur.css"
+            "Color": "color.ts",
+            "Typography": "typography.ts",
+            "Dimension": "dimension.ts",
+            "Size": "size.ts",
+            "Space": "space.ts",
+            "Opacity": "opacity.ts",
+            "FontSize": "font-size.ts",
+            "LineHeight": "line-height.ts",
+            "LetterSpacing": "letter-spacing.ts",
+            "ParagraphSpacing": "paragraph-spacing.ts",
+            "BorderWidth": "border-width.ts",
+            "BorderRadius": "border-radius.ts",
+            "Duration": "duration.ts",
+            "ZIndex": "z-index.ts",
+            "Shadow": "shadow.ts",
+            "Border": "border.ts",
+            "Gradient": "gradient.ts",
+            "String": "string.ts",
+            "ProductCopy": "product-copy.ts",
+            "FontFamily": "font-family.ts",
+            "FontWeight": "font-weight.ts",
+            "TextCase": "text-case.ts",
+            "TextDecoration": "text-decoration.ts",
+            "Visibility": "visibility.ts",
+            "Blur": "blur.ts"
         },
         "allowedKeys": {
             "options": [
@@ -289,7 +289,7 @@
         "type": "string",
         "default": "",
         "title": "Global prefix",
-        "description": "Prefix all variable names (e.g., '--ds-color-primary').",
+        "description": "Prefix all token names (e.g., 'ds_color_primary').",
         "category": "Token names"
     },
     {
@@ -371,22 +371,6 @@
         }
     },
     {
-        "key": "cssSelector",
-        "type": "string",
-        "default": ":root",
-        "title": "CSS selector",
-        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
-        "category": "CSS selectors"
-    },
-    {
-        "key": "themeSelector",
-        "type": "string",
-        "default": ".theme-{theme}",
-        "title": "CSS selector for themes",
-        "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
-        "category": "CSS selectors"
-    },
-    {
         "key": "showDescriptions",
         "type": "boolean",
         "default": true,
@@ -418,7 +402,7 @@
         "type": "number",
         "default": 2,
         "title": "Indentation",
-        "description": "Number of spaces used to indent CSS variables.",
+        "description": "Number of spaces used for indentation in generated files.",
         "category": "Other"
     }
 ]
