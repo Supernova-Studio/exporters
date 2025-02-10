@@ -1,6 +1,7 @@
-import { FileHelper } from "@supernovaio/export-utils"
+import { FileHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { tokenObjectKeyName } from "../content/token"
+import { exportConfiguration } from ".."
 
 /**
  * Generates TypeScript type definitions (types.d.ts) for all tokens.
@@ -16,6 +17,8 @@ import { tokenObjectKeyName } from "../content/token"
  * @returns OutputTextFile with the generated type definitions
  */
 export function typesOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGroup>): OutputTextFile {
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+  
   // Group tokens by type
   const tokensByType = new Map<TokenType, Token[]>()
   tokens.forEach(token => {
@@ -29,9 +32,9 @@ export function typesOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     const properties = typeTokens.map(token => {
       const name = tokenObjectKeyName(token, tokenGroups)
       if (token.description) {
-        return `  /** ${token.description.trim()} */\n  ${name}: string;`
+        return `${indentString}/** ${token.description.trim()} */\n${indentString}${name}: string;`
       }
-      return `  ${name}: string;`
+      return `${indentString}${name}: string;`
     }).join('\n')
 
     return `export interface ${type}Tokens {\n${properties}\n}`
@@ -41,9 +44,9 @@ export function typesOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
   const allProperties = tokens.map(token => {
     const name = tokenObjectKeyName(token, tokenGroups)
     if (token.description) {
-      return `  /** ${token.description.trim()} */\n  ${name}: string;`
+      return `${indentString}/** ${token.description.trim()} */\n${indentString}${name}: string;`
     }
-    return `  ${name}: string;`
+    return `${indentString}${name}: string;`
   }).join('\n')
 
   const content = `// This file was generated automatically and should not be changed manually.
