@@ -1,8 +1,7 @@
-import { FileHelper } from "@supernovaio/export-utils"
+import { FileHelper, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
-import { getThemeIdentifier } from "../utils/theme-utils"
 
 /**
  * Generates the root index.ts file that exports all themes and base tokens.
@@ -48,7 +47,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
     
     // Theme tokens
     themes.forEach(theme => {
-      const themeId = getThemeIdentifier(theme)
+      const themeId = ThemeHelper.getThemeIdentifier(theme)
       imports.push(`export { default as ${themeId} } from "./${themeId}";`)
     })
 
@@ -71,7 +70,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
 
     // Generate imports for themed tokens
     themes.forEach(theme => {
-      const themeId = getThemeIdentifier(theme)
+      const themeId = ThemeHelper.getThemeIdentifier(theme)
       Object.values(TokenType)
         .filter(type => usedTokenTypes.has(type))
         .forEach(type => {

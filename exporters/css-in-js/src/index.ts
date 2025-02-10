@@ -3,15 +3,8 @@ import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 import { typesOutputFile } from "./files/types-file"
-import { ThemeHelper } from "@supernovaio/export-utils"
 import { folderIndexOutputFile } from "./files/folder-index-file"
-import { getThemeIdentifier } from "./utils/theme-utils"
-
-// For now, let's move the theme helper function directly into the file until utils is updated
-function getThemePath(theme: TokenTheme | string): string {
-  if (typeof theme === 'string') return theme
-  return theme.codeName?.toLowerCase() || theme.name.toLowerCase()
-}
+import { ThemeHelper } from "@supernovaio/export-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -79,7 +72,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       case ThemeExportStyle.SeparateFiles:
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-          const themePath = getThemeIdentifier(theme)
+          const themePath = ThemeHelper.getThemeIdentifier(theme)
           const files = Object.values(TokenType)
             .map((type) => styleOutputFile(
               type, 

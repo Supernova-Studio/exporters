@@ -1,9 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThemeHelper = void 0;
+const NamingHelper_1 = require("./NamingHelper");
+const StringCase_1 = require("../enums/StringCase");
 class ThemeHelper {
     /**
-     * Checks if a token type has any themed tokens in a given theme
+     * Checks if token type has any themed tokens in given theme
+     * @param tokens - All tokens
+     * @param type - Token type to check
+     * @param theme - Theme to check against
+     * @returns True if the type has any themed tokens
      */
     static hasThemedTokens(tokens, type, theme) {
         const tokensOfType = tokens.filter((token) => token.tokenType === type);
@@ -12,22 +18,35 @@ class ThemeHelper {
     }
     /**
      * Filters tokens to only include those that are themed
+     * @param tokens - Tokens to filter
+     * @param theme - Theme to check against
+     * @returns Filtered array of tokens that have theme overrides
      */
     static filterThemedTokens(tokens, theme) {
         const overriddenTokenIds = new Set(theme.overriddenTokens.map(t => t.id));
         return tokens.filter(token => overriddenTokenIds.has(token.id));
     }
     /**
-     * Gets theme path/name for file organization
+     * Gets theme identifier for file organization
+     * @param theme - Theme object or string
+     * @returns Normalized theme identifier in kebab-case
      */
-    static getThemePath(theme) {
-        return typeof theme === 'string' ? theme : theme.name.toLowerCase();
+    static getThemeIdentifier(theme) {
+        if (typeof theme === 'string')
+            return theme;
+        const identifier = theme.codeName || theme.name;
+        return NamingHelper_1.NamingHelper.codeSafeVariableName(identifier, StringCase_1.StringCase.kebabCase);
     }
     /**
-     * Gets display name for a theme
+     * Gets display name for theme
+     * @param theme - Theme object or string
+     * @returns Theme display name
      */
     static getThemeName(theme) {
-        return typeof theme === 'string' ? theme : theme.name;
+        if (typeof theme === 'string')
+            return theme;
+        const identifier = theme.codeName || theme.name;
+        return NamingHelper_1.NamingHelper.codeSafeVariableName(identifier, StringCase_1.StringCase.capitalCase);
     }
 }
 exports.ThemeHelper = ThemeHelper;

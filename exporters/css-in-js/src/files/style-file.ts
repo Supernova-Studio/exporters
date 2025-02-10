@@ -5,7 +5,6 @@ import { tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
-import { getThemeIdentifier } from "../utils/theme-utils"
 
 // For now, let's move the theme helper functions directly into the file until utils is updated
 function filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Token> {

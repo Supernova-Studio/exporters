@@ -1,8 +1,14 @@
 import { Token, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
+import { NamingHelper } from "./NamingHelper"
+import { StringCase } from "../enums/StringCase"
 
 export class ThemeHelper {
   /**
-   * Checks if a token type has any themed tokens in a given theme
+   * Checks if token type has any themed tokens in given theme
+   * @param tokens - All tokens
+   * @param type - Token type to check
+   * @param theme - Theme to check against
+   * @returns True if the type has any themed tokens
    */
   static hasThemedTokens(tokens: Array<Token>, type: TokenType, theme: TokenTheme): boolean {
     const tokensOfType = tokens.filter((token) => token.tokenType === type)
@@ -12,6 +18,9 @@ export class ThemeHelper {
 
   /**
    * Filters tokens to only include those that are themed
+   * @param tokens - Tokens to filter
+   * @param theme - Theme to check against
+   * @returns Filtered array of tokens that have theme overrides
    */
   static filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Token> {
     const overriddenTokenIds = new Set(theme.overriddenTokens.map(t => t.id))
@@ -19,16 +28,24 @@ export class ThemeHelper {
   }
 
   /**
-   * Gets theme path/name for file organization
+   * Gets theme identifier for file organization
+   * @param theme - Theme object or string
+   * @returns Normalized theme identifier in kebab-case
    */
-  static getThemePath(theme: TokenTheme | string): string {
-    return typeof theme === 'string' ? theme : theme.name.toLowerCase()
+  static getThemeIdentifier(theme: TokenTheme | string): string {
+    if (typeof theme === 'string') return theme
+    const identifier = theme.codeName || theme.name
+    return NamingHelper.codeSafeVariableName(identifier, StringCase.kebabCase)
   }
 
   /**
-   * Gets display name for a theme
+   * Gets display name for theme
+   * @param theme - Theme object or string
+   * @returns Theme display name
    */
   static getThemeName(theme: TokenTheme | string): string {
-    return typeof theme === 'string' ? theme : theme.name
+    if (typeof theme === 'string') return theme
+    const identifier = theme.codeName || theme.name
+    return NamingHelper.codeSafeVariableName(identifier, StringCase.capitalCase)
   }
 } 

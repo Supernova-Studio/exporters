@@ -2,6 +2,7 @@ import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, Token
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
+import { ThemeHelper } from "@supernovaio/export-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -93,7 +94,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
               type, 
               themedTokens, 
               tokenGroups, 
-              theme.name.toLowerCase(), 
+              ThemeHelper.getThemeIdentifier(theme),
               theme  // Pass the theme object for override filtering
             ))
         })

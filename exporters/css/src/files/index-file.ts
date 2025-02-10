@@ -1,7 +1,6 @@
-import { FileHelper } from "@supernovaio/export-utils"
+import { FileHelper, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { hasThemedTokens } from "../utils/theme-utils"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 
 export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
@@ -29,12 +28,12 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
 
   // Add theme imports if any
   const themeImports = themes.map((theme) => {
-    const themePath = typeof theme === 'string' ? theme : theme.name.toLowerCase()
-    const themeName = typeof theme === 'string' ? theme : theme.name
+    const themePath = ThemeHelper.getThemeIdentifier(theme)
+    const themeName = ThemeHelper.getThemeName(theme)
     
     // If exportOnlyThemedTokens is enabled, only include types that have themed tokens
     const themeTypes = exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string'
-      ? types.filter(type => hasThemedTokens(tokens, type, theme))
+      ? types.filter(type => ThemeHelper.hasThemedTokens(tokens, type, theme))
       : types
 
     return themeTypes

@@ -1,4 +1,4 @@
-import { FileHelper } from "@supernovaio/export-utils"
+import { FileHelper, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
@@ -17,10 +17,10 @@ import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
  * 3. Exports this object as the default export
  * 
  * @param tokens - Array of all tokens for this theme/base
- * @param folderPath - Path where the index file should be generated
+ * @param themePath - Path where the index file should be generated
  * @returns OutputTextFile with the generated index content
  */
-export function folderIndexOutputFile(tokens: Array<Token>, folderPath: string): OutputTextFile {
+export function folderIndexOutputFile(tokens: Array<Token>, themePath: string): OutputTextFile {
   // Group all tokens by their type (Color, Typography, etc.) for efficient processing
   // This creates a map where each type points to an array of its tokens
   const tokensByType = tokens.reduce((acc, token) => {
@@ -65,7 +65,7 @@ export function folderIndexOutputFile(tokens: Array<Token>, folderPath: string):
   }
 
   return FileHelper.createTextFile({
-    relativePath: folderPath,
+    relativePath: themePath,
     fileName: 'index.ts',
     content: content
   })

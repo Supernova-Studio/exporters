@@ -105,3 +105,17 @@ Here is a list of all the configuration options this exporter provides:
 - **showGeneratedFileDisclaimer:** Show a disclaimer indicating the file is auto-generated.
 - **disclaimer:** Set the text of the auto-generation disclaimer.
 - **indent:** Number of spaces used for indentation.
+
+## Possible future improvements
+
+Here are some planned improvements for future versions:
+
+- **CSS Variables Export**: Generate CSS custom properties alongside JS tokens for hybrid approaches and runtime theme switching
+
+- **Object Token Format**: Export tokens in a structured object format instead of flat values:
+  ```typescript
+  export const tokens = {
+    colors: { primary: '#...', secondary: '#...' },
+    spacing: { small: '4px', large: '8px' }
+  }
+  ```
