@@ -1,7 +1,7 @@
 import { FileHelper, CSSHelper } from "@supernovaio/export-utils"
-import { AnyToken, OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import {  OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken, tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
+import { tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
@@ -67,22 +67,19 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
       forceRemUnit: exportConfiguration.forceRemUnit,
       remBase: exportConfiguration.remBase,
       tokenToVariableRef: (t) => {
+        const tokenRef = t.tokenType !== type
+          ? `${t.tokenType}Tokens.${tokenObjectKeyName(t, tokenGroups, false)}`
+          : tokenObjectKeyName(t, tokenGroups, false)
+
         if (t.tokenType !== type) {
-          const importType = t.tokenType
-          importsNeeded.add(importType)
-          return `\${${importType}Tokens.${tokenObjectKeyName(t, tokenGroups, false)}}`
+          importsNeeded.add(t.tokenType)
         }
-        return `\${${tokenObjectKeyName(t, tokenGroups, false)}}`
+
+        return `\${${tokenRef}}`
       },
     })
 
-    // For composite values that contain references, wrap the entire value in template literals
-    const hasReferences = value.includes('${')
-    const formattedValue = hasReferences
-      ? `\`${value}\``
-      : formatTokenValue(value)
-
-    return `const ${name} = ${formattedValue};`
+    return `const ${name} = ${formatTokenValue(value)};`
   }).join('\n')
 
   // Generate imports if needed
