@@ -9,10 +9,12 @@ const NamingHelper_1 = require("./NamingHelper");
  */
 class TokenNameTracker {
     constructor() {
-        /** Maps token IDs to their generated unique names and values */
-        this.tokenNameMap = new Map(); // token.id -> { name, value }
-        /** Maps generated names back to token IDs and values to check for naming conflicts */
-        this.nameToTokenMap = new Map(); // generated name -> { id, value }
+        /** Maps token IDs to their generated unique names */
+        this.tokenNameMap = new Map(); // token.id -> generated name
+        /** Maps generated names back to token IDs to check for naming conflicts */
+        this.nameToTokenMap = new Map(); // generated name -> token.id
+        /** Maps hierarchy level + name to token IDs */
+        this.hierarchyNameMap = new Map(); // "path/name" -> Set of token IDs
     }
     /**
      * Clears all stored token name mappings, effectively resetting the tracker state.
@@ -20,6 +22,40 @@ class TokenNameTracker {
     reset() {
         this.tokenNameMap.clear();
         this.nameToTokenMap.clear();
+        this.hierarchyNameMap.clear();
+    }
+    /**
+     * Gets a clean, unique name for a token without any group prefixes.
+     * Used for hierarchical structures where the path handles grouping.
+     */
+    getSimpleTokenName(token, format, forExport = false, path = [] // Add path parameter to check hierarchy level
+    ) {
+        // Create a unique key for this hierarchy level
+        const hierarchyKey = path.join('/');
+        const hierarchyFullKey = `${hierarchyKey}/${token.name}`;
+        // If we're looking up a name for reference and it was already generated, use that
+        if (!forExport && this.tokenNameMap.has(token.id)) {
+            return this.tokenNameMap.get(token.id);
+        }
+        // Get the base name without any prefixes
+        let name = NamingHelper_1.NamingHelper.codeSafeVariableName(token.name, format);
+        // Get or create the set of token IDs for this hierarchy level and name
+        if (!this.hierarchyNameMap.has(hierarchyFullKey)) {
+            this.hierarchyNameMap.set(hierarchyFullKey, new Set());
+        }
+        const tokensAtLevel = this.hierarchyNameMap.get(hierarchyFullKey);
+        // Only add suffix if there's another token with the same name at the same level
+        if (tokensAtLevel.size > 0 && !tokensAtLevel.has(token.id)) {
+            name = `${name}_${tokensAtLevel.size}`;
+        }
+        // Track the token at this hierarchy level
+        tokensAtLevel.add(token.id);
+        // Track the name if not for export
+        if (!forExport) {
+            this.tokenNameMap.set(token.id, name);
+            this.nameToTokenMap.set(name, token.id);
+        }
+        return name;
     }
     /**
      * Generates or retrieves a unique, code-safe name for a given token.
@@ -34,33 +70,20 @@ class TokenNameTracker {
     getTokenName(token, tokenGroups, format, prefix, forExport = false) {
         // If we're looking up a name for reference and it was already generated, use that
         if (!forExport && this.tokenNameMap.has(token.id)) {
-            return this.tokenNameMap.get(token.id).name;
+            return this.tokenNameMap.get(token.id);
         }
         const parent = tokenGroups.find((group) => group.id === token.parentGroupId);
-        const tokenValue = token.value;
         // Get the base name
         let name = NamingHelper_1.NamingHelper.codeSafeVariableNameForToken(token, format, parent, prefix);
-        // Check if name exists but belongs to a token with the same value
-        if (this.nameToTokenMap.has(name)) {
-            const existing = this.nameToTokenMap.get(name);
-            // If tokens have the same value, reuse the name
-            if (tokenValue === existing.value) {
-                if (!forExport) {
-                    this.tokenNameMap.set(token.id, { name, value: tokenValue });
-                    // No need to update nameToTokenMap as we're reusing the existing name
-                }
-                return name;
-            }
-        }
         let counter = 1;
-        // If name is taken by a different token with different value, add a suffix
-        while (this.nameToTokenMap.has(name) && this.nameToTokenMap.get(name).id !== token.id) {
-            name = `${name}_duplicate_${counter++}`;
+        // If name is taken by a different token, add a suffix
+        while (this.nameToTokenMap.has(name) && this.nameToTokenMap.get(name) !== token.id) {
+            name = `${name}_copy_${counter++}`;
         }
         // Track the name if not for export
         if (!forExport) {
-            this.tokenNameMap.set(token.id, { name, value: tokenValue });
-            this.nameToTokenMap.set(name, { id: token.id, value: tokenValue });
+            this.tokenNameMap.set(token.id, name);
+            this.nameToTokenMap.set(name, token.id);
         }
         return name;
     }

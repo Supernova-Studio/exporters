@@ -6,14 +6,21 @@ import { StringCase } from "../enums/StringCase";
  * a unique, code-safe name that can be used in generated code.
  */
 export declare class TokenNameTracker {
-    /** Maps token IDs to their generated unique names and values */
+    /** Maps token IDs to their generated unique names */
     private tokenNameMap;
-    /** Maps generated names back to token IDs and values to check for naming conflicts */
+    /** Maps generated names back to token IDs to check for naming conflicts */
     private nameToTokenMap;
+    /** Maps hierarchy level + name to token IDs */
+    private hierarchyNameMap;
     /**
      * Clears all stored token name mappings, effectively resetting the tracker state.
      */
     reset(): void;
+    /**
+     * Gets a clean, unique name for a token without any group prefixes.
+     * Used for hierarchical structures where the path handles grouping.
+     */
+    getSimpleTokenName(token: Token, format: StringCase, forExport?: boolean, path?: string[]): string;
     /**
      * Generates or retrieves a unique, code-safe name for a given token.
      *
