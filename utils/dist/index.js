@@ -24,3 +24,4 @@ __exportStar(require("./helpers/FileNameHelper"), exports);
 __exportStar(require("./helpers/GeneralHelper"), exports);
 __exportStar(require("./enums/StringCase"), exports);
 __exportStar(require("./enums/ColorFormat"), exports);
+__exportStar(require("./helpers/TokenNameTracker"), exports);
