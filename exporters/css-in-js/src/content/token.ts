@@ -2,6 +2,7 @@ import { NamingHelper, CSSHelper, StringCase } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
+import { formatTokenValue } from "../utils/value-formatter"
 
 // Maps to track token name generation to ensure uniqueness and consistency:
 // - tokenNameMap: Caches generated names to ensure the same token always gets the same name
@@ -64,10 +65,7 @@ export function resetTokenNameTracking(): void {
 }
 
 export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
-  // Generate a consistent, unique name for this token
   const name = tokenObjectKeyName(token, tokenGroups)
-
-  // Convert the token's value to a CSS-compatible format, handling references and formatting
   const value = CSSHelper.tokenToCSS(token, mappedTokens, {
     allowReferences: exportConfiguration.useReferences,
     decimals: exportConfiguration.colorPrecision,
@@ -75,21 +73,13 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     forceRemUnit: exportConfiguration.forceRemUnit,
     remBase: exportConfiguration.remBase,
     tokenToVariableRef: (t) => {
-      // Convert referenced tokens to their variable names
       return tokenObjectKeyName(t, tokenGroups)
     },
   })
 
-  // Format the value based on its type:
-  // - CSS values (with units or color hex) are wrapped in quotes
-  // - References to other tokens are left as direct object references
-  const formattedValue = value.includes('px') || value.includes('rem') || value.includes('%') || value.includes('#')
-    ? `"${value}"` 
-    : value
-
   const indentString = " ".repeat(exportConfiguration.indent)
+  const formattedValue = formatTokenValue(value)
 
-  // Include the token's description as a comment if enabled and available
   if (exportConfiguration.showDescriptions && token.description) {
     return `${indentString}// ${token.description.trim()}\n${indentString}${name}: ${formattedValue},`
   } else {

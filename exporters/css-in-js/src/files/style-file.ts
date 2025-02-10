@@ -4,6 +4,7 @@ import { exportConfiguration } from ".."
 import { convertedToken, tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
+import { formatTokenValue } from "../utils/value-formatter"
 
 // For now, let's move the theme helper functions directly into the file until utils is updated
 function filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Token> {
@@ -59,41 +60,28 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   
   const constDeclarations = sortedForDeclarations.map(token => {
     const name = tokenObjectKeyName(token, tokenGroups, false)
-    
-    // Check if this token directly references another token
-    const isDirectReference = !!(token as any)?.value?.referencedTokenId
-    
-    if (isDirectReference) {
-        // For direct references, just use the referenced token name
-        const referencedToken = mappedTokens.get((token as any).value.referencedTokenId)!
-        if (referencedToken.tokenType !== type) {
-            // Cross-type reference
-            importsNeeded.add(referencedToken.tokenType)
-            return `const ${name} = ${referencedToken.tokenType}Tokens.${tokenObjectKeyName(referencedToken, tokenGroups, false)};`
-        }
-        // Same-type reference
-        return `const ${name} = ${tokenObjectKeyName(referencedToken, tokenGroups, false)};`
-    }
-
-    // For non-references, continue with existing logic
     const value = CSSHelper.tokenToCSS(token, mappedTokens, {
-        allowReferences: true,
-        decimals: exportConfiguration.colorPrecision,
-        colorFormat: exportConfiguration.colorFormat,
-        forceRemUnit: exportConfiguration.forceRemUnit,
-        remBase: exportConfiguration.remBase,
-        tokenToVariableRef: (t) => {
-            if (t.tokenType !== type) {
-                const importType = t.tokenType
-                importsNeeded.add(importType)
-                return `\${${importType}Tokens.${tokenObjectKeyName(t, tokenGroups, false)}}`
-            }
-            return `\${${tokenObjectKeyName(t, tokenGroups, false)}}`
-        },
+      allowReferences: exportConfiguration.useReferences,
+      decimals: exportConfiguration.colorPrecision,
+      colorFormat: exportConfiguration.colorFormat,
+      forceRemUnit: exportConfiguration.forceRemUnit,
+      remBase: exportConfiguration.remBase,
+      tokenToVariableRef: (t) => {
+        if (t.tokenType !== type) {
+          const importType = t.tokenType
+          importsNeeded.add(importType)
+          return `\${${importType}Tokens.${tokenObjectKeyName(t, tokenGroups, false)}}`
+        }
+        return `\${${tokenObjectKeyName(t, tokenGroups, false)}}`
+      },
     })
 
-    // Use template literals only for non-direct references
-    const formattedValue = `\`${value}\``
+    // For composite values that contain references, wrap the entire value in template literals
+    const hasReferences = value.includes('${')
+    const formattedValue = hasReferences
+      ? `\`${value}\``
+      : formatTokenValue(value)
+
     return `const ${name} = ${formattedValue};`
   }).join('\n')
 
@@ -119,20 +107,12 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     content = `/**\n * ${exportConfiguration.disclaimer.replace(/\n/g, '\n * ')} \n*/\n\n${content}`
   }
 
-  // Get the full path including theme folder if provided
-  const relativePath = themePath
-    ? `./${themePath}`
-    : exportConfiguration.baseStyleFilePath
-
-  // Use default style file names but change extension to .ts
-  let fileName = exportConfiguration.customizeStyleFileNames
-    ? exportConfiguration.styleFileNames[type].replace('.css', '.ts')
-    : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '.ts')
-
-  // Retrieve content as file which content will be directly written to the output
+  // Return proper OutputTextFile object
   return FileHelper.createTextFile({
-    relativePath: relativePath,
-    fileName: fileName,
+    relativePath: themePath ? `./${themePath}` : exportConfiguration.baseStyleFilePath,
+    fileName: exportConfiguration.customizeStyleFileNames
+      ? exportConfiguration.styleFileNames[type].replace('.css', '.ts')
+      : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '.ts'),
     content: content,
   })
 }
