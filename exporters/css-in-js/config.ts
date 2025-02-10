@@ -17,6 +17,8 @@ export type ExporterConfiguration = {
   disclaimer: string
   /** When enabled, file with all css style files imported will be generated */
   generateIndexFile: boolean
+  /** When enabled, generates an index.ts in each theme/base folder */
+  generateFolderIndexFiles: boolean
   /** When enabled, empty style files will be generated. Otherwise empty are omitted */
   generateEmptyFiles: boolean
   /** When enabled, token description will be shown as code comments for every exported token */
@@ -57,4 +59,6 @@ export type ExporterConfiguration = {
   customizeTokenPrefixes: boolean
   /** Global prefix for all token names. When set, all tokens will be prefixed with this value */
   globalNamePrefix: string
+  /** When enabled, generates TypeScript type definitions file */
+  generateTypeDefinitions: boolean
 }

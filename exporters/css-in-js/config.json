@@ -169,6 +169,14 @@
         "category": "Index file"
     },
     {
+        "key": "generateFolderIndexFiles",
+        "type": "boolean",
+        "default": true,
+        "title": "Generate folder index files",
+        "description": "Generate an index.ts in each theme/base folder.",
+        "category": "Style files"
+    },
+    {
         "key": "indexFileName",
         "type": "string",
         "default": "index.ts",
@@ -403,6 +411,14 @@
         "default": 2,
         "title": "Indentation",
         "description": "Number of spaces used for indentation in generated files.",
+        "category": "Other"
+    },
+    {
+        "key": "generateTypeDefinitions",
+        "type": "boolean",
+        "default": false,
+        "title": "Generate type definitions",
+        "description": "Generate TypeScript type definitions file (types.d.ts).",
         "category": "Other"
     }
 ]

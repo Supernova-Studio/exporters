@@ -22,4 +22,15 @@ export function hasThemedTokens(tokens: Array<Token>, type: TokenType, theme: To
 export function filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Token> {
   const overriddenTokenIds = new Set(theme.overriddenTokens.map(t => t.id))
   return tokens.filter(token => overriddenTokenIds.has(token.id))
+}
+
+export function getThemeIdentifier(theme: TokenTheme | string): string {
+  if (typeof theme === 'string') return theme
+  return theme.codeName?.toLowerCase() || theme.name.toLowerCase()
+}
+
+export function getThemeName(theme: TokenTheme | string): string {
+  if (typeof theme === 'string') return theme
+  const identifier = theme.codeName || theme.name
+  return identifier.charAt(0).toUpperCase() + identifier.slice(1)
 } 

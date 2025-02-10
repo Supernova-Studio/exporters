@@ -17,9 +17,5 @@ export function formatTokenValue(value: string): string {
   }
 
   // Otherwise wrap CSS values in single quotes
-  return value.includes('px') || value.includes('rem') || 
-         value.includes('%') || value.includes('#') ||
-         value.includes('"')
-    ? `'${value}'`
-    : value
+  return `'${value}'`
 } 

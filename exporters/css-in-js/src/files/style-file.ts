@@ -5,6 +5,7 @@ import { tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
+import { getThemeIdentifier } from "../utils/theme-utils"
 
 // For now, let's move the theme helper functions directly into the file until utils is updated
 function filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Token> {
@@ -13,10 +14,35 @@ function filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Toke
 }
 
 function getThemePath(theme: TokenTheme | string): string {
-  return typeof theme === 'string' ? theme : theme.name.toLowerCase()
+  if (typeof theme === 'string') return theme
+  return theme.codeName?.toLowerCase() || theme.name.toLowerCase()
 }
 
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
+/**
+ * Generates a TypeScript file for a specific token type (color.ts, typography.ts, etc.).
+ * These files contain the actual token values and are typically consumed through the index files.
+ * 
+ * Features:
+ * - Generates type-safe token exports
+ * - Handles token references correctly
+ * - Supports theming
+ * - Includes token descriptions as comments
+ * - Formats values according to configuration
+ * 
+ * @param type - The type of tokens to generate (Color, Typography, etc.)
+ * @param tokens - Array of all tokens
+ * @param tokenGroups - Array of token groups for name generation
+ * @param themePath - Path for themed tokens (empty for base tokens)
+ * @param theme - Theme configuration when generating themed tokens
+ * @returns OutputTextFile with the generated content or null if no tokens exist
+ */
+export function styleOutputFile(
+  type: TokenType,
+  tokens: Array<Token>,
+  tokenGroups: Array<TokenGroup>,
+  themePath: string = '',
+  theme?: TokenTheme
+): OutputTextFile | null {
   // Clear any previously cached token names to ensure clean generation
   resetTokenNameTracking()
 

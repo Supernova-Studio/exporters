@@ -1,62 +1,91 @@
 import { FileHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { hasThemedTokens } from "../utils/theme-utils"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
+import { getThemeIdentifier } from "../utils/theme-utils"
 
-export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
-  // Skip if disabled
+/**
+ * Generates the root index.ts file that exports all themes and base tokens.
+ * This file serves as the main entry point for consuming the design tokens.
+ * 
+ * When folder index files are enabled, it generates clean imports like:
+ * ```typescript
+ * export { default as base } from "./base";
+ * export { default as dark } from "./dark";
+ * ```
+ * 
+ * Which allows users to consume tokens like:
+ * ```typescript
+ * import { base, dark } from './tokens'
+ * console.log(base.primary)
+ * ```
+ * 
+ * @param tokens - Array of all tokens
+ * @param themes - Array of themes to export
+ * @returns OutputTextFile with the generated index content or null if generation is disabled
+ */
+export function indexOutputFile(tokens: Array<Token>, themes: Array<string | TokenTheme> = []): OutputTextFile | null {
   if (!exportConfiguration.generateIndexFile) {
     return null
   }
 
-  // Get all unique token types
-  const types = [...new Set(tokens.map((token) => token.tokenType))]
+  let content = ''
 
-  // Create imports and exports for each type
-  const imports = types
-    .map((type) => {
-      const fileName = exportConfiguration.customizeStyleFileNames
-        ? exportConfiguration.styleFileNames[type].replace('.css', '')
-        : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '')
-      return `import { ${type}Tokens } from "${exportConfiguration.baseStyleFilePath}/${fileName}";`
-    })
-    .join("\n")
+  if (exportConfiguration.generateFolderIndexFiles) {
+    // Add disclaimer if enabled
+    if (exportConfiguration.showGeneratedFileDisclaimer) {
+      content += `/**\n * ${exportConfiguration.disclaimer.replace(/\n/g, '\n * ')} \n*/\n\n`
+    }
 
-  // Add theme imports if any
-  const themeImports = themes.map((theme) => {
-    const themePath = typeof theme === 'string' ? theme : theme.name.toLowerCase()
-    const themeName = typeof theme === 'string' ? theme : theme.name
+    // Group imports and exports together
+    const imports: string[] = []
+    const exports: string[] = []
     
-    const themeTypes = exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string'
-      ? types.filter(type => hasThemedTokens(tokens, type, theme))
-      : types
+    // Base tokens
+    if (exportConfiguration.exportBaseValues) {
+      imports.push(`export { default as base } from "${exportConfiguration.baseStyleFilePath}";`)
+    }
+    
+    // Theme tokens
+    themes.forEach(theme => {
+      const themeId = getThemeIdentifier(theme)
+      imports.push(`export { default as ${themeId} } from "./${themeId}";`)
+    })
 
-    return themeTypes
-      .map((type) => {
-        const fileName = exportConfiguration.customizeStyleFileNames
-          ? exportConfiguration.styleFileNames[type].replace('.css', '')
-          : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '')
-        return `import { ${type}Tokens as ${type}${themeName}Tokens } from "./${themePath}/${fileName}";`
-      })
-      .join("\n")
-  }).join("\n")
+    // Add imports to content
+    content += imports.join('\n')
+  } else {
+    // Original behavior - import individual files
+    const usedTokenTypes = new Set(tokens.map(t => t.tokenType))
 
-  // Export all tokens
-  const exports = `\nexport {\n${types.map(type => `  ${type}Tokens`).join(',\n')}`
-    + (themes.length > 0 ? ',\n' + themes.map(theme => {
-      const themeName = typeof theme === 'string' ? theme : theme.name
-      return types.map(type => `  ${type}${themeName}Tokens`).join(',\n')
-    }).join(',\n') : '')
-    + '\n};\n'
+    if (exportConfiguration.exportBaseValues) {
+      Object.values(TokenType)
+        .filter(type => usedTokenTypes.has(type))
+        .forEach(type => {
+          const fileName = exportConfiguration.customizeStyleFileNames
+            ? exportConfiguration.styleFileNames[type].replace('.css', '').replace('.ts', '')
+            : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '').replace('.ts', '')
+          content += `export * from "${exportConfiguration.baseStyleFilePath}/${fileName}";\n`
+        })
+    }
 
-  // Ensure indexFileName ends with .ts
-  let fileName = exportConfiguration.indexFileName.replace('.css', '.ts')
+    // Generate imports for themed tokens
+    themes.forEach(theme => {
+      const themeId = getThemeIdentifier(theme)
+      Object.values(TokenType)
+        .filter(type => usedTokenTypes.has(type))
+        .forEach(type => {
+          const fileName = exportConfiguration.customizeStyleFileNames
+            ? exportConfiguration.styleFileNames[type].replace('.css', '').replace('.ts', '')
+            : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '').replace('.ts', '')
+          content += `export * from "./${themeId}/${fileName}";\n`
+        })
+    })
+  }
 
-  // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
     relativePath: exportConfiguration.baseIndexFilePath,
-    fileName: fileName,
-    content: imports + '\n\n' + themeImports + exports,
+    fileName: exportConfiguration.indexFileName,
+    content: content
   })
 }

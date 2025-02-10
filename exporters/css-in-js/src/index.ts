@@ -4,10 +4,13 @@ import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 import { typesOutputFile } from "./files/types-file"
 import { ThemeHelper } from "@supernovaio/export-utils"
+import { folderIndexOutputFile } from "./files/folder-index-file"
+import { getThemeIdentifier } from "./utils/theme-utils"
 
 // For now, let's move the theme helper function directly into the file until utils is updated
 function getThemePath(theme: TokenTheme | string): string {
-  return typeof theme === 'string' ? theme : theme.name.toLowerCase()
+  if (typeof theme === 'string') return theme
+  return theme.codeName?.toLowerCase() || theme.name.toLowerCase()
 }
 
 /** Exporter configuration from the resolved default configuration and user overrides */
@@ -76,22 +79,45 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       case ThemeExportStyle.SeparateFiles:
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-          return Object.values(TokenType)
+          const themePath = getThemeIdentifier(theme)
+          const files = Object.values(TokenType)
             .map((type) => styleOutputFile(
               type, 
               themedTokens, 
               tokenGroups, 
-              getThemePath(theme),
+              themePath,
               theme
             ))
+          
+          // Generate folder index files independently of root index file
+          if (exportConfiguration.generateFolderIndexFiles) {
+            files.push(folderIndexOutputFile(themedTokens, themePath))
+          }
+          
+          return files
         })
         
         const baseFiles = exportConfiguration.exportBaseValues
-          ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          ? [
+              ...Object.values(TokenType)
+                .map((type) => styleOutputFile(type, tokens, tokenGroups)),
+              ...(exportConfiguration.generateFolderIndexFiles 
+                ? [folderIndexOutputFile(tokens, exportConfiguration.baseStyleFilePath)]
+                : [])
+            ]
           : []
 
-        const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
+        // Only add root index file if enabled
+        const rootIndexFile = exportConfiguration.generateIndexFile 
+          ? [indexOutputFile(tokens, themesToApply)]
+          : []
+
+        const separateFiles = [
+          ...baseFiles, 
+          ...themeFiles, 
+          ...rootIndexFile,
+          ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : [])
+        ]
         return processOutputFiles(separateFiles)
 
       case ThemeExportStyle.MergedTheme:
@@ -110,7 +136,12 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
             themesToApply[0]
           ))
 
-        const mergedFiles = [...baseTokenFiles, ...mergedThemeFiles, indexOutputFile(tokens, ['themed'])]
+        const mergedFiles = [
+          ...baseTokenFiles, 
+          ...mergedThemeFiles, 
+          indexOutputFile(tokens, ['themed']),
+          ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : [])
+        ]
         return processOutputFiles(mergedFiles)
 
       case ThemeExportStyle.ApplyDirectly:
@@ -123,11 +154,16 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Default case: Generate files without themes
   const defaultFiles = [
     ...(exportConfiguration.exportBaseValues
-      ? Object.values(TokenType)
-          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      ? [
+          ...Object.values(TokenType)
+            .map((type) => styleOutputFile(type, tokens, tokenGroups)),
+          ...(exportConfiguration.generateFolderIndexFiles 
+            ? [folderIndexOutputFile(tokens, exportConfiguration.baseStyleFilePath)]
+            : [])
+        ]
       : []),
-    indexOutputFile(tokens),
-    typesOutputFile(tokens, tokenGroups),
+    ...(exportConfiguration.generateIndexFile ? [indexOutputFile(tokens)] : []),
+    ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : []),
   ]
   return processOutputFiles(defaultFiles)
 })
