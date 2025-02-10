@@ -3,8 +3,6 @@ import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-e
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
-import { filterThemedTokens } from "../utils/theme-utils"
-import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 
 export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
   // Skip base token files if exportBaseValues is false and this is not a theme file
