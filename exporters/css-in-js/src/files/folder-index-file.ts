@@ -1,4 +1,4 @@
-import { FileHelper, ThemeHelper } from "@supernovaio/export-utils"
+import { FileHelper, GeneralHelper, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
@@ -31,6 +31,8 @@ export function folderIndexOutputFile(tokens: Array<Token>, themePath: string): 
     return acc
   }, {} as Record<TokenType, Token[]>)
 
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+
   // Prepare arrays to collect import statements and token spreads
   const imports: string[] = []
   const exports: string[] = []
@@ -48,7 +50,7 @@ export function folderIndexOutputFile(tokens: Array<Token>, themePath: string): 
     // Add import for this token type's file
     imports.push(`import { ${type}Tokens } from "./${fileName}";`)
     // Spread all tokens from this type into the final object
-    exports.push(`  ...${type}Tokens,`)
+    exports.push(`${indentString}...${type}Tokens,`)
   })
 
   // Combine everything into the final file content:
@@ -61,7 +63,7 @@ export function folderIndexOutputFile(tokens: Array<Token>, themePath: string): 
 
   // Add the file disclaimer if configured
   if (exportConfiguration.showGeneratedFileDisclaimer) {
-    content = `/**\n * ${exportConfiguration.disclaimer.replace(/\n/g, '\n * ')} \n*/\n\n${content}`
+    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
   }
 
   return FileHelper.createTextFile({

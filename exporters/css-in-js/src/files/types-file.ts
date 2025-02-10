@@ -49,9 +49,7 @@ export function typesOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     return `${indentString}${name}: string;`
   }).join('\n')
 
-  const content = `// This file was generated automatically and should not be changed manually.
-
-// Type-specific interfaces
+  const content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, `// Type-specific interfaces
 ${interfaces}
 
 // Combined flat token type
@@ -61,7 +59,7 @@ ${allProperties}
 
 // Default export type
 export type { TokenObject as default };
-`
+`)
 
   return FileHelper.createTextFile({
     relativePath: './',

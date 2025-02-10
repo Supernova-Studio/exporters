@@ -1,4 +1,4 @@
-import { FileHelper, StringCase, ThemeHelper } from "@supernovaio/export-utils"
+import { FileHelper, GeneralHelper, StringCase, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
@@ -31,11 +31,6 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
   let content = ''
 
   if (exportConfiguration.generateFolderIndexFiles) {
-    // Add disclaimer if enabled
-    if (exportConfiguration.showGeneratedFileDisclaimer) {
-      content += `/**\n * ${exportConfiguration.disclaimer.replace(/\n/g, '\n * ')} \n*/\n\n`
-    }
-
     // Group imports and exports together
     const imports: string[] = []
     const exports: string[] = []
@@ -80,6 +75,10 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
           content += `export * from "./${themeId}/${fileName}";\n`
         })
     })
+  }
+
+  if (exportConfiguration.showGeneratedFileDisclaimer) {
+    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
   }
 
   return FileHelper.createTextFile({
