@@ -10,6 +10,11 @@ export enum ThemeExportStyle {
     MergedTheme = "mergedTheme"
 }
 
+export enum TokenSortOrder {
+    Default = "default",
+    Alphabetical = "alphabetical"
+}
+
 export type ExporterConfiguration = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: boolean
@@ -61,4 +66,6 @@ export type ExporterConfiguration = {
   globalNamePrefix: string
   /** When enabled, generates TypeScript type definitions file */
   generateTypeDefinitions: boolean
+  /** Controls how tokens are sorted in the generated files */
+  tokenSortOrder: TokenSortOrder
 }

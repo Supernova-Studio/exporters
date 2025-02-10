@@ -86,20 +86,3 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     return `${indentString}${name}: ${formattedValue},`
   }
 }
-
-function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
-  const prefix = getTokenPrefix(token.tokenType)
-  const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
-  return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent, prefix)
-}
-
-function addGlobalPrefix(name: string): string {
-  if (!exportConfiguration.globalNamePrefix) {
-    return name
-  }
-  // Format the global prefix and combine with name using the same NamingHelper
-  return NamingHelper.codeSafeVariableName(
-    `${exportConfiguration.globalNamePrefix.trim()} ${name}`,
-    exportConfiguration.tokenNameStyle
-  )
-}

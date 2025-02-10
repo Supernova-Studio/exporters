@@ -1,21 +1,10 @@
-import { FileHelper, CSSHelper } from "@supernovaio/export-utils"
-import {  OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper } from "@supernovaio/export-utils"
+import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
-
-// For now, let's move the theme helper functions directly into the file until utils is updated
-function filterThemedTokens(tokens: Array<Token>, theme: TokenTheme): Array<Token> {
-  const overriddenTokenIds = new Set(theme.overriddenTokens.map(t => t.id))
-  return tokens.filter(token => overriddenTokenIds.has(token.id))
-}
-
-function getThemePath(theme: TokenTheme | string): string {
-  if (typeof theme === 'string') return theme
-  return theme.codeName?.toLowerCase() || theme.name.toLowerCase()
-}
 
 /**
  * Generates a TypeScript file for a specific token type (color.ts, typography.ts, etc.).
@@ -57,7 +46,7 @@ export function styleOutputFile(
   // - Filter to only include tokens that are overridden in this theme
   // - Skip generating the file if no tokens are themed (when configured)
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
-    tokensOfType = filterThemedTokens(tokensOfType, theme)
+    tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
     
     if (tokensOfType.length === 0) {
       return null
@@ -72,15 +61,18 @@ export function styleOutputFile(
   // Create a lookup map for quick token reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
-  // Sort tokens to ensure referenced tokens are declared after their dependencies
-  // This prevents using variables before they're defined
+  // Sort tokens to ensure proper declaration order:
+  // - Tokens with direct values come first
+  // - Tokens that reference other tokens come after
+  // This prevents reference errors where a token tries to use another token that hasn't been declared yet
   const sortedForDeclarations = [...tokensOfType].sort((a, b) => {
     const aHasRef = !!(a as any)?.value?.referencedTokenId
     const bHasRef = !!(b as any)?.value?.referencedTokenId
     return aHasRef === bHasRef ? 0 : aHasRef ? 1 : -1
   })
   
-  // Track which token types we need to import (for cross-type token references)
+  // Track token types that need to be imported when tokens reference other token types
+  // For example, if a Shadow token references a Color token, we need to import ColorTokens
   const importsNeeded = new Set<string>()
   
   const constDeclarations = sortedForDeclarations.map(token => {
@@ -107,7 +99,8 @@ export function styleOutputFile(
     return `const ${name} = ${formatTokenValue(value)};`
   }).join('\n')
 
-  // Generate imports if needed
+  // Generate import statements for any referenced token types
+  // For example: import { ColorTokens } from "./color";
   const imports = Array.from(importsNeeded)
     .map(importType => {
       const fileName = exportConfiguration.customizeStyleFileNames
@@ -139,12 +132,42 @@ export function styleOutputFile(
   })
 }
 
+/**
+ * Generates the content of the exported token object.
+ * This object provides a type-safe way to access token values through their generated names.
+ * 
+ * Features:
+ * - Maintains token grouping structure
+ * - Includes token descriptions as JSDoc comments
+ * - Supports alphabetical sorting when configured
+ * - Properly indents according to configuration
+ * 
+ * @param tokens - Array of tokens to include in the object
+ * @param tokenGroups - Array of token groups for maintaining hierarchy
+ * @returns Formatted string containing the object's properties
+ */
 function generateTokenObject(tokens: Array<Token>, tokenGroups: Array<TokenGroup>): string {
-  return tokens.map(token => {
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+  
+  // Create a copy of tokens array for sorting
+  let sortedTokens = [...tokens]
+  
+  // Sort tokens alphabetically if configured
+  // This can make it easier to find tokens in the generated files
+  if (exportConfiguration.tokenSortOrder === 'alphabetical') {
+    sortedTokens.sort((a, b) => {
+      const nameA = tokenObjectKeyName(a, tokenGroups, true)
+      const nameB = tokenObjectKeyName(b, tokenGroups, true)
+      return nameA.localeCompare(nameB)
+    })
+  }
+
+  // Generate the object properties, including descriptions as JSDoc comments
+  return sortedTokens.map(token => {
     const name = tokenObjectKeyName(token, tokenGroups, true)
     if (token.description) {
-      return `  /** ${token.description.trim()} */\n  ${name},`
+      return `${indentString}/** ${token.description.trim()} */\n${indentString}${name},`
     }
-    return `  ${name},`
+    return `${indentString}${name},`
   }).join('\n')
 }

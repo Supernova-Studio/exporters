@@ -1,4 +1,4 @@
-import { NamingHelper, CSSHelper } from "@supernovaio/export-utils"
+import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
@@ -24,7 +24,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
       return `var(--${addGlobalPrefix(tokenVariableName(t, tokenGroups))})`
     },
   })
-  const indentString = " ".repeat(exportConfiguration.indent)
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   if (exportConfiguration.showDescriptions && token.description) {
     // Generate token with comments

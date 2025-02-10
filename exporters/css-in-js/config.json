@@ -420,5 +420,23 @@
         "title": "Generate type definitions",
         "description": "Generate TypeScript type definitions file (types.d.ts).",
         "category": "Other"
+    },
+    {
+        "key": "tokenSortOrder",
+        "type": "enum",
+        "default": "default", 
+        "title": "Token name sorting",
+        "description": "Control how token names (object keys) are sorted in the generated token files.",
+        "category": "Style files",
+        "options": {
+            "default": {
+                "label": "Default order",
+                "description": "Keep token names in their original order"
+            },
+            "alphabetical": {
+                "label": "Alphabetical",
+                "description": "Sort token names alphabetically A-Z"
+            }
+        }
     }
 ]
