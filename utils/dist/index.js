@@ -19,5 +19,7 @@ __exportStar(require("./helpers/ColorHelper"), exports);
 __exportStar(require("./helpers/TokenHelper"), exports);
 __exportStar(require("./helpers/CSSHelper"), exports);
 __exportStar(require("./helpers/FileHelper"), exports);
+__exportStar(require("./helpers/ThemeHelper"), exports);
+__exportStar(require("./helpers/FileNameHelper"), exports);
 __exportStar(require("./enums/StringCase"), exports);
 __exportStar(require("./enums/ColorFormat"), exports);

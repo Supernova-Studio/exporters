@@ -1,4 +1,4 @@
-import { FileHelper } from "@supernovaio/export-utils"
+import { FileHelper, ThemeHelper, FileNameHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
@@ -17,7 +17,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
 
   // If this is a theme file, handle themed tokens
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
-    tokensOfType = filterThemedTokens(tokensOfType, theme)
+    tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
     
     // If no tokens are themed, don't generate the file at all
     if (tokensOfType.length === 0) {
@@ -49,10 +49,10 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
     ? `./${themePath}`
     : exportConfiguration.baseStyleFilePath
 
-  // Use default style file names if customization is disabled
+  // Use default style file names
   let fileName = exportConfiguration.customizeStyleFileNames
     ? exportConfiguration.styleFileNames[type]
-    : DEFAULT_STYLE_FILE_NAMES[type]
+    : FileNameHelper.getDefaultStyleFileName(type)
 
   // Ensure filename ends with .css
   if (!fileName.toLowerCase().endsWith('.css')) {

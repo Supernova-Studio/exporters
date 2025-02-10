@@ -1,0 +1,22 @@
+{
+    "id": "supernovaio.exporter-css-in-js",
+    "name": "CSS in JS",
+    "description": "Export your design system tokens into CSS in JS variables and definitions.",
+    "author": "Supernova.io",
+    "organization": "Supernova.io",
+    "homepage": "https://supernova.io",
+    "version": "2.0.0",
+    "usesBrands": true,
+    "usesThemes": true,
+    "executable": "/dist/build.js",
+    "engine": "latest",
+    "tags": [
+        "CSS",
+        "Tokens",
+        "CSS in JS",
+        "React",
+        "Vue",
+        "Styled Components",
+        "Emotion",
+    ]
+}
