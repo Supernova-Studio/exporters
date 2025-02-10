@@ -2,6 +2,12 @@ import { FileHelper, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
+import { getStyleFileName } from "../utils/file-utils"
+
+// Helper function to ensure .css extension
+function ensureExtension(fileName: string, extension: string): string {
+  return fileName.toLowerCase().endsWith(extension) ? fileName : `${fileName}${extension}`
+}
 
 export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
   // Skip if disabled
@@ -12,17 +18,10 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Get all unique token types
   const types = [...new Set(tokens.map((token) => token.tokenType))]
 
-  // Get default style file names if customization is disabled
-  const getStyleFileName = (type: TokenType) => {
-    return exportConfiguration.customizeStyleFileNames
-      ? exportConfiguration.styleFileNames[type]
-      : DEFAULT_STYLE_FILE_NAMES[type]
-  }
-
   // Create imports for each type - only if exportBaseValues is true
   const imports = exportConfiguration.exportBaseValues 
     ? types
-        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${getStyleFileName(type)}";`)
+        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${getStyleFileName(type, '.css')}";`)
         .join("\n")
     : ''
 
@@ -40,7 +39,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
       .map((type, index) => {
         // Add theme name comment only before the first import of the theme
         const themeComment = index === 0 ? `\n/* Theme: ${themeName} */\n` : ''
-        return `${themeComment}@import "./${themePath}/${getStyleFileName(type)}";`
+        return `${themeComment}@import "./${themePath}/${getStyleFileName(type, '.css')}";`
       })
       .join("\n")
   }).join("\n")
@@ -48,11 +47,8 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Only add newlines between base imports and theme imports if both exist
   const separator = imports && themeImports ? "\n\n" : ""
 
-  // Ensure indexFileName ends with .css
-  let fileName = exportConfiguration.indexFileName
-  if (!fileName.toLowerCase().endsWith('.css')) {
-    fileName += '.css'
-  }
+  // Handle index file name extension
+  const fileName = ensureExtension(exportConfiguration.indexFileName, '.css')
 
   // Retrieve content as file which content will be directly written to the output
   return FileHelper.createTextFile({
