@@ -104,8 +104,8 @@ export function styleOutputFile(
   const imports = Array.from(importsNeeded)
     .map(importType => {
       const fileName = exportConfiguration.customizeStyleFileNames
-        ? exportConfiguration.styleFileNames[importType].replace('.css', '')
-        : DEFAULT_STYLE_FILE_NAMES[importType].replace('.css', '')
+        ? exportConfiguration.styleFileNames[importType].replace('.ts', '')
+        : DEFAULT_STYLE_FILE_NAMES[importType].replace('.ts', '')
       return `import { ${importType}Tokens } from "./${fileName}";`
     })
     .join('\n')
@@ -119,15 +119,15 @@ export function styleOutputFile(
   content += `\n\nexport const ${type}Tokens = {\n${objectProperties}\n}`
 
   if (exportConfiguration.showGeneratedFileDisclaimer) {
-    content = `/**\n * ${exportConfiguration.disclaimer.replace(/\n/g, '\n * ')} \n*/\n\n${content}`
+    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
   }
 
-  // Return proper OutputTextFile object
+  // Create and return a text file containing the generated token styles
   return FileHelper.createTextFile({
     relativePath: themePath ? `./${themePath}` : exportConfiguration.baseStyleFilePath,
     fileName: exportConfiguration.customizeStyleFileNames
-      ? exportConfiguration.styleFileNames[type].replace('.css', '.ts')
-      : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '.ts'),
+      ? exportConfiguration.styleFileNames[type]
+      : DEFAULT_STYLE_FILE_NAMES[type],
     content: content,
   })
 }
