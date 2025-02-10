@@ -99,6 +99,7 @@ Here is a list of all the configuration options this exporter provides:
 - **baseStyleFilePath:** Directory path for files relative to export root.
 - **customizeStyleFileNames:** Enable custom file names for each token type.
 - **styleFileNames:** Define specific file names for each token type (when customizeStyleFileNames is enabled).
+- **tokenSortOrder:** Control how token names are sorted in generated files (default order or alphabetical).
 
 ### Other
 - **showDescriptions:** Display descriptions for each token as code comments.
