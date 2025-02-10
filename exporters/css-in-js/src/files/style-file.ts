@@ -59,24 +59,40 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   
   const constDeclarations = sortedForDeclarations.map(token => {
     const name = tokenObjectKeyName(token, tokenGroups, false)
-    const value = CSSHelper.tokenToCSS(token, mappedTokens, {
-      allowReferences: true,
-      decimals: exportConfiguration.colorPrecision,
-      colorFormat: exportConfiguration.colorFormat,
-      forceRemUnit: exportConfiguration.forceRemUnit,
-      remBase: exportConfiguration.remBase,
-      tokenToVariableRef: (t) => {
-        // If referenced token is from a different type, track it for imports
-        if (t.tokenType !== type) {
-          const importType = t.tokenType
-          importsNeeded.add(importType)
-          return `\${${importType}Tokens.${tokenObjectKeyName(t, tokenGroups, false)}}`
+    
+    // Check if this token directly references another token
+    const isDirectReference = !!(token as any)?.value?.referencedTokenId
+    
+    if (isDirectReference) {
+        // For direct references, just use the referenced token name
+        const referencedToken = mappedTokens.get((token as any).value.referencedTokenId)!
+        if (referencedToken.tokenType !== type) {
+            // Cross-type reference
+            importsNeeded.add(referencedToken.tokenType)
+            return `const ${name} = ${referencedToken.tokenType}Tokens.${tokenObjectKeyName(referencedToken, tokenGroups, false)};`
         }
-        return `\${${tokenObjectKeyName(t, tokenGroups, false)}}`
-      },
+        // Same-type reference
+        return `const ${name} = ${tokenObjectKeyName(referencedToken, tokenGroups, false)};`
+    }
+
+    // For non-references, continue with existing logic
+    const value = CSSHelper.tokenToCSS(token, mappedTokens, {
+        allowReferences: true,
+        decimals: exportConfiguration.colorPrecision,
+        colorFormat: exportConfiguration.colorFormat,
+        forceRemUnit: exportConfiguration.forceRemUnit,
+        remBase: exportConfiguration.remBase,
+        tokenToVariableRef: (t) => {
+            if (t.tokenType !== type) {
+                const importType = t.tokenType
+                importsNeeded.add(importType)
+                return `\${${importType}Tokens.${tokenObjectKeyName(t, tokenGroups, false)}}`
+            }
+            return `\${${tokenObjectKeyName(t, tokenGroups, false)}}`
+        },
     })
 
-    // Always use template literals - simpler and handles all cases
+    // Use template literals only for non-direct references
     const formattedValue = `\`${value}\``
     return `const ${name} = ${formattedValue};`
   }).join('\n')

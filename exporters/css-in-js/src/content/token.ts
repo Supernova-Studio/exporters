@@ -25,17 +25,29 @@ export function tokenObjectKeyName(token: Token, tokenGroups: Array<TokenGroup>,
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
   
   // Generate a safe variable name using the token's properties and parent group
-  let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, parent, prefix)
-  let counter = 1
+  // Use the configured tokenNameStyle here
+  let name = NamingHelper.codeSafeVariableNameForToken(
+    token, 
+    exportConfiguration.tokenNameStyle, // Use the configured style instead of hardcoded camelCase
+    parent, 
+    prefix
+  )
 
-  // Handle name collisions by appending numbers until we find a unique name
-  // that isn't already used by a different token
+  // Apply global prefix if configured
+  if (exportConfiguration.globalNamePrefix) {
+    name = NamingHelper.codeSafeVariableName(
+      `${exportConfiguration.globalNamePrefix.trim()} ${name}`,
+      exportConfiguration.tokenNameStyle
+    )
+  }
+
+  // Handle name collisions
+  let counter = 1
   while (nameToTokenMap.has(name) && nameToTokenMap.get(name) !== token.id) {
     name = `${name}${counter++}`
   }
 
   // Cache the generated name for future lookups, but only if not generating for export
-  // This prevents temporary names used during export from polluting the name cache
   if (!forExport) {
     tokenNameMap.set(token.id, name)
     nameToTokenMap.set(name, token.id)
