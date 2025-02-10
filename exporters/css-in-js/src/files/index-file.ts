@@ -1,4 +1,4 @@
-import { FileHelper, GeneralHelper, StringCase, ThemeHelper } from "@supernovaio/export-utils"
+import { FileHelper, FileNameHelper, GeneralHelper, StringCase, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
@@ -33,7 +33,6 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
   if (exportConfiguration.generateFolderIndexFiles) {
     // Group imports and exports together
     const imports: string[] = []
-    const exports: string[] = []
     
     // Base tokens
     if (exportConfiguration.exportBaseValues) {
@@ -49,16 +48,19 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
     // Add imports to content
     content += imports.join('\n')
   } else {
-    // Original behavior - import individual files
+    // Export individual files
     const usedTokenTypes = new Set(tokens.map(t => t.tokenType))
 
+    // Export base tokens if enabled
     if (exportConfiguration.exportBaseValues) {
       Object.values(TokenType)
         .filter(type => usedTokenTypes.has(type))
         .forEach(type => {
+          // We use DEFAULT_STYLE_FILE_NAMES as fallback because styleFileNames from configuration
+          // can be customized by the user, and we need access to original default values
           const fileName = exportConfiguration.customizeStyleFileNames
-            ? exportConfiguration.styleFileNames[type].replace('.css', '').replace('.ts', '')
-            : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '').replace('.ts', '')
+            ? FileNameHelper.ensureFileExtension(exportConfiguration.styleFileNames[type], ".ts")
+            : DEFAULT_STYLE_FILE_NAMES[type]
           content += `export * from "${exportConfiguration.baseStyleFilePath}/${fileName}";\n`
         })
     }
@@ -69,9 +71,11 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
       Object.values(TokenType)
         .filter(type => usedTokenTypes.has(type))
         .forEach(type => {
+          // We use DEFAULT_STYLE_FILE_NAMES as fallback because styleFileNames from configuration
+          // can be customized by the user, and we need access to original default values
           const fileName = exportConfiguration.customizeStyleFileNames
-            ? exportConfiguration.styleFileNames[type].replace('.css', '').replace('.ts', '')
-            : DEFAULT_STYLE_FILE_NAMES[type].replace('.css', '').replace('.ts', '')
+            ? FileNameHelper.ensureFileExtension(exportConfiguration.styleFileNames[type], ".ts")
+            : DEFAULT_STYLE_FILE_NAMES[type]
           content += `export * from "./${themeId}/${fileName}";\n`
         })
     })
@@ -83,7 +87,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<string | Tok
 
   return FileHelper.createTextFile({
     relativePath: exportConfiguration.baseIndexFilePath,
-    fileName: exportConfiguration.indexFileName,
+    fileName: FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, ".ts"),
     content: content
   })
 }

@@ -1,4 +1,4 @@
-import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper } from "@supernovaio/export-utils"
+import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper, FileNameHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
@@ -126,7 +126,7 @@ export function styleOutputFile(
   return FileHelper.createTextFile({
     relativePath: themePath ? `./${themePath}` : exportConfiguration.baseStyleFilePath,
     fileName: exportConfiguration.customizeStyleFileNames
-      ? exportConfiguration.styleFileNames[type]
+      ? FileNameHelper.ensureFileExtension(exportConfiguration.styleFileNames[type], ".ts")
       : DEFAULT_STYLE_FILE_NAMES[type],
     content: content,
   })
