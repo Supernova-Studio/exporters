@@ -1,7 +1,7 @@
 {
     "id": "supernovaio.exporter-css-in-js",
     "name": "CSS in JS",
-    "description": "Export your design system tokens into CSS in JS variables and definitions.",
+    "description": "Export your design tokens to CSS in JS variables and definitions.",
     "author": "Supernova.io",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
