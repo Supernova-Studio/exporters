@@ -1,3 +1,5 @@
+![Style Dictionary Exporter](https://raw.githubusercontent.com/Supernova-Studio/exporters/main/exporters/style-dictionary/resources/header.png)
+
 # Style Dictionary Exporter
 
 The Style Dictionary Exporter is a powerful package for converting your design system data into Style Dictionary format. It facilitates a seamless transition from design to development, ensuring consistency and accuracy throughout the process. The Style Dictionary exporter has a variety of configuration options to make sure the output always fits your codebase.
