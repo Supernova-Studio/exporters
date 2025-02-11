@@ -95,7 +95,7 @@ export function styleOutputFile(
           .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
         
         // Process the token name for the reference
-        const tokenName = processTokenName(t.name, t, pathSegments)
+        const tokenName = processTokenName(t, pathSegments)
 
         // Combine all segments into the full path
         const fullPath = [

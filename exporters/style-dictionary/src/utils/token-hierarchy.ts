@@ -16,7 +16,7 @@ export function resetNameTracking(): void {
 /**
  * Processes a token name according to our rules using TokenNameTracker
  */
-export function processTokenName(name: string, token: Token, path: string[] = []): string {
+export function processTokenName(token: Token, path: string[] = []): string {
   // Get name from TokenNameTracker
   let tokenName = tokenNameTracker.getSimpleTokenName(
     token,
@@ -25,7 +25,9 @@ export function processTokenName(name: string, token: Token, path: string[] = []
     path
   )
 
-  // Remove leading underscore from any token name
+  // Remove leading underscore from any token name - these are automatically added by parsers
+  // when object keys start with numbers to make them valid identifiers, 
+  // but we don't want them in the final output
   if (tokenName.startsWith('_')) {
     tokenName = tokenName.slice(1)
   }
@@ -46,7 +48,10 @@ export function createHierarchicalStructure(
   token: Token
 ): any {
   // First level is always the type prefix from configuration or defaults
-  const prefix = getTokenPrefix(token.tokenType)
+  const prefix = NamingHelper.codeSafeVariableName(
+    getTokenPrefix(token.tokenType),
+    exportConfiguration.tokenNameStyle
+  )
   
   // Middle levels come from path segments
   const pathLevels = (path || [])
@@ -54,11 +59,13 @@ export function createHierarchicalStructure(
     .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
 
   // Process the token name using TokenNameTracker with path
-  const tokenName = processTokenName(name, token, pathLevels)
+  const tokenName = processTokenName(token, pathLevels)
 
-  // Combine all levels
+  // Combine all levels, applying tokenNameStyle to globalNamePrefix if present
   const allLevels = [
-    ...(exportConfiguration.globalNamePrefix ? [exportConfiguration.globalNamePrefix] : []),
+    ...(exportConfiguration.globalNamePrefix 
+      ? [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] 
+      : []),
     prefix,
     ...pathLevels,
     tokenName
