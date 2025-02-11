@@ -11,7 +11,7 @@ import {
   pascalCase,
   pathCase,
   sentenceCase,
-  snakeCase
+  snakeCase,
 } from "change-case"
 
 export class NamingHelper {
@@ -83,6 +83,9 @@ export class NamingHelper {
         break
       case StringCase.snakeCase:
         sentence = snakeCase(sentence)
+        break
+      case StringCase.flatCase:
+        sentence = camelCase(sentence).toLowerCase()
         break
       default:
         break

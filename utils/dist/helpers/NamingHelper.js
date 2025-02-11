@@ -63,6 +63,9 @@ class NamingHelper {
             case StringCase_1.StringCase.snakeCase:
                 sentence = (0, change_case_1.snakeCase)(sentence);
                 break;
+            case StringCase_1.StringCase.flatCase:
+                sentence = (0, change_case_1.camelCase)(sentence).toLowerCase();
+                break;
             default:
                 break;
         }

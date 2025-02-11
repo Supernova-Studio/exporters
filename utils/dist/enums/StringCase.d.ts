@@ -24,5 +24,7 @@ export declare enum StringCase {
     /** Example: "Hello world example 123" */
     sentenceCase = "sentenceCase",
     /** Example: "hello_world_example_123" */
-    snakeCase = "snakeCase"
+    snakeCase = "snakeCase",
+    /** Example: "helloworldexample123" */
+    flatCase = "flatCase"
 }

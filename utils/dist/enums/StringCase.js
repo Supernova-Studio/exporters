@@ -29,4 +29,6 @@ var StringCase;
     StringCase["sentenceCase"] = "sentenceCase";
     /** Example: "hello_world_example_123" */
     StringCase["snakeCase"] = "snakeCase";
+    /** Example: "helloworldexample123" */
+    StringCase["flatCase"] = "flatCase";
 })(StringCase || (exports.StringCase = StringCase = {}));
