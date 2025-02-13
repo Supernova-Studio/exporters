@@ -1,5 +1,5 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
-import { ExporterConfiguration, ThemeExportStyle } from "../../config"
+import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile, generateStyleFiles } from "./files/style-file"
 import { ThemeHelper } from "@supernovaio/export-utils"
