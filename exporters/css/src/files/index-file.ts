@@ -2,6 +2,7 @@ import { FileHelper, FileNameHelper, ThemeHelper } from "@supernovaio/export-uti
 import { OutputTextFile, Token, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { getStyleFileName } from "../utils/file-utils"
+import { FileStructure } from "../../config"
 
 /**
  * Generates an index CSS file that imports all token style files and theme variations.
@@ -15,6 +16,28 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Skip if index file generation is disabled in configuration
   if (!exportConfiguration.generateIndexFile) {
     return null
+  }
+
+  // For single file structure, we only need to import the main tokens file
+  if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+    const imports = exportConfiguration.exportBaseValues 
+      ? `@import "./tokens.css";`
+      : ''
+
+    const themeImports = themes.map((theme) => {
+      const themePath = ThemeHelper.getThemeIdentifier(theme)
+      const themeName = ThemeHelper.getThemeName(theme)
+      return `\n/* Theme: ${themeName} */\n@import "./tokens.${themePath}.css";`
+    }).join("\n")
+
+    const separator = imports && themeImports ? "\n\n" : ""
+    const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, '.css')
+
+    return FileHelper.createTextFile({
+      relativePath: exportConfiguration.baseIndexFilePath,
+      fileName: fileName,
+      content: imports + separator + themeImports,
+    })
   }
 
   // Extract unique token types (e.g., 'color', 'typography', etc.) from all tokens

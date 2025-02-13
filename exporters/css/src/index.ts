@@ -1,7 +1,7 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
-import { ExporterConfiguration, ThemeExportStyle } from "../config"
+import { ExporterConfiguration, ThemeExportStyle } from "../../config"
 import { indexOutputFile } from "./files/index-file"
-import { styleOutputFile } from "./files/style-file"
+import { styleOutputFile, generateStyleFiles } from "./files/style-file"
 import { ThemeHelper } from "@supernovaio/export-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
@@ -68,72 +68,49 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     
     // Handle different theme export modes
     switch (exportConfiguration.exportThemesAs) {
-      case ThemeExportStyle.ApplyDirectly:
+      case 'applyDirectly':
         // Apply all themes directly to token values
-        // This mode combines all themes into a single set of tokens
-        // Useful when you want to apply multiple themes at once without separate files
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         const directFiles = [
-          ...Object.values(TokenType)
-            .map((type) => styleOutputFile(type, tokens, tokenGroups)),
+          ...generateStyleFiles(tokens, tokenGroups),
           indexOutputFile(tokens),
         ]
         return processOutputFiles(directFiles)
 
-      case ThemeExportStyle.SeparateFiles:
+      case 'separateFiles':
         // Generate separate files for each theme
-        // Creates a new directory for each theme containing all token files
-        // Example structure:
-        // - base/color.css (base tokens)
-        // - dark/color.css (dark theme tokens)
-        // - light/color.css (light theme tokens)
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-          return Object.values(TokenType)
-            .map((type) => styleOutputFile(
-              type, 
-              themedTokens, 
-              tokenGroups, 
-              ThemeHelper.getThemeIdentifier(theme),
-              theme  // Pass the theme object for override filtering
-            ))
+          return generateStyleFiles(
+            themedTokens, 
+            tokenGroups, 
+            ThemeHelper.getThemeIdentifier(theme),
+            theme
+          )
         })
         
         // Generate base files without themes only if exportBaseValues is true
-        // These files contain the default token values before any theme is applied
         const baseFiles = exportConfiguration.exportBaseValues
-          ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          ? generateStyleFiles(tokens, tokenGroups)
           : []
 
         const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
         return processOutputFiles(separateFiles)
 
-      case ThemeExportStyle.MergedTheme:
+      case 'mergedTheme':
         // Generate base files without themes only if exportBaseValues is true
-        // These files contain the default token values in the root selector
-        // For multi-brand setups, these would be the brand's base tokens
         const baseTokenFiles = exportConfiguration.exportBaseValues
-          ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          ? generateStyleFiles(tokens, tokenGroups)
           : []
 
         // Generate themed files with all themes applied
-        // Creates a single set of files with all themed tokens
-        // All themes are combined into a 'themed' directory
-        // Particularly useful for:
-        // - Multi-brand setups where each brand has its own themes
-        // - When you want to keep brand-specific theme variations together
-        // - Scenarios where themes need to be applied on top of brand-specific tokens
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const mergedThemeFiles = Object.values(TokenType)
-          .map((type) => styleOutputFile(
-            type, 
-            themedTokens, 
-            tokenGroups, 
-            'themed',
-            themesToApply[0]  // Pass the first theme as reference for overrides
-          ))
+        const mergedThemeFiles = generateStyleFiles(
+          themedTokens, 
+          tokenGroups, 
+          'themed',
+          themesToApply[0]
+        )
 
         const mergedFiles = [...baseTokenFiles, ...mergedThemeFiles, indexOutputFile(tokens, ['themed'])]
         return processOutputFiles(mergedFiles)
@@ -143,8 +120,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Default case: Generate files without themes
   const defaultFiles = [
     ...(exportConfiguration.exportBaseValues
-      ? Object.values(TokenType)
-          .map((type) => styleOutputFile(type, tokens, tokenGroups))
+      ? generateStyleFiles(tokens, tokenGroups)
       : []),
     indexOutputFile(tokens),
   ]

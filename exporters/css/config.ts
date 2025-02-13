@@ -10,6 +10,11 @@ export enum ThemeExportStyle {
     MergedTheme = "mergedTheme"
 }
 
+export enum FileStructure {
+    SeparateByType = "separateByType",
+    SingleFile = "singleFile"
+}
+
 export type ExporterConfiguration = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: boolean
@@ -61,4 +66,6 @@ export type ExporterConfiguration = {
   customizeTokenPrefixes: boolean
   /** Global prefix for all token names. When set, all tokens will be prefixed with this value */
   globalNamePrefix: string
+  /** Controls how token styles are organized in files */
+  fileStructure: FileStructure
 }
