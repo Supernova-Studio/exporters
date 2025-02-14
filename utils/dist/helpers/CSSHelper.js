@@ -229,7 +229,7 @@ class CSSHelper {
             return this.textDecorationToCSS(option.value);
         }
         // Visibility values are supported in CSS as is our data model
-        return option.value;
+        return option.value.toLowerCase();
     }
     static blurTokenValueToCSS(blur, allTokens, options) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(blur.referencedTokenId, allTokens, options.allowReferences);
@@ -332,7 +332,7 @@ class CSSHelper {
                 return 'lowercase';
             case sdk_exporters_1.TextCase.camel:
             case sdk_exporters_1.TextCase.smallCaps:
-                return 'capitalize';
+                return 'small-caps';
         }
     }
     static textDecorationToCSS(textDecoration) {
