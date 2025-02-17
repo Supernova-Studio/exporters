@@ -1,14 +1,14 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
-## 2.1.0 - 2024-02-20
+## 2.1.0 - 2025-02-17
 
 ### 🚀 New
 - Added new "Nested themes" export format that combines all theme values into a single object structure
 - Each token now includes base value and theme-specific values in a unified structure
 - Improved theme value organization for better readability and integration
 
-## 2.0.0 - 2024-02-10
+## 2.0.0 - 2025-02-10
 
 ### 🚀 New
 

@@ -1,14 +1,14 @@
 ### CSS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
-## 3.1.0 - 2024-03-21
+## 3.1.0 - 2025-02-17
 
 ### ✨ Added
 - New `fileStructure` configuration option that controls how token styles are organized in files:
   - `separateByType`: Generate separate files for each token type (default)
   - `singleFile`: Generate one combined file containing all token types
 
-## 3.0.0 - 2024-02-10
+## 3.0.0 - 2025-02-10
 
 ### 🚀 New Features
 
