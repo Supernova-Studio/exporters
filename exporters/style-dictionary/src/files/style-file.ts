@@ -81,8 +81,13 @@ export function styleOutputFile(
   // Clear any previously cached token names to ensure clean generation
   resetTokenNameTracking()
 
-  // Skip generating base token files unless explicitly enabled or generating themed tokens
-  if (!exportConfiguration.exportBaseValues && !themePath) {
+  // Skip generating base token files unless:
+  // - Base values are explicitly enabled via exportBaseValues, or
+  // - We're generating themed files (themePath is present), or
+  // - We're using nested themes format (which needs to generate files even without base values
+  //   since it combines all theme values into a single file structure)
+  if (!exportConfiguration.exportBaseValues && !themePath && 
+      exportConfiguration.exportThemesAs !== ThemeExportStyle.NestedThemes) {
     return null
   }
 
