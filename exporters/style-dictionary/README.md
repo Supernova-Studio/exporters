@@ -23,16 +23,17 @@ Given the following design system token (meta representation for brevity):
 ```json
 {
   "color": {
-    "red": {
-      "value": "#ff0000",
-      "description": "The reddest of reds"
-    },
-    "blue": {
-      "value": "#0000ff"
-    },
-    "primary": {
-      "value": "{color.red.value}",
-      "description": "The main color used throughout the application"
+    "buttonPrimaryBackground": {
+      "description": "Primary button background color",
+      "base": {
+        "value": "#000000"
+      },
+      "theme-light": {
+        "value": "{color.primitives.gold.400}"
+      },
+      "theme-dark": {
+        "value": "{color.primitives.gold.600}"
+      }
     }
   }
 }
@@ -56,16 +57,17 @@ The exporter would produce:
 {
   "_comment": "This file was generated automatically by Supernova.io and should not be changed manually.",
   "color": {
-    "red": {
-      "value": "#ff0000",
-      "description": "The reddest of reds"
-    },
-    "blue": {
-      "value": "#0000ff"
-    },
-    "primary": {
-      "value": "{color.red.value}",
-      "description": "The main color used throughout the application"
+    "buttonPrimaryBackground": {
+      "description": "Primary button background color",
+      "base": {
+        "value": "#000000"
+      },
+      "theme-light": {
+        "value": "{color.primitives.gold.400}"
+      },
+      "theme-dark": {
+        "value": "{color.primitives.gold.600}"
+      }
     }
   }
 }
@@ -89,7 +91,11 @@ Here is a list of all the configuration options this exporter provides:
 - **colorPrecision:** Maximum number of decimals in colors.
 
 ### Themes
-- **exportThemesAs:** Control how themes are exported (separate files, applied directly, or merged).
+- **exportThemesAs:** Control how themes are exported:
+  - Separate files (one file per theme)
+  - Applied directly (themes applied to base values)
+  - Merged theme (all themes applied together in one file)
+  - Nested themes (themes as nested values per token)
 - **exportOnlyThemedTokens:** Only include tokens that differ from base values in theme files.
 - **exportBaseValues:** Include base token values along with themes.
 

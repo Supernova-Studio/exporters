@@ -1,4 +1,4 @@
-import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper, FileNameHelper } from "@supernovaio/export-utils"
+import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper, FileNameHelper, StringCase } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { tokenObjectKeyName, resetTokenNameTracking, getTokenPrefix } from "../content/token"
@@ -6,6 +6,49 @@ import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { createHierarchicalStructure, deepMerge, processTokenName } from "../utils/token-hierarchy"
 import { NamingHelper } from "@supernovaio/export-utils"
+import { ThemeExportStyle } from "../../config"
+
+/**
+ * Creates a value object for a token, either as a simple value or themed values
+ */
+function createTokenValue(
+  value: string,
+  token: Token,
+  theme?: TokenTheme
+): any {
+  const baseValue = value.replace(/['"]/g, '')
+  const description = token.description && exportConfiguration.showDescriptions 
+    ? { description: token.description.trim() } 
+    : {}
+
+  // For nested themes style, create an object with theme-specific values
+  if (exportConfiguration.exportThemesAs === ThemeExportStyle.NestedThemes) {
+    const valueObject = {
+      base: {
+        value: baseValue
+      }
+    }
+
+    // Add themed value if theme is provided
+    if (theme) {
+      valueObject[ThemeHelper.getThemeIdentifier(theme, StringCase.kebabCase)] = {
+        value: baseValue
+      }
+    }
+
+    // Add description last
+    return {
+      ...valueObject,
+      ...description
+    }
+  }
+
+  // Default case - return simple value object
+  return {
+    value: baseValue,
+    ...description
+  }
+}
 
 /**
  * Generates a TypeScript file for a specific token type (color.ts, typography.ts, etc.).
@@ -112,16 +155,10 @@ export function styleOutputFile(
     const hierarchicalObject = createHierarchicalStructure(
       token.tokenPath || [],
       token.name,
-      {
-        value: value.replace(/['"]/g, ''),
-        ...(token.description && exportConfiguration.showDescriptions 
-          ? { description: token.description.trim() } 
-          : {})
-      },
-      token // Pass the full token object instead of just tokenType
+      createTokenValue(value, token, theme),
+      token
     )
 
-    // Deep merge with existing object
     Object.assign(tokenObject, deepMerge(tokenObject, hierarchicalObject))
   })
 

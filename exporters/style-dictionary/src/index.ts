@@ -2,6 +2,8 @@ import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, Token
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { styleOutputFile } from "./files/style-file"
 import { StringCase, ThemeHelper } from "@supernovaio/export-utils"
+import { FileHelper } from "@supernovaio/export-utils"
+import { deepMerge } from "./utils/token-hierarchy"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -54,8 +56,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Process themes if specified
   if (context.themeIds && context.themeIds.length > 0) {
     const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
-
-    // Find and validate requested themes
     const themesToApply = context.themeIds.map((themeId) => {
       const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
       if (!theme) {
@@ -65,6 +65,30 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     })
     
     switch (exportConfiguration.exportThemesAs) {
+      case ThemeExportStyle.NestedThemes:
+        // Generate one file per token type containing all theme values
+        const valueObjectFiles = Object.values(TokenType)
+          .map((type) => {
+            const tokenFiles = themesToApply.map((theme) => {
+              const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
+              return styleOutputFile(type, themedTokens, tokenGroups, '', theme)
+            })
+            // Merge all theme files for this token type
+            return tokenFiles.reduce((merged, file) => {
+              if (!merged || !file) return file
+              const mergedContent = deepMerge(
+                JSON.parse(merged.content),
+                JSON.parse(file.content)
+              )
+              return FileHelper.createTextFile({
+                relativePath: file.path,
+                fileName: file.name,
+                content: JSON.stringify(mergedContent, null, exportConfiguration.indent)
+              })
+            }, null)
+          })
+        return processOutputFiles(valueObjectFiles)
+
       case ThemeExportStyle.SeparateFiles:
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])

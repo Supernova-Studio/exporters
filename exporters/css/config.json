@@ -199,6 +199,24 @@
         }
     },
     {
+        "key": "fileStructure",
+        "type": "enum",
+        "default": "separateByType",
+        "title": "File structure",
+        "description": "Control how token styles are organized in files",
+        "category": "Style files",
+        "options": {
+            "separateByType": {
+                "label": "Separate files by type",
+                "description": "Generate separate files for each token type"
+            },
+            "singleFile": {
+                "label": "Single combined file",
+                "description": "Generate one file containing all token types"
+            }
+        }
+    },
+    {
         "key": "generateEmptyFiles",
         "type": "boolean",
         "default": false,
@@ -428,23 +446,5 @@
         "title": "Indentation",
         "description": "Number of spaces used to indent CSS variables.",
         "category": "Other"
-    },
-    {
-        "key": "fileStructure",
-        "type": "enum",
-        "default": "separateByType",
-        "title": "File structure",
-        "description": "Control how token styles are organized in files",
-        "category": "Style files",
-        "options": {
-            "separateByType": {
-                "label": "Separate files by type",
-                "description": "Generate separate files for each token type"
-            },
-            "singleFile": {
-                "label": "Single combined file",
-                "description": "Generate one file containing all token types"
-            }
-        }
     }
 ]
