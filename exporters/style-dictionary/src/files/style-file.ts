@@ -23,8 +23,11 @@ function createTokenValue(
 
   // For nested themes style, create an object with theme-specific values
   if (exportConfiguration.exportThemesAs === ThemeExportStyle.NestedThemes) {
-    const valueObject = {
-      base: {
+    const valueObject = {}
+
+    // Only include base value if exportBaseValues is true
+    if (exportConfiguration.exportBaseValues) {
+      valueObject['base'] = {
         value: baseValue
       }
     }

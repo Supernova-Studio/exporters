@@ -2,7 +2,6 @@ import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, Token
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { styleOutputFile } from "./files/style-file"
 import { StringCase, ThemeHelper } from "@supernovaio/export-utils"
-import { FileHelper } from "@supernovaio/export-utils"
 import { deepMerge } from "./utils/token-hierarchy"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
@@ -69,22 +68,33 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         // Generate one file per token type containing all theme values
         const valueObjectFiles = Object.values(TokenType)
           .map((type) => {
+            // Start with base tokens
+            const baseFile = styleOutputFile(type, tokens, tokenGroups)
+            
             const tokenFiles = themesToApply.map((theme) => {
               const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
               return styleOutputFile(type, themedTokens, tokenGroups, '', theme)
             })
-            // Merge all theme files for this token type
-            return tokenFiles.reduce((merged, file) => {
-              if (!merged || !file) return file
+            
+            // Include base file in the merge if it exists
+            const allFiles = baseFile ? [baseFile, ...tokenFiles] : tokenFiles
+            
+            // Filter out null files and merge their content
+            return allFiles.reduce((merged, file) => {
+              if (!file) return merged
+              if (!merged) return file
+
+              // Merge the content directly
               const mergedContent = deepMerge(
                 JSON.parse(merged.content),
                 JSON.parse(file.content)
               )
-              return FileHelper.createTextFile({
-                relativePath: file.path,
-                fileName: file.name,
+
+              // Return a new file with merged content
+              return {
+                ...file, // Keep the path and name from the last file
                 content: JSON.stringify(mergedContent, null, exportConfiguration.indent)
-              })
+              }
             }, null)
           })
         return processOutputFiles(valueObjectFiles)
