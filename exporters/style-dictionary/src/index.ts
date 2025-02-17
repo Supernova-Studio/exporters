@@ -63,24 +63,31 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return theme
     })
     
+    // Process themes based on the selected export style
     switch (exportConfiguration.exportThemesAs) {
       case ThemeExportStyle.NestedThemes:
-        // Generate one file per token type containing all theme values
+        // Generate one file per token type with all themes nested inside each token
+        // Example output at root level:
+        // ├── color.json
+        // │   {
+        // │     "primary": {
+        // │       "base": { "value": "#000000" },
+        // │       "theme-light": { "value": "#FFFFFF" },
+        // │       "theme-dark": { "value": "#333333" },
+        // │       "description": "Primary color"
+        // │     }
+        // │   }
+        // ├── typography.json
+        // └── ...
         const valueObjectFiles = Object.values(TokenType)
           .map((type) => {
-            // Start with base tokens
-            const baseFile = styleOutputFile(type, tokens, tokenGroups)
-            
             const tokenFiles = themesToApply.map((theme) => {
               const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-              return styleOutputFile(type, themedTokens, tokenGroups, '', theme)
+              return styleOutputFile(type, themedTokens, tokenGroups, undefined, theme)
             })
-            
-            // Include base file in the merge if it exists
-            const allFiles = baseFile ? [baseFile, ...tokenFiles] : tokenFiles
-            
+
             // Filter out null files and merge their content
-            return allFiles.reduce((merged, file) => {
+            return tokenFiles.reduce((merged, file) => {
               if (!file) return merged
               if (!merged) return file
 
@@ -92,7 +99,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
               // Return a new file with merged content
               return {
-                ...file, // Keep the path and name from the last file
+                ...file,
                 content: JSON.stringify(mergedContent, null, exportConfiguration.indent)
               }
             }, null)
@@ -100,6 +107,17 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         return processOutputFiles(valueObjectFiles)
 
       case ThemeExportStyle.SeparateFiles:
+        // Generate separate files for each theme and token type
+        // Creates a directory structure like:
+        // base/
+        //   ├── color.json
+        //   └── typography.json
+        // light/
+        //   ├── color.json
+        //   └── typography.json
+        // dark/
+        //   ├── color.json
+        //   └── typography.json
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
           const themePath = ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
@@ -118,6 +136,15 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         ])
 
       case ThemeExportStyle.MergedTheme:
+        // Generate one file per token type with all themes applied together
+        // Useful when themes should be merged in a specific order
+        // Creates a directory structure like:
+        // base/              (if exportBaseValues is true)
+        //   ├── color.json
+        //   └── typography.json
+        // themed/
+        //   ├── color.json   (contains values after applying all themes)
+        //   └── typography.json
         const baseTokenFiles = exportConfiguration.exportBaseValues
           ? Object.values(TokenType)
               .map((type) => styleOutputFile(type, tokens, tokenGroups))
@@ -140,7 +167,11 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         return processOutputFiles(mergedFiles)
 
       case ThemeExportStyle.ApplyDirectly:
-        // Apply themes directly to tokens
+        // Apply theme values directly to tokens, replacing base values
+        // Generates one set of files at root level:
+        // ├── color.json     (contains themed values)
+        // ├── typography.json
+        // └── ...
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         break
     }
