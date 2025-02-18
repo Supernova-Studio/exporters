@@ -25,8 +25,9 @@ function createTokenValue(
   if (exportConfiguration.exportThemesAs === ThemeExportStyle.NestedThemes) {
     const valueObject = {}
 
-    // Only include base value if exportBaseValues is true
-    if (exportConfiguration.exportBaseValues) {
+    // Include base value only when processing base tokens (no theme)
+    // This ensures base values only come from the base file
+    if (!theme && exportConfiguration.exportBaseValues) {
       valueObject['base'] = {
         value: baseValue
       }

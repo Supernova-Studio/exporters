@@ -81,17 +81,28 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         // └── ...
         const valueObjectFiles = Object.values(TokenType)
           .map((type) => {
-            const tokenFiles = themesToApply.map((theme) => {
+            // First, create a file with base values if enabled
+            const baseFile = exportConfiguration.exportBaseValues
+              ? styleOutputFile(type, tokens, tokenGroups)
+              : null
+
+            // Then create files for each theme
+            const themeFiles = themesToApply.map((theme) => {
               const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-              return styleOutputFile(type, themedTokens, tokenGroups, undefined, theme)
+              // Pass false for exportBaseValues to prevent including base values in theme files
+              const originalExportBaseValues = exportConfiguration.exportBaseValues
+              exportConfiguration.exportBaseValues = false
+              const file = styleOutputFile(type, themedTokens, tokenGroups, undefined, theme)
+              exportConfiguration.exportBaseValues = originalExportBaseValues
+              return file
             })
 
-            // Filter out null files and merge their content
-            return tokenFiles.reduce((merged, file) => {
+            // Merge all files, starting with the base file
+            return [baseFile, ...themeFiles].reduce((merged, file) => {
               if (!file) return merged
               if (!merged) return file
 
-              // Merge the content directly
+              // Merge the content
               const mergedContent = deepMerge(
                 JSON.parse(merged.content),
                 JSON.parse(file.content)
