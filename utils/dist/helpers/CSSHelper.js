@@ -331,6 +331,7 @@ class CSSHelper {
             case sdk_exporters_1.TextCase.lower:
                 return 'lowercase';
             case sdk_exporters_1.TextCase.camel:
+                return 'capitalize';
             case sdk_exporters_1.TextCase.smallCaps:
                 return 'small-caps';
         }

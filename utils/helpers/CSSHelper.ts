@@ -484,7 +484,8 @@ import {
         case TextCase.lower:
           return 'lowercase'
         case TextCase.camel:
-        case TextCase.smallCaps:
+          return 'capitalize'
+          case TextCase.smallCaps:
           return 'small-caps'
       }
     }
