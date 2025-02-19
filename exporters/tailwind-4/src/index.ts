@@ -1,7 +1,6 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, Token, TokenGroup, TokenTheme, OutputTextFile } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
-import { indexOutputFile } from "./files/index-file"
-import { styleOutputFile } from "./files/style-file"
+import { styleOutputFile } from "./files/tailwind-file"
 import { ThemeHelper } from "@supernovaio/export-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
@@ -17,14 +16,12 @@ function processOutputFiles(files: Array<OutputTextFile | null>): Array<OutputTe
 }
 
 /**
- * Main export function that generates CSS files from design tokens
+ * Main export function that generates Tailwind CSS files from design tokens
  * 
  * This function handles:
  * - Fetching tokens and token groups from the design system
  * - Filtering tokens by brand if specified
  * - Processing themes in different modes (direct, separate files, or combined)
- * - Generating style files for each token type
- * - Creating an optional index file that imports all style files
  * 
  * @param sdk - Supernova SDK instance
  * @param context - Export context containing design system information
@@ -70,11 +67,9 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     switch (exportConfiguration.exportThemesAs) {
       case ThemeExportStyle.ApplyDirectly:
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const directFiles = processOutputFiles([
-          styleOutputFile(tokens, tokenGroups),
-          indexOutputFile()
+        return processOutputFiles([
+          styleOutputFile(tokens, tokenGroups)
         ])
-        return directFiles
 
       case ThemeExportStyle.SeparateFiles:
         const themeFiles = themesToApply.flatMap((theme) => {
@@ -91,12 +86,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
           ? styleOutputFile(tokens, tokenGroups)
           : null
 
-        const separateFiles = processOutputFiles([
-          baseFiles,
-          ...themeFiles,
-          indexOutputFile()
-        ])
-        return separateFiles
+        return processOutputFiles([baseFiles, ...themeFiles])
 
       case ThemeExportStyle.MergedTheme:
         const baseTokenFiles = exportConfiguration.exportBaseValues
@@ -111,22 +101,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
           themesToApply[0]
         )
 
-        const mergedFiles = processOutputFiles([
-          baseTokenFiles,
-          mergedThemeFiles,
-          indexOutputFile()
-        ])
-        return mergedFiles
+        return processOutputFiles([baseTokenFiles, mergedThemeFiles])
     }
   }
 
   // Default case: Generate files without themes
-  const defaultFiles = processOutputFiles([
-    exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null,
-    indexOutputFile()
+  return processOutputFiles([
+    exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null
   ])
-  
-  return defaultFiles
 })
 
 export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes: Array<TokenTheme> = []): Array<OutputTextFile> {

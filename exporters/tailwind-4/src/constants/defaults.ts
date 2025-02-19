@@ -1,33 +1,5 @@
 import { TokenType } from "@supernovaio/sdk-exporters"
 
-export const DEFAULT_STYLE_FILE_NAMES: Record<TokenType, string> = {
-  Color: "color.css",
-  Typography: "typography.css",
-  Dimension: "dimension.css",
-  Size: "size.css",
-  Space: "space.css",
-  Opacity: "opacity.css",
-  FontSize: "font-size.css",
-  LineHeight: "line-height.css",
-  LetterSpacing: "letter-spacing.css",
-  ParagraphSpacing: "paragraph-spacing.css",
-  BorderWidth: "border-width.css",
-  BorderRadius: "border-radius.css",
-  Duration: "duration.css",
-  ZIndex: "z-index.css",
-  Shadow: "shadow.css",
-  Border: "border.css",
-  Gradient: "gradient.css",
-  String: "string.css",
-  ProductCopy: "product-copy.css",
-  FontFamily: "font-family.css",
-  FontWeight: "font-weight.css",
-  TextCase: "text-case.css",
-  TextDecoration: "text-decoration.css",
-  Visibility: "visibility.css",
-  Blur: "blur.css"
-}
-
 export const DEFAULT_TOKEN_PREFIXES: Record<TokenType, string> = {
   Color: "color",
   Typography: "text",
