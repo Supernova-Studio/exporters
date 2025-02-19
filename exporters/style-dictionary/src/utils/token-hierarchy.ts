@@ -78,10 +78,25 @@ export function createHierarchicalStructure(
 }
 
 /**
- * Deeply merges objects together
+ * Deeply merges objects together, ensuring descriptions appear after all other properties
+ * 
+ * This function handles a special case for token descriptions:
+ * 1. Extracts descriptions from both objects being merged
+ * 2. Removes them temporarily to prevent them from being merged in the middle
+ * 3. Merges all other properties (themes, values, etc.)
+ * 4. Adds the description back at the very end
+ * 
+ * This ensures the output format is consistent:
+ * {
+ *   base: { value: "..." },
+ *   theme-light: { value: "..." },
+ *   theme-dark: { value: "..." },
+ *   description: "..."  // Always last
+ * }
+ * 
  * @param target Target object to merge into
  * @param source Source object to merge from
- * @returns Merged object
+ * @returns Merged object with description at the end
  */
 export function deepMerge(target: any, source: any): any {
   if (!target) return source
@@ -89,6 +104,12 @@ export function deepMerge(target: any, source: any): any {
   
   const output = { ...target }
   
+  // Get description from either object (if it exists)
+  const description = source.description || target.description
+  delete output.description
+  delete source.description
+
+  // Merge everything except description
   Object.keys(source).forEach(key => {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       if (!(key in target)) {
@@ -100,6 +121,11 @@ export function deepMerge(target: any, source: any): any {
       output[key] = source[key]
     }
   })
+
+  // Add description back at the end if it exists
+  if (description) {
+    output.description = description
+  }
   
   return output
 } 

@@ -38,6 +38,28 @@
         }
     },
     {
+        "key": "tokenNameStructure",
+        "type": "enum",
+        "default": "pathAndName",
+        "title": "Token name structure",
+        "description": "Control what parts are included in the exporter token name.",
+        "category": "Token names",
+        "options": {
+            "pathAndName": {
+                "label": "Path + Name",
+                "description": "Include path and name (e.g. button-primary-background)"
+            },
+            "nameOnly": {
+                "label": "Name only",
+                "description": "Only include name (e.g. background)"
+            },
+            "collectionPathAndName": {
+                "label": "Collection + Path + Name",
+                "description": "Include collection, path, and name (e.g. core-button-primary-background)"
+            }
+        }
+    },
+    {
         "key": "colorFormat",
         "type": "enum",
         "default": "smartHashHex",
@@ -196,6 +218,24 @@
         "category": "Index file",
         "dependsOn": {
             "generateIndexFile": true
+        }
+    },
+    {
+        "key": "fileStructure",
+        "type": "enum",
+        "default": "separateByType",
+        "title": "File structure",
+        "description": "Control how token styles are organized in files",
+        "category": "Style files",
+        "options": {
+            "separateByType": {
+                "label": "Separate files by type",
+                "description": "Generate separate files for each token type"
+            },
+            "singleFile": {
+                "label": "Single combined file",
+                "description": "Generate one file containing all token types"
+            }
         }
     },
     {

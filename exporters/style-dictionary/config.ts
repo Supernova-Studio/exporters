@@ -7,7 +7,8 @@ import { TokenType } from "@supernovaio/sdk-exporters"
 export enum ThemeExportStyle {
     ApplyDirectly = "applyDirectly",
     SeparateFiles = "separateFiles",
-    MergedTheme = "mergedTheme"
+    MergedTheme = "mergedTheme",
+    NestedThemes = "nestedThemes"
 }
 
 export enum TokenSortOrder {

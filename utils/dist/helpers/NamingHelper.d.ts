@@ -1,7 +1,7 @@
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters";
 import { StringCase } from "../enums/StringCase";
 export declare class NamingHelper {
-    static codeSafeVariableNameForToken(token: Pick<Token, 'name'>, format: StringCase, parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null, prefix: string | null): string;
+    static codeSafeVariableNameForToken(token: Pick<Token, 'name'>, format: StringCase, parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null, prefix: string | null, collectionName?: string | null, globalPrefix?: string | null): string;
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
      * if they contain spaces, case changes from one letter to another and so on.

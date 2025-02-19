@@ -145,6 +145,10 @@
             "mergedTheme": {
                 "label": "Merged theme file",
                 "description": "Generate theme object with all themes applied together"
+            },
+            "nestedThemes": {
+                "label": "Nested themes",
+                "description": "Generate objects with theme-specific values for each token"
             }
         }
     },
