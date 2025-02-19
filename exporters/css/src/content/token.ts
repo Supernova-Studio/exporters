@@ -1,3 +1,4 @@
+import { DesignSystemCollection } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection';
 import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
@@ -22,11 +23,17 @@ export function getTokenPrefix(tokenType: TokenType): string {
  * @param token - The design token to convert
  * @param mappedTokens - Map of all tokens for resolving references
  * @param tokenGroups - Array of token groups for determining token hierarchy
+ * @param collections - Array of collections for resolving collection names
  * @returns Formatted CSS custom property string with optional description comment
  */
-export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
+export function convertedToken(
+  token: Token, 
+  mappedTokens: Map<string, Token>, 
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection> = []
+): string {
   // Generate the CSS variable name based on token properties and configuration
-  const name = tokenVariableName(token, tokenGroups)
+  const name = tokenVariableName(token, tokenGroups, collections)
 
   // Convert token value to CSS, handling references and formatting according to configuration
   const value = CSSHelper.tokenToCSS(token, mappedTokens, {
@@ -37,46 +44,48 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     remBase: exportConfiguration.remBase,
     // Custom handler for token references - converts them to CSS var() syntax
     tokenToVariableRef: (t) => {
-      return `var(--${addGlobalPrefix(tokenVariableName(t, tokenGroups))})`
+      return `var(--${tokenVariableName(t, tokenGroups, collections)})`
     },
   })
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   // Add description comment if enabled and description exists
   if (exportConfiguration.showDescriptions && token.description) {
-    return `${indentString}/* ${token.description.trim()} */\n${indentString}--${addGlobalPrefix(name)}: ${value};`
+    return `${indentString}/* ${token.description.trim()} */\n${indentString}--${name}: ${value};`
   } else {
-    return `${indentString}--${addGlobalPrefix(name)}: ${value};`
+    return `${indentString}--${name}: ${value};`
   }
 }
 
 /**
  * Generates a code-safe variable name for a token based on its properties and configuration.
- * Includes type-specific prefix and considers token hierarchy.
+ * Includes type-specific prefix and considers token hierarchy and collection.
  * 
  * @param token - The token to generate a name for
  * @param tokenGroups - Array of token groups for determining token hierarchy
+ * @param collections - Array of collections for resolving collection names
  * @returns Formatted variable name string
  */
-function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
+function tokenVariableName(
+  token: Token, 
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection> = []
+): string {
   const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
-  return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent, prefix)
-}
 
-/**
- * Adds a global prefix to a variable name if configured.
- * Ensures the combined name remains code-safe.
- * 
- * @param name - The variable name to add prefix to
- * @returns Name with global prefix if configured, original name otherwise
- */
-function addGlobalPrefix(name: string): string {
-  if (!exportConfiguration.globalNamePrefix) {
-    return name
+  // Find collection if needed and exists
+  let collection: DesignSystemCollection | null = null
+  if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
+    collection = collections.find(c => c.persistentId === token.collectionId) ?? {name: token.collectionId} as DesignSystemCollection
   }
-  return NamingHelper.codeSafeVariableName(
-    `${exportConfiguration.globalNamePrefix.trim()} ${name}`,
-    exportConfiguration.tokenNameStyle
+
+  return NamingHelper.codeSafeVariableNameForToken(
+    token, 
+    exportConfiguration.tokenNameStyle, 
+    exportConfiguration.tokenNameStructure !== 'nameOnly' ? parent : null, 
+    prefix,
+    collection?.name,
+    exportConfiguration.globalNamePrefix
   )
 }

@@ -19,21 +19,38 @@ export class NamingHelper {
     token: Pick<Token, 'name'>,
     format: StringCase,
     parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null,
-    prefix: string | null
+    prefix: string | null,
+    collectionName?: string | null,
+    globalPrefix?: string | null
   ): string {
     // Create array with all path segments and token name at the end
     let fragments: Array<string> = []
+
+    // Add global prefix first if provided
+    if (globalPrefix && globalPrefix.length > 0) {
+      fragments.push(globalPrefix.trim())
+    }
+
+    // Add type-specific prefix if provided
+    if (prefix && prefix.length > 0) {
+      fragments.push(prefix)
+    }
+
+    // Add collection name if provided
+    if (collectionName && collectionName.length > 0) {
+      fragments.push(collectionName)
+    }
+
+    // Add parent path and name
     if (parent) {
-      fragments = [...parent.path]
+      fragments.push(...parent.path)
       if (!parent.isRoot) {
         fragments.push(parent.name)
       }
     }
+
+    // Add token name last
     fragments.push(token.name)
-  
-    if (prefix && prefix.length > 0) {
-      fragments.unshift(prefix)
-    }
 
     return NamingHelper.codeSafeVariableName(fragments, format)
   }

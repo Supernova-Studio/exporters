@@ -4,6 +4,7 @@ import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileStructure } from "../../config"
+import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 
 /**
  * Main entry point for generating style files
@@ -17,7 +18,8 @@ export function generateStyleFiles(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   themePath: string = '',
-  theme?: TokenTheme
+  theme?: TokenTheme,
+  tokenCollections: Array<DesignSystemCollection> = []
 ): Array<OutputTextFile> {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
   if (!exportConfiguration.exportBaseValues && !themePath) {
@@ -33,7 +35,7 @@ export function generateStyleFiles(
   // For separate files by type (existing logic)
   const types = [...new Set(tokens.map(token => token.tokenType))]
   return types
-    .map(type => styleOutputFile(type, tokens, tokenGroups, themePath, theme))
+    .map(type => styleOutputFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
     .filter((file): file is OutputTextFile => file !== null)
 }
 
@@ -44,9 +46,17 @@ export function generateStyleFiles(
  * @param tokenGroups - Array of token groups for reference
  * @param themePath - Optional path for theme-specific files (e.g. 'dark', 'light')
  * @param theme - Optional theme configuration for themed tokens
+ * @param tokenCollections - Array of token collections for reference
  * @returns OutputTextFile object if file should be generated, null otherwise
  */
-export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
+export function styleOutputFile(
+  type: TokenType, 
+  tokens: Array<Token>, 
+  tokenGroups: Array<TokenGroup>, 
+  themePath: string = '', 
+  theme?: TokenTheme, 
+  tokenCollections: Array<DesignSystemCollection> = []
+): OutputTextFile | null {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
   if (!exportConfiguration.exportBaseValues && !themePath) {
     return null
@@ -73,7 +83,7 @@ export function styleOutputFile(type: TokenType, tokens: Array<Token>, tokenGrou
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   // Convert tokens to CSS variable declarations
-  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups)).join("\n")
+  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
   const selector = themePath 
@@ -118,7 +128,8 @@ function generateCombinedStyleFile(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   themePath: string = '',
-  theme?: TokenTheme
+  theme?: TokenTheme,
+  tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
   let processedTokens = tokens
 
@@ -142,7 +153,7 @@ function generateCombinedStyleFile(
   
   // Convert all tokens to CSS variable declarations
   const cssVariables = processedTokens
-    .map((token) => convertedToken(token, mappedTokens, tokenGroups))
+    .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections))
     .join("\n")
 
   // Determine the CSS selector based on whether this is a theme file

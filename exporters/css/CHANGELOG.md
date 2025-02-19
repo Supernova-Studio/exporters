@@ -1,4 +1,4 @@
-### CSS Exporter Release Notes
+### CSS exporter release notes
 All the updates to this exporter are documented in this file.
 
 ## 3.1.0 - 2025-02-17
@@ -7,10 +7,14 @@ All the updates to this exporter are documented in this file.
 - New `fileStructure` configuration option that controls how token styles are organized in files:
   - `separateByType`: Generate separate files for each token type (default)
   - `singleFile`: Generate one combined file containing all token types
+- New `tokenNameStructure` configuration option that controls what parts are included in exported token names:
+  - `pathAndName`: Include token path and name (default)
+  - `nameOnly`: Only include token name
+  - `collectionPathAndName`: Include collection, path, and name
 
 ## 3.0.0 - 2025-02-10
 
-### 🚀 New Features
+### 🚀 New features
 
 - Added support for global name prefix configuration
 - Introduced customizable token type prefixes
@@ -21,7 +25,7 @@ All the updates to this exporter are documented in this file.
   - Merged theme output
 - Added comprehensive TypeScript type definitions
 
-### 💥 Breaking Changes
+### 💥 Breaking changes
 
 - Updated token naming convention system
 - Modified theme export structure

@@ -15,6 +15,12 @@ export enum FileStructure {
     SingleFile = "singleFile"
 }
 
+export enum TokenNameStructure {
+  PathAndName = "pathAndName",
+  NameOnly = "nameOnly",
+  CollectionPathAndName = "collectionPathAndName"
+}
+
 export type ExporterConfiguration = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: boolean
@@ -68,4 +74,6 @@ export type ExporterConfiguration = {
   globalNamePrefix: string
   /** Controls how token styles are organized in files */
   fileStructure: FileStructure
+  /** Controls what parts are included in the token name */
+  tokenNameStructure: TokenNameStructure
 }

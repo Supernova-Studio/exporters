@@ -4,19 +4,30 @@ exports.NamingHelper = void 0;
 const StringCase_1 = require("../enums/StringCase");
 const change_case_1 = require("change-case");
 class NamingHelper {
-    static codeSafeVariableNameForToken(token, format, parent, prefix) {
+    static codeSafeVariableNameForToken(token, format, parent, prefix, collectionName, globalPrefix) {
         // Create array with all path segments and token name at the end
         let fragments = [];
+        // Add global prefix first if provided
+        if (globalPrefix && globalPrefix.length > 0) {
+            fragments.push(globalPrefix.trim());
+        }
+        // Add type-specific prefix if provided
+        if (prefix && prefix.length > 0) {
+            fragments.push(prefix);
+        }
+        // Add collection name if provided
+        if (collectionName && collectionName.length > 0) {
+            fragments.push(collectionName);
+        }
+        // Add parent path and name
         if (parent) {
-            fragments = [...parent.path];
+            fragments.push(...parent.path);
             if (!parent.isRoot) {
                 fragments.push(parent.name);
             }
         }
+        // Add token name last
         fragments.push(token.name);
-        if (prefix && prefix.length > 0) {
-            fragments.unshift(prefix);
-        }
         return NamingHelper.codeSafeVariableName(fragments, format);
     }
     /**
