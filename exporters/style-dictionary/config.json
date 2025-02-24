@@ -3,21 +3,21 @@
         "key": "tokenNameStructure",
         "type": "enum",
         "default": "pathAndName",
-        "title": "Token name structure",
-        "description": "Control what parts are included in the exported token name.",
+        "title": "Token path structure",
+        "description": "Control which hierarchy levels are included in the token path.",
         "category": "Token names",
         "options": {
             "pathAndName": {
-                "label": "Path + Name",
-                "description": "Include path and name (e.g. button-primary-background)"
+                "label": "Group path + Token name",
+                "description": "Include group path and token name (e.g. button/primary/bg)"
             },
             "nameOnly": {
-                "label": "Name only",
-                "description": "Only include name (e.g. background)"
+                "label": "Token name only",
+                "description": "Only include token name without group path (e.g. primary)"
             },
             "collectionPathAndName": {
-                "label": "Collection + Path + Name",
-                "description": "Include collection, path, and name (e.g. core-button-primary-background)"
+                "label": "Collection + Group path + Token name",
+                "description": "Include collection, group path, and token name (e.g. core/button/primary/bg)"
             }
         }
     },
