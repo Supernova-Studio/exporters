@@ -16,6 +16,12 @@ export enum TokenSortOrder {
     Alphabetical = "alphabetical"
 }
 
+export enum TokenNameStructure {
+  PathAndName = "pathAndName",
+  NameOnly = "nameOnly",
+  CollectionPathAndName = "collectionPathAndName"
+}
+
 export type ExporterConfiguration = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: boolean
@@ -59,4 +65,6 @@ export type ExporterConfiguration = {
   globalNamePrefix: string
   /** Controls how tokens are sorted in the generated files */
   tokenSortOrder: TokenSortOrder
+  /** Controls what parts are included in the token name */
+  tokenNameStructure: TokenNameStructure
 }

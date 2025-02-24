@@ -1,6 +1,14 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
+## 2.2.0 - 2025-02-24
+
+### ✨ Added
+- New `tokenNameStructure` configuration option that controls how token names are structured:
+  - `pathAndName`: Include path and name (e.g. button-primary-background)
+  - `nameOnly`: Only include name (e.g. background)
+  - `collectionPathAndName`: Include collection, path, and name (e.g. core-button-primary-background)
+
 ## 2.1.0 - 2025-02-17
 
 ### 🚀 New

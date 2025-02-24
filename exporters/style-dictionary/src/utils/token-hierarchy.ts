@@ -1,4 +1,5 @@
 import { TokenType, Token } from "@supernovaio/sdk-exporters"
+import { DesignSystemCollection } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection'
 import { NamingHelper, TokenNameTracker } from "@supernovaio/export-utils"
 import { exportConfiguration } from ".."
 import { getTokenPrefix } from "../content/token"
@@ -16,7 +17,11 @@ export function resetNameTracking(): void {
 /**
  * Processes a token name according to our rules using TokenNameTracker
  */
-export function processTokenName(token: Token, path: string[] = []): string {
+export function processTokenName(
+  token: Token, 
+  path: string[] = [],
+  collections: Array<DesignSystemCollection> = []
+): string {
   // Get name from TokenNameTracker
   let tokenName = tokenNameTracker.getSimpleTokenName(
     token,
@@ -25,9 +30,7 @@ export function processTokenName(token: Token, path: string[] = []): string {
     path
   )
 
-  // Remove leading underscore from any token name - these are automatically added by parsers
-  // when object keys start with numbers to make them valid identifiers, 
-  // but we don't want them in the final output
+  // Remove leading underscore from any token name
   if (tokenName.startsWith('_')) {
     tokenName = tokenName.slice(1)
   }
@@ -45,13 +48,38 @@ export function createHierarchicalStructure(
   path: string[] | undefined, 
   name: string, 
   value: any,
-  token: Token
+  token: Token,
+  collections: Array<DesignSystemCollection> = []
 ): any {
   // First level is always the type prefix from configuration or defaults
   const prefix = NamingHelper.codeSafeVariableName(
     getTokenPrefix(token.tokenType),
     exportConfiguration.tokenNameStyle
   )
+  
+  // For nameOnly, we only include type and name
+  if (exportConfiguration.tokenNameStructure === 'nameOnly') {
+    const tokenName = processTokenName(token, [])
+    const allLevels = [
+      ...(exportConfiguration.globalNamePrefix 
+        ? [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] 
+        : []),
+      prefix,
+      tokenName
+    ]
+    return allLevels.reduceRight((nestedValue, segment) => ({
+      [segment]: nestedValue
+    }), value)
+  }
+  
+  // Get collection name if needed
+  let collectionSegment: string[] = []
+  if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
+    const collection = collections.find(c => c.persistentId === token.collectionId)
+    if (collection) {
+      collectionSegment = [NamingHelper.codeSafeVariableName(collection.name, exportConfiguration.tokenNameStyle)]
+    }
+  }
   
   // Middle levels come from path segments
   const pathLevels = (path || [])
@@ -61,12 +89,13 @@ export function createHierarchicalStructure(
   // Process the token name using TokenNameTracker with path
   const tokenName = processTokenName(token, pathLevels)
 
-  // Combine all levels, applying tokenNameStyle to globalNamePrefix if present
+  // Combine all levels
   const allLevels = [
     ...(exportConfiguration.globalNamePrefix 
       ? [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] 
       : []),
     prefix,
+    ...collectionSegment,
     ...pathLevels,
     tokenName
   ]

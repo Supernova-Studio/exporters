@@ -78,10 +78,14 @@ The exporter would produce:
 Here is a list of all the configuration options this exporter provides:
 
 ### Token names
-- **globalNamePrefix:** Prefix all token names (e.g., 'ds_color_primary').
-- **customizeTokenPrefixes:** Customize the prefixes for each design token type.
-- **tokenPrefixes:** Define specific prefixes for each token type (when customizeTokenPrefixes is enabled).
-- **tokenNameStyle:** Define the naming convention of the exported tokens (camelCase, constantCase, flatCase, pascalCase, or snakeCase).
+- **tokenNameStructure:** Control what parts are included in the exported token names:
+  - `pathAndName` (default): Include path and name (e.g. button-primary-background)
+  - `nameOnly`: Only include name (e.g. background)
+  - `collectionPathAndName`: Include collection, path, and name (e.g. core-button-primary-background)
+- **tokenNameStyle:** Define the naming convention of the exported tokens (camelCase, constantCase, flatCase, pascalCase, or snakeCase)
+- **globalNamePrefix:** Prefix all token names (e.g., 'ds_color_primary')
+- **customizeTokenPrefixes:** Customize the prefixes for each design token type
+- **tokenPrefixes:** Define specific prefixes for each token type (when customizeTokenPrefixes is enabled)
 
 ### Token values
 - **colorFormat:** Set the format for color exports (HEX, RGB, HSL, OKLCH with various options).

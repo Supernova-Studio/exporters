@@ -36,9 +36,10 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     versionId: context.versionId,
   }
 
-  // Fetch tokens and token groups
+  // Fetch tokens, groups and collections
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
+  let tokenCollections = await sdk.tokens.getTokenCollections(remoteVersionIdentifier)
 
   // Filter by brand if specified
   if (context.brandId) {
@@ -83,7 +84,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
           .map((type) => {
             // First, create a file with base values if enabled
             const baseFile = exportConfiguration.exportBaseValues
-              ? styleOutputFile(type, tokens, tokenGroups)
+              ? styleOutputFile(type, tokens, tokenGroups, '', undefined, tokenCollections)
               : null
 
             // Then create files for each theme
@@ -92,7 +93,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
               // Pass false for exportBaseValues to prevent including base values in theme files
               const originalExportBaseValues = exportConfiguration.exportBaseValues
               exportConfiguration.exportBaseValues = false
-              const file = styleOutputFile(type, themedTokens, tokenGroups, undefined, theme)
+              const file = styleOutputFile(type, themedTokens, tokenGroups, '', theme, tokenCollections)
               exportConfiguration.exportBaseValues = originalExportBaseValues
               return file
             })
@@ -133,12 +134,12 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
           const themePath = ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
           return Object.values(TokenType)
-            .map((type) => styleOutputFile(type, themedTokens, tokenGroups, themePath, theme))
+            .map((type) => styleOutputFile(type, themedTokens, tokenGroups, themePath, theme, tokenCollections))
         })
         
         const baseFiles = exportConfiguration.exportBaseValues
           ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+              .map((type) => styleOutputFile(type, tokens, tokenGroups, '', undefined, tokenCollections))
           : []
 
         return processOutputFiles([
@@ -158,7 +159,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         //   └── typography.json
         const baseTokenFiles = exportConfiguration.exportBaseValues
           ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+              .map((type) => styleOutputFile(type, tokens, tokenGroups, '', undefined, tokenCollections))
           : []
 
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
@@ -168,7 +169,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
             themedTokens, 
             tokenGroups, 
             'themed',
-            themesToApply[0]
+            themesToApply[0],
+            tokenCollections
           ))
 
         const mergedFiles = [
@@ -191,7 +193,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Default case: Generate files without themes
   const defaultFiles = exportConfiguration.exportBaseValues
     ? Object.values(TokenType)
-        .map((type) => styleOutputFile(type, tokens, tokenGroups))
+        .map((type) => styleOutputFile(type, tokens, tokenGroups, '', undefined, tokenCollections))
     : []
   
   return processOutputFiles(defaultFiles)

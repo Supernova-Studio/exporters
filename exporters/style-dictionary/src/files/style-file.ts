@@ -1,12 +1,13 @@
 import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper, FileNameHelper, StringCase } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { DesignSystemCollection } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection'
 import { exportConfiguration } from ".."
 import { tokenObjectKeyName, resetTokenNameTracking, getTokenPrefix } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { createHierarchicalStructure, deepMerge, processTokenName } from "../utils/token-hierarchy"
 import { NamingHelper } from "@supernovaio/export-utils"
-import { ThemeExportStyle } from "../../config"
+import { ThemeExportStyle, TokenNameStructure } from "../../config"
 
 /**
  * Creates a value object for a token, either as a simple value or themed values
@@ -70,6 +71,7 @@ function createTokenValue(
  * @param tokenGroups - Array of token groups for name generation
  * @param themePath - Path for themed tokens (empty for base tokens)
  * @param theme - Theme configuration when generating themed tokens
+ * @param collections - Array of design system collections
  * @returns OutputTextFile with the generated content or null if no tokens exist
  */
 export function styleOutputFile(
@@ -77,7 +79,8 @@ export function styleOutputFile(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   themePath: string = '',
-  theme?: TokenTheme
+  theme?: TokenTheme,
+  collections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
   // Clear any previously cached token names to ensure clean generation
   resetTokenNameTracking()
@@ -118,8 +121,8 @@ export function styleOutputFile(
   let sortedTokens = [...tokensOfType]
   if (exportConfiguration.tokenSortOrder === 'alphabetical') {
     sortedTokens.sort((a, b) => {
-      const nameA = tokenObjectKeyName(a, tokenGroups, true)
-      const nameB = tokenObjectKeyName(b, tokenGroups, true)
+      const nameA = tokenObjectKeyName(a, tokenGroups, true, collections)
+      const nameB = tokenObjectKeyName(b, tokenGroups, true, collections)
       return nameA.localeCompare(nameB)
     })
   }
@@ -133,6 +136,7 @@ export function styleOutputFile(
   }
   
   sortedTokens.forEach(token => {
+    const name = tokenObjectKeyName(token, tokenGroups, true, collections)
     const value = CSSHelper.tokenToCSS(token, mappedTokens, {
       allowReferences: exportConfiguration.useReferences,
       decimals: exportConfiguration.colorPrecision,
@@ -142,21 +146,50 @@ export function styleOutputFile(
       tokenToVariableRef: (t) => {
         // Build the full reference path
         const prefix = getTokenPrefix(t.tokenType)
+
+        // Get path segments and include them based on structure type
         const pathSegments = (t.tokenPath || [])
           .filter(segment => segment && segment.trim().length > 0)
           .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
-        
-        // Process the token name for the reference
+
+        // Process the token name
         const tokenName = processTokenName(t, pathSegments)
 
-        // Combine all segments into the full path
-        const fullPath = [
-          prefix,
-          ...pathSegments,
-          tokenName
-        ].join('.')
+        // Combine all segments based on structure type
+        let segments: string[] = [prefix]
 
-        return `{${fullPath}}`
+        switch (exportConfiguration.tokenNameStructure) {
+          case TokenNameStructure.NameOnly:
+            segments.push(tokenName)
+            break
+            
+          case TokenNameStructure.CollectionPathAndName:
+            if (t.collectionId) {
+              const collection = collections.find(c => c.persistentId === t.collectionId)
+              if (collection) {
+                const collectionSegment = NamingHelper.codeSafeVariableName(collection.name, exportConfiguration.tokenNameStyle)
+                segments.push(collectionSegment)
+              }
+            }
+            segments.push(...pathSegments, tokenName)
+            break
+            
+          case TokenNameStructure.PathAndName:
+            segments.push(...pathSegments, tokenName)
+            break
+        }
+
+        // Add global prefix if configured
+        if (exportConfiguration.globalNamePrefix) {
+          segments.unshift(
+            NamingHelper.codeSafeVariableName(
+              exportConfiguration.globalNamePrefix, 
+              exportConfiguration.tokenNameStyle
+            )
+          )
+        }
+
+        return `{${segments.join('.')}}`
       }
     })
 
@@ -165,7 +198,8 @@ export function styleOutputFile(
       token.tokenPath || [],
       token.name,
       createTokenValue(value, token, theme),
-      token
+      token,
+      collections
     )
 
     Object.assign(tokenObject, deepMerge(tokenObject, hierarchicalObject))
