@@ -111,8 +111,8 @@ export function createHierarchicalStructure(
     pathSegments
   )
 
-  // Add the unique token name as the final segment
-  segments.push(tokenName)
+  // Add the unique token name as the final segment, removing any leading underscore
+  segments.push(tokenName.replace(/^_/, ''))
 
   // Build the nested object structure from the segments
   return segments.reduceRight((nestedValue, segment) => ({
