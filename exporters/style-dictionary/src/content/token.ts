@@ -18,10 +18,11 @@ export function tokenObjectKeyName(
   forExport: boolean = false,
   collections: Array<DesignSystemCollection> = []
 ): string {
-  // Find collection if needed and exists
-  let collection: DesignSystemCollection | null = null
+  // Find collection if needed
+  let collectionName: string | null = null
   if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
-    collection = collections.find(c => c.persistentId === token.collectionId) ?? {name: token.collectionId} as DesignSystemCollection
+    const collection = collections.find(c => c.persistentId === token.collectionId)
+    collectionName = collection?.name ?? null
   }
 
   // For nameOnly structure, don't pass the parent group
@@ -29,18 +30,15 @@ export function tokenObjectKeyName(
     tokenGroups.find((group) => group.id === token.parentGroupId) : 
     null
 
-  // Ensure parent is either a valid TokenGroup or null
-  const parent = parentGroup ?? null
-
   // Get the prefix for this token type
   const prefix = getTokenPrefix(token.tokenType)
 
   return NamingHelper.codeSafeVariableNameForToken(
     token,
     exportConfiguration.tokenNameStyle,
-    parent,
+    parentGroup ?? null,
     prefix,
-    collection?.name,
+    collectionName,
     exportConfiguration.globalNamePrefix
   )
 }

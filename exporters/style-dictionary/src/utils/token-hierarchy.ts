@@ -51,57 +51,71 @@ export function createHierarchicalStructure(
   token: Token,
   collections: Array<DesignSystemCollection> = []
 ): any {
-  // First level is always the type prefix from configuration or defaults
+  // Get collection name if needed for collection-based token organization
+  let collectionSegment: string | null = null
+  if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
+    const collection = collections.find(c => c.persistentId === token.collectionId)
+    collectionSegment = collection?.name ?? null
+  }
+
+  // First level is always the type prefix (e.g., 'color', 'typography')
   const prefix = NamingHelper.codeSafeVariableName(
     getTokenPrefix(token.tokenType),
     exportConfiguration.tokenNameStyle
   )
-  
-  // For nameOnly, we only include type and name
-  if (exportConfiguration.tokenNameStructure === 'nameOnly') {
-    const tokenName = processTokenName(token, [])
-    const allLevels = [
-      ...(exportConfiguration.globalNamePrefix 
-        ? [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] 
-        : []),
-      prefix,
-      tokenName
-    ]
-    return allLevels.reduceRight((nestedValue, segment) => ({
-      [segment]: nestedValue
-    }), value)
-  }
-  
-  // Get collection name if needed
-  let collectionSegment: string[] = []
-  if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
-    const collection = collections.find(c => c.persistentId === token.collectionId)
-    if (collection) {
-      collectionSegment = [NamingHelper.codeSafeVariableName(collection.name, exportConfiguration.tokenNameStyle)]
-    }
-  }
-  
-  // Middle levels come from path segments
-  const pathLevels = (path || [])
-    .filter(segment => segment && segment.trim().length > 0)
-    .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
 
-  // Process the token name using TokenNameTracker with path
-  const tokenName = processTokenName(token, pathLevels)
-
-  // Combine all levels
-  const allLevels = [
-    ...(exportConfiguration.globalNamePrefix 
-      ? [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] 
-      : []),
-    prefix,
-    ...collectionSegment,
-    ...pathLevels,
-    tokenName
+  // Build the initial segments array with global prefix (if any) and type prefix
+  const segments = [
+    ...(exportConfiguration.globalNamePrefix ? 
+      [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] : 
+      []),
+    prefix
   ]
 
-  // Build the nested structure
-  return allLevels.reduceRight((nestedValue, segment) => ({
+  // Add collection to the output path if present
+  if (collectionSegment) {
+    segments.push(NamingHelper.codeSafeVariableName(collectionSegment, exportConfiguration.tokenNameStyle))
+  }
+
+  // Create path segments array for name uniqueness checking
+  // We include the collection name here so tokens with the same path in different collections
+  // don't get treated as duplicates
+  const pathSegments = [
+    // Collection name (if any) becomes part of the uniqueness check
+    ...(collectionSegment ? [collectionSegment] : []),
+    // Regular path segments are included unless nameOnly structure is selected
+    ...(exportConfiguration.tokenNameStructure !== 'nameOnly'
+      ? (path || [])
+          .filter(segment => segment && segment.trim().length > 0)
+          .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
+      : [])
+  ]
+
+  // Add path segments to the output structure
+  // We don't include collection here since it was already added above
+  if (exportConfiguration.tokenNameStructure !== 'nameOnly') {
+    segments.push(
+      ...(path || [])
+        .filter(segment => segment && segment.trim().length > 0)
+        .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
+    )
+  }
+
+  // Generate a unique token name that considers the collection context
+  // This ensures we only add numbering (_1, _2) when there are actual conflicts
+  // within the same collection path
+  const tokenName = tokenNameTracker.getSimpleTokenName(
+    token,
+    exportConfiguration.tokenNameStyle,
+    false,
+    pathSegments
+  )
+
+  // Add the unique token name as the final segment
+  segments.push(tokenName)
+
+  // Build the nested object structure from the segments
+  return segments.reduceRight((nestedValue, segment) => ({
     [segment]: nestedValue
   }), value)
 }
