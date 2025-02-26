@@ -69,7 +69,7 @@ export function createHierarchicalStructure(
     ...(exportConfiguration.globalNamePrefix ? 
       [NamingHelper.codeSafeVariableName(exportConfiguration.globalNamePrefix, exportConfiguration.tokenNameStyle)] : 
       []),
-    prefix
+    ...(prefix ? [prefix] : [])
   ]
 
   // Add collection to the output path if present
