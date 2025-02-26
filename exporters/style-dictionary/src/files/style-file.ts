@@ -156,7 +156,10 @@ export function styleOutputFile(
         const tokenName = processTokenName(t, pathSegments)
 
         // Combine all segments based on structure type
-        let segments: string[] = [prefix]
+        let segments: string[] = []
+        if (prefix) {
+          segments.push(prefix)
+        }
 
         switch (exportConfiguration.tokenNameStructure) {
           case TokenNameStructure.NameOnly:
