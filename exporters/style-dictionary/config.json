@@ -321,7 +321,7 @@
     {
         "key": "customizeTokenPrefixes",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "title": "Customize type prefixes",
         "description": "Customize the prefixes for each design token type.",
         "category": "Token names",
@@ -343,7 +343,7 @@
             "Border": "border",
             "BorderRadius": "borderRadius",
             "BorderWidth": "borderWidth",
-            "Color": "",
+            "Color": "color",
             "Dimension": "dimension",
             "Duration": "duration",
             "FontFamily": "fontFamily",
