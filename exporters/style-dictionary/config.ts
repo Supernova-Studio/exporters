@@ -67,4 +67,6 @@ export type ExporterConfiguration = {
   tokenSortOrder: TokenSortOrder
   /** Controls what parts are included in the token name */
   tokenNameStructure: TokenNameStructure
+  /** When enabled, token names will be prefixed with their type */
+  useTokenTypePrefixes: boolean
 }

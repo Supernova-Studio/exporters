@@ -10,6 +10,23 @@ import { NamingHelper } from "@supernovaio/export-utils"
 import { ThemeExportStyle, TokenNameStructure } from "../../config"
 
 /**
+ * Gets the token type string for Style Dictionary output
+ * This is different from getTokenPrefix because we always want a type,
+ * even when useTokenTypePrefixes is false
+ */
+function getTokenTypeForOutput(tokenType: TokenType): string {
+  // If using token prefixes, use the configured prefix
+  if (exportConfiguration.useTokenTypePrefixes) {
+    return exportConfiguration.customizeTokenPrefixes
+      ? exportConfiguration.tokenPrefixes[tokenType]
+      : DEFAULT_TOKEN_PREFIXES[tokenType]
+  }
+  
+  // Otherwise, use the default prefix for the type
+  return DEFAULT_TOKEN_PREFIXES[tokenType]
+}
+
+/**
  * Creates a value object for a token, either as a simple value or themed values
  */
 function createTokenValue(
@@ -21,6 +38,9 @@ function createTokenValue(
   const description = token.description && exportConfiguration.showDescriptions 
     ? { description: token.description.trim() } 
     : {}
+  
+  // Get the token type, forcing a return value even when prefixes are disabled
+  const tokenType = getTokenPrefix(token.tokenType, true)
 
   // For nested themes style, create an object with theme-specific values
   if (exportConfiguration.exportThemesAs === ThemeExportStyle.NestedThemes) {
@@ -30,14 +50,16 @@ function createTokenValue(
     // This ensures base values only come from the base file
     if (!theme && exportConfiguration.exportBaseValues) {
       valueObject['base'] = {
-        value: baseValue
+        value: baseValue,
+        type: tokenType
       }
     }
 
     // Add themed value if theme is provided
     if (theme) {
       valueObject[ThemeHelper.getThemeIdentifier(theme, StringCase.kebabCase)] = {
-        value: baseValue
+        value: baseValue,
+        type: tokenType
       }
     }
 
@@ -48,9 +70,10 @@ function createTokenValue(
     }
   }
 
-  // Default case - return simple value object
+  // Default case - return simple value object with type
   return {
     value: baseValue,
+    type: tokenType,
     ...description
   }
 }

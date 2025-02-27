@@ -84,6 +84,7 @@ Here is a list of all the configuration options this exporter provides:
   - `collectionPathAndName`: Include collection, path, and name (e.g. core-button-primary-background)
 - **tokenNameStyle:** Define the naming convention of the exported tokens (camelCase, constantCase, flatCase, pascalCase, or snakeCase)
 - **globalNamePrefix:** Prefix all token names (e.g., 'ds_color_primary')
+- **useTokenTypePrefixes:** Control whether token names are prefixed with their type (e.g., 'color.primary' vs just 'primary')
 - **customizeTokenPrefixes:** Customize the prefixes for each design token type
 - **tokenPrefixes:** Define specific prefixes for each token type (when customizeTokenPrefixes is enabled)
 
