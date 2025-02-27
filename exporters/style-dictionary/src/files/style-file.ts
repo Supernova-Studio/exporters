@@ -10,23 +10,6 @@ import { NamingHelper } from "@supernovaio/export-utils"
 import { ThemeExportStyle, TokenNameStructure } from "../../config"
 
 /**
- * Gets the token type string for Style Dictionary output
- * This is different from getTokenPrefix because we always want a type,
- * even when useTokenTypePrefixes is false
- */
-function getTokenTypeForOutput(tokenType: TokenType): string {
-  // If using token prefixes, use the configured prefix
-  if (exportConfiguration.useTokenTypePrefixes) {
-    return exportConfiguration.customizeTokenPrefixes
-      ? exportConfiguration.tokenPrefixes[tokenType]
-      : DEFAULT_TOKEN_PREFIXES[tokenType]
-  }
-  
-  // Otherwise, use the default prefix for the type
-  return DEFAULT_TOKEN_PREFIXES[tokenType]
-}
-
-/**
  * Creates a value object for a token, either as a simple value or themed values
  */
 function createTokenValue(

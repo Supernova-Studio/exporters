@@ -13,7 +13,7 @@ export function getTokenPrefix(tokenType: TokenType, forceReturn: boolean = fals
   }
   
   return exportConfiguration.customizeTokenPrefixes
-    ? exportConfiguration.tokenPrefixes[tokenType]
+    ? exportConfiguration.tokenPrefixes[tokenType].trim()
     : DEFAULT_TOKEN_PREFIXES[tokenType]
 }
 
