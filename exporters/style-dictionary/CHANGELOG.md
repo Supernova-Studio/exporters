@@ -1,6 +1,12 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
+## 2.3.0 - 2025-02-27
+
+### ✨ Added
+- Added token `type` information to Style Dictionary output for better compatibility
+- New `useTokenTypePrefixes` configuration option that controls whether token names are prefixed with their type
+
 ## 2.2.0 - 2025-02-24
 
 ### ✨ Added
