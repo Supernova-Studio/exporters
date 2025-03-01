@@ -12,7 +12,7 @@
                 "description": "Example: --myVariableName"
             },
             "constantCase": {
-                "label": "Constant case", 
+                "label": "Constant case",
                 "description": "Example: --MY_VARIABLE_NAME"
             },
             "flatCase": {
@@ -468,5 +468,21 @@
         "title": "Indentation",
         "description": "Number of spaces used to indent CSS variables.",
         "category": "Other"
+    },
+    {
+        "key": "propertyToWriteTo",
+        "type": "string",
+        "default": "React",
+        "title": "Property to write name to",
+        "description": "If provided, token name will be written back to this specific property (both name and codename can be provided and will be matched).",
+        "category": "Write"
+    },
+    {
+        "key": "propertyToWriteToIncludesVar",
+        "type": "boolean",
+        "default": true,
+        "title": "Include var() in property",
+        "description": "If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.",
+        "category": "Write"
     }
 ]
