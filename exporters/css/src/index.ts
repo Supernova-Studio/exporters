@@ -1,8 +1,8 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile } from "@supernovaio/sdk-exporters"
-import { ExporterConfiguration } from "../config"
+import { ThemeHelper } from "@supernovaio/export-utils"
+import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { generateStyleFiles } from "./files/style-file"
-import { ThemeHelper } from "@supernovaio/export-utils"
 import { WriteTokenPropStore } from "./WriteTokenPropStore"
 import { tokenVariableName } from "./content/token"
 
@@ -33,7 +33,6 @@ function processOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutput
  * @returns Promise resolving to an array of output files
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  console.log("Exporting design tokens...")
   // Fetch data from design system that is currently being exported
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
@@ -57,7 +56,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     tokens = tokens.filter((token) => token.brandId === brand.id)
     tokenGroups = tokenGroups.filter((tokenGroup) => tokenGroup.brandId === brand.id)
   }
-  console.log("Exporting design tokens...")
 
   // Process themes if specified
   if (context.themeIds && context.themeIds.length > 0) {
@@ -74,14 +72,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
     // Handle different theme export modes
     switch (exportConfiguration.exportThemesAs) {
-      case "applyDirectly":
+      case ThemeExportStyle.ApplyDirectly:
         // Apply all themes directly to token values
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         const directFiles = [...generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections), indexOutputFile(tokens)]
         outputFiles = processOutputFiles(directFiles)
         break
 
-      case "separateFiles":
+      case ThemeExportStyle.SeparateFiles:
         // Generate separate files for each theme
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
@@ -97,7 +95,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         outputFiles = processOutputFiles(separateFiles)
         break
 
-      case "mergedTheme":
+      case ThemeExportStyle.MergedTheme:
         // Generate base files without themes only if exportBaseValues is true
         const baseTokenFiles = exportConfiguration.exportBaseValues
           ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)

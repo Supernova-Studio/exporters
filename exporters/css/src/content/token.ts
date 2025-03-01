@@ -3,6 +3,7 @@ import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-util
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
+import { TokenNameStructure } from "../../config"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -70,14 +71,14 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, 
 
   // Find collection if needed and exists
   let collection: DesignSystemCollection | null = null
-  if (exportConfiguration.tokenNameStructure === "collectionPathAndName" && token.collectionId) {
+  if (exportConfiguration.tokenNameStructure === TokenNameStructure.CollectionPathAndName && token.collectionId) {
     collection = collections.find((c) => c.persistentId === token.collectionId) ?? ({ name: token.collectionId } as DesignSystemCollection)
   }
 
   return NamingHelper.codeSafeVariableNameForToken(
     token,
     exportConfiguration.tokenNameStyle,
-    exportConfiguration.tokenNameStructure !== "nameOnly" ? parent : null,
+    exportConfiguration.tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
     prefix,
     collection?.name,
     exportConfiguration.globalNamePrefix

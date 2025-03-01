@@ -65,7 +65,7 @@ export class WriteTokenPropStore {
       // Create the property if it doesn’t exist
       if (!property) {
         void (await this.sdk.tokens.createTokenProperty(this.target, {
-          type: "Text" as any,
+          type: "Text" as ElementPropertyType,
           name: propertyName,
           codeName: NamingHelper.codeSafeVariableName([propertyName], StringCase.camelCase),
           columnWidth: 200,
@@ -95,13 +95,9 @@ export class WriteTokenPropStore {
    * @param valueGenerator - A function that generates the property value (usually name) for each token.
    */
   public async writeTokenProperties(propertyName: string, tokens: Token[], valueGenerator: (token: Token) => string): Promise<void> {
-    console.log(propertyName)
     const trimmedPropertyName = propertyName?.trim()
     if (!trimmedPropertyName) {
-      console.log("Skipping writing token properties as no property name was provided.")
       return
-    } else {
-      console.log(`Writing token properties to ${trimmedPropertyName} for ${tokens.length} tokens...`)
     }
 
     for (const token of tokens) {
@@ -109,9 +105,6 @@ export class WriteTokenPropStore {
       this.storeValueForTokenProperty(token, trimmedPropertyName, value)
     }
 
-    // return
-
     await this.batchUpdateStoredTokenProperties()
-    console.log(`Wrote token properties to ${trimmedPropertyName}, updated for ${tokens.length} tokens.`)
   }
 }
