@@ -1,9 +1,8 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile } from "@supernovaio/sdk-exporters"
-import { ThemeHelper } from "@supernovaio/export-utils"
+import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { generateStyleFiles } from "./files/style-file"
-import { WriteTokenPropStore } from "./WriteTokenPropStore"
 import { tokenVariableName } from "./content/token"
 
 /** Exporter configuration from the resolved default configuration and user overrides */

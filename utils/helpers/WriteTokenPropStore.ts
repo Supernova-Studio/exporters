@@ -1,5 +1,6 @@
-import { NamingHelper, StringCase } from "@supernovaio/export-utils"
 import { ElementPropertyType, RemoteVersionIdentifier, Supernova, Token } from "@supernovaio/sdk-exporters"
+import { NamingHelper } from "./NamingHelper"
+import { StringCase } from "../enums/StringCase"
 
 /**
  * Class responsible for storing and updating token properties in Supernova.
