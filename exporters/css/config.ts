@@ -79,5 +79,5 @@ export type ExporterConfiguration = {
   /** If provided, token name will be written back to this specific property (both name and codename can be provided and will be matched) */
   propertyToWriteNameTo: string
   /** If enabled, the resulting properties will be encapsulated in var() syntax for easier copying */
-  propertyToWriteToIncludesVar: boolean
+  propertyToWriteNameToIncludesVar: boolean
 }

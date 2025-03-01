@@ -470,7 +470,7 @@
         "category": "Other"
     },
     {
-        "key": "propertyToWriteTo",
+        "key": "propertyToWriteNameTo",
         "type": "string",
         "default": "React",
         "title": "Property to write name to",
@@ -478,7 +478,7 @@
         "category": "Write"
     },
     {
-        "key": "propertyToWriteToIncludesVar",
+        "key": "propertyToWriteNameToIncludesVar",
         "type": "boolean",
         "default": true,
         "title": "Include var() in property",
