@@ -13,10 +13,10 @@
         "@supernovaio/export-utils": "file:../../utils"
     },
     "peerDependencies": {
-        "@supernovaio/sdk-exporters": "2.0.32"
+        "@supernovaio/sdk-exporters": "2.0.38"
     },
     "devDependencies": {
-        "@supernovaio/sdk-exporters": "2.0.32",
+        "@supernovaio/sdk-exporters": "2.0.38",
         "prettier": "3.0.3",
         "terser-webpack-plugin": "5.3.9",
         "ts-loader": "^7.0.5",
