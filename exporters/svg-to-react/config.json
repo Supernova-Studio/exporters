@@ -1,4 +1,6 @@
-[{
+[
+    {
+        "category": "Svg export settings",
         "key": "svgScale",
         "type": "enum",
         "options": [
@@ -8,94 +10,121 @@
             "x4"
         ],
         "default": "x1",
-        "title": "SVG Scale",
-        "description": "Scale of the exported SVG. Allowed options are x1, x2, x3, x4. By default, assets are exported as x1, the original size"
+        "title": "Svg scale",
+        "description": "Scale of the exported SVG. Default is x1 (original size)."
     },
     {
+        "category": "Svg export settings",
         "key": "optimize",
         "type": "boolean",
         "default": true,
-        "title": "Optimize SVG",
-        "description": "Optimize SVG using SVGO plugin. This will remove all unnecessary attributes from SVG, making it substantially smaller"
+        "title": "Optimize svg",
+        "description": "Optimize SVG using SVGO plugin to reduce file size."
     },
     {
+        "category": "File organization",
         "key": "keepOriginalSvgs",
         "type": "boolean",
         "default": true,
-        "title": "Keep Original SVGs",
-        "description": "When enabled, original SVGs will be generated and stored alongside the component"
+        "title": "Keep original svgs",
+        "description": "Generate and store original SVGs alongside components."
     },
     {
+        "category": "File organization",
         "key": "originalSvgFolder",
         "type": "string",
         "default": "src",
-        "title": "Original SVGs folder",
-        "description": "Folder to write the original SVGs to. Ignored when original SVGs are not generated to the output"
+        "title": "Original svgs folder",
+        "description": "Folder for original SVGs. Ignored when original SVGs are not generated.",
+        "dependsOn": {
+            "keepOriginalSvgs": true
+        }
     },
     {
+        "category": "File organization",
         "key": "componentFolder",
         "type": "string",
         "default": "dist",
-        "title": "Keep Original SVGs",
-        "description": "Folder to write the components to"
+        "title": "Component folder",
+        "description": "Folder to write the components to."
     },
     {
+        "category": "Component generation",
         "key": "typescript",
         "type": "boolean",
         "default": true,
-        "title": "Typescript Compatibility",
-        "description": "When enabled, definitions will be generated to be typescript compatible, otherwise javascript definition is generated instead"
+        "title": "Typescript compatibility",
+        "description": "Generate TypeScript-compatible definitions instead of JavaScript."
     },
     {
+        "category": "Component generation",
         "key": "customComponentTemplate",
         "type": "boolean",
         "default": false,
-        "title": "Use Custom Component Template",
-        "description": "When enabled, component template will be used instead of the default ones"
+        "title": "Use custom component template",
+        "description": "Use custom template instead of default ones."
     },
     {
+        "category": "Component generation",
         "key": "componentTemplate",
-        "type": "string",
+        "type": "code",
         "default": "",
-        "title": "Component Template",
-        "description": "Template of the generated component"
+        "language": "typescript",
+        "title": "Component template",
+        "description": "Template for generated components.",
+        "dependsOn": {
+            "customComponentTemplate": true
+        }
     },
     {
+        "category": "Index file settings",
         "key": "generateIndex",
         "type": "boolean",
         "default": true,
-        "title": "Generate Index File",
-        "description": "Generate index file"
+        "title": "Generate index file",
+        "description": "Generate index file for components."
     },
     {
+        "category": "Index file settings",
         "key": "customIndexTemplate",
         "type": "boolean",
         "default": false,
-        "title": "Use Custom Index Template",
-        "description": "When enabled, index template will be used instead of the default one"
+        "title": "Use custom index template",
+        "description": "Use custom template instead of default one.",
+        "dependsOn": {
+            "generateIndex": true
+        }
     },
     {
+        "category": "Index file settings",
         "key": "indexTemplate",
-        "type": "string",
+        "type": "code",
+        "language": "typescript",
         "default": "",
-        "title": "Index Template",
-        "description": "Template of the generated index file"
+        "title": "Index template",
+        "description": "Template for the generated index file.",
+        "dependsOn": {
+            "customIndexTemplate": true
+        }
     },
     {
+        "category": "Content replacement",
         "key": "replaceValues",
         "type": "object",
         "default": {},
-        "title": "Replace Values",
-        "description": "When provided, each key will be replaced with provided value"
+        "title": "Replace values",
+        "description": "Key-value pairs for content replacement."
     },
     {
+        "category": "SVGO configuration",
         "key": "svgoOptions",
         "type": "object",
         "default": {},
-        "title": "SVGO Options",
-        "description": "When provided, SVGO will be configured with these options. Check https://github.com/svg/svgo for all various options"
+        "title": "Svgo options",
+        "description": "Configuration options for SVGO. See https://github.com/svg/svgo for details."
     },
     {
+        "category": "Other",
         "key": "ignoredAssetPaths",
         "type": "array",
         "default": [
@@ -103,7 +132,27 @@
             "old",
             "backup"
         ],
-        "title": "Ignored Asset Paths",
-        "description": "Ignored asset paths. By default, all icons will be exported, however, you can specify which paths should be excluded. If you include partial path fragments, all paths matching will be ignored (such as `icons` will ignore all icons in `icons/` folder and its subfolders)"
+        "title": "Ignored asset paths",
+        "description": "Paths to exclude from export. Partial matches will ignore all matching paths."
+    },
+    {
+        "key": "showGeneratedFileDisclaimer",
+        "type": "boolean",
+        "default": true,
+        "title": "Show file disclaimer",
+        "description": "Show auto-generation message in all style files.",
+        "category": "Other"
+    },
+    {
+        "key": "disclaimer",
+        "type": "string",
+        "isMultiline": true,
+        "default": "This file was generated automatically by Supernova.io and should not be changed manually. To modify the format or content of this file, please contact your design system team.",
+        "title": "Disclaimer message",
+        "description": "Custom message for auto-generated files.",
+        "category": "Other",
+        "dependsOn": {
+            "showGeneratedFileDisclaimer": true
+        }
     }
 ]
