@@ -82,10 +82,12 @@ export class WriteTokenPropStore {
       }
 
       // Update each token’s property value
-      // TODO: DON'T RELEASE LIKE THIS! Implement batch update first
-      for (const [token, value] of tokenMap) {
-        await this.sdk.tokens.updateTokenPropertyValue(this.target, value, token, property)
-      }
+      const payload = Array.from(tokenMap).map(([token, valueToWrite]) => ({
+        definitionId: property.id,
+        targetElementId: token.id,
+        value: valueToWrite,
+      }))
+      await this.sdk.bulkOperations.updateElementProperties(this.target, payload)
     }
   }
 
