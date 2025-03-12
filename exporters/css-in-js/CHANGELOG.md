@@ -1,6 +1,15 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
+## 2.1.0 - 2025-03-12
+
+### 🚀 New
+
+Added automatic write-back functionality that allows saving generated variable names back to tokens:
+- New option to enable/disable automatic write-back of generated names
+- Configurable custom property name where the generated names will be saved
+- Helps maintain consistency between design tokens and generated code
+
 ## 2.0.0 - 2025-02-10
 
 ### 🚀 New

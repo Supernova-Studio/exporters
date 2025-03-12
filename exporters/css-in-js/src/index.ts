@@ -146,7 +146,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // Write property name of each token if the property to write to was provided in settings
-  if (!context.isPreview) {
+  if (!context.isPreview && exportConfiguration.writeNameToProperty) {
     const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
     await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
       return tokenObjectKeyName(token, tokenGroups)

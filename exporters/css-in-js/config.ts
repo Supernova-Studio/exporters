@@ -68,6 +68,8 @@ export type ExporterConfiguration = {
   generateTypeDefinitions: boolean
   /** Controls how tokens are sorted in the generated files */
   tokenSortOrder: TokenSortOrder
-  /** If provided, token name will be written back to this specific property (both name and codename can be provided and will be matched) */
+  /** When enabled, generated variable names will be saved back to tokens as custom properties */
+  writeNameToProperty: boolean
+  /** Name of the custom property where generated variable names will be saved */
   propertyToWriteNameTo: string
 }

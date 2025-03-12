@@ -54,7 +54,7 @@ class WriteTokenPropStore {
             // Create the property if it doesn’t exist
             if (!property) {
                 void (await this.sdk.tokens.createTokenProperty(this.target, {
-                    type: "Text",
+                    type: "Generic", // Using "Generic" (a.k.a. formatted "Code" in Supernova UI) instead of a pure "Text" property
                     name: propertyName,
                     codeName: NamingHelper_1.NamingHelper.codeSafeVariableName([propertyName], StringCase_1.StringCase.camelCase),
                     columnWidth: 200,

@@ -76,8 +76,10 @@ export type ExporterConfiguration = {
   fileStructure: FileStructure
   /** Controls what parts are included in the token name */
   tokenNameStructure: TokenNameStructure
-  /** If provided, token name will be written back to this specific property (both name and codename can be provided and will be matched) */
+  /** When enabled, generated variable names will be saved back to tokens as custom properties */
+  writeNameToProperty: boolean
+  /** Name of the custom property where generated variable names will be saved */
   propertyToWriteNameTo: string
-  /** If enabled, the resulting properties will be encapsulated in var() syntax for easier copying */
+  /** If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying */
   propertyToWriteNameToIncludesVar: boolean
 }
