@@ -28,7 +28,7 @@ export function generateStyleFiles(
 
   // For single file output
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-    const result = generateCombinedStyleFile(tokens, tokenGroups, themePath, theme)
+    const result = generateCombinedStyleFile(tokens, tokenGroups, themePath, theme, tokenCollections)
     return result ? [result] : []
   }
 
