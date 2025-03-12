@@ -12,7 +12,7 @@
                 "description": "Example: myVariableName"
             },
             "constantCase": {
-                "label": "Constant case", 
+                "label": "Constant case",
                 "description": "Example: MY_VARIABLE_NAME"
             },
             "flatCase": {
@@ -209,7 +209,7 @@
     {
         "key": "tokenSortOrder",
         "type": "enum",
-        "default": "default", 
+        "default": "default",
         "title": "Token name sorting",
         "description": "Control how token names (object keys) are sorted in the generated token files.",
         "category": "Style files",
@@ -438,5 +438,13 @@
         "title": "Generate type definitions",
         "description": "Generate TypeScript type definitions file (types.d.ts).",
         "category": "Other"
+    },
+    {
+        "key": "propertyToWriteNameTo",
+        "type": "string",
+        "default": "React",
+        "title": "Property to write name to",
+        "description": "If provided, token name will be written back to this specific property (both name and codename can be provided and will be matched).",
+        "category": "Write"
     }
 ]

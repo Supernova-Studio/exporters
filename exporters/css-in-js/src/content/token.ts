@@ -5,32 +5,21 @@ import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
 
 // Create a single instance of the tracker for consistent name generation
-const tokenNameTracker = new TokenNameTracker()
+export const tokenNameTracker = new TokenNameTracker()
 
 export function getTokenPrefix(tokenType: TokenType): string {
-  return exportConfiguration.customizeTokenPrefixes
-    ? exportConfiguration.tokenPrefixes[tokenType]
-    : DEFAULT_TOKEN_PREFIXES[tokenType]
+  return exportConfiguration.customizeTokenPrefixes ? exportConfiguration.tokenPrefixes[tokenType] : DEFAULT_TOKEN_PREFIXES[tokenType]
 }
 
 export function tokenObjectKeyName(token: Token, tokenGroups: Array<TokenGroup>, forExport: boolean = false): string {
   const prefix = getTokenPrefix(token.tokenType)
-  let name = tokenNameTracker.getTokenName(
-    token,
-    tokenGroups,
-    exportConfiguration.tokenNameStyle,
-    prefix,
-    forExport
-  )
+  let name = tokenNameTracker.getTokenName(token, tokenGroups, exportConfiguration.tokenNameStyle, prefix, forExport)
 
   // Apply global prefix if configured
   if (exportConfiguration.globalNamePrefix) {
-    name = NamingHelper.codeSafeVariableName(
-      `${exportConfiguration.globalNamePrefix.trim()} ${name}`,
-      exportConfiguration.tokenNameStyle
-    )
+    name = NamingHelper.codeSafeVariableName(`${exportConfiguration.globalNamePrefix.trim()} ${name}`, exportConfiguration.tokenNameStyle)
   }
-  
+
   return name
 }
 
