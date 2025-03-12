@@ -106,6 +106,9 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Style files
 - **generateEmptyFiles:** Generate empty files instead of omitting them.
+- **fileStructure:** Control how token styles are organized in files:
+  - `separateByType` (default): Generate separate files for each token type
+  - `singleFile`: Generate one file containing all token types
 - **baseStyleFilePath:** Directory path for files relative to export root.
 - **customizeStyleFileNames:** Enable custom file names for each token type.
 - **styleFileNames:** Define specific file names for each token type (when customizeStyleFileNames is enabled).

@@ -1,6 +1,13 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
+## 2.4.0 - 2025-03-12
+
+### ✨ Added
+- New `fileStructure` configuration option that controls how token files are organized:
+  - `separateByType`: Generate separate files for each token type (default)
+  - `singleFile`: Generate one combined file containing all token types
+
 ## 2.3.0 - 2025-02-27
 
 ### ✨ Added
