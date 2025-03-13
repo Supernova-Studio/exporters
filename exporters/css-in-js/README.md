@@ -107,6 +107,10 @@ Here is a list of all the configuration options this exporter provides:
 - **disclaimer:** Set the text of the auto-generation disclaimer.
 - **indent:** Number of spaces used for indentation.
 
+### Automatic write-back
+- **writeNameToProperty:** Enable saving generated variable names back to tokens as custom properties.
+- **propertyToWriteNameTo:** Name of the custom property where generated variable names will be saved.
+
 ## Possible future improvements
 
 Here are some planned improvements for future versions:

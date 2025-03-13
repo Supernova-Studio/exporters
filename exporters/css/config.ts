@@ -5,20 +5,20 @@ import { TokenType } from "@supernovaio/sdk-exporters"
  * Main configuration of the exporter - type interface. Default values for it can be set through `config.json` and users can override the behavior when creating the pipelines.
  */
 export enum ThemeExportStyle {
-    ApplyDirectly = "applyDirectly",
-    SeparateFiles = "separateFiles",
-    MergedTheme = "mergedTheme"
+  ApplyDirectly = "applyDirectly",
+  SeparateFiles = "separateFiles",
+  MergedTheme = "mergedTheme",
 }
 
 export enum FileStructure {
-    SeparateByType = "separateByType",
-    SingleFile = "singleFile"
+  SeparateByType = "separateByType",
+  SingleFile = "singleFile",
 }
 
 export enum TokenNameStructure {
   PathAndName = "pathAndName",
   NameOnly = "nameOnly",
-  CollectionPathAndName = "collectionPathAndName"
+  CollectionPathAndName = "collectionPathAndName",
 }
 
 export type ExporterConfiguration = {
@@ -76,4 +76,10 @@ export type ExporterConfiguration = {
   fileStructure: FileStructure
   /** Controls what parts are included in the token name */
   tokenNameStructure: TokenNameStructure
+  /** When enabled, generated variable names will be saved back to tokens as custom properties */
+  writeNameToProperty: boolean
+  /** Name of the custom property where generated variable names will be saved */
+  propertyToWriteNameTo: string
+  /** If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying */
+  propertyToWriteNameToIncludesVar: boolean
 }

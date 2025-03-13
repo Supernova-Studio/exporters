@@ -157,3 +157,9 @@ Here is a list of all the configuration options this exporter provides:
 - **disclaimer:** A message explaining that the file was automatically generated will appear in all style files (requires showGeneratedFileDisclaimer: true).
 
 - **indent:** Number of spaces used to indent CSS variables.
+
+### Automatic write-back
+
+- **writeNameToProperty:** Enable saving generated variable names back to tokens as custom properties.
+- **propertyToWriteNameTo:** Name of the custom property where generated variable names will be saved.
+- **propertyToWriteNameToIncludesVar:** If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.

@@ -4,7 +4,8 @@ import { indexOutputFile } from "./files/index-file"
 import { styleOutputFile } from "./files/style-file"
 import { typesOutputFile } from "./files/types-file"
 import { folderIndexOutputFile } from "./files/folder-index-file"
-import { StringCase, ThemeHelper } from "@supernovaio/export-utils"
+import { StringCase, ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
+import { tokenObjectKeyName } from "./content/token"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -15,19 +16,19 @@ export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
  * @returns Array of non-null output files
  */
 function processOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutputFile> {
-    return files.filter((file): file is AnyOutputFile => file !== null);
+  return files.filter((file): file is AnyOutputFile => file !== null)
 }
 
 /**
  * Main export function that generates CSS files from design tokens
- * 
+ *
  * This function handles:
  * - Fetching tokens and token groups from the design system
  * - Filtering tokens by brand if specified
  * - Processing themes in different modes (direct, separate files, or combined)
  * - Generating style files for each token type
  * - Creating an optional index file that imports all style files
- * 
+ *
  * @param sdk - Supernova SDK instance
  * @param context - Export context containing design system information
  * @returns Promise resolving to an array of output files
@@ -40,6 +41,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // Fetch tokens and token groups
+  let outputFiles: Array<AnyOutputFile> = []
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
 
@@ -67,96 +69,90 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       }
       return theme
     })
-    
+
     switch (exportConfiguration.exportThemesAs) {
       case ThemeExportStyle.SeparateFiles:
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
           const themePath = ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
-          const files = Object.values(TokenType)
-            .map((type) => styleOutputFile(
-              type, 
-              themedTokens, 
-              tokenGroups, 
-              themePath,
-              theme
-            ))
-          
+          const files = Object.values(TokenType).map((type) => styleOutputFile(type, themedTokens, tokenGroups, themePath, theme))
+
           // Generate folder index files independently of root index file
           if (exportConfiguration.generateFolderIndexFiles) {
             files.push(folderIndexOutputFile(themedTokens, themePath))
           }
-          
+
           return files
         })
-        
+
         const baseFiles = exportConfiguration.exportBaseValues
           ? [
-              ...Object.values(TokenType)
-                .map((type) => styleOutputFile(type, tokens, tokenGroups)),
-              ...(exportConfiguration.generateFolderIndexFiles 
+              ...Object.values(TokenType).map((type) => styleOutputFile(type, tokens, tokenGroups)),
+              ...(exportConfiguration.generateFolderIndexFiles
                 ? [folderIndexOutputFile(tokens, exportConfiguration.baseStyleFilePath)]
-                : [])
+                : []),
             ]
           : []
 
         // Only add root index file if enabled
-        const rootIndexFile = exportConfiguration.generateIndexFile 
-          ? [indexOutputFile(tokens, themesToApply)]
-          : []
+        const rootIndexFile = exportConfiguration.generateIndexFile ? [indexOutputFile(tokens, themesToApply)] : []
 
         const separateFiles = [
-          ...baseFiles, 
-          ...themeFiles, 
+          ...baseFiles,
+          ...themeFiles,
           ...rootIndexFile,
-          ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : [])
+          ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : []),
         ]
-        return processOutputFiles(separateFiles)
+        outputFiles = processOutputFiles(separateFiles)
+        break
 
       case ThemeExportStyle.MergedTheme:
         const baseTokenFiles = exportConfiguration.exportBaseValues
-          ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          ? Object.values(TokenType).map((type) => styleOutputFile(type, tokens, tokenGroups))
           : []
 
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const mergedThemeFiles = Object.values(TokenType)
-          .map((type) => styleOutputFile(
-            type, 
-            themedTokens, 
-            tokenGroups, 
-            'themed',
-            themesToApply[0]
-          ))
+        const mergedThemeFiles = Object.values(TokenType).map((type) =>
+          styleOutputFile(type, themedTokens, tokenGroups, "themed", themesToApply[0])
+        )
 
         const mergedFiles = [
-          ...baseTokenFiles, 
-          ...mergedThemeFiles, 
-          indexOutputFile(tokens, ['themed']),
-          ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : [])
+          ...baseTokenFiles,
+          ...mergedThemeFiles,
+          indexOutputFile(tokens, ["themed"]),
+          ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : []),
         ]
-        return processOutputFiles(mergedFiles)
+        outputFiles = processOutputFiles(mergedFiles)
+        break
 
       case ThemeExportStyle.ApplyDirectly:
         // Apply themes directly to tokens
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         break
     }
+  } else {
+    // Default case: Generate files without themes
+    const defaultFiles = [
+      ...(exportConfiguration.exportBaseValues
+        ? [
+            ...Object.values(TokenType).map((type) => styleOutputFile(type, tokens, tokenGroups)),
+            ...(exportConfiguration.generateFolderIndexFiles ? [folderIndexOutputFile(tokens, exportConfiguration.baseStyleFilePath)] : []),
+          ]
+        : []),
+      ...(exportConfiguration.generateIndexFile ? [indexOutputFile(tokens)] : []),
+      ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : []),
+    ]
+    outputFiles = processOutputFiles(defaultFiles)
   }
 
-  // Default case: Generate files without themes
-  const defaultFiles = [
-    ...(exportConfiguration.exportBaseValues
-      ? [
-          ...Object.values(TokenType)
-            .map((type) => styleOutputFile(type, tokens, tokenGroups)),
-          ...(exportConfiguration.generateFolderIndexFiles 
-            ? [folderIndexOutputFile(tokens, exportConfiguration.baseStyleFilePath)]
-            : [])
-        ]
-      : []),
-    ...(exportConfiguration.generateIndexFile ? [indexOutputFile(tokens)] : []),
-    ...(exportConfiguration.generateTypeDefinitions ? [typesOutputFile(tokens, tokenGroups)] : []),
-  ]
-  return processOutputFiles(defaultFiles)
+  // Write property name of each token if the property to write to was provided in settings
+  if (!context.isPreview && exportConfiguration.writeNameToProperty) {
+    const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
+    await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
+      return tokenObjectKeyName(token, tokenGroups)
+    })
+  }
+
+  // Finalize export by retrieving the files to write to destination
+  return outputFiles
 })

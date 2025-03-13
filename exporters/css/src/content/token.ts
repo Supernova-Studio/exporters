@@ -1,8 +1,9 @@
-import { DesignSystemCollection } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection';
+import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
+import { TokenNameStructure } from "../../config"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -11,15 +12,13 @@ import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
  * @returns The prefix string to use for this token type
  */
 export function getTokenPrefix(tokenType: TokenType): string {
-  return exportConfiguration.customizeTokenPrefixes
-    ? exportConfiguration.tokenPrefixes[tokenType]
-    : DEFAULT_TOKEN_PREFIXES[tokenType]
+  return exportConfiguration.customizeTokenPrefixes ? exportConfiguration.tokenPrefixes[tokenType] : DEFAULT_TOKEN_PREFIXES[tokenType]
 }
 
 /**
  * Converts a design token into its CSS custom property representation.
  * Handles formatting of the token value, references, and optional description comments.
- * 
+ *
  * @param token - The design token to convert
  * @param mappedTokens - Map of all tokens for resolving references
  * @param tokenGroups - Array of token groups for determining token hierarchy
@@ -27,8 +26,8 @@ export function getTokenPrefix(tokenType: TokenType): string {
  * @returns Formatted CSS custom property string with optional description comment
  */
 export function convertedToken(
-  token: Token, 
-  mappedTokens: Map<string, Token>, 
+  token: Token,
+  mappedTokens: Map<string, Token>,
   tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection> = []
 ): string {
@@ -60,30 +59,26 @@ export function convertedToken(
 /**
  * Generates a code-safe variable name for a token based on its properties and configuration.
  * Includes type-specific prefix and considers token hierarchy and collection.
- * 
+ *
  * @param token - The token to generate a name for
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @param collections - Array of collections for resolving collection names
  * @returns Formatted variable name string
  */
-function tokenVariableName(
-  token: Token, 
-  tokenGroups: Array<TokenGroup>,
-  collections: Array<DesignSystemCollection> = []
-): string {
+export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, collections: Array<DesignSystemCollection> = []): string {
   const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
 
   // Find collection if needed and exists
   let collection: DesignSystemCollection | null = null
-  if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
-    collection = collections.find(c => c.persistentId === token.collectionId) ?? {name: token.collectionId} as DesignSystemCollection
+  if (exportConfiguration.tokenNameStructure === TokenNameStructure.CollectionPathAndName && token.collectionId) {
+    collection = collections.find((c) => c.persistentId === token.collectionId) ?? ({ name: token.collectionId } as DesignSystemCollection)
   }
 
   return NamingHelper.codeSafeVariableNameForToken(
-    token, 
-    exportConfiguration.tokenNameStyle, 
-    exportConfiguration.tokenNameStructure !== 'nameOnly' ? parent : null, 
+    token,
+    exportConfiguration.tokenNameStyle,
+    exportConfiguration.tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
     prefix,
     collection?.name,
     exportConfiguration.globalNamePrefix
