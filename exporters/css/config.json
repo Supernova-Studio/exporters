@@ -472,7 +472,7 @@
     {
         "key": "writeNameToProperty",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "title": "Write generated variable names",
         "description": "Save generated variable names back to tokens as custom properties.",
         "category": "Automatic write-back"
