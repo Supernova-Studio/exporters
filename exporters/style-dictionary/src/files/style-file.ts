@@ -62,69 +62,47 @@ function createTokenValue(
 }
 
 /**
- * Generates a TypeScript file for a specific token type (color.ts, typography.ts, etc.).
- * These files contain the actual token values and are typically consumed through the index files.
+ * Core token processing function that handles the transformation of tokens into a structured object.
+ * This function encapsulates the shared logic between single-file and separate-file outputs.
  * 
  * Features:
- * - Generates type-safe token exports
- * - Handles token references correctly
- * - Supports theming
- * - Includes token descriptions as comments
+ * - Handles token name tracking and uniqueness
+ * - Processes token values and references
+ * - Manages token sorting
+ * - Creates hierarchical object structure
+ * - Handles theme-specific values
+ * - Includes token descriptions and comments
  * - Formats values according to configuration
  * 
- * @param type - The type of tokens to generate (Color, Typography, etc.)
- * @param tokens - Array of all tokens
- * @param tokenGroups - Array of token groups for name generation
- * @param themePath - Path for themed tokens (empty for base tokens)
- * @param theme - Theme configuration when generating themed tokens
- * @param collections - Array of design system collections
- * @returns OutputTextFile with the generated content or null if no tokens exist
+ * @param tokens - Array of tokens to process
+ * @param tokenGroups - Array of token groups for maintaining hierarchy
+ * @param theme - Optional theme configuration for themed tokens
+ * @param collections - Array of design system collections for collection-based organization
+ * @param allTokens - Optional array of all available tokens for reference resolution
+ * @returns Structured object containing processed tokens, or null if no output should be generated
  */
-export function styleOutputFile(
-  type: TokenType,
+function processTokensToObject(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  themePath: string = '',
   theme?: TokenTheme,
-  collections: Array<DesignSystemCollection> = []
-): OutputTextFile | null {
+  collections: Array<DesignSystemCollection> = [],
+  allTokens?: Array<Token>
+): any | null {
   // Clear any previously cached token names to ensure clean generation
   resetTokenNameTracking()
 
-  // Skip generating base token files unless:
-  // - Base values are explicitly enabled via exportBaseValues, or
-  // - We're generating themed files (themePath is present), or
-  // - We're using nested themes format (which needs to generate files even without base values
-  //   since it combines all theme values into a single file structure)
-  if (!exportConfiguration.exportBaseValues && !themePath && 
-      exportConfiguration.exportThemesAs !== ThemeExportStyle.NestedThemes) {
-    return null
-  }
-
-  // Filter to only include tokens of the specified type (color, size, etc)
-  let tokensOfType = tokens.filter((token) => token.tokenType === type)
-
-  // For themed token files:
-  // - Filter to only include tokens that are overridden in this theme
-  // - Skip generating the file if no tokens are themed (when configured)
-  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
-    tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
-    
-    if (tokensOfType.length === 0) {
-      return null
-    }
-  }
-
   // Skip generating empty files unless explicitly configured to do so
-  if (!exportConfiguration.generateEmptyFiles && tokensOfType.length === 0) {
+  if (!exportConfiguration.generateEmptyFiles && tokens.length === 0) {
     return null
   }
 
-  // Create a lookup map for quick token reference resolution
-  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
+  // Create a lookup map for quick token reference resolution using all tokens
+  // This ensures that references to tokens outside the current filtered set still work
+  const mappedTokens = new Map((allTokens || tokens).map((token) => [token.id, token]))
 
   // Sort tokens if configured
-  let sortedTokens = [...tokensOfType]
+  // This can make it easier to find tokens in the generated files
+  let sortedTokens = [...tokens]
   if (exportConfiguration.tokenSortOrder === 'alphabetical') {
     sortedTokens.sort((a, b) => {
       const nameA = tokenObjectKeyName(a, tokenGroups, true, collections)
@@ -133,16 +111,21 @@ export function styleOutputFile(
     })
   }
 
-  // Generate the JSON structure
+  // Initialize the root object that will contain all processed tokens
   const tokenObject: any = {}
   
-  // Add disclaimer as _comment if enabled
+  // Add generated file disclaimer if enabled
+  // This helps users understand that the file is auto-generated
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     tokenObject._comment = exportConfiguration.disclaimer
   }
   
+  // Process each token and build the hierarchical structure
   sortedTokens.forEach(token => {
+    // Generate the token's object key name based on configuration
     const name = tokenObjectKeyName(token, tokenGroups, true, collections)
+
+    // Convert token to CSS-compatible value, handling references and formatting
     const value = CSSHelper.tokenToCSS(token, mappedTokens, {
       allowReferences: exportConfiguration.useReferences,
       decimals: exportConfiguration.colorPrecision,
@@ -150,29 +133,28 @@ export function styleOutputFile(
       forceRemUnit: exportConfiguration.forceRemUnit,
       remBase: exportConfiguration.remBase,
       tokenToVariableRef: (t) => {
-        // Build the full reference path
+        // Build the reference path based on token structure configuration
         const prefix = getTokenPrefix(t.tokenType)
-
-        // Get path segments and include them based on structure type
         const pathSegments = (t.tokenPath || [])
           .filter(segment => segment && segment.trim().length > 0)
           .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
 
-        // Process the token name
         const tokenName = processTokenName(t, pathSegments)
 
-        // Combine all segments based on structure type
+        // Build segments array based on configuration
         let segments: string[] = []
         if (prefix) {
           segments.push(prefix)
         }
 
+        // Handle different token name structure configurations
         switch (exportConfiguration.tokenNameStructure) {
           case TokenNameStructure.NameOnly:
             segments.push(tokenName)
             break
             
           case TokenNameStructure.CollectionPathAndName:
+            // Include collection name in the path if available
             if (t.collectionId) {
               const collection = collections.find(c => c.persistentId === t.collectionId)
               if (collection) {
@@ -202,7 +184,7 @@ export function styleOutputFile(
       }
     })
 
-    // Create hierarchical structure using the tracked name
+    // Create the hierarchical object structure for this token
     const hierarchicalObject = createHierarchicalStructure(
       token.tokenPath || [],
       token.name,
@@ -211,12 +193,74 @@ export function styleOutputFile(
       collections
     )
 
+    // Merge the token's object structure into the main object
     Object.assign(tokenObject, deepMerge(tokenObject, hierarchicalObject))
   })
 
-  // Generate the final JSON content
+  return tokenObject
+}
+
+/**
+ * Generates a style file for a specific token type (color.json, typography.json, etc.).
+ * This function is used when fileStructure is set to 'separateByType'.
+ * 
+ * Features:
+ * - Generates separate files for each token type
+ * - Handles token filtering by type
+ * - Supports theming
+ * - Includes token descriptions as comments
+ * - Formats values according to configuration
+ * 
+ * @param type - The type of tokens to generate (Color, Typography, etc.)
+ * @param tokens - Array of all tokens
+ * @param tokenGroups - Array of token groups for name generation
+ * @param themePath - Path for themed tokens (empty for base tokens)
+ * @param theme - Theme configuration when generating themed tokens
+ * @param collections - Array of design system collections
+ * @returns OutputTextFile with the generated content or null if no tokens exist
+ */
+export function styleOutputFile(
+  type: TokenType,
+  tokens: Array<Token>,
+  tokenGroups: Array<TokenGroup>,
+  themePath: string = '',
+  theme?: TokenTheme,
+  collections: Array<DesignSystemCollection> = []
+): OutputTextFile | null {
+  // Skip generating base token files unless:
+  // - Base values are explicitly enabled via exportBaseValues, or
+  // - We're generating themed files (themePath is present), or
+  // - We're using nested themes format
+  if (!exportConfiguration.exportBaseValues && !themePath && 
+      exportConfiguration.exportThemesAs !== ThemeExportStyle.NestedThemes) {
+    return null
+  }
+
+  // Filter to only include tokens of the specified type (color, size, etc)
+  let tokensOfType = tokens.filter((token) => token.tokenType === type)
+
+  // For themed token files:
+  // - Filter to only include tokens that are overridden in this theme
+  // - Skip generating the file if no tokens are themed (when configured)
+  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
+    tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
+    
+    if (tokensOfType.length === 0) {
+      return null
+    }
+  }
+
+  // Process tokens into a structured object
+  // Pass the full tokens array for reference resolution
+  const tokenObject = processTokensToObject(tokensOfType, tokenGroups, theme, collections, tokens)
+  if (!tokenObject) {
+    return null
+  }
+
+  // Generate the final JSON content with proper indentation
   const content = JSON.stringify(tokenObject, null, exportConfiguration.indent)
 
+  // Create and return the output file with appropriate path and name
   return FileHelper.createTextFile({
     relativePath: themePath ? `./${themePath}` : exportConfiguration.baseStyleFilePath,
     fileName: exportConfiguration.customizeStyleFileNames
@@ -264,4 +308,80 @@ function generateTokenObject(tokens: Array<Token>, tokenGroups: Array<TokenGroup
     }
     return `${indentString}${name},`
   }).join('\n')
+}
+
+/**
+ * Generates a single combined JSON file containing all token types.
+ * This function is used when fileStructure is set to 'singleFile'.
+ * 
+ * Features:
+ * - Combines all token types into a single file
+ * - Maintains token type grouping in the output
+ * - Supports theming
+ * - Includes token descriptions
+ * - Places files directly in root with theme-based names
+ * 
+ * Output structure examples:
+ * - No themes: tokens.json
+ * - Separate theme files: tokens.json, tokens.light.json, tokens.dark.json
+ * - Merged themes: tokens.json, tokens.themed.json
+ * - Nested themes: tokens.json (with all themes nested inside)
+ * 
+ * @param tokens - Array of all tokens
+ * @param tokenGroups - Array of token groups for hierarchy
+ * @param themePath - Optional theme path for themed files
+ * @param theme - Optional theme configuration
+ * @param collections - Array of design system collections
+ * @returns OutputTextFile with the combined content or null if no output should be generated
+ */
+export function combinedStyleOutputFile(
+  tokens: Array<Token>,
+  tokenGroups: Array<TokenGroup>,
+  themePath: string = '',
+  theme?: TokenTheme,
+  collections: Array<DesignSystemCollection> = []
+): OutputTextFile | null {
+  // Skip generating base token files unless:
+  // - Base values are explicitly enabled via exportBaseValues, or
+  // - We're generating themed files (themePath is present), or
+  // - We're using nested themes format
+  if (!exportConfiguration.exportBaseValues && !themePath && 
+      exportConfiguration.exportThemesAs !== ThemeExportStyle.NestedThemes) {
+    return null
+  }
+
+  // Store original tokens for reference resolution
+  const originalTokens = [...tokens]
+
+  // For themed token files:
+  // - Filter to only include tokens that are overridden in this theme
+  // - Skip generating the file if no tokens are themed (when configured)
+  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
+    tokens = ThemeHelper.filterThemedTokens(tokens, theme)
+    
+    if (tokens.length === 0) {
+      return null
+    }
+  }
+
+  // Process all tokens into a single structured object
+  // Pass the original tokens array for reference resolution
+  const tokenObject = processTokensToObject(tokens, tokenGroups, theme, collections, originalTokens)
+  if (!tokenObject) {
+    return null
+  }
+
+  // Generate the final JSON content with proper indentation
+  const content = JSON.stringify(tokenObject, null, exportConfiguration.indent)
+
+  // For single file mode, themed files go directly in root with theme-based names
+  const fileName = themePath ? `tokens.${themePath}.json` : 'tokens.json'
+  const relativePath = './' // Put files directly in root folder
+
+  // Create and return the output file
+  return FileHelper.createTextFile({
+    relativePath: relativePath,
+    fileName: fileName,
+    content: content
+  })
 }
