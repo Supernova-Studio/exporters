@@ -199,11 +199,11 @@
         }
     },
     {
-        "key": "globalNamePrefix",
+        "key": "globalPrefix",
         "type": "string",
         "default": "",
-        "title": "Global prefix",
-        "description": "Prefix all variable names (e.g., '--ds-color-primary').",
+        "title": "Prefix",
+        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
         "category": "Token names"
     },
     {
@@ -285,6 +285,46 @@
         }
     },
     {
+        "key": "useColorUtilityPrefixes",
+        "type": "boolean",
+        "default": true,
+        "title": "Use color utility prefixes",
+        "description": "Enable specific prefixes for different color utilities. Only applies to color tokens.",
+        "category": "Token names"
+    },
+    {
+        "key": "colorUtilityPrefixes",
+        "type": "object",
+        "title": "Color utility prefixes",
+        "description": "Define specific string patterns to identify and prefix color tokens based on their utility. These prefixes are automatically applied only to color tokens.",
+        "category": "Token names",
+        "dependsOn": {
+            "useColorUtilityPrefixes": true
+        },
+        "default": {
+            "text": "foreground",
+            "boxShadow": "shadow",
+            "background": "background",
+            "outline": "outline",
+            "border": "border",
+            "stroke": "stroke"
+        },
+        "allowedKeys": {
+            "options": [
+                "text",
+                "boxShadow",
+                "background",
+                "outline",
+                "border",
+                "stroke"
+            ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
+    },
+    {
         "key": "cssSelector",
         "type": "string",
         "default": "@theme",
@@ -334,5 +374,149 @@
         "title": "Indentation",
         "description": "Number of spaces used to indent CSS variables.",
         "category": "Other"
+    },
+    {
+        "key": "disableAnimateDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset animation styles",
+        "description": "Reset all animation token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableBlurDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset blur styles",
+        "description": "Reset all blur token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableBorderRadiusDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset border radius styles",
+        "description": "Reset all border radius token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableBreakpointDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset breakpoint styles",
+        "description": "Reset all breakpoint token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableColorDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset color styles",
+        "description": "Reset all color token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableContainerDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset container styles",
+        "description": "Reset all container token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableDropShadowDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset drop shadow styles",
+        "description": "Reset all drop shadow token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableFontDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset font family styles",
+        "description": "Reset all font family token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableFontWeightDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset font weight styles",
+        "description": "Reset all font weight token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableInsetDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset inset styles",
+        "description": "Reset all inset token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableLeadingDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset line height styles",
+        "description": "Reset all line height token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disablePerspectiveDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset perspective styles",
+        "description": "Reset all perspective token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableShadowDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset shadow styles",
+        "description": "Reset all shadow token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableSpacingDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset spacing styles",
+        "description": "Reset all spacing token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableTextDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset text styles",
+        "description": "Reset all text token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "disableTrackingDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Reset letter spacing styles",
+        "description": "Reset all letter spacing token values to initial state before applying new values.",
+        "category": "Disabled default styles"
+    },
+    {
+        "key": "findReplace",
+        "type": "object",
+        "title": "Find and Replace",
+        "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
+        "category": "Token names",
+        "default": {
+            "Border Radius": ""
+        },
+        "allowedKeys": {
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
     }
 ]

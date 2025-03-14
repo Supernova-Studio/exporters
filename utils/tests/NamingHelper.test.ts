@@ -138,6 +138,90 @@ test('codeSafeVariableNameForToken_case_3', () => {
     isRoot: false
   }
   expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, tokenGroup, null)).toBe(
-    'brandRedRed1000'
+    'brandRed1000'
+  )
+})
+
+test('codeSafeVariableNameForToken_removes_consecutive_duplicates_1', () => {
+  const token = {
+    name: '500'
+  }
+  const tokenGroup = {
+    name: 'Neutral',
+    path: ['Neutral', 'Neutral'],
+    isRoot: false
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'neutral-500'
+  )
+})
+
+test('codeSafeVariableNameForToken_removes_consecutive_duplicates_2', () => {
+  const token = {
+    name: '500'
+  }
+  const tokenGroup = {
+    name: 'Neutral',
+    path: ['Color', 'Color', 'Neutral'],
+    isRoot: false
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'color-neutral-500'
+  )
+})
+
+test('codeSafeVariableNameForToken_keeps_non_consecutive_duplicates', () => {
+  const token = {
+    name: '500'
+  }
+  const tokenGroup = {
+    name: 'Neutral',
+    path: ['Neutral', 'Color', 'Neutral'],
+    isRoot: false
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'neutral-color-neutral-500'
+  )
+})
+
+test('codeSafeVariableNameForToken_handles_token_name_duplicate_1', () => {
+  const token = {
+    name: 'Neutral 500'
+  }
+  const tokenGroup = {
+    name: 'Neutral',
+    path: ['Color'],
+    isRoot: false
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'color-neutral-500'
+  )
+})
+
+test('codeSafeVariableNameForToken_handles_token_name_duplicate_2', () => {
+  const token = {
+    name: 'Neutral 500'
+  }
+  const tokenGroup = {
+    name: 'Neutral',
+    path: ['Color', 'Neutral'],
+    isRoot: false
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'color-neutral-500'
+  )
+})
+
+test('codeSafeVariableNameForToken_handles_token_name_with_different_case', () => {
+  const token = {
+    name: 'neutral 500'
+  }
+  const tokenGroup = {
+    name: 'Neutral',
+    path: ['Color', 'NEUTRAL'],
+    isRoot: false
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'color-neutral-500'
   )
 })

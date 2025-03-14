@@ -4,7 +4,7 @@ exports.NamingHelper = void 0;
 const StringCase_1 = require("../enums/StringCase");
 const change_case_1 = require("change-case");
 class NamingHelper {
-    static codeSafeVariableNameForToken(token, format, parent, prefix) {
+    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace) {
         // Create array with all path segments and token name at the end
         let fragments = [];
         if (parent) {
@@ -13,9 +13,34 @@ class NamingHelper {
                 fragments.push(parent.name);
             }
         }
-        fragments.push(token.name);
+        // Split token name into words
+        const tokenNameParts = token.name.split(/[\s-_]+/);
+        // If the first word of token name matches the last fragment (case insensitive),
+        // only add the remaining parts of the token name
+        if (fragments.length > 0 && tokenNameParts.length > 1 &&
+            tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase()) {
+            fragments.push(tokenNameParts.slice(1).join(' '));
+        }
+        else {
+            fragments.push(token.name);
+        }
         if (prefix && prefix.length > 0) {
             fragments.unshift(prefix);
+        }
+        // Remove consecutive duplicates
+        fragments = fragments.filter((fragment, index) => {
+            // Keep if it's first element or different from previous
+            return index === 0 || fragment.toLowerCase() !== fragments[index - 1].toLowerCase();
+        });
+        // Apply find/replace to each fragment if provided
+        if (findReplace) {
+            fragments = fragments.map(fragment => {
+                let result = fragment;
+                for (const [find, replace] of Object.entries(findReplace)) {
+                    result = result.replace(new RegExp(find, 'g'), replace);
+                }
+                return result;
+            });
         }
         return NamingHelper.codeSafeVariableName(fragments, format);
     }
@@ -25,8 +50,14 @@ class NamingHelper {
      *
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
      */
-    static codeSafeVariableName(fragments, format) {
+    static codeSafeVariableName(fragments, format, findReplace) {
         let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ');
+        // Apply find/replace if provided
+        if (findReplace) {
+            for (const [find, replace] of Object.entries(findReplace)) {
+                sentence = sentence.replace(new RegExp(find, 'g'), replace);
+            }
+        }
         // Only allow letters, digits, underscore and hyphen
         sentence = sentence.replaceAll(/[^a-zA-Z0-9_-]/g, '_');
         switch (format) {

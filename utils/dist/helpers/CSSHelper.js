@@ -8,13 +8,17 @@ const ColorHelper_1 = require("./ColorHelper");
 class CSSHelper {
     static tokenToCSS(token, allTokens, options) {
         /** Use subroutines to convert specific token types to different css representations. Many tokens are of the same type */
+        let cssValue;
         switch (token.tokenType) {
             case sdk_exporters_1.TokenType.color:
-                return this.colorTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.colorTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.border:
-                return this.borderTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.borderTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.gradient:
-                return this.gradientTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.gradientTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.dimension:
             case sdk_exporters_1.TokenType.size:
             case sdk_exporters_1.TokenType.space:
@@ -27,26 +31,41 @@ class CSSHelper {
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                return this.dimensionTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.dimensionTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.shadow:
-                return this.shadowTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.shadowTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.fontWeight:
-                return this.fontWeightTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.fontWeightTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.fontFamily:
             case sdk_exporters_1.TokenType.productCopy:
             case sdk_exporters_1.TokenType.string:
-                return this.stringTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.stringTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.textCase:
             case sdk_exporters_1.TokenType.textDecoration:
             case sdk_exporters_1.TokenType.visibility:
-                return this.optionTokenValueToCSS(token.value, allTokens, options, token.tokenType);
+                cssValue = this.optionTokenValueToCSS(token.value, allTokens, options, token.tokenType);
+                break;
             case sdk_exporters_1.TokenType.blur:
-                return this.blurTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.blurTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.typography:
-                return this.typographyTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.typographyTokenValueToCSS(token.value, allTokens, options);
+                break;
             default:
                 throw new sdk_exporters_1.UnreachableCaseError(token.tokenType, 'Unsupported token type for transformation to CSS:');
         }
+        // Allow value transformation if transformer exists
+        if (options.valueTransformer) {
+            const transformedValue = options.valueTransformer(cssValue, token);
+            if (transformedValue !== undefined) {
+                return transformedValue;
+            }
+        }
+        return cssValue;
     }
     static colorTokenValueToCSS(color, allTokens, options) {
         return ColorHelper_1.ColorHelper.formattedColorOrVariableName(color, allTokens, options);

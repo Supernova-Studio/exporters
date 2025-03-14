@@ -1,5 +1,6 @@
-import { FileNameHelper } from './FileNameHelper'
+import { FileNameHelper } from '../helpers/FileNameHelper'
 import { TokenType } from "@supernovaio/sdk-exporters"
+import { test, expect } from '@jest/globals'
 
 describe('FileNameHelper', () => {
   describe('ensureFileExtension', () => {
@@ -48,4 +49,30 @@ describe('FileNameHelper', () => {
       expect(FileNameHelper.getDefaultStyleFileName(TokenType.color, 'scss')).toBe('color.scss')
     })
   })
+})
+
+test('ensureFileExtension_with_dot', () => {
+  expect(FileNameHelper.ensureFileExtension('test', '.css')).toBe('test.css')
+  expect(FileNameHelper.ensureFileExtension('test.css', '.css')).toBe('test.css')
+})
+
+test('ensureFileExtension_without_dot', () => {
+  expect(FileNameHelper.ensureFileExtension('test', 'css')).toBe('test.css')
+  expect(FileNameHelper.ensureFileExtension('test.css', 'css')).toBe('test.css')
+})
+
+test('replaceFileExtension_with_dot', () => {
+  expect(FileNameHelper.replaceFileExtension('test.css', '.css', '.scss')).toBe('test.scss')
+})
+
+test('replaceFileExtension_without_dot', () => {
+  expect(FileNameHelper.replaceFileExtension('test.css', 'css', 'scss')).toBe('test.scss')
+})
+
+test('getDefaultStyleFileName_with_dot', () => {
+  expect(FileNameHelper.getDefaultStyleFileName(TokenType.color, '.css')).toBe('color.css')
+})
+
+test('getDefaultStyleFileName_without_dot', () => {
+  expect(FileNameHelper.getDefaultStyleFileName(TokenType.typography, 'css')).toBe('typography.css')
 }) 

@@ -34,14 +34,42 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     // Create a map of all tokens by ID for reference resolution
     const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
-    // Start with Tailwind import
-    let content = '@import "tailwindcss";\n\n'
+    // Start with Tailwind import with prefix if configured
+    let content = exportConfiguration.globalPrefix 
+        ? `@import "tailwindcss" prefix(${exportConfiguration.globalPrefix});\n\n`
+        : '@import "tailwindcss";\n\n'
 
     // Generate CSS variables grouped by token type
     let cssVariables = ''
+
+    // Add reset rules if any are enabled
+    const indentString = GeneralHelper.indent(exportConfiguration.indent)
+    const resetRules: string[] = []
+
+    if (exportConfiguration.disableAnimateDefaults) resetRules.push('--animate-*: initial;')
+    if (exportConfiguration.disableBlurDefaults) resetRules.push('--blur-*: initial;')
+    if (exportConfiguration.disableBorderRadiusDefaults) resetRules.push('--radius-*: initial;')
+    if (exportConfiguration.disableBreakpointDefaults) resetRules.push('--breakpoint-*: initial;')
+    if (exportConfiguration.disableColorDefaults) resetRules.push('--color-*: initial;')
+    if (exportConfiguration.disableContainerDefaults) resetRules.push('--container-*: initial;')
+    if (exportConfiguration.disableDropShadowDefaults) resetRules.push('--drop-shadow-*: initial;')
+    if (exportConfiguration.disableFontDefaults) resetRules.push('--font-*: initial;')
+    if (exportConfiguration.disableFontWeightDefaults) resetRules.push('--font-weight-*: initial;')
+    if (exportConfiguration.disableInsetDefaults) resetRules.push('--inset-*: initial;')
+    if (exportConfiguration.disableLeadingDefaults) resetRules.push('--leading-*: initial;')
+    if (exportConfiguration.disablePerspectiveDefaults) resetRules.push('--perspective-*: initial;')
+    if (exportConfiguration.disableShadowDefaults) resetRules.push('--shadow-*: initial;')
+    if (exportConfiguration.disableSpacingDefaults) resetRules.push('--spacing-*: initial;')
+    if (exportConfiguration.disableTextDefaults) resetRules.push('--text-*: initial;')
+    if (exportConfiguration.disableTrackingDefaults) resetRules.push('--tracking-*: initial;')
+
+    if (resetRules.length > 0) {
+        cssVariables += `\n${indentString}/* Reset default values */\n${indentString}${resetRules.join(`\n${indentString}`)}\n`
+    }
+
     tokensByType.forEach((tokensOfType, type) => {
         // Add section comment for token type
-        cssVariables += `\n  /* ${type} */\n`
+        cssVariables += `\n${indentString}/* ${type} */\n`
         
         // Convert tokens to CSS variable declarations
         cssVariables += tokensOfType
@@ -51,13 +79,8 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         cssVariables += "\n"
     })
 
-    // Determine the CSS selector based on whether this is a theme file
-    const selector = themePath 
-        ? exportConfiguration.themeSelector.replace('{theme}', themePath)
-        : exportConfiguration.cssSelector
-
-    // Add the CSS variables within the selector
-    content += `${selector} {\n${cssVariables}}`
+    // Use @theme directive for Tailwind 4
+    content += `@theme {\n${cssVariables}}`
 
     // Add disclaimer if enabled
     if (exportConfiguration.showGeneratedFileDisclaimer) {
