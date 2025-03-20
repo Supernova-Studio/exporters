@@ -1,4 +1,4 @@
-import { exportConfiguration } from "."
+import { exportConfiguration } from '.'
 
 export function applicableComponentTemplate(svg: string, name: string): string {
   if (exportConfiguration.customComponentTemplate) {
@@ -41,10 +41,10 @@ export const ${name} = (props) => (
 
 /** Component template. Must contain {{svg}} and {{name}} tags */
 export function componentCustomTemplate(template: string, svg: string, name: string): string {
-  if (!template.includes("{{svg}}")) throw new Error("Template must contain {{svg}} tag")
-  if (!template.includes("{{name}}")) throw new Error("Template must contain {{name}} tag")
+  if (!template.includes('{{svg}}')) throw new Error('Template must contain {{svg}} tag')
+  if (!template.includes('{{name}}')) throw new Error('Template must contain {{name}} tag')
 
-  return template.replace("{{svg}}", svg).replace("{{name}}", name)
+  return template.replace('{{svg}}', svg).replace('{{name}}', name)
 }
 
 /** Index template used for generation when either typescript or javascript is enabled */
@@ -54,8 +54,8 @@ export function indexTemplate(path: string, name: string): string {
 
 /** Index template. Must contain {{path}} and {{name}} tags */
 export function indexCustomTemplate(template: string, path: string, name: string): string {
-  if (!template.includes("{{path}}")) throw new Error("Template must contain {{path}} tag")
-  if (!template.includes("{{name}}")) throw new Error("Template must contain {{name}} tag")
+  if (!template.includes('{{path}}')) throw new Error('Template must contain {{path}} tag')
+  if (!template.includes('{{name}}')) throw new Error('Template must contain {{name}} tag')
 
-  return template.replace("{{path}}", path).replace("{{name}}", name)
+  return template.replace('{{path}}', path).replace('{{name}}', name)
 }
