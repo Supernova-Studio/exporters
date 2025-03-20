@@ -1,5 +1,5 @@
-import { exportConfiguration } from '.'
-import { optimize } from 'svgo'
+import { exportConfiguration } from "."
+import { optimize } from "svgo"
 
 export function optimizeSVG(svg: string): string {
   // Run SVGO to optimize the content of the SVG

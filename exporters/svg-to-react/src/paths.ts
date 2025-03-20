@@ -1,5 +1,5 @@
-import { NamingHelper, StringCase } from '@supernovaio/export-helpers'
-import { RenderedAsset } from '@supernovaio/sdk-exporters'
+import { NamingHelper, StringCase } from "@supernovaio/export-helpers"
+import { RenderedAsset } from "@supernovaio/sdk-exporters"
 
 export function exportAssetDestination(
   asset: RenderedAsset,
@@ -9,8 +9,8 @@ export function exportAssetDestination(
   path: string
 } {
   const extension = asset.format.toString()
-  const duplicates = asset.previouslyDuplicatedNames > 0 ? '-' + asset.previouslyDuplicatedNames : ''
-  const name = asset.originalName.toLowerCase().replaceAll(' ', '-')
+  const duplicates = asset.previouslyDuplicatedNames > 0 ? "-" + asset.previouslyDuplicatedNames : ""
+  const name = asset.originalName.toLowerCase().replaceAll(" ", "-")
 
   // Create full path
   let path = [...asset.group.path]
@@ -18,7 +18,7 @@ export function exportAssetDestination(
   if (folder) {
     path = [folder, ...path]
   }
-  const resultingPath = path.join('/').replaceAll(' ', '-').toLowerCase()
+  const resultingPath = path.join("/").replaceAll(" ", "-").toLowerCase()
 
   if (path.length > 0) {
     return {
@@ -28,7 +28,7 @@ export function exportAssetDestination(
   } else {
     return {
       name: `${name}${duplicates}.${extension}`,
-      path: './'
+      path: "./"
     }
   }
 }
@@ -41,9 +41,9 @@ export function exportReactDefinitionDestination(
   name: string
   path: string
 } {
-  const duplicates = asset.previouslyDuplicatedNames > 0 ? asset.previouslyDuplicatedNames : ''
-  const name = NamingHelper.codeSafeVariableName(asset.originalName, StringCase.capitalCase).replaceAll(' ', '')
-  const extension = 'tsx'
+  const duplicates = asset.previouslyDuplicatedNames > 0 ? asset.previouslyDuplicatedNames : ""
+  const name = NamingHelper.codeSafeVariableName(asset.originalName, StringCase.capitalCase).replaceAll(" ", "")
+  const extension = "tsx"
 
   // Create full path
   let path = [...asset.group.path]
@@ -51,7 +51,7 @@ export function exportReactDefinitionDestination(
   if (folder) {
     path = [folder, ...path]
   }
-  const resultingPath = path.join('/').replaceAll(' ', '-').toLowerCase()
+  const resultingPath = path.join("/").replaceAll(" ", "-").toLowerCase()
 
   if (path.length > 0) {
     return {
@@ -63,7 +63,7 @@ export function exportReactDefinitionDestination(
     return {
       className: `${name}${duplicates}`,
       name: `${name}${duplicates}.${extension}`,
-      path: './'
+      path: "./"
     }
   }
 }

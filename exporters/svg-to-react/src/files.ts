@@ -1,9 +1,9 @@
-import { NetworkHelper, FileHelper } from '@supernovaio/export-helpers'
-import { AnyOutputFile, OutputTextFile, RenderedAsset, Supernova } from '@supernovaio/sdk-exporters'
-import { ExporterConfiguration } from '../config'
-import { exportReactDefinitionDestination, exportAssetDestination } from './paths'
-import { optimizeSVG } from './svg'
-import { applicableComponentTemplate } from './templates'
+import { NetworkHelper, FileHelper } from "@supernovaio/export-helpers"
+import { AnyOutputFile, OutputTextFile, RenderedAsset, Supernova } from "@supernovaio/sdk-exporters"
+import { ExporterConfiguration } from "../config"
+import { exportReactDefinitionDestination, exportAssetDestination } from "./paths"
+import { optimizeSVG } from "./svg"
+import { applicableComponentTemplate } from "./templates"
 
 export async function convertRenderedAssetToComponent(
   asset: RenderedAsset,
@@ -64,9 +64,9 @@ export async function convertRenderedAssetsToIndexFile(
         const destination = exportReactDefinitionDestination(a, exportConfiguration.componentFolder)
         return `export * from "./${destination.path}/${destination.className}"`
       })
-      .join('\n'),
-    relativePath: './',
-    fileName: 'index.ts'
+      .join("\n"),
+    relativePath: "./",
+    fileName: "index.ts"
   })
 
   return indexFile
@@ -74,7 +74,7 @@ export async function convertRenderedAssetsToIndexFile(
 
 function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   if (chunkSize <= 0) {
-    throw new Error('Chunk size should be greater than 0.')
+    throw new Error("Chunk size should be greater than 0.")
   }
 
   const result: T[][] = []

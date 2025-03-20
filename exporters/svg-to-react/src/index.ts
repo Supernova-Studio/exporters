@@ -4,14 +4,14 @@ import {
   RemoteVersionIdentifier,
   AnyOutputFile,
   AssetFormat
-} from '@supernovaio/sdk-exporters'
-import { ExporterConfiguration } from '../config'
+} from "@supernovaio/sdk-exporters"
+import { ExporterConfiguration } from "../config"
 import {
   convertRenderedAssetsToComponentsInBatches,
   convertRenderedAssetsToOriginalSVG,
   convertRenderedAssetsToIndexFile
-} from './files'
-import { isPathFilteredOut } from './paths'
+} from "./files"
+import { isPathFilteredOut } from "./paths"
 
 /**
  * Export entrypoint.
