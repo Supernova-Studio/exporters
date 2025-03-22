@@ -1,6 +1,16 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, AssetFormat } from "@supernovaio/sdk-exporters"
+import {
+  Supernova,
+  PulsarContext,
+  RemoteVersionIdentifier,
+  AnyOutputFile,
+  AssetFormat
+} from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
-import { convertRenderedAssetsToComponentsInBatches, convertRenderedAssetsToOriginalSVG, convertRenderedAssetsToIndexFile } from "./files"
+import {
+  convertRenderedAssetsToComponentsInBatches,
+  convertRenderedAssetsToOriginalSVG,
+  convertRenderedAssetsToIndexFile
+} from "./files"
 import { isPathFilteredOut } from "./paths"
 
 /**
@@ -12,7 +22,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Fetch data from design system that is currently being exported (context)
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
-    versionId: context.versionId,
+    versionId: context.versionId
   }
 
   // Render all assets in the library
