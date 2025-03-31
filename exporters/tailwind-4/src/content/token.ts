@@ -1,7 +1,7 @@
-import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-utils"
+import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
+import { TAILWIND_TOKEN_PREFIXES } from "../constants/defaults"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -10,22 +10,7 @@ import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
  * @returns The prefix string to use for this token type
  */
 export function getTokenPrefix(tokenType: TokenType): string {
-  return exportConfiguration.customizeTokenPrefixes
-    ? exportConfiguration.tokenPrefixes[tokenType]
-    : DEFAULT_TOKEN_PREFIXES[tokenType]
-}
-
-/**
- * Applies find/replace rules to a string based on configuration
- * @param input - The string to process
- * @returns The processed string with replacements applied
- */
-function applyFindReplace(input: string): string {
-  let result = input
-  for (const [find, replace] of Object.entries(exportConfiguration.findReplace)) {
-    result = result.replace(new RegExp(find, 'g'), replace)
-  }
-  return result
+  return TAILWIND_TOKEN_PREFIXES[tokenType]
 }
 
 /**
@@ -68,10 +53,19 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   })
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
-  // Add debug info showing the full path
+  // Add debug info showing the full path and find/replace rules
   const tokenPath = token.tokenPath || []
   const fullPath = [...tokenPath, token.name].join('/')
   let output = `${indentString}/* Path: ${fullPath} */\n`
+  output += `${indentString}/* Find/Replace: ${JSON.stringify(exportConfiguration.findReplace)} */\n`
+  output += `${indentString}/* Find/Replace Type: ${typeof exportConfiguration.findReplace} */\n`
+  output += `${indentString}/* Token: ${JSON.stringify({
+    name: token.name,
+    type: token.tokenType,
+    path: token.tokenPath,
+    prefix: getTokenPrefix(token.tokenType)
+  })} */\n`
+  output += `${indentString}/* Generated name: ${name} */\n`
 
   // Add description if enabled
   if (exportConfiguration.showDescriptions && token.description) {
@@ -81,7 +75,8 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   // Special handling for blur tokens
   if (token.tokenType === TokenType.blur) {
     const isBackdropBlur = fullPath.toLowerCase().includes('background')
-    name = isBackdropBlur ? 'backdrop-blur' : (token.name.toLowerCase() === 'blur' ? 'blur-default' : `blur-${token.name}`)
+    const blurName = isBackdropBlur ? 'backdrop-blur' : (token.name.toLowerCase() === 'blur' ? 'blur-default' : `blur-${token.name}`)
+    name = NamingHelper.codeSafeVariableName(blurName, StringCase.kebabCase)
   }
   
   output += `${indentString}--${name}: ${value};`
@@ -114,7 +109,7 @@ function buildFullPath(groupId: string | null, tokenGroups: Array<TokenGroup>): 
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @returns Formatted variable name string
  */
-function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
+export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
   let prefix = getTokenPrefix(token.tokenType)
   
   // Handle color utility prefixes if enabled and token is a color
@@ -144,14 +139,18 @@ function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string
           .replace(/^[-\s]+|[-\s]+$/g, '') // Remove leading/trailing hyphens and spaces
 
         // Construct the name as: utility-color-path-name
-        return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, exportConfiguration.tokenNameStyle)
+        // Using only codeSafeVariableName because we
+        return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace)
       }
     }
 
     // If no utility match, use standard naming
-    return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent || null, prefix, exportConfiguration.findReplace)
+    const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
+    return name
   }
 
+  // For non-color tokens or when color utility prefixes are disabled
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)
-  return NamingHelper.codeSafeVariableNameForToken(token, exportConfiguration.tokenNameStyle, parent || null, prefix, exportConfiguration.findReplace)
+  const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
+  return name
 }

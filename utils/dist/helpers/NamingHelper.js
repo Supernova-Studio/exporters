@@ -24,24 +24,35 @@ class NamingHelper {
         else {
             fragments.push(token.name);
         }
+        // Apply find/replace to path and name fragments *first*
+        if (findReplace) {
+            // Sort find patterns by length (longest first) to handle overlapping patterns
+            const sortedPatterns = Object.entries(findReplace)
+                .sort(([a], [b]) => b.length - a.length);
+            // Join path and name for find/replace processing
+            let pathAndName = fragments.join(' ');
+            for (const [find, replace] of sortedPatterns) {
+                // Create a case-insensitive pattern that matches the word
+                // Use a more flexible pattern that handles word boundaries better
+                const pattern = new RegExp(`\\b${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b|(?<=^|\\s)${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$)`, 'gi');
+                pathAndName = pathAndName.replace(pattern, replace);
+            }
+            // Split back into fragments and clean up
+            fragments = pathAndName
+                .split(/\s+/)
+                .filter(f => f.length > 0)
+                .map(f => f.trim());
+        }
+        // Add prefix *after* find/replace
         if (prefix && prefix.length > 0) {
             fragments.unshift(prefix);
         }
-        // Remove consecutive duplicates
+        // Remove consecutive duplicates *after* adding prefix
         fragments = fragments.filter((fragment, index) => {
             // Keep if it's first element or different from previous
             return index === 0 || fragment.toLowerCase() !== fragments[index - 1].toLowerCase();
         });
-        // Apply find/replace to each fragment if provided
-        if (findReplace) {
-            fragments = fragments.map(fragment => {
-                let result = fragment;
-                for (const [find, replace] of Object.entries(findReplace)) {
-                    result = result.replace(new RegExp(find, 'g'), replace);
-                }
-                return result;
-            });
-        }
+        // Apply case formatting
         return NamingHelper.codeSafeVariableName(fragments, format);
     }
     /**
@@ -54,8 +65,14 @@ class NamingHelper {
         let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ');
         // Apply find/replace if provided
         if (findReplace) {
-            for (const [find, replace] of Object.entries(findReplace)) {
-                sentence = sentence.replace(new RegExp(find, 'g'), replace);
+            // Sort find patterns by length (longest first) to handle overlapping patterns
+            const sortedPatterns = Object.entries(findReplace)
+                .sort(([a], [b]) => b.length - a.length);
+            for (const [find, replace] of sortedPatterns) {
+                // Create a case-insensitive pattern that matches the word
+                // Use a more flexible pattern that handles word boundaries better
+                const pattern = new RegExp(`\\b${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b|(?<=^|\\s)${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$)`, 'gi');
+                sentence = sentence.replace(pattern, replace);
             }
         }
         // Only allow letters, digits, underscore and hyphen

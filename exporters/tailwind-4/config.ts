@@ -27,8 +27,6 @@ export type ExporterConfiguration = {
   showDescriptions: boolean
   /** When enabled, values will use references to other tokens where applicable */
   useReferences: boolean
-  /** Style of exported token names */
-  tokenNameStyle: StringCase
   /** Format of the exported colors */
   colorFormat: ColorFormat
   /** Max number of decimals in colors */

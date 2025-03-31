@@ -225,3 +225,136 @@ test('codeSafeVariableNameForToken_handles_token_name_with_different_case', () =
     'color-neutral-500'
   )
 })
+
+test('codeSafeVariableNameForToken_find_replace_1', () => {
+  const token = {
+    name: 'Border Color Medium Contrast'
+  }
+  const tokenGroup = {
+    name: 'Border',
+    path: ['Color'],
+    isRoot: false
+  }
+  const findReplace = {
+    'Border Radius': '',
+    'border': '',
+    'Contrast': ''
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, findReplace)).toBe(
+    'color-medium'
+  )
+})
+
+test('codeSafeVariableNameForToken_find_replace_2', () => {
+  const token = {
+    name: 'Border Color Medium'
+  }
+  const tokenGroup = {
+    name: 'Border',
+    path: ['Color'],
+    isRoot: false
+  }
+  const findReplace = {
+    'Border': 'Edge',
+    'Color': ''
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, findReplace)).toBe(
+    'edge-medium'
+  )
+})
+
+test('codeSafeVariableNameForToken_find_replace_case_insensitive', () => {
+  const token = {
+    name: 'BORDER COLOR MEDIUM'
+  }
+  const tokenGroup = {
+    name: 'Border',
+    path: ['Color'],
+    isRoot: false
+  }
+  const findReplace = {
+    'border': 'edge',
+    'color': 'hue'
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, findReplace)).toBe(
+    'hue-edge-hue-medium'
+  )
+})
+
+test('codeSafeVariableNameForToken_find_replace_special_chars', () => {
+  const token = {
+    name: 'Border.Color.Medium'
+  }
+  const tokenGroup = {
+    name: 'Border',
+    path: ['Color'],
+    isRoot: false
+  }
+  const findReplace = {
+    'Border.Color': 'Edge'
+  }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, findReplace)).toBe(
+    'color-border-edge-medium'
+  )
+})
+
+test('codeSafeVariableName_find_replace_1', () => {
+  const findReplace = {
+    'Border Radius': '',
+    'border': '',
+    'Contrast': ''
+  }
+  expect(NamingHelper.codeSafeVariableName('Border Color Medium Contrast', StringCase.kebabCase, findReplace)).toBe(
+    'color-medium'
+  )
+})
+
+test('codeSafeVariableName_find_replace_2', () => {
+  const findReplace = {
+    'Border': 'Edge',
+    'Color': 'Hue'
+  }
+  expect(NamingHelper.codeSafeVariableName('Border Color Medium', StringCase.kebabCase, findReplace)).toBe(
+    'edge-hue-medium'
+  )
+})
+
+test('codeSafeVariableName_find_replace_case_insensitive', () => {
+  const findReplace = {
+    'border': 'edge',
+    'color': 'hue'
+  }
+  expect(NamingHelper.codeSafeVariableName('BORDER COLOR MEDIUM', StringCase.kebabCase, findReplace)).toBe(
+    'edge-hue-medium'
+  )
+})
+
+test('codeSafeVariableName_find_replace_special_chars', () => {
+  const findReplace = {
+    'Border.Color': 'Edge.Hue'
+  }
+  expect(NamingHelper.codeSafeVariableName('Border.Color.Medium', StringCase.kebabCase, findReplace)).toBe(
+    'edge-hue-medium'
+  )
+})
+
+test('codeSafeVariableName_find_replace_overlapping_patterns', () => {
+  const findReplace = {
+    'Border': 'Edge',
+    'Border Color': 'BorderHue'
+  }
+  expect(NamingHelper.codeSafeVariableName('Border Color Medium', StringCase.kebabCase, findReplace)).toBe(
+    'border-hue-medium'
+  )
+})
+
+test('codeSafeVariableName_find_replace_empty_strings', () => {
+  const findReplace = {
+    'Border': '',
+    'Color': '',
+    'Medium': ''
+  }
+  expect(NamingHelper.codeSafeVariableName('Border Color Medium', StringCase.kebabCase, findReplace)).toBe(
+    ''
+  )
+})

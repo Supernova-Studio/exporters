@@ -1,43 +1,5 @@
 [
     {
-        "key": "tokenNameStyle",
-        "type": "enum",
-        "default": "kebabCase",
-        "title": "Token name style",
-        "description": "Export token names in the selected case.",
-        "category": "Token names",
-        "options": {
-            "camelCase": {
-                "label": "Camel case",
-                "description": "Example: --myVariableName"
-            },
-            "constantCase": {
-                "label": "Constant case", 
-                "description": "Example: --MY_VARIABLE_NAME"
-            },
-            "flatCase": {
-                "label": "Flat case",
-                "description": "Example: --myvariablename"
-            },
-            "kebabCase": {
-                "label": "Kebab case",
-                "description": "Example: --my-variable-name"
-            },
-            "pascalCase": {
-                "label": "Pascal case",
-                "description": "Example: --MyVariableName"
-            },
-            "snakeCase": {
-                "label": "Snake case",
-                "description": "Example: --my_variable_name"
-            },
-            "trainCase": {
-                "label": "Train case",
-                "description": "Example: --My-Variable-Name"
-            }
-        }
-    },
-    {
         "key": "colorFormat",
         "type": "enum",
         "default": "smartOklch",
@@ -215,76 +177,6 @@
         "category": "Token names"
     },
     {
-        "key": "tokenPrefixes",
-        "type": "object",
-        "title": "Token prefixes",
-        "description": "Each token of a specific type is prefixed with the following identifier.",
-        "category": "Token names",
-        "dependsOn": {
-            "customizeTokenPrefixes": true
-        },
-        "default": {
-            "Blur": "blur",
-            "Border": "border",
-            "BorderRadius": "borderRadius",
-            "BorderWidth": "borderWidth",
-            "Color": "color",
-            "Dimension": "dimension",
-            "Duration": "duration",
-            "FontFamily": "fontFamily",
-            "FontSize": "fontSize",
-            "FontWeight": "fontWeight",
-            "Gradient": "gradient",
-            "LetterSpacing": "letterSpacing",
-            "LineHeight": "lineHeight",
-            "Opacity": "opacity",
-            "ParagraphSpacing": "paragraphSpacing",
-            "ProductCopy": "productCopy",
-            "Shadow": "shadow",
-            "Size": "size",
-            "Space": "space",
-            "String": "string",
-            "TextCase": "textCase",
-            "TextDecoration": "textDecoration",
-            "Typography": "typography",
-            "Visibility": "visibility",
-            "ZIndex": "zIndex"
-        },
-        "allowedKeys": {
-            "options": [
-                "Color",
-                "Typography",
-                "Dimension",
-                "Size",
-                "Space",
-                "Opacity",
-                "FontSize",
-                "LineHeight",
-                "LetterSpacing",
-                "ParagraphSpacing",
-                "BorderWidth",
-                "BorderRadius",
-                "Duration",
-                "ZIndex",
-                "Shadow",
-                "Border",
-                "Gradient",
-                "String",
-                "ProductCopy",
-                "FontFamily",
-                "FontWeight",
-                "TextCase",
-                "TextDecoration",
-                "Visibility",
-                "Blur"
-            ],
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
-    },
-    {
         "key": "useColorUtilityPrefixes",
         "type": "boolean",
         "default": true,
@@ -318,6 +210,20 @@
                 "border",
                 "stroke"
             ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
+    },
+    {
+        "key": "findReplace",
+        "type": "object",
+        "title": "Find and Replace",
+        "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
+        "category": "Token names",
+        "default": {},
+        "allowedKeys": {
             "type": "string"
         },
         "allowedValues": {
@@ -410,7 +316,7 @@
     {
         "key": "disableColorDefaults",
         "type": "boolean",
-        "default": false,
+        "default": true,
         "title": "Reset color styles",
         "description": "Reset all color token values to initial state before applying new values.",
         "category": "Disabled default styles"
@@ -502,21 +408,5 @@
         "title": "Reset letter spacing styles",
         "description": "Reset all letter spacing token values to initial state before applying new values.",
         "category": "Disabled default styles"
-    },
-    {
-        "key": "findReplace",
-        "type": "object",
-        "title": "Find and Replace",
-        "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
-        "category": "Token names",
-        "default": {
-            "Border Radius": ""
-        },
-        "allowedKeys": {
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
     }
 ]
