@@ -171,10 +171,27 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
     }
 
     // Check token path against each utility pattern
-    for (const [utilityName, pattern] of Object.entries(exportConfiguration.colorUtilityPrefixes)) {
-      if (fullPath.includes(pattern.toLowerCase())) {
+    for (const [utilityName, patternString] of Object.entries(exportConfiguration.colorUtilityPrefixes)) {
+      // Split pattern by comma to support multiple patterns for a single utility
+      const patterns = patternString.split(',').map(p => p.trim().toLowerCase())
+      
+      // Check if any of the patterns match the path
+      const matchingPattern = patterns.find(pattern => fullPath.includes(pattern))
+      
+      if (matchingPattern) {
+        // Debug logging for matched patterns if debug mode is enabled
+        if (exportConfiguration.debug) {
+          console.log('Color utility pattern match:', {
+            utilityName,
+            patternString,
+            matchingPattern,
+            patterns,
+            fullPath
+          })
+        }
+        
         // Find where the pattern matches in the path
-        const patternIndex = tokenPath.findIndex(p => p.toLowerCase() === pattern.toLowerCase())
+        const patternIndex = tokenPath.findIndex(p => p.toLowerCase().includes(matchingPattern))
         
         // Get the remaining path segments after the pattern match
         const remainingPath = patternIndex >= 0 
@@ -191,7 +208,8 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
         if (exportConfiguration.debug) {
           console.log('Color utility match:', {
             utilityName,
-            pattern,
+            matchingPattern,
+            patternIndex,
             remainingPath,
             segments,
             cleanName
@@ -199,7 +217,6 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
         }
 
         // Construct the name as: utility-color-path-name
-        // Using only codeSafeVariableName because we
         return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace)
       }
     }

@@ -150,15 +150,15 @@
         "key": "colorUtilityPrefixes",
         "type": "object",
         "title": "Color utility prefixes",
-        "description": "Define specific string patterns to identify and prefix color tokens based on their utility. These prefixes are automatically applied only to color tokens.",
+        "description": "Define specific string patterns to identify and prefix color tokens based on their utility. Multiple patterns can be specified using comma-separated values (e.g., 'background,bg').",
         "category": "Token names",
         "dependsOn": {
             "useColorUtilityPrefixes": true
         },
         "default": {
-            "text": "foreground",
+            "text": "foreground,text",
             "boxShadow": "shadow",
-            "background": "background",
+            "background": "background,bg",
             "outline": "outline",
             "border": "border",
             "stroke": "stroke"
@@ -328,7 +328,6 @@
         "title": "Find and replace",
         "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
         "category": "Find and replace",
-        "hasCustomFields": true,
         "default": {"Test": ""},
         "allowedKeys": {
             "type": "string"

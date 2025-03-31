@@ -55,7 +55,18 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         content += ` * Color Format: ${exportConfiguration.colorFormat}\n`
         content += ` * Prefix: ${exportConfiguration.globalPrefix || 'None'}\n`
         content += ` * Find/Replace Rules: ${JSON.stringify(exportConfiguration.findReplace)}\n`
-        content += ` * Color Utility Prefixes: ${exportConfiguration.useColorUtilityPrefixes ? JSON.stringify(exportConfiguration.colorUtilityPrefixes) : 'Disabled'}\n`
+        
+        // Add detailed information about color utility prefixes
+        if (exportConfiguration.useColorUtilityPrefixes) {
+            content += ` * Color Utility Prefixes:\n`
+            for (const [utilityName, patterns] of Object.entries(exportConfiguration.colorUtilityPrefixes)) {
+                const patternArray = patterns.split(',').map(p => p.trim())
+                content += `    - ${utilityName}: ${patternArray.join(', ')}\n`
+            }
+        } else {
+            content += ` * Color Utility Prefixes: Disabled\n`
+        }
+        
         content += ` * Generated: ${new Date().toISOString()}\n`
         content += ` */\n\n`
     }
