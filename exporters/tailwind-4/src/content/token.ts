@@ -1,7 +1,7 @@
 import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { TAILWIND_TOKEN_PREFIXES } from "../constants/defaults"
+import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION } from "../constants/defaults"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -14,15 +14,29 @@ export function getTokenPrefix(tokenType: TokenType): string {
 }
 
 /**
+ * Check if a token type is allowed for customization in Tailwind
+ * @param tokenType The token type to check
+ * @returns True if the token type is allowed in Tailwind customization
+ */
+export function isAllowedTokenType(tokenType: TokenType): boolean {
+  return TAILWIND_ALLOWED_CUSTOMIZATION.includes(tokenType)
+}
+
+/**
  * Converts a design token into its CSS custom property representation.
  * Handles formatting of the token value, references, and optional description comments.
  * 
  * @param token - The design token to convert
  * @param mappedTokens - Map of all tokens for resolving references
  * @param tokenGroups - Array of token groups for determining token hierarchy
- * @returns Formatted CSS custom property string with optional description comment
+ * @returns Formatted CSS custom property string with optional description comment or null if token type is not allowed
  */
-export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
+export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string | null {
+  // Skip tokens that are not allowed for Tailwind customization
+  if (!isAllowedTokenType(token.tokenType)) {
+    return null;
+  }
+
   // Generate the CSS variable name based on token properties and configuration
   let name = tokenVariableName(token, tokenGroups)
 
@@ -35,6 +49,19 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     remBase: exportConfiguration.remBase,
     // Custom handler for token references - converts them to CSS var() syntax
     tokenToVariableRef: (t) => {
+      // Skip references to tokens that are not allowed for Tailwind customization
+      if (!isAllowedTokenType(t.tokenType)) {
+        // Return the raw value instead of a reference
+        return CSSHelper.tokenToCSS(t, mappedTokens, {
+          allowReferences: false, // Don't follow nested references
+          decimals: exportConfiguration.colorPrecision,
+          colorFormat: exportConfiguration.colorFormat,
+          forceRemUnit: exportConfiguration.forceRemUnit,
+          remBase: exportConfiguration.remBase,
+          tokenToVariableRef: () => "", // Stub function that never gets called since allowReferences is false
+          valueTransformer: undefined
+        });
+      }
       return `var(--${tokenVariableName(t, tokenGroups)})`
     },
     // Handle blur values - extract just the dimension

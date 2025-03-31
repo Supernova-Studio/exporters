@@ -31,10 +31,21 @@ export const TAILWIND_TOKEN_PREFIXES: Record<TokenType, string> = {
 /**
  * List of token types that can be customized in Tailwind 4
  * These are the token types supported by Tailwind CSS configuration
+ * 
+ * Unsupported token types that will be filtered out:
+ * - Dimension (use size or space instead)
+ * - ParagraphSpacing (not directly supported by Tailwind)
+ * - Gradient (not a core Tailwind property)
+ * - String (not relevant for CSS variables)
+ * - ProductCopy (not relevant for CSS variables)
+ * - TextCase (use Tailwind text-case utilities instead)
+ * - TextDecoration (use Tailwind text-decoration utilities instead)
+ * - Visibility (use Tailwind visibility utilities instead)
  */
 export const TAILWIND_ALLOWED_CUSTOMIZATION: TokenType[] = [
   TokenType.color,
   TokenType.space,
+  TokenType.size,
   TokenType.fontSize,
   TokenType.lineHeight,
   TokenType.letterSpacing,
@@ -46,5 +57,7 @@ export const TAILWIND_ALLOWED_CUSTOMIZATION: TokenType[] = [
   TokenType.opacity,
   TokenType.duration,
   TokenType.zIndex,
-  TokenType.blur
+  TokenType.blur,
+  TokenType.typography,
+  TokenType.border,
 ] 

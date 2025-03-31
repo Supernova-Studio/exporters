@@ -1,7 +1,7 @@
 import { FileHelper, ThemeHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken } from "../content/token"
+import { convertedToken, isAllowedTokenType } from "../content/token"
 
 /**
  * Generates a single CSS output file containing all token styles in Tailwind format
@@ -19,6 +19,12 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         if (processedTokens.length === 0) {
             return null
         }
+    }
+
+    // Filter out tokens not allowed for Tailwind customization
+    processedTokens = processedTokens.filter(token => isAllowedTokenType(token.tokenType))
+    if (processedTokens.length === 0) {
+        return null
     }
 
     // Group tokens by type for organized output
@@ -72,11 +78,12 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         cssVariables += `\n${indentString}/* ${type} */\n`
         
         // Convert tokens to CSS variable declarations
-        cssVariables += tokensOfType
+        const cssDeclarations = tokensOfType
             .map((token) => convertedToken(token, mappedTokens, tokenGroups))
+            .filter((declaration): declaration is string => declaration !== null) // Filter out null returns
             .join("\n")
         
-        cssVariables += "\n"
+        cssVariables += cssDeclarations + "\n"
     })
 
     // Use @theme directive for Tailwind 4
