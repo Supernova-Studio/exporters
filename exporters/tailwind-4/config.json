@@ -131,49 +131,11 @@
         "category": "Themes"
     },
     {
-        "key": "generateIndexFile",
-        "type": "boolean",
-        "default": false,
-        "title": "Generate index file",
-        "description": "Generate a file with imports for all base and theme style files.",
-        "category": "Index file"
-    },
-    {
-        "key": "indexFileName",
-        "type": "string",
-        "default": "index.css",
-        "title": "Index filename",
-        "description": "The name of the index file that will be generated.",
-        "category": "Index file",
-        "dependsOn": {
-            "generateIndexFile": true
-        }
-    },
-    {
-        "key": "baseIndexFilePath",
-        "type": "string",
-        "default": "./",
-        "title": "Path to index file",
-        "description": "Index file will be written to this directory relative to export root.",
-        "category": "Index file",
-        "dependsOn": {
-            "generateIndexFile": true
-        }
-    },
-    {
         "key": "globalPrefix",
         "type": "string",
         "default": "",
         "title": "Prefix",
         "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
-        "category": "Token names"
-    },
-    {
-        "key": "customizeTokenPrefixes",
-        "type": "boolean",
-        "default": false,
-        "title": "Customize type prefixes",
-        "description": "Customize the prefixes for each design token type.",
         "category": "Token names"
     },
     {
@@ -215,72 +177,6 @@
         "allowedValues": {
             "type": "string"
         }
-    },
-    {
-        "key": "findReplace",
-        "type": "object",
-        "title": "Find and Replace",
-        "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
-        "category": "Token names",
-        "default": {},
-        "allowedKeys": {
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
-    },
-    {
-        "key": "cssSelector",
-        "type": "string",
-        "default": "@theme",
-        "title": "CSS selector",
-        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
-        "category": "CSS selectors"
-    },
-    {
-        "key": "themeSelector",
-        "type": "string",
-        "default": ".theme-{theme}",
-        "title": "CSS selector for themes",
-        "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
-        "category": "CSS selectors"
-    },
-    {
-        "key": "showDescriptions",
-        "type": "boolean",
-        "default": true,
-        "title": "Show token descriptions",
-        "description": "Show the token description as a code comment for every exported token.",
-        "category": "Other"
-    },
-    {
-        "key": "showGeneratedFileDisclaimer",
-        "type": "boolean",
-        "default": true,
-        "title": "Show file disclaimer",
-        "description": "A message explaining that the file was automatically generated will appear in all style files.",
-        "category": "Other"
-    },
-    {
-        "key": "disclaimer",
-        "type": "string",
-        "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
-        "title": "Disclaimer message",
-        "isMultiline": true,
-        "description": "A message explaining that the file was automatically generated will appear in all style files.",
-        "category": "Other",
-        "dependsOn": {
-            "showGeneratedFileDisclaimer": true
-        }
-    },
-    {
-        "key": "indent",
-        "type": "number",
-        "default": 2,
-        "title": "Indentation",
-        "description": "Number of spaces used to indent CSS variables.",
-        "category": "Other"
     },
     {
         "key": "disableAnimateDefaults",
@@ -409,5 +305,79 @@
         "title": "Reset letter spacing styles",
         "description": "Reset all letter spacing token values to initial state before applying new values.",
         "category": "Disabled default styles"
+    },
+    {
+        "key": "findReplace",
+        "type": "object",
+        "title": "Find and Replace",
+        "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
+        "category": "Find and replace",
+        "default": {},
+        "allowedKeys": {
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
+    },
+    {
+        "key": "cssSelector",
+        "type": "string",
+        "default": "@theme",
+        "title": "CSS selector",
+        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
+        "category": "CSS selectors"
+    },
+    {
+        "key": "themeSelector",
+        "type": "string",
+        "default": ".theme-{theme}",
+        "title": "CSS selector for themes",
+        "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
+        "category": "CSS selectors"
+    },
+    {
+        "key": "showDescriptions",
+        "type": "boolean",
+        "default": true,
+        "title": "Show token descriptions",
+        "description": "Show the token description as a code comment for every exported token.",
+        "category": "Other"
+    },
+    {
+        "key": "showGeneratedFileDisclaimer",
+        "type": "boolean",
+        "default": true,
+        "title": "Show file disclaimer",
+        "description": "A message explaining that the file was automatically generated will appear in all style files.",
+        "category": "Other"
+    },
+    {
+        "key": "disclaimer",
+        "type": "string",
+        "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
+        "title": "Disclaimer message",
+        "isMultiline": true,
+        "description": "A message explaining that the file was automatically generated will appear in all style files.",
+        "category": "Other",
+        "dependsOn": {
+            "showGeneratedFileDisclaimer": true
+        }
+    },
+    {
+        "key": "indent",
+        "type": "number",
+        "default": 2,
+        "title": "Indentation",
+        "description": "Number of spaces used to indent CSS variables.",
+        "category": "Other"
+    },
+    {
+        "key": "debug",
+        "type": "boolean",
+        "default": false,
+        "title": "Debug mode",
+        "description": "Add debug information to the generated files to help with troubleshooting.",
+        "category": "Other"
     }
 ]

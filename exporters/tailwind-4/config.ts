@@ -19,8 +19,6 @@ export type ExporterConfiguration = {
   showGeneratedFileDisclaimer: boolean
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   disclaimer: string
-  /** When enabled, file with all css style files imported will be generated */
-  generateIndexFile: boolean
   /** When enabled, empty style files will be generated. Otherwise empty are omitted */
   generateEmptyFiles: boolean
   /** When enabled, token description will be shown as code comments for every exported token */
@@ -37,12 +35,8 @@ export type ExporterConfiguration = {
   tokenPrefixes: Record<TokenType, string>
   /** Name of each file that will be generated. Tokens are grouped by the type and will land in each of those files */
   styleFileNames: Record<TokenType, string>
-  /** Name of the index file that will be generated */
-  indexFileName: string
   /** All files will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
   baseStyleFilePath: string
-  /** Index file will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
-  baseIndexFilePath: string
   /** CSS selector where variables will be defined */
   cssSelector: string
   /** CSS selector pattern for themes, {theme} will be replaced with theme name */
@@ -59,8 +53,6 @@ export type ExporterConfiguration = {
   remBase: number
   /** When enabled, allows customization of style file names */
   customizeStyleFileNames: boolean
-  /** When enabled, allows customization of token prefixes */
-  customizeTokenPrefixes: boolean
   /** Prefix for Tailwind classes and CSS variables */
   globalPrefix: string
   /** When enabled, uses specific prefixes for different color utilities */
@@ -101,4 +93,6 @@ export type ExporterConfiguration = {
   disableTextDefaults: boolean
   /** When enabled, resets all letter spacing token values to initial state before applying new values */
   disableTrackingDefaults: boolean
+  /** When enabled, adds debug information to the generated files to help with troubleshooting */
+  debug: boolean
 }
