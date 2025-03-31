@@ -131,27 +131,19 @@
         "category": "Themes"
     },
     {
-        "key": "globalPrefix",
-        "type": "string",
-        "default": "",
-        "title": "Prefix",
-        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
-        "category": "Token names"
-    },
-    {
         "key": "useColorUtilityPrefixes",
         "type": "boolean",
         "default": true,
         "title": "Use color utility prefixes",
         "description": "Enable specific prefixes for different color utilities. Only applies to color tokens.",
-        "category": "Token names"
+        "category": "Utility prefixes"
     },
     {
         "key": "colorUtilityPrefixes",
         "type": "object",
         "title": "Color utility prefixes",
         "description": "Define specific string patterns to identify and prefix color tokens based on their utility. Multiple patterns can be specified using comma-separated values (e.g., 'background,bg').",
-        "category": "Token names",
+        "category": "Utility prefixes",
         "dependsOn": {
             "useColorUtilityPrefixes": true
         },
@@ -161,7 +153,8 @@
             "background": "background,bg",
             "outline": "outline",
             "border": "border",
-            "stroke": "stroke"
+            "stroke": "stroke",
+            "fill": "fill"
         },
         "allowedKeys": {
             "options": [
@@ -170,13 +163,22 @@
                 "background",
                 "outline",
                 "border",
-                "stroke"
+                "stroke",
+                "fill"
             ],
             "type": "string"
         },
         "allowedValues": {
             "type": "string"
         }
+    },
+    {
+        "key": "globalPrefix",
+        "type": "string",
+        "default": "",
+        "title": "Prefix",
+        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
+        "category": "Token names"
     },
     {
         "key": "disableAnimateDefaults",
