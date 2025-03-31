@@ -267,6 +267,7 @@
         "type": "string",
         "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
         "title": "Disclaimer message",
+        "isMultiline": true,
         "description": "A message explaining that the file was automatically generated will appear in all style files.",
         "category": "Other",
         "dependsOn": {

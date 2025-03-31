@@ -1,6 +1,6 @@
 {
     "id": "supernovaio.exporter-tailwind",
-    "name": "Tailwind CSS",
+    "name": "Tailwind CSS 4",
     "description": "Export design tokens as Tailwind CSS configuration. Tailwind 4 compatible.",
     "author": "Supernova.io",
     "organization": "Supernova.io",
