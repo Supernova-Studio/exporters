@@ -80,19 +80,21 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   })
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
-  // Add debug info showing the full path and find/replace rules
+  let output = ""
   const tokenPath = token.tokenPath || []
   const fullPath = [...tokenPath, token.name].join('/')
-  let output = `${indentString}/* Path: ${fullPath} */\n`
-  output += `${indentString}/* Find/Replace: ${JSON.stringify(exportConfiguration.findReplace)} */\n`
-  output += `${indentString}/* Find/Replace Type: ${typeof exportConfiguration.findReplace} */\n`
-  output += `${indentString}/* Token: ${JSON.stringify({
-    name: token.name,
-    type: token.tokenType,
-    path: token.tokenPath,
-    prefix: getTokenPrefix(token.tokenType)
-  })} */\n`
-  output += `${indentString}/* Generated name: ${name} */\n`
+  
+  // Add debug info only if debug mode is enabled
+  if (exportConfiguration.debug) {
+    // Add detailed debug information
+    output += `${indentString}/* Path: ${fullPath} */\n`
+    output += `${indentString}/* Token: ${JSON.stringify({
+      name: token.name,
+      type: token.tokenType,
+      path: token.tokenPath,
+      prefix: getTokenPrefix(token.tokenType)
+    })} */\n`
+  }
 
   // Add description if enabled
   if (exportConfiguration.showDescriptions && token.description) {
@@ -139,6 +141,17 @@ function buildFullPath(groupId: string | null, tokenGroups: Array<TokenGroup>): 
 export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
   let prefix = getTokenPrefix(token.tokenType)
   
+  // Debug logging if debug mode is enabled
+  if (exportConfiguration.debug) {
+    console.log('Token:', {
+      name: token.name,
+      type: token.tokenType,
+      path: token.tokenPath,
+      prefix,
+      findReplace: exportConfiguration.findReplace
+    })
+  }
+  
   // Handle color utility prefixes if enabled and token is a color
   if (exportConfiguration.useColorUtilityPrefixes && token.tokenType === TokenType.color) {
     // Get the parent once and reuse it
@@ -147,6 +160,15 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
     // Use the token's built-in path and add token name
     const tokenPath = token.tokenPath || []
     const fullPath = [...tokenPath, token.name].join('/').toLowerCase()
+
+    // Debug logging for color token paths if debug mode is enabled
+    if (exportConfiguration.debug) {
+      console.log('Color token path:', {
+        tokenPath,
+        fullPath,
+        findReplace: exportConfiguration.findReplace
+      })
+    }
 
     // Check token path against each utility pattern
     for (const [utilityName, pattern] of Object.entries(exportConfiguration.colorUtilityPrefixes)) {
@@ -165,6 +187,17 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
           .trim()
           .replace(/^[-\s]+|[-\s]+$/g, '') // Remove leading/trailing hyphens and spaces
 
+        // Debug logging for utility matches if debug mode is enabled
+        if (exportConfiguration.debug) {
+          console.log('Color utility match:', {
+            utilityName,
+            pattern,
+            remainingPath,
+            segments,
+            cleanName
+          })
+        }
+
         // Construct the name as: utility-color-path-name
         // Using only codeSafeVariableName because we
         return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace)
@@ -173,11 +206,35 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
     // If no utility match, use standard naming
     const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
+    
+    // Debug logging for standard naming if debug mode is enabled
+    if (exportConfiguration.debug) {
+      console.log('Standard color naming:', {
+        name,
+        token,
+        parent,
+        prefix,
+        findReplace: exportConfiguration.findReplace
+      })
+    }
+    
     return name
   }
 
   // For non-color tokens or when color utility prefixes are disabled
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)
   const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
+  
+  // Debug logging for non-color tokens if debug mode is enabled
+  if (exportConfiguration.debug) {
+    console.log('Non-color token naming:', {
+      name,
+      token,
+      parent,
+      prefix,
+      findReplace: exportConfiguration.findReplace
+    })
+  }
+  
   return name
 }

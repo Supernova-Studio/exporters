@@ -45,6 +45,21 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         ? `@import "tailwindcss" prefix(${exportConfiguration.globalPrefix});\n\n`
         : '@import "tailwindcss";\n\n'
 
+    // Add debug information at the top if enabled
+    if (exportConfiguration.debug) {
+        content += `/* Debug Information\n`
+        content += ` * Exporter: Tailwind CSS by Supernova\n`
+        content += ` * Theme: ${themePath || 'Base'}\n`
+        content += ` * Token Count: ${processedTokens.length}\n`
+        content += ` * Token Types: ${Array.from(tokensByType.keys()).join(', ')}\n`
+        content += ` * Color Format: ${exportConfiguration.colorFormat}\n`
+        content += ` * Prefix: ${exportConfiguration.globalPrefix || 'None'}\n`
+        content += ` * Find/Replace Rules: ${JSON.stringify(exportConfiguration.findReplace)}\n`
+        content += ` * Color Utility Prefixes: ${exportConfiguration.useColorUtilityPrefixes ? JSON.stringify(exportConfiguration.colorUtilityPrefixes) : 'Disabled'}\n`
+        content += ` * Generated: ${new Date().toISOString()}\n`
+        content += ` */\n\n`
+    }
+
     // Generate CSS variables grouped by token type
     let cssVariables = ''
 
@@ -76,6 +91,11 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     tokensByType.forEach((tokensOfType, type) => {
         // Add section comment for token type
         cssVariables += `\n${indentString}/* ${type} */\n`
+        
+        // Add debug count information if debug is enabled
+        if (exportConfiguration.debug) {
+            cssVariables += `${indentString}/* ${tokensOfType.length} ${type} tokens */\n`
+        }
         
         // Convert tokens to CSS variable declarations
         const cssDeclarations = tokensOfType
