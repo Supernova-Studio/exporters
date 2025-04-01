@@ -330,13 +330,7 @@
         "title": "Find and replace",
         "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
         "category": "Find and replace",
-        "default": {"Test": ""},
-        "allowedKeys": {
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
+        "default": {"Test": ""}
     },
     {
         "key": "showDescriptions",
