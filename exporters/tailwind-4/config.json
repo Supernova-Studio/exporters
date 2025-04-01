@@ -116,14 +116,6 @@
         "category": "Typography"
     },
     {
-        "key": "globalPrefix",
-        "type": "string",
-        "default": "",
-        "title": "Global prefix",
-        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
-        "category": "Colors"
-    },
-    {
         "key": "forceRemUnit",
         "type": "boolean",
         "default": false,
@@ -189,12 +181,23 @@
         "category": "Themes"
     },
     {
+        "key": "disableAllDefaults",
+        "type": "boolean",
+        "default": false,
+        "title": "Disable all default Tailwind styles",
+        "description": "Remove all default Tailwind utilities by adding --*: initial; to reset group.",
+        "category": "Disable default Tailwind configuration"
+    },
+    {
         "key": "disableAnimateDefaults",
         "type": "boolean",
         "default": false,
         "title": "Disable animation styles",
         "description": "Remove all animation utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableBlurDefaults",
@@ -202,7 +205,10 @@
         "default": false,
         "title": "Disable blur styles",
         "description": "Remove all blur utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableBorderRadiusDefaults",
@@ -210,7 +216,10 @@
         "default": false,
         "title": "Disable border radius styles",
         "description": "Remove all border radius utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableBreakpointDefaults",
@@ -218,7 +227,10 @@
         "default": false,
         "title": "Disable breakpoint styles",
         "description": "Remove all breakpoint utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableColorDefaults",
@@ -226,7 +238,10 @@
         "default": true,
         "title": "Disable color styles",
         "description": "Remove all color utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableContainerDefaults",
@@ -234,7 +249,10 @@
         "default": false,
         "title": "Disable container styles",
         "description": "Remove all container utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableDropShadowDefaults",
@@ -242,7 +260,10 @@
         "default": false,
         "title": "Disable drop shadow styles",
         "description": "Remove all drop shadow utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableFontDefaults",
@@ -250,7 +271,10 @@
         "default": false,
         "title": "Disable font family styles",
         "description": "Remove all font family utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableFontWeightDefaults",
@@ -258,7 +282,10 @@
         "default": false,
         "title": "Disable font weight styles",
         "description": "Remove all font weight utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableInsetDefaults",
@@ -266,7 +293,10 @@
         "default": false,
         "title": "Disable inset styles",
         "description": "Remove all inset utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableLeadingDefaults",
@@ -274,7 +304,10 @@
         "default": false,
         "title": "Disable line height styles",
         "description": "Remove all line height utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disablePerspectiveDefaults",
@@ -282,7 +315,10 @@
         "default": false,
         "title": "Disable perspective styles",
         "description": "Remove all perspective utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableShadowDefaults",
@@ -290,7 +326,10 @@
         "default": false,
         "title": "Disable shadow styles",
         "description": "Remove all shadow utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableSpacingDefaults",
@@ -298,7 +337,10 @@
         "default": false,
         "title": "Disable spacing styles",
         "description": "Remove all spacing utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableTextDefaults",
@@ -306,7 +348,10 @@
         "default": false,
         "title": "Disable text styles",
         "description": "Remove all text utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "disableTrackingDefaults",
@@ -314,7 +359,10 @@
         "default": false,
         "title": "Disable letter spacing styles",
         "description": "Remove all letter spacing utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration"
+        "category": "Disable default Tailwind configuration",
+        "dependsOn": {
+            "disableAllDefaults": false
+        }
     },
     {
         "key": "cssSelector",
@@ -330,6 +378,14 @@
         "default": ".theme-{theme}",
         "title": "CSS selector for themes",
         "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
+        "category": "CSS selectors"
+    },
+    {
+        "key": "globalPrefix",
+        "type": "string",
+        "default": "",
+        "title": "Global prefix",
+        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
         "category": "CSS selectors"
     },
     {

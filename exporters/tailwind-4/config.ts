@@ -97,4 +97,6 @@ export type ExporterConfiguration = {
   debug: boolean
   /** When enabled, generates typography classes in @layer components using typography tokens */
   generateTypographyClasses: boolean
+  /** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group */
+  disableAllDefaults: boolean
 }

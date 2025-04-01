@@ -88,22 +88,26 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     const indentString = GeneralHelper.indent(exportConfiguration.indent)
     const resetRules: string[] = []
 
-    if (exportConfiguration.disableAnimateDefaults) resetRules.push('--animate-*: initial;')
-    if (exportConfiguration.disableBlurDefaults) resetRules.push('--blur-*: initial;')
-    if (exportConfiguration.disableBorderRadiusDefaults) resetRules.push('--radius-*: initial;')
-    if (exportConfiguration.disableBreakpointDefaults) resetRules.push('--breakpoint-*: initial;')
-    if (exportConfiguration.disableColorDefaults) resetRules.push('--color-*: initial;')
-    if (exportConfiguration.disableContainerDefaults) resetRules.push('--container-*: initial;')
-    if (exportConfiguration.disableDropShadowDefaults) resetRules.push('--drop-shadow-*: initial;')
-    if (exportConfiguration.disableFontDefaults) resetRules.push('--font-*: initial;')
-    if (exportConfiguration.disableFontWeightDefaults) resetRules.push('--font-weight-*: initial;')
-    if (exportConfiguration.disableInsetDefaults) resetRules.push('--inset-*: initial;')
-    if (exportConfiguration.disableLeadingDefaults) resetRules.push('--leading-*: initial;')
-    if (exportConfiguration.disablePerspectiveDefaults) resetRules.push('--perspective-*: initial;')
-    if (exportConfiguration.disableShadowDefaults) resetRules.push('--shadow-*: initial;')
-    if (exportConfiguration.disableSpacingDefaults) resetRules.push('--spacing-*: initial;')
-    if (exportConfiguration.disableTextDefaults) resetRules.push('--text-*: initial;')
-    if (exportConfiguration.disableTrackingDefaults) resetRules.push('--tracking-*: initial;')
+    if (exportConfiguration.disableAllDefaults) {
+        resetRules.push('--*: initial;')
+    } else {
+        if (exportConfiguration.disableAnimateDefaults) resetRules.push('--animate-*: initial;')
+        if (exportConfiguration.disableBlurDefaults) resetRules.push('--blur-*: initial;')
+        if (exportConfiguration.disableBorderRadiusDefaults) resetRules.push('--radius-*: initial;')
+        if (exportConfiguration.disableBreakpointDefaults) resetRules.push('--breakpoint-*: initial;')
+        if (exportConfiguration.disableColorDefaults) resetRules.push('--color-*: initial;')
+        if (exportConfiguration.disableContainerDefaults) resetRules.push('--container-*: initial;')
+        if (exportConfiguration.disableDropShadowDefaults) resetRules.push('--drop-shadow-*: initial;')
+        if (exportConfiguration.disableFontDefaults) resetRules.push('--font-*: initial;')
+        if (exportConfiguration.disableFontWeightDefaults) resetRules.push('--font-weight-*: initial;')
+        if (exportConfiguration.disableInsetDefaults) resetRules.push('--inset-*: initial;')
+        if (exportConfiguration.disableLeadingDefaults) resetRules.push('--leading-*: initial;')
+        if (exportConfiguration.disablePerspectiveDefaults) resetRules.push('--perspective-*: initial;')
+        if (exportConfiguration.disableShadowDefaults) resetRules.push('--shadow-*: initial;')
+        if (exportConfiguration.disableSpacingDefaults) resetRules.push('--spacing-*: initial;')
+        if (exportConfiguration.disableTextDefaults) resetRules.push('--text-*: initial;')
+        if (exportConfiguration.disableTrackingDefaults) resetRules.push('--tracking-*: initial;')
+    }
 
     if (resetRules.length > 0 && selector === '@theme') {
         cssVariables += `\n${indentString}/* Reset default Tailwind configuration */\n${indentString}${resetRules.join(`\n${indentString}`)}\n`
