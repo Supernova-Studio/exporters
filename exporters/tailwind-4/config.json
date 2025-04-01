@@ -176,137 +176,137 @@
         "key": "globalPrefix",
         "type": "string",
         "default": "",
-        "title": "Prefix",
+        "title": "Global prefix",
         "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
-        "category": "Token names"
+        "category": "Utility prefixes"
     },
     {
         "key": "disableAnimateDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset animation styles",
-        "description": "Reset all animation token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable animation styles",
+        "description": "Remove all animation utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableBlurDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset blur styles",
-        "description": "Reset all blur token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable blur styles",
+        "description": "Remove all blur utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableBorderRadiusDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset border radius styles",
-        "description": "Reset all border radius token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable border radius styles",
+        "description": "Remove all border radius utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableBreakpointDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset breakpoint styles",
-        "description": "Reset all breakpoint token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable breakpoint styles",
+        "description": "Remove all breakpoint utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableColorDefaults",
         "type": "boolean",
         "default": true,
-        "title": "Reset color styles",
-        "description": "Reset all color token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable color styles",
+        "description": "Remove all color utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableContainerDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset container styles",
-        "description": "Reset all container token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable container styles",
+        "description": "Remove all container utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableDropShadowDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset drop shadow styles",
-        "description": "Reset all drop shadow token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable drop shadow styles",
+        "description": "Remove all drop shadow utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableFontDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset font family styles",
-        "description": "Reset all font family token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable font family styles",
+        "description": "Remove all font family utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableFontWeightDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset font weight styles",
-        "description": "Reset all font weight token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable font weight styles",
+        "description": "Remove all font weight utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableInsetDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset inset styles",
-        "description": "Reset all inset token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable inset styles",
+        "description": "Remove all inset utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableLeadingDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset line height styles",
-        "description": "Reset all line height token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable line height styles",
+        "description": "Remove all line height utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disablePerspectiveDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset perspective styles",
-        "description": "Reset all perspective token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable perspective styles",
+        "description": "Remove all perspective utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableShadowDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset shadow styles",
-        "description": "Reset all shadow token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable shadow styles",
+        "description": "Remove all shadow utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableSpacingDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset spacing styles",
-        "description": "Reset all spacing token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable spacing styles",
+        "description": "Remove all spacing utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableTextDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset text styles",
-        "description": "Reset all text token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable text styles",
+        "description": "Remove all text utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "disableTrackingDefaults",
         "type": "boolean",
         "default": false,
-        "title": "Reset letter spacing styles",
-        "description": "Reset all letter spacing token values to initial state before applying new values.",
-        "category": "Disabled default styles"
+        "title": "Disable letter spacing styles",
+        "description": "Remove all letter spacing utilities from the default Tailwind configuration.",
+        "category": "Disable default Tailwind configuration"
     },
     {
         "key": "cssSelector",

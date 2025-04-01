@@ -113,24 +113,6 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 }
 
 /**
- * Builds a complete path by traversing up through parent groups
- */
-function buildFullPath(groupId: string | null, tokenGroups: Array<TokenGroup>): string[] {
-  const path: string[] = []
-  let currentGroupId = groupId
-
-  while (currentGroupId) {
-    const group = tokenGroups.find(g => g.id === currentGroupId)
-    if (!group) break
-
-    path.unshift(group.name)
-    currentGroupId = group.parentGroupId
-  }
-
-  return path
-}
-
-/**
  * Generates a code-safe variable name for a token based on its properties and configuration.
  * Includes type-specific prefix and considers token hierarchy.
  * 

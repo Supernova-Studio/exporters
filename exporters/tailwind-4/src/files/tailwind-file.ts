@@ -105,7 +105,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     if (exportConfiguration.disableTrackingDefaults) resetRules.push('--tracking-*: initial;')
 
     if (resetRules.length > 0 && selector === '@theme') {
-        cssVariables += `\n${indentString}/* Reset default values */\n${indentString}${resetRules.join(`\n${indentString}`)}\n`
+        cssVariables += `\n${indentString}/* Reset default Tailwind configuration */\n${indentString}${resetRules.join(`\n${indentString}`)}\n`
     }
 
     tokensByType.forEach((tokensOfType, type) => {
