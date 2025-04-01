@@ -95,4 +95,6 @@ export type ExporterConfiguration = {
   disableTrackingDefaults: boolean
   /** When enabled, adds debug information to the generated files to help with troubleshooting */
   debug: boolean
+  /** When enabled, generates typography classes in @layer components using typography tokens */
+  generateTypographyClasses: boolean
 }

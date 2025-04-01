@@ -5,7 +5,7 @@
         "default": "smartOklch",
         "title": "Color format",
         "description": "Export color token values in the selected color format.",
-        "category": "Token values",
+        "category": "Colors",
         "options": {
             "smartHashHex": {
                 "label": "HEX (auto)",
@@ -58,6 +58,72 @@
         }
     },
     {
+        "key": "useColorUtilityPrefixes",
+        "type": "boolean",
+        "default": true,
+        "title": "Use color utility prefixes",
+        "description": "Enable specific prefixes for different color utilities. Only applies to color tokens.",
+        "category": "Colors"
+    },
+    {
+        "key": "colorUtilityPrefixes",
+        "type": "object",
+        "title": "Color utility prefixes",
+        "description": "Define specific string patterns to identify and prefix color tokens based on their utility. Multiple patterns can be specified using comma-separated values (e.g., 'background,bg').",
+        "category": "Colors",
+        "dependsOn": {
+            "useColorUtilityPrefixes": true
+        },
+        "default": {
+            "text": "foreground,text",
+            "boxShadow": "shadow",
+            "background": "background,bg",
+            "outline": "outline",
+            "border": "border",
+            "stroke": "stroke",
+            "fill": "fill"
+        },
+        "allowedKeys": {
+            "options": [
+                "text",
+                "boxShadow",
+                "background",
+                "outline",
+                "border",
+                "stroke",
+                "fill"
+            ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
+    },
+    {
+        "key": "colorPrecision",
+        "type": "number",
+        "default": 3,
+        "title": "Color precision",
+        "description": "Maximum number of decimals in colors.",
+        "category": "Colors"
+    },
+    {
+        "key": "generateTypographyClasses",
+        "type": "boolean",
+        "default": true,
+        "title": "Generate typography classes",
+        "description": "Generate typography classes in @layer components using typography tokens.",
+        "category": "Typography"
+    },
+    {
+        "key": "globalPrefix",
+        "type": "string",
+        "default": "",
+        "title": "Global prefix",
+        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
+        "category": "Colors"
+    },
+    {
         "key": "forceRemUnit",
         "type": "boolean",
         "default": false,
@@ -82,14 +148,6 @@
         "default": true,
         "title": "Use token references",
         "description": "Values will use references to other tokens (where applicable).",
-        "category": "Token values"
-    },
-    {
-        "key": "colorPrecision",
-        "type": "number",
-        "default": 3,
-        "title": "Color precision",
-        "description": "Maximum number of decimals in colors.",
         "category": "Token values"
     },
     {
@@ -129,56 +187,6 @@
         "title": "Export base values",
         "description": "Base token values will be exported along with themes.",
         "category": "Themes"
-    },
-    {
-        "key": "useColorUtilityPrefixes",
-        "type": "boolean",
-        "default": true,
-        "title": "Use color utility prefixes",
-        "description": "Enable specific prefixes for different color utilities. Only applies to color tokens.",
-        "category": "Utility prefixes"
-    },
-    {
-        "key": "colorUtilityPrefixes",
-        "type": "object",
-        "title": "Color utility prefixes",
-        "description": "Define specific string patterns to identify and prefix color tokens based on their utility. Multiple patterns can be specified using comma-separated values (e.g., 'background,bg').",
-        "category": "Utility prefixes",
-        "dependsOn": {
-            "useColorUtilityPrefixes": true
-        },
-        "default": {
-            "text": "foreground,text",
-            "boxShadow": "shadow",
-            "background": "background,bg",
-            "outline": "outline",
-            "border": "border",
-            "stroke": "stroke",
-            "fill": "fill"
-        },
-        "allowedKeys": {
-            "options": [
-                "text",
-                "boxShadow",
-                "background",
-                "outline",
-                "border",
-                "stroke",
-                "fill"
-            ],
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
-    },
-    {
-        "key": "globalPrefix",
-        "type": "string",
-        "default": "",
-        "title": "Global prefix",
-        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
-        "category": "Utility prefixes"
     },
     {
         "key": "disableAnimateDefaults",

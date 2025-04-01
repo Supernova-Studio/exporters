@@ -1,5 +1,5 @@
 import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
-import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION } from "../constants/defaults"
 
@@ -23,6 +23,99 @@ export function isAllowedTokenType(tokenType: TokenType): boolean {
 }
 
 /**
+ * Generates debug information for a token
+ * @param token - The token to generate debug info for
+ * @param indentString - The indentation string to use
+ * @returns Debug information string or empty string if debug is disabled
+ */
+function generateDebugInfo(token: Token, indentString: string): string {
+  if (!exportConfiguration.debug) {
+    return ""
+  }
+
+  const tokenPath = token.tokenPath || []
+  const fullPath = [...tokenPath, token.name].join('/')
+  
+  return `${indentString}/* Path: ${fullPath} */\n` +
+         `${indentString}/* Token: ${JSON.stringify({
+           name: token.name,
+           type: token.tokenType,
+           path: token.tokenPath,
+           prefix: getTokenPrefix(token.tokenType),
+           value: (token as unknown as AnyToken).value
+         })} */\n`
+}
+
+/**
+ * Handles the conversion of a typography token into CSS custom properties
+ * @param token - The typography token to convert
+ * @param mappedTokens - Map of all tokens for resolving references
+ * @param tokenGroups - Array of token groups for determining token hierarchy
+ * @returns Formatted CSS custom property string
+ */
+function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+  let output = ""
+  
+  // Add debug info
+  output += generateDebugInfo(token, indentString)
+
+  // Add description if enabled
+  if (exportConfiguration.showDescriptions && token.description) {
+    output += `${indentString}/* ${token.description.trim()} */\n`
+  }
+
+  // Get the base name for the typography token
+  const baseName = tokenVariableName(token, tokenGroups)
+
+  // Extract individual properties from the typography token
+  // @ts-ignore
+  const typographyValue = token.value as TypographyTokenValue
+
+  // Helper function to create CSS variable for a typography property
+  const createTypographyProperty = (property: keyof Omit<TypographyTokenValue, 'referencedTokenId'>, suffix: string = '') => {
+    if (typographyValue[property]) {
+      const propertyValue = typographyValue[property] as AnyDimensionTokenValue
+      const value = {
+        ...propertyValue,
+        referencedTokenId: propertyValue.referencedTokenId || null
+      }
+
+      // Map typography properties to their corresponding token types
+      const tokenTypeMap: Record<keyof Omit<TypographyTokenValue, 'referencedTokenId'>, TokenType> = {
+        fontSize: TokenType.fontSize,
+        lineHeight: TokenType.lineHeight,
+        letterSpacing: TokenType.letterSpacing,
+        fontWeight: TokenType.fontWeight,
+        fontFamily: TokenType.fontFamily,
+        textDecoration: TokenType.textDecoration,
+        textCase: TokenType.textCase,
+        paragraphIndent: TokenType.paragraphSpacing,
+        paragraphSpacing: TokenType.paragraphSpacing
+      }
+
+      // @ts-ignore
+      output += `${indentString}--${baseName}${suffix}: ${CSSHelper.tokenToCSS({ ...token, value, tokenType: tokenTypeMap[property] }, mappedTokens, {
+        allowReferences: exportConfiguration.useReferences,
+        decimals: exportConfiguration.colorPrecision,
+        colorFormat: exportConfiguration.colorFormat,
+        forceRemUnit: exportConfiguration.forceRemUnit,
+        remBase: exportConfiguration.remBase,
+        tokenToVariableRef: (t) => `var(--${tokenVariableName(t, tokenGroups)})`
+      })};\n`
+    }
+  }
+
+  // Create CSS variables for each typography property
+  createTypographyProperty('fontSize') // Base font size
+  createTypographyProperty('lineHeight', '--line-height')
+  createTypographyProperty('letterSpacing', '--letter-spacing')
+  createTypographyProperty('fontWeight', '--font-weight')
+
+  return output
+}
+
+/**
  * Converts a design token into its CSS custom property representation.
  * Handles formatting of the token value, references, and optional description comments.
  * 
@@ -35,6 +128,11 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   // Skip tokens that are not allowed for Tailwind customization
   if (!isAllowedTokenType(token.tokenType)) {
     return null;
+  }
+
+  // Special handling for typography tokens
+  if (token.tokenType === TokenType.typography) {
+    return handleTypographyToken(token, mappedTokens, tokenGroups)
   }
 
   // Generate the CSS variable name based on token properties and configuration
@@ -81,20 +179,9 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   let output = ""
-  const tokenPath = token.tokenPath || []
-  const fullPath = [...tokenPath, token.name].join('/')
   
-  // Add debug info only if debug mode is enabled
-  if (exportConfiguration.debug) {
-    // Add detailed debug information
-    output += `${indentString}/* Path: ${fullPath} */\n`
-    output += `${indentString}/* Token: ${JSON.stringify({
-      name: token.name,
-      type: token.tokenType,
-      path: token.tokenPath,
-      prefix: getTokenPrefix(token.tokenType)
-    })} */\n`
-  }
+  // Add debug info
+  output += generateDebugInfo(token, indentString)
 
   // Add description if enabled
   if (exportConfiguration.showDescriptions && token.description) {
@@ -103,7 +190,9 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 
   // Special handling for blur tokens
   if (token.tokenType === TokenType.blur) {
-    const isBackdropBlur = fullPath.toLowerCase().includes('background')
+    const tokenPath = token.tokenPath || []
+    const fullPath = [...tokenPath, token.name].join('/').toLowerCase()
+    const isBackdropBlur = fullPath.includes('background')
     const blurName = isBackdropBlur ? 'backdrop-blur' : (token.name.toLowerCase() === 'blur' ? 'blur-default' : `blur-${token.name}`)
     name = NamingHelper.codeSafeVariableName(blurName, StringCase.kebabCase)
   }
@@ -123,17 +212,6 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
   let prefix = getTokenPrefix(token.tokenType)
   
-  // Debug logging if debug mode is enabled
-  if (exportConfiguration.debug) {
-    console.log('Token:', {
-      name: token.name,
-      type: token.tokenType,
-      path: token.tokenPath,
-      prefix,
-      findReplace: exportConfiguration.findReplace
-    })
-  }
-  
   // Handle color utility prefixes if enabled and token is a color
   if (exportConfiguration.useColorUtilityPrefixes && token.tokenType === TokenType.color) {
     // Get the parent once and reuse it
@@ -142,15 +220,6 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
     // Use the token's built-in path and add token name
     const tokenPath = token.tokenPath || []
     const fullPath = [...tokenPath, token.name].join('/').toLowerCase()
-
-    // Debug logging for color token paths if debug mode is enabled
-    if (exportConfiguration.debug) {
-      console.log('Color token path:', {
-        tokenPath,
-        fullPath,
-        findReplace: exportConfiguration.findReplace
-      })
-    }
 
     // Check token path against each utility pattern
     for (const [utilityName, patternString] of Object.entries(exportConfiguration.colorUtilityPrefixes)) {
@@ -161,17 +230,6 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
       const matchingPattern = patterns.find(pattern => fullPath.includes(pattern))
       
       if (matchingPattern) {
-        // Debug logging for matched patterns if debug mode is enabled
-        if (exportConfiguration.debug) {
-          console.log('Color utility pattern match:', {
-            utilityName,
-            patternString,
-            matchingPattern,
-            patterns,
-            fullPath
-          })
-        }
-        
         // Find where the pattern matches in the path
         const patternIndex = tokenPath.findIndex(p => p.toLowerCase().includes(matchingPattern))
         
@@ -186,18 +244,6 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
           .trim()
           .replace(/^[-\s]+|[-\s]+$/g, '') // Remove leading/trailing hyphens and spaces
 
-        // Debug logging for utility matches if debug mode is enabled
-        if (exportConfiguration.debug) {
-          console.log('Color utility match:', {
-            utilityName,
-            matchingPattern,
-            patternIndex,
-            remainingPath,
-            segments,
-            cleanName
-          })
-        }
-
         // Construct the name as: utility-color-path-name
         return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace)
       }
@@ -205,35 +251,11 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
     // If no utility match, use standard naming
     const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
-    
-    // Debug logging for standard naming if debug mode is enabled
-    if (exportConfiguration.debug) {
-      console.log('Standard color naming:', {
-        name,
-        token,
-        parent,
-        prefix,
-        findReplace: exportConfiguration.findReplace
-      })
-    }
-    
     return name
   }
 
   // For non-color tokens or when color utility prefixes are disabled
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)
   const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
-  
-  // Debug logging for non-color tokens if debug mode is enabled
-  if (exportConfiguration.debug) {
-    console.log('Non-color token naming:', {
-      name,
-      token,
-      parent,
-      prefix,
-      findReplace: exportConfiguration.findReplace
-    })
-  }
-  
   return name
 }

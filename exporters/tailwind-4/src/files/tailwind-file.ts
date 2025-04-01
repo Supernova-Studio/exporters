@@ -1,7 +1,8 @@
 import { FileHelper, ThemeHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken, isAllowedTokenType } from "../content/token"
+import { convertedToken, isAllowedTokenType, tokenVariableName } from "../content/token"
+import { generateTypographyClass } from "../content/typography"
 import { CSSHelper } from "@supernovaio/export-utils"
 
 /**
@@ -108,6 +109,21 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         cssVariables += `\n${indentString}/* Reset default Tailwind configuration */\n${indentString}${resetRules.join(`\n${indentString}`)}\n`
     }
 
+    // Generate typography classes first
+    let typographyClasses = ''
+    const typographyTokens = processedTokens.filter(token => token.tokenType === TokenType.typography)
+    if (typographyTokens.length > 0 && exportConfiguration.generateTypographyClasses) {
+        typographyClasses = '\n@layer components {\n'
+        typographyTokens.forEach(token => {
+            const classContent = generateTypographyClass(token, tokenGroups)
+            if (classContent) {
+                typographyClasses += classContent
+            }
+        })
+        typographyClasses += '}\n'
+    }
+
+    // Generate CSS variables for all token types
     tokensByType.forEach((tokensOfType, type) => {
         // Add section comment for token type
         cssVariables += `\n${indentString}/* ${type} */\n`
@@ -134,7 +150,10 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
     // Add inline option for @theme if it's the base selector and there are references
     const themeDirective = selector === '@theme' && hasReferences ? '@theme inline' : selector
-    content += `${themeDirective} {\n${cssVariables}}`
+    content += `${themeDirective} {\n${cssVariables}}\n`
+
+    // Add typography classes after the theme variables
+    content += typographyClasses
 
     // Add disclaimer if enabled
     if (exportConfiguration.showGeneratedFileDisclaimer) {
