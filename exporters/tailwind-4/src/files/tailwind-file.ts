@@ -1,12 +1,15 @@
 import { FileHelper, ThemeHelper, GeneralHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken, isAllowedTokenType } from "../content/token"
+import { CSSHelper } from "@supernovaio/export-utils"
 
 /**
  * Generates a single CSS output file containing all token styles in Tailwind format
  */
 export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
+
+
     // Skip if no tokens and empty files are disabled
     if (!exportConfiguration.generateEmptyFiles && tokens.length === 0) {
         return null
@@ -71,6 +74,12 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         content += ` */\n\n`
     }
 
+     // Use configured selector for base tokens or theme selector for themed tokens
+     const selector = themePath && theme 
+     ? exportConfiguration.themeSelector.replace('{theme}', themePath)
+     : exportConfiguration.cssSelector
+
+
     // Generate CSS variables grouped by token type
     let cssVariables = ''
 
@@ -95,7 +104,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     if (exportConfiguration.disableTextDefaults) resetRules.push('--text-*: initial;')
     if (exportConfiguration.disableTrackingDefaults) resetRules.push('--tracking-*: initial;')
 
-    if (resetRules.length > 0) {
+    if (resetRules.length > 0 && selector === '@theme') {
         cssVariables += `\n${indentString}/* Reset default values */\n${indentString}${resetRules.join(`\n${indentString}`)}\n`
     }
 
@@ -117,8 +126,15 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         cssVariables += cssDeclarations + "\n"
     })
 
-    // Use @theme directive for Tailwind 4
-    content += `@theme {\n${cssVariables}}`
+    // Check if any tokens use references and if references are enabled
+    const hasReferences = exportConfiguration.useReferences && processedTokens.some(token => 
+        // @ts-ignore
+        token.value.referencedTokenId && token.value.referencedTokenId !== null && token.value.referencedTokenId !== undefined
+    )
+
+    // Add inline option for @theme if it's the base selector and there are references
+    const themeDirective = selector === '@theme' && hasReferences ? '@theme inline' : selector
+    content += `${themeDirective} {\n${cssVariables}}`
 
     // Add disclaimer if enabled
     if (exportConfiguration.showGeneratedFileDisclaimer) {
