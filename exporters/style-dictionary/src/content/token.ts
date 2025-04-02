@@ -4,20 +4,48 @@ import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
 import { resetNameTracking } from "../utils/token-hierarchy"
+import { DesignSystemCollection } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection'
 
-export function getTokenPrefix(tokenType: TokenType): string {
+export function getTokenPrefix(tokenType: TokenType, forceReturn: boolean = false): string {
+  // Return empty string if token type prefixes are disabled (unless forceReturn is true)
+  if (!exportConfiguration.useTokenTypePrefixes && !forceReturn) {
+    return ''
+  }
+  
   return exportConfiguration.customizeTokenPrefixes
-    ? exportConfiguration.tokenPrefixes[tokenType]
+    ? exportConfiguration.tokenPrefixes[tokenType].trim()
     : DEFAULT_TOKEN_PREFIXES[tokenType]
 }
 
-export function tokenObjectKeyName(token: Token, tokenGroups: Array<TokenGroup>, forExport: boolean = false): string {
-  let name = NamingHelper.codeSafeVariableName(
-    token.name,
-    exportConfiguration.tokenNameStyle
-  )
+export function tokenObjectKeyName(
+  token: Token, 
+  tokenGroups: Array<TokenGroup>, 
+  forExport: boolean = false,
+  collections: Array<DesignSystemCollection> = []
+): string {
+  // Find collection if needed
+  let collectionName: string | null = null
+  if (exportConfiguration.tokenNameStructure === 'collectionPathAndName' && token.collectionId) {
+    const collection = collections.find(c => c.persistentId === token.collectionId)
+    collectionName = collection?.name ?? null
+  }
 
-  return name
+  // For nameOnly structure, don't pass the parent group
+  const parentGroup = exportConfiguration.tokenNameStructure !== 'nameOnly' ? 
+    tokenGroups.find((group) => group.id === token.parentGroupId) : 
+    null
+
+  // Get the prefix for this token type
+  const prefix = getTokenPrefix(token.tokenType)
+
+  return NamingHelper.codeSafeVariableNameForToken(
+    token,
+    exportConfiguration.tokenNameStyle,
+    parentGroup ?? null,
+    prefix,
+    collectionName,
+    exportConfiguration.globalNamePrefix
+  )
 }
 
 // Use the hierarchy-based name tracking reset
@@ -25,8 +53,13 @@ export function resetTokenNameTracking(): void {
   resetNameTracking()
 }
 
-export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
-  const name = tokenObjectKeyName(token, tokenGroups)
+export function convertedToken(
+  token: Token, 
+  mappedTokens: Map<string, Token>, 
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection> = []
+): string {
+  const name = tokenObjectKeyName(token, tokenGroups, false, collections)
   const value = CSSHelper.tokenToCSS(token, mappedTokens, {
     allowReferences: exportConfiguration.useReferences,
     decimals: exportConfiguration.colorPrecision,
@@ -34,7 +67,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     forceRemUnit: exportConfiguration.forceRemUnit,
     remBase: exportConfiguration.remBase,
     tokenToVariableRef: (t) => {
-      return tokenObjectKeyName(t, tokenGroups)
+      return tokenObjectKeyName(t, tokenGroups, false, collections)
     },
   })
 

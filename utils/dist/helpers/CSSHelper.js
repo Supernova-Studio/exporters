@@ -8,17 +8,13 @@ const ColorHelper_1 = require("./ColorHelper");
 class CSSHelper {
     static tokenToCSS(token, allTokens, options) {
         /** Use subroutines to convert specific token types to different css representations. Many tokens are of the same type */
-        let cssValue;
         switch (token.tokenType) {
             case sdk_exporters_1.TokenType.color:
-                cssValue = this.colorTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.colorTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.border:
-                cssValue = this.borderTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.borderTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.gradient:
-                cssValue = this.gradientTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.gradientTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.dimension:
             case sdk_exporters_1.TokenType.size:
             case sdk_exporters_1.TokenType.space:
@@ -31,41 +27,26 @@ class CSSHelper {
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                cssValue = this.dimensionTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.dimensionTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.shadow:
-                cssValue = this.shadowTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.shadowTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.fontWeight:
-                cssValue = this.fontWeightTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.fontWeightTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.fontFamily:
             case sdk_exporters_1.TokenType.productCopy:
             case sdk_exporters_1.TokenType.string:
-                cssValue = this.stringTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.stringTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.textCase:
             case sdk_exporters_1.TokenType.textDecoration:
             case sdk_exporters_1.TokenType.visibility:
-                cssValue = this.optionTokenValueToCSS(token.value, allTokens, options, token.tokenType);
-                break;
+                return this.optionTokenValueToCSS(token.value, allTokens, options, token.tokenType);
             case sdk_exporters_1.TokenType.blur:
-                cssValue = this.blurTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.blurTokenValueToCSS(token.value, allTokens, options);
             case sdk_exporters_1.TokenType.typography:
-                cssValue = this.typographyTokenValueToCSS(token.value, allTokens, options);
-                break;
+                return this.typographyTokenValueToCSS(token.value, allTokens, options);
             default:
                 throw new sdk_exporters_1.UnreachableCaseError(token.tokenType, 'Unsupported token type for transformation to CSS:');
         }
-        // Allow value transformation if transformer exists
-        if (options.valueTransformer) {
-            const transformedValue = options.valueTransformer(cssValue, token);
-            if (transformedValue !== undefined) {
-                return transformedValue;
-            }
-        }
-        return cssValue;
     }
     static colorTokenValueToCSS(color, allTokens, options) {
         return ColorHelper_1.ColorHelper.formattedColorOrVariableName(color, allTokens, options);
@@ -248,7 +229,7 @@ class CSSHelper {
             return this.textDecorationToCSS(option.value);
         }
         // Visibility values are supported in CSS as is our data model
-        return option.value;
+        return option.value.toLowerCase();
     }
     static blurTokenValueToCSS(blur, allTokens, options) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(blur.referencedTokenId, allTokens, options.allowReferences);
@@ -350,8 +331,9 @@ class CSSHelper {
             case sdk_exporters_1.TextCase.lower:
                 return 'lowercase';
             case sdk_exporters_1.TextCase.camel:
-            case sdk_exporters_1.TextCase.smallCaps:
                 return 'capitalize';
+            case sdk_exporters_1.TextCase.smallCaps:
+                return 'small-caps';
         }
     }
     static textDecorationToCSS(textDecoration) {

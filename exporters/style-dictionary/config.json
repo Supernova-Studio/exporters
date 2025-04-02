@@ -1,5 +1,27 @@
 [
     {
+        "key": "tokenNameStructure",
+        "type": "enum",
+        "default": "pathAndName",
+        "title": "Token path structure",
+        "description": "Control which hierarchy levels are included in the token path.",
+        "category": "Token names",
+        "options": {
+            "pathAndName": {
+                "label": "Group path + Token name",
+                "description": "Include group path and token name (e.g. button/primary/bg)"
+            },
+            "nameOnly": {
+                "label": "Token name only",
+                "description": "Only include token name without group path (e.g. primary)"
+            },
+            "collectionPathAndName": {
+                "label": "Collection + Group path + Token name",
+                "description": "Include collection, group path, and token name (e.g. core/button/primary/bg)"
+            }
+        }
+    },
+    {
         "key": "tokenNameStyle",
         "type": "enum",
         "default": "kebabCase",
@@ -145,6 +167,10 @@
             "mergedTheme": {
                 "label": "Merged theme file",
                 "description": "Generate theme object with all themes applied together"
+            },
+            "nestedThemes": {
+                "label": "Nested themes",
+                "description": "Generate objects with theme-specific values for each token"
             }
         }
     },
@@ -163,6 +189,24 @@
         "title": "Export base values",
         "description": "Base token values will be exported along with themes.",
         "category": "Themes"
+    },
+    {
+        "key": "fileStructure",
+        "type": "enum",
+        "default": "separateByType",
+        "title": "File structure",
+        "description": "Control how token styles are organized in files",
+        "category": "Style files",
+        "options": {
+            "separateByType": {
+                "label": "Separate files by type",
+                "description": "Generate separate files for each token type"
+            },
+            "singleFile": {
+                "label": "Single combined file",
+                "description": "Generate one file containing all token types"
+            }
+        }
     },
     {
         "key": "generateEmptyFiles",
@@ -244,31 +288,31 @@
         },
         "allowedKeys": {
             "options": [
+                "Blur",
+                "Border",
+                "BorderRadius", 
+                "BorderWidth",
                 "Color",
-                "Typography",
                 "Dimension",
+                "Duration",
+                "FontFamily",
+                "FontSize",
+                "FontWeight",
+                "Gradient",
+                "LetterSpacing",
+                "LineHeight",
+                "Opacity",
+                "ParagraphSpacing",
+                "ProductCopy",
+                "Shadow",
                 "Size",
                 "Space",
-                "Opacity",
-                "FontSize",
-                "LineHeight",
-                "LetterSpacing",
-                "ParagraphSpacing",
-                "BorderWidth",
-                "BorderRadius",
-                "Duration",
-                "ZIndex",
-                "Shadow",
-                "Border",
-                "Gradient",
                 "String",
-                "ProductCopy",
-                "FontFamily",
-                "FontWeight",
                 "TextCase",
                 "TextDecoration",
+                "Typography",
                 "Visibility",
-                "Blur"
+                "ZIndex"
             ],
             "type": "string"
         },
@@ -285,12 +329,23 @@
         "category": "Token names"
     },
     {
+        "key": "useTokenTypePrefixes",
+        "type": "boolean",
+        "default": true,
+        "title": "Use token type prefixes",
+        "description": "Prefix hierarchy with token type (e.g., 'color.group.primary').",
+        "category": "Token names"
+    },
+    {
         "key": "customizeTokenPrefixes",
         "type": "boolean",
         "default": false,
         "title": "Customize type prefixes",
         "description": "Customize the prefixes for each design token type.",
-        "category": "Token names"
+        "category": "Token names",
+        "dependsOn": {
+            "useTokenTypePrefixes": true
+        }
     },
     {
         "key": "tokenPrefixes",
@@ -330,31 +385,31 @@
         },
         "allowedKeys": {
             "options": [
+                "Blur",
+                "Border",
+                "BorderRadius", 
+                "BorderWidth",
                 "Color",
-                "Typography",
                 "Dimension",
+                "Duration",
+                "FontFamily",
+                "FontSize",
+                "FontWeight",
+                "Gradient",
+                "LetterSpacing",
+                "LineHeight",
+                "Opacity",
+                "ParagraphSpacing",
+                "ProductCopy",
+                "Shadow",
                 "Size",
                 "Space",
-                "Opacity",
-                "FontSize",
-                "LineHeight",
-                "LetterSpacing",
-                "ParagraphSpacing",
-                "BorderWidth",
-                "BorderRadius",
-                "Duration",
-                "ZIndex",
-                "Shadow",
-                "Border",
-                "Gradient",
                 "String",
-                "ProductCopy",
-                "FontFamily",
-                "FontWeight",
                 "TextCase",
                 "TextDecoration",
+                "Typography",
                 "Visibility",
-                "Blur"
+                "ZIndex"
             ],
             "type": "string"
         },

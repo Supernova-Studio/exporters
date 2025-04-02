@@ -12,7 +12,7 @@
                 "description": "Example: --myVariableName"
             },
             "constantCase": {
-                "label": "Constant case", 
+                "label": "Constant case",
                 "description": "Example: --MY_VARIABLE_NAME"
             },
             "flatCase": {
@@ -34,6 +34,28 @@
             "trainCase": {
                 "label": "Train case",
                 "description": "Example: --My-Variable-Name"
+            }
+        }
+    },
+    {
+        "key": "tokenNameStructure",
+        "type": "enum",
+        "default": "pathAndName",
+        "title": "Token name structure",
+        "description": "Control what parts are included in the exporter token name.",
+        "category": "Token names",
+        "options": {
+            "pathAndName": {
+                "label": "Path + Name",
+                "description": "Include path and name (e.g. button-primary-background)"
+            },
+            "nameOnly": {
+                "label": "Name only",
+                "description": "Only include name (e.g. background)"
+            },
+            "collectionPathAndName": {
+                "label": "Collection + Path + Name",
+                "description": "Include collection, path, and name (e.g. core-button-primary-background)"
             }
         }
     },
@@ -196,6 +218,24 @@
         "category": "Index file",
         "dependsOn": {
             "generateIndexFile": true
+        }
+    },
+    {
+        "key": "fileStructure",
+        "type": "enum",
+        "default": "separateByType",
+        "title": "File structure",
+        "description": "Control how token styles are organized in files",
+        "category": "Style files",
+        "options": {
+            "separateByType": {
+                "label": "Separate files by type",
+                "description": "Generate separate files for each token type"
+            },
+            "singleFile": {
+                "label": "Single combined file",
+                "description": "Generate one file containing all token types"
+            }
         }
     },
     {
@@ -428,5 +468,35 @@
         "title": "Indentation",
         "description": "Number of spaces used to indent CSS variables.",
         "category": "Other"
+    },
+    {
+        "key": "writeNameToProperty",
+        "type": "boolean",
+        "default": false,
+        "title": "Write generated variable names",
+        "description": "Save generated variable names back to tokens as custom properties.",
+        "category": "Automatic write-back"
+    },
+    {
+        "key": "propertyToWriteNameTo",
+        "type": "string",
+        "default": "CSS",
+        "title": "Custom property name",
+        "description": "Name of the custom property where generated variable names will be saved.",
+        "category": "Automatic write-back",
+        "dependsOn": {
+            "writeNameToProperty": true
+        }
+    },
+    {
+        "key": "propertyToWriteNameToIncludesVar",
+        "type": "boolean",
+        "default": true,
+        "title": "Include var() in property",
+        "description": "If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.",
+        "category": "Automatic write-back",
+        "dependsOn": {
+            "writeNameToProperty": true
+        }
     }
 ]

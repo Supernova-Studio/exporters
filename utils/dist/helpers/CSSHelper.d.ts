@@ -14,12 +14,10 @@ export type TokenToCSSOptions = {
     forceRemUnit?: boolean;
     /** Base value for rem conversion (default: 16) */
     remBase?: number;
-    /** Optional transformer for CSS values based on token type and value */
-    valueTransformer?: (value: string, token: Token) => string | undefined;
 };
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 export declare class CSSHelper {
-    static tokenToCSS(token: Token, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
+    static tokenToCSS(token: Pick<Token, 'tokenType'>, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static colorTokenValueToCSS(color: ColorTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static borderTokenValueToCSS(border: BorderTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static gradientTokenValueToCSS(gradients: Array<GradientTokenValue>, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;

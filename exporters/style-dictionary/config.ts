@@ -7,12 +7,24 @@ import { TokenType } from "@supernovaio/sdk-exporters"
 export enum ThemeExportStyle {
     ApplyDirectly = "applyDirectly",
     SeparateFiles = "separateFiles",
-    MergedTheme = "mergedTheme"
+    MergedTheme = "mergedTheme",
+    NestedThemes = "nestedThemes"
+}
+
+export enum FileStructure {
+    SeparateByType = "separateByType",
+    SingleFile = "singleFile"
 }
 
 export enum TokenSortOrder {
     Default = "default",
     Alphabetical = "alphabetical"
+}
+
+export enum TokenNameStructure {
+  PathAndName = "pathAndName",
+  NameOnly = "nameOnly",
+  CollectionPathAndName = "collectionPathAndName"
 }
 
 export type ExporterConfiguration = {
@@ -58,4 +70,10 @@ export type ExporterConfiguration = {
   globalNamePrefix: string
   /** Controls how tokens are sorted in the generated files */
   tokenSortOrder: TokenSortOrder
+  /** Controls what parts are included in the token name */
+  tokenNameStructure: TokenNameStructure
+  /** When enabled, token names will be prefixed with their type */
+  useTokenTypePrefixes: boolean
+  /** Control how token styles are organized in files */
+  fileStructure: FileStructure
 }

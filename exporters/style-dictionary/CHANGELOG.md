@@ -1,6 +1,34 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
+## 2.4.0 - 2025-03-12
+
+### ✨ Added
+- New `fileStructure` configuration option that controls how token files are organized:
+  - `separateByType`: Generate separate files for each token type (default)
+  - `singleFile`: Generate one combined file containing all token types
+
+## 2.3.0 - 2025-02-27
+
+### ✨ Added
+- Added token `type` information to Style Dictionary output for better compatibility
+- New `useTokenTypePrefixes` configuration option that controls whether token names are prefixed with their type
+
+## 2.2.0 - 2025-02-24
+
+### ✨ Added
+- New `tokenNameStructure` configuration option that controls how tokens are structured:
+  - `pathAndName`: Include path and name (e.g. button/primary/bg)
+  - `nameOnly`: Only include name (e.g. primary)
+  - `collectionPathAndName`: Include collection, path, and name (e.g. core/button/primary/bg)
+
+## 2.1.0 - 2025-02-17
+
+### 🚀 New
+- Added new "Nested themes" export format that combines all theme values into a single object structure
+- Each token now includes base value and theme-specific values in a unified structure
+- Improved theme value organization for better readability and integration
+
 ## 2.0.0 - 2025-02-10
 
 ### 🚀 New

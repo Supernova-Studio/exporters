@@ -21,12 +21,18 @@ export class NamingHelper {
     parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null,
     prefix: string | null,
     findReplace?: Record<string, string>,
-    removeDuplicateFragments: boolean = true
+    removeDuplicateFragments: boolean = true,
+    // @deprecated: use prefix instead
+    collectionName?: string | null,
+    // @deprecated: use prefix instead
+    globalPrefix?: string | null
   ): string {
-    // Step 1: Create array with all path segments and token name at the end
+    // Create array with all path segments and token name at the end
     let fragments: Array<string> = []
+
+    // Add parent path and name
     if (parent) {
-      fragments = [...parent.path]
+      fragments.push(...parent.path)
       if (!parent.isRoot) {
         fragments.push(parent.name)
       }
@@ -84,8 +90,21 @@ export class NamingHelper {
     }
   
     // Step 4: Add prefix after find/replace (prefix should not be affected by find/replace)
+
+
+    // Add collection name if provided
+    if (collectionName && collectionName.length > 0) {
+      fragments.unshift(collectionName)
+    }
+
+    // Add type-specific prefix if provided
     if (prefix && prefix.length > 0) {
       fragments.unshift(prefix)
+    }
+
+    // Add global prefix first if provided
+    if (globalPrefix && globalPrefix.length > 0) {
+      fragments.unshift(globalPrefix.trim())
     }
 
     // Step 5: Apply case formatting to the final fragments

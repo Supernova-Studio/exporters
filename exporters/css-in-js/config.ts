@@ -5,14 +5,14 @@ import { TokenType } from "@supernovaio/sdk-exporters"
  * Main configuration of the exporter - type interface. Default values for it can be set through `config.json` and users can override the behavior when creating the pipelines.
  */
 export enum ThemeExportStyle {
-    ApplyDirectly = "applyDirectly",
-    SeparateFiles = "separateFiles",
-    MergedTheme = "mergedTheme"
+  ApplyDirectly = "applyDirectly",
+  SeparateFiles = "separateFiles",
+  MergedTheme = "mergedTheme",
 }
 
 export enum TokenSortOrder {
-    Default = "default",
-    Alphabetical = "alphabetical"
+  Default = "default",
+  Alphabetical = "alphabetical",
 }
 
 export type ExporterConfiguration = {
@@ -68,4 +68,8 @@ export type ExporterConfiguration = {
   generateTypeDefinitions: boolean
   /** Controls how tokens are sorted in the generated files */
   tokenSortOrder: TokenSortOrder
+  /** When enabled, generated variable names will be saved back to tokens as custom properties */
+  writeNameToProperty: boolean
+  /** Name of the custom property where generated variable names will be saved */
+  propertyToWriteNameTo: string
 }

@@ -6,10 +6,8 @@ class FileNameHelper {
      * Ensures a filename has the correct extension
      */
     static ensureFileExtension(fileName, extension) {
-        // Ensure extension starts with a dot
-        const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`;
-        if (!fileName.toLowerCase().endsWith(normalizedExtension.toLowerCase())) {
-            return fileName + normalizedExtension;
+        if (!fileName.toLowerCase().endsWith(extension)) {
+            return fileName + extension;
         }
         return fileName;
     }
@@ -17,10 +15,7 @@ class FileNameHelper {
      * Replaces file extension
      */
     static replaceFileExtension(fileName, oldExt, newExt) {
-        // Ensure extensions start with a dot
-        const normalizedOldExt = oldExt.startsWith('.') ? oldExt : `.${oldExt}`;
-        const normalizedNewExt = newExt.startsWith('.') ? newExt : `.${newExt}`;
-        return fileName.replace(new RegExp(`${normalizedOldExt}$`), normalizedNewExt);
+        return fileName.replace(new RegExp(`${oldExt}$`), newExt);
     }
     /**
      * Gets the default style file name for a token type
@@ -53,9 +48,7 @@ class FileNameHelper {
             Visibility: "visibility",
             Blur: "blur"
         };
-        // Ensure extension starts with a dot
-        const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`;
-        return baseNames[type] + normalizedExtension;
+        return baseNames[type] + extension;
     }
 }
 exports.FileNameHelper = FileNameHelper;

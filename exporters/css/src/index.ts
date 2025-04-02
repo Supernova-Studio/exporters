@@ -1,8 +1,9 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile } from "@supernovaio/sdk-exporters"
+import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
-import { styleOutputFile } from "./files/style-file"
-import { ThemeHelper } from "@supernovaio/export-utils"
+import { generateStyleFiles } from "./files/style-file"
+import { tokenVariableName } from "./content/token"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -13,19 +14,19 @@ export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
  * @returns Array of non-null output files
  */
 function processOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutputFile> {
-    return files.filter((file): file is AnyOutputFile => file !== null);
+  return files.filter((file): file is AnyOutputFile => file !== null)
 }
 
 /**
  * Main export function that generates CSS files from design tokens
- * 
+ *
  * This function handles:
  * - Fetching tokens and token groups from the design system
  * - Filtering tokens by brand if specified
  * - Processing themes in different modes (direct, separate files, or combined)
  * - Generating style files for each token type
  * - Creating an optional index file that imports all style files
- * 
+ *
  * @param sdk - Supernova SDK instance
  * @param context - Export context containing design system information
  * @returns Promise resolving to an array of output files
@@ -38,8 +39,10 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // Fetch tokens and token groups
+  let outputFiles: Array<AnyOutputFile> = []
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
+  let tokenCollections = await sdk.tokens.getTokenCollections(remoteVersionIdentifier)
 
   // Filter by brand if specified
   if (context.brandId) {
@@ -65,88 +68,67 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       }
       return theme
     })
-    
+
     // Handle different theme export modes
     switch (exportConfiguration.exportThemesAs) {
       case ThemeExportStyle.ApplyDirectly:
         // Apply all themes directly to token values
-        // This mode combines all themes into a single set of tokens
-        // Useful when you want to apply multiple themes at once without separate files
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const directFiles = [
-          ...Object.values(TokenType)
-            .map((type) => styleOutputFile(type, tokens, tokenGroups)),
-          indexOutputFile(tokens),
-        ]
-        return processOutputFiles(directFiles)
+        const directFiles = [...generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections), indexOutputFile(tokens)]
+        outputFiles = processOutputFiles(directFiles)
+        break
 
       case ThemeExportStyle.SeparateFiles:
         // Generate separate files for each theme
-        // Creates a new directory for each theme containing all token files
-        // Example structure:
-        // - base/color.css (base tokens)
-        // - dark/color.css (dark theme tokens)
-        // - light/color.css (light theme tokens)
         const themeFiles = themesToApply.flatMap((theme) => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-          return Object.values(TokenType)
-            .map((type) => styleOutputFile(
-              type, 
-              themedTokens, 
-              tokenGroups, 
-              ThemeHelper.getThemeIdentifier(theme),
-              theme  // Pass the theme object for override filtering
-            ))
+          return generateStyleFiles(themedTokens, tokenGroups, ThemeHelper.getThemeIdentifier(theme), theme, tokenCollections)
         })
-        
+
         // Generate base files without themes only if exportBaseValues is true
-        // These files contain the default token values before any theme is applied
         const baseFiles = exportConfiguration.exportBaseValues
-          ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)
           : []
 
         const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
-        return processOutputFiles(separateFiles)
+        outputFiles = processOutputFiles(separateFiles)
+        break
 
       case ThemeExportStyle.MergedTheme:
         // Generate base files without themes only if exportBaseValues is true
-        // These files contain the default token values in the root selector
-        // For multi-brand setups, these would be the brand's base tokens
         const baseTokenFiles = exportConfiguration.exportBaseValues
-          ? Object.values(TokenType)
-              .map((type) => styleOutputFile(type, tokens, tokenGroups))
+          ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)
           : []
 
         // Generate themed files with all themes applied
-        // Creates a single set of files with all themed tokens
-        // All themes are combined into a 'themed' directory
-        // Particularly useful for:
-        // - Multi-brand setups where each brand has its own themes
-        // - When you want to keep brand-specific theme variations together
-        // - Scenarios where themes need to be applied on top of brand-specific tokens
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const mergedThemeFiles = Object.values(TokenType)
-          .map((type) => styleOutputFile(
-            type, 
-            themedTokens, 
-            tokenGroups, 
-            'themed',
-            themesToApply[0]  // Pass the first theme as reference for overrides
-          ))
+        const mergedThemeFiles = generateStyleFiles(themedTokens, tokenGroups, "themed", themesToApply[0], tokenCollections)
 
-        const mergedFiles = [...baseTokenFiles, ...mergedThemeFiles, indexOutputFile(tokens, ['themed'])]
-        return processOutputFiles(mergedFiles)
+        const mergedFiles = [...baseTokenFiles, ...mergedThemeFiles, indexOutputFile(tokens, ["themed"])]
+        outputFiles = processOutputFiles(mergedFiles)
+        break
     }
+  } else {
+    // Default case: Generate files without themes
+    const defaultFiles = [
+      ...(exportConfiguration.exportBaseValues ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections) : []),
+      indexOutputFile(tokens),
+    ]
+    outputFiles = processOutputFiles(defaultFiles)
   }
 
-  // Default case: Generate files without themes
-  const defaultFiles = [
-    ...(exportConfiguration.exportBaseValues
-      ? Object.values(TokenType)
-          .map((type) => styleOutputFile(type, tokens, tokenGroups))
-      : []),
-    indexOutputFile(tokens),
-  ]
-  return processOutputFiles(defaultFiles)
+  // Write property name of each token if the property to write to was provided in settings
+  if (!context.isPreview && exportConfiguration.writeNameToProperty) {
+    const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
+    await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
+      if (exportConfiguration.propertyToWriteNameToIncludesVar) {
+        return `var(--${tokenVariableName(token, tokenGroups, tokenCollections)})`
+      } else {
+        return tokenVariableName(token, tokenGroups, tokenCollections)
+      }
+    })
+  }
+
+  // Finalize export by retrieving the files to write to destination
+  return outputFiles
 })

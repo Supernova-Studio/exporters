@@ -23,12 +23,12 @@ export function exportAssetDestination(
   if (path.length > 0) {
     return {
       name: `${name}${duplicates}.${extension}`,
-      path: resultingPath,
+      path: resultingPath
     }
   } else {
     return {
       name: `${name}${duplicates}.${extension}`,
-      path: "./",
+      path: "./"
     }
   }
 }
@@ -57,13 +57,13 @@ export function exportReactDefinitionDestination(
     return {
       className: `${name}${duplicates}`,
       name: `${name}${duplicates}.${extension}`,
-      path: resultingPath,
+      path: resultingPath
     }
   } else {
     return {
       className: `${name}${duplicates}`,
       name: `${name}${duplicates}.${extension}`,
-      path: "./",
+      path: "./"
     }
   }
 }

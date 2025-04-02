@@ -23,16 +23,17 @@ Given the following design system token (meta representation for brevity):
 ```json
 {
   "color": {
-    "red": {
-      "value": "#ff0000",
-      "description": "The reddest of reds"
-    },
-    "blue": {
-      "value": "#0000ff"
-    },
-    "primary": {
-      "value": "{color.red.value}",
-      "description": "The main color used throughout the application"
+    "buttonPrimaryBackground": {
+      "description": "Primary button background color",
+      "base": {
+        "value": "#000000"
+      },
+      "theme-light": {
+        "value": "{color.primitives.gold.400}"
+      },
+      "theme-dark": {
+        "value": "{color.primitives.gold.600}"
+      }
     }
   }
 }
@@ -56,16 +57,17 @@ The exporter would produce:
 {
   "_comment": "This file was generated automatically by Supernova.io and should not be changed manually.",
   "color": {
-    "red": {
-      "value": "#ff0000",
-      "description": "The reddest of reds"
-    },
-    "blue": {
-      "value": "#0000ff"
-    },
-    "primary": {
-      "value": "{color.red.value}",
-      "description": "The main color used throughout the application"
+    "buttonPrimaryBackground": {
+      "description": "Primary button background color",
+      "base": {
+        "value": "#000000"
+      },
+      "theme-light": {
+        "value": "{color.primitives.gold.400}"
+      },
+      "theme-dark": {
+        "value": "{color.primitives.gold.600}"
+      }
     }
   }
 }
@@ -76,10 +78,15 @@ The exporter would produce:
 Here is a list of all the configuration options this exporter provides:
 
 ### Token names
-- **globalNamePrefix:** Prefix all token names (e.g., 'ds_color_primary').
-- **customizeTokenPrefixes:** Customize the prefixes for each design token type.
-- **tokenPrefixes:** Define specific prefixes for each token type (when customizeTokenPrefixes is enabled).
-- **tokenNameStyle:** Define the naming convention of the exported tokens (camelCase, constantCase, flatCase, pascalCase, or snakeCase).
+- **tokenNameStructure:** Control what parts are included in the exported token names:
+  - `pathAndName` (default): Include path and name (e.g. button-primary-background)
+  - `nameOnly`: Only include name (e.g. background)
+  - `collectionPathAndName`: Include collection, path, and name (e.g. core-button-primary-background)
+- **tokenNameStyle:** Define the naming convention of the exported tokens (camelCase, constantCase, flatCase, pascalCase, or snakeCase)
+- **globalNamePrefix:** Prefix all token names (e.g., 'ds_color_primary')
+- **useTokenTypePrefixes:** Control whether token names are prefixed with their type (e.g., 'color.primary' vs just 'primary')
+- **customizeTokenPrefixes:** Customize the prefixes for each design token type
+- **tokenPrefixes:** Define specific prefixes for each token type (when customizeTokenPrefixes is enabled)
 
 ### Token values
 - **colorFormat:** Set the format for color exports (HEX, RGB, HSL, OKLCH with various options).
@@ -89,12 +96,19 @@ Here is a list of all the configuration options this exporter provides:
 - **colorPrecision:** Maximum number of decimals in colors.
 
 ### Themes
-- **exportThemesAs:** Control how themes are exported (separate files, applied directly, or merged).
+- **exportThemesAs:** Control how themes are exported:
+  - Separate files (one file per theme)
+  - Applied directly (themes applied to base values)
+  - Merged theme (all themes applied together in one file)
+  - Nested themes (themes as nested values per token)
 - **exportOnlyThemedTokens:** Only include tokens that differ from base values in theme files.
 - **exportBaseValues:** Include base token values along with themes.
 
 ### Style files
 - **generateEmptyFiles:** Generate empty files instead of omitting them.
+- **fileStructure:** Control how token styles are organized in files:
+  - `separateByType` (default): Generate separate files for each token type
+  - `singleFile`: Generate one file containing all token types
 - **baseStyleFilePath:** Directory path for files relative to export root.
 - **customizeStyleFileNames:** Enable custom file names for each token type.
 - **styleFileNames:** Define specific file names for each token type (when customizeStyleFileNames is enabled).

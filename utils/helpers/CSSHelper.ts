@@ -375,7 +375,7 @@ import {
       }
   
       // Visibility values are supported in CSS as is our data model
-      return option.value
+      return option.value.toLowerCase()
     }
   
     static blurTokenValueToCSS(blur: BlurTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string {
@@ -507,8 +507,9 @@ import {
         case TextCase.lower:
           return 'lowercase'
         case TextCase.camel:
-        case TextCase.smallCaps:
           return 'capitalize'
+        case TextCase.smallCaps:
+          return 'small-caps'
       }
     }
   
