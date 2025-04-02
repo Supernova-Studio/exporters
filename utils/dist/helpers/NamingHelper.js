@@ -4,7 +4,7 @@ exports.NamingHelper = void 0;
 const StringCase_1 = require("../enums/StringCase");
 const change_case_1 = require("change-case");
 class NamingHelper {
-    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace) {
+    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, removeDuplicateFragments = true) {
         // Step 1: Create array with all path segments and token name at the end
         let fragments = [];
         if (parent) {
@@ -60,20 +60,8 @@ class NamingHelper {
         if (prefix && prefix.length > 0) {
             fragments.unshift(prefix);
         }
-        // Step 5: Remove fragment-level consecutive duplicates
-        // This handles cases where entire fragments are duplicated
-        // For example, ["color", "border", "border"] becomes ["color", "border"]
-        // First convert to kebabCase for normalization
-        const normalizedString = (0, change_case_1.kebabCase)(fragments.join(' '));
-        // Split by "-" to get new fragments
-        const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0);
-        // Remove duplicates from normalized fragments
-        const uniqueFragments = normalizedFragments.filter((fragment, index) => {
-            // Keep if it's first element or different from previous
-            return index === 0 || fragment !== normalizedFragments[index - 1];
-        });
-        // Step 6: Apply case formatting to the final fragments
-        return NamingHelper.codeSafeVariableName(uniqueFragments, format);
+        // Step 5: Apply case formatting to the final fragments
+        return NamingHelper.codeSafeVariableName(fragments, format, undefined, removeDuplicateFragments);
     }
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
@@ -81,7 +69,7 @@ class NamingHelper {
      *
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
      */
-    static codeSafeVariableName(fragments, format, findReplace) {
+    static codeSafeVariableName(fragments, format, findReplace, removeDuplicateFragments = false) {
         // Convert fragments to a single sentence for processing
         let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ');
         // Apply find/replace if provided
@@ -108,6 +96,20 @@ class NamingHelper {
         }
         // Only allow letters, digits, underscore and hyphen
         sentence = sentence.replaceAll(/[^a-zA-Z0-9_-]/g, '_');
+        // Remove duplicates if requested
+        if (removeDuplicateFragments) {
+            // First convert to kebabCase for normalization
+            const normalizedString = (0, change_case_1.kebabCase)(sentence);
+            // Split by "-" to get new fragments
+            const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0);
+            // Remove duplicates from normalized fragments
+            const uniqueFragments = normalizedFragments.filter((fragment, index) => {
+                // Keep if it's first element or different from previous
+                return index === 0 || fragment !== normalizedFragments[index - 1];
+            });
+            // Join back into a sentence
+            sentence = uniqueFragments.join(' ');
+        }
         switch (format) {
             case StringCase_1.StringCase.camelCase:
                 sentence = (0, change_case_1.camelCase)(sentence);

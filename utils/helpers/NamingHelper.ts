@@ -20,7 +20,8 @@ export class NamingHelper {
     format: StringCase,
     parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null,
     prefix: string | null,
-    findReplace?: Record<string, string>
+    findReplace?: Record<string, string>,
+    removeDuplicateFragments: boolean = true
   ): string {
     // Step 1: Create array with all path segments and token name at the end
     let fragments: Array<string> = []
@@ -87,24 +88,8 @@ export class NamingHelper {
       fragments.unshift(prefix)
     }
 
-    // Step 5: Remove fragment-level consecutive duplicates
-    // This handles cases where entire fragments are duplicated
-    // For example, ["color", "border", "border"] becomes ["color", "border"]
-    
-    // First convert to kebabCase for normalization
-    const normalizedString = kebabCase(fragments.join(' '))
-    
-    // Split by "-" to get new fragments
-    const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0)
-    
-    // Remove duplicates from normalized fragments
-    const uniqueFragments = normalizedFragments.filter((fragment, index) => {
-      // Keep if it's first element or different from previous
-      return index === 0 || fragment !== normalizedFragments[index - 1]
-    })
-    
-    // Step 6: Apply case formatting to the final fragments
-    return NamingHelper.codeSafeVariableName(uniqueFragments, format)
+    // Step 5: Apply case formatting to the final fragments
+    return NamingHelper.codeSafeVariableName(fragments, format, undefined, removeDuplicateFragments)
   }
 
   /**
@@ -116,7 +101,8 @@ export class NamingHelper {
   static codeSafeVariableName(
     fragments: Array<string> | string,
     format: StringCase,
-    findReplace?: Record<string, string>
+    findReplace?: Record<string, string>,
+    removeDuplicateFragments: boolean = false
   ): string {
     // Convert fragments to a single sentence for processing
     let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ')
@@ -150,6 +136,24 @@ export class NamingHelper {
 
     // Only allow letters, digits, underscore and hyphen
     sentence = sentence.replaceAll(/[^a-zA-Z0-9_-]/g, '_')
+
+    // Remove duplicates if requested
+    if (removeDuplicateFragments) {
+      // First convert to kebabCase for normalization
+      const normalizedString = kebabCase(sentence)
+      
+      // Split by "-" to get new fragments
+      const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0)
+      
+      // Remove duplicates from normalized fragments
+      const uniqueFragments = normalizedFragments.filter((fragment, index) => {
+        // Keep if it's first element or different from previous
+        return index === 0 || fragment !== normalizedFragments[index - 1]
+      })
+      
+      // Join back into a sentence
+      sentence = uniqueFragments.join(' ')
+    }
 
     switch (format) {
       case StringCase.camelCase:

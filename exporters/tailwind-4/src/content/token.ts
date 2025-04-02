@@ -245,7 +245,7 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
           .replace(/^[-\s]+|[-\s]+$/g, '') // Remove leading/trailing hyphens and spaces
 
         // Construct the name as: utility-color-path-name
-        return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace)
+        return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace, true)
       }
     }
 

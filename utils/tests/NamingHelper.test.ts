@@ -358,3 +358,60 @@ test('codeSafeVariableName_find_replace_empty_strings', () => {
     ''
   )
 })
+
+test('codeSafeVariableNameForToken_deduplication_with_kebabCase', () => {
+  // Token: {"name":"fill-warning","type":"Color","path":["Color","bg","fill"],"prefix":"color","value":{"color":{"r":255,"g":184,"b":0,"referencedTokenId":null},"opacity":{"unit":"Raw","measure":1,"referencedTokenId":null},"referencedTokenId":"6e32c1bc-489b-43f2-8aa0-07fdf3cfb8ee"}}
+  const token = {
+    name: 'fill-warning'
+  }
+  const tokenGroup = {
+    name: 'fill',
+    path: ['Color', 'bg', 'fill'],
+    isRoot: false
+  }
+  // Test with different case formats to ensure deduplication works in all cases
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, true)).toBe(
+    'color-bg-fill-warning'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, tokenGroup, 'color', undefined, true)).toBe(
+    'colorBgFillWarning'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.snakeCase, tokenGroup, 'color', undefined, true)).toBe(
+    'color_bg_fill_warning'
+  )
+})
+
+test('codeSafeVariableNameForToken_without_deduplication', () => {
+  // Same token as above but without deduplication
+  const token = {
+    name: 'fill-warning'
+  }
+  const tokenGroup = {
+    name: 'fill',
+    path: ['Color', 'bg', 'fill'],
+    isRoot: false
+  }
+  // Test with different case formats to ensure no deduplication happens when removeDuplicateFragments is false
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, false)).toBe(
+    'color-color-bg-fill-fill-warning'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, tokenGroup, 'color')).toBe(
+    'colorBgFillWarning'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.snakeCase, tokenGroup, 'color')).toBe(
+    'color_bg_fill_warning'
+  )
+})
+
+test('codeSafeVariableName_with_removeDuplicateFragments', () => {
+  // Test the removeDuplicateFragments parameter directly on codeSafeVariableName
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, true)).toBe(
+    'color-bg-fill-warning'
+  )
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.camelCase, undefined, true)).toBe(
+    'colorBgFillWarning'
+  )
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, true)).toBe(
+    'color_bg_fill_warning'
+  )
+})
