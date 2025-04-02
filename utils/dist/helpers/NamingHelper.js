@@ -5,7 +5,7 @@ const StringCase_1 = require("../enums/StringCase");
 const change_case_1 = require("change-case");
 class NamingHelper {
     static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace) {
-        // Create array with all path segments and token name at the end
+        // Step 1: Create array with all path segments and token name at the end
         let fragments = [];
         if (parent) {
             fragments = [...parent.path];
@@ -13,10 +13,12 @@ class NamingHelper {
                 fragments.push(parent.name);
             }
         }
-        // Split token name into words
+        // Step 2: Handle token name intelligently to avoid word-level duplication
+        // For example, if the path ends with "Red" and token name is "Red 500",
+        // we only want to add "500" to avoid "Red Red 500"
         const tokenNameParts = token.name.split(/[\s-_]+/);
-        // If the first word of token name matches the last fragment (case insensitive),
-        // only add the remaining parts of the token name
+        // This checks if the first word of token name matches the last fragment (case insensitive)
+        // and if so, only adds the remaining parts of the token name
         if (fragments.length > 0 && tokenNameParts.length > 1 &&
             tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase()) {
             fragments.push(tokenNameParts.slice(1).join(' '));
@@ -24,7 +26,8 @@ class NamingHelper {
         else {
             fragments.push(token.name);
         }
-        // Apply find/replace to path and name fragments *first*
+        // Step 3: Apply find/replace to path and name fragments only (not prefix)
+        // This allows for custom text replacements in the variable name
         if (findReplace) {
             // Sort find patterns by length (longest first) to handle overlapping patterns
             const sortedPatterns = Object.entries(findReplace)
@@ -32,9 +35,19 @@ class NamingHelper {
             // Join path and name for find/replace processing
             let pathAndName = fragments.join(' ');
             for (const [find, replace] of sortedPatterns) {
-                // Create a case-insensitive pattern that matches the word
-                // Use a more flexible pattern that handles word boundaries better
-                const pattern = new RegExp(`\\b${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b|(?<=^|\\s)${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$)`, 'gi');
+                // Escape special regex characters to ensure they're treated as literal characters
+                const escapedFind = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                // Create a regex pattern that matches the word in two ways:
+                // 1. Using standard word boundaries (\b) - matches transitions between word/non-word chars
+                // 2. Using lookahead/lookbehind to match at string boundaries or between spaces
+                //    This handles cases where \b alone might not work correctly
+                const pattern = new RegExp(
+                // Part 1: Match with standard word boundaries
+                `\\b${escapedFind}\\b|` +
+                    // Part 2: Match at start of string or after space AND before end of string or space
+                    `(?<=^|\\s)${escapedFind}(?=\\s|$)`, 'gi' // g: global (match all occurrences), i: case-insensitive
+                );
+                // Replace all occurrences with the replacement string
                 pathAndName = pathAndName.replace(pattern, replace);
             }
             // Split back into fragments and clean up
@@ -43,17 +56,24 @@ class NamingHelper {
                 .filter(f => f.length > 0)
                 .map(f => f.trim());
         }
-        // Add prefix *after* find/replace
+        // Step 4: Add prefix after find/replace (prefix should not be affected by find/replace)
         if (prefix && prefix.length > 0) {
             fragments.unshift(prefix);
         }
-        // Remove consecutive duplicates *after* adding prefix
-        fragments = fragments.filter((fragment, index) => {
+        // Step 5: Remove fragment-level consecutive duplicates
+        // This handles cases where entire fragments are duplicated
+        // For example, ["color", "border", "border"] becomes ["color", "border"]
+        // First convert to kebabCase for normalization
+        const normalizedString = (0, change_case_1.kebabCase)(fragments.join(' '));
+        // Split by "-" to get new fragments
+        const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0);
+        // Remove duplicates from normalized fragments
+        const uniqueFragments = normalizedFragments.filter((fragment, index) => {
             // Keep if it's first element or different from previous
-            return index === 0 || fragment.toLowerCase() !== fragments[index - 1].toLowerCase();
+            return index === 0 || fragment !== normalizedFragments[index - 1];
         });
-        // Apply case formatting
-        return NamingHelper.codeSafeVariableName(fragments, format);
+        // Step 6: Apply case formatting to the final fragments
+        return NamingHelper.codeSafeVariableName(uniqueFragments, format);
     }
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
@@ -62,6 +82,7 @@ class NamingHelper {
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
      */
     static codeSafeVariableName(fragments, format, findReplace) {
+        // Convert fragments to a single sentence for processing
         let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ');
         // Apply find/replace if provided
         if (findReplace) {
@@ -69,9 +90,19 @@ class NamingHelper {
             const sortedPatterns = Object.entries(findReplace)
                 .sort(([a], [b]) => b.length - a.length);
             for (const [find, replace] of sortedPatterns) {
-                // Create a case-insensitive pattern that matches the word
-                // Use a more flexible pattern that handles word boundaries better
-                const pattern = new RegExp(`\\b${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b|(?<=^|\\s)${find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$)`, 'gi');
+                // Escape special regex characters to ensure they're treated as literal characters
+                const escapedFind = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                // Create a regex pattern that matches the word in two ways:
+                // 1. Using standard word boundaries (\b) - matches transitions between word/non-word chars
+                // 2. Using lookahead/lookbehind to match at string boundaries or between spaces
+                //    This handles cases where \b alone might not work correctly
+                const pattern = new RegExp(
+                // Part 1: Match with standard word boundaries
+                `\\b${escapedFind}\\b|` +
+                    // Part 2: Match at start of string or after space AND before end of string or space
+                    `(?<=^|\\s)${escapedFind}(?=\\s|$)`, 'gi' // g: global (match all occurrences), i: case-insensitive
+                );
+                // Replace all occurrences with the replacement string
                 sentence = sentence.replace(pattern, replace);
             }
         }

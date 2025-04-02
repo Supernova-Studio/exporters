@@ -90,13 +90,21 @@ export class NamingHelper {
     // Step 5: Remove fragment-level consecutive duplicates
     // This handles cases where entire fragments are duplicated
     // For example, ["color", "border", "border"] becomes ["color", "border"]
-    fragments = fragments.filter((fragment, index) => {
+    
+    // First convert to kebabCase for normalization
+    const normalizedString = kebabCase(fragments.join(' '))
+    
+    // Split by "-" to get new fragments
+    const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0)
+    
+    // Remove duplicates from normalized fragments
+    const uniqueFragments = normalizedFragments.filter((fragment, index) => {
       // Keep if it's first element or different from previous
-      return index === 0 || fragment.toLowerCase() !== fragments[index - 1].toLowerCase()
+      return index === 0 || fragment !== normalizedFragments[index - 1]
     })
-
+    
     // Step 6: Apply case formatting to the final fragments
-    return NamingHelper.codeSafeVariableName(fragments, format)
+    return NamingHelper.codeSafeVariableName(uniqueFragments, format)
   }
 
   /**
