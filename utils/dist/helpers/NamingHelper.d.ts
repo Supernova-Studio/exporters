@@ -8,7 +8,7 @@ export declare class NamingHelper {
      * @returns The text with all replacements applied
      */
     private static applyFindReplace;
-    static codeSafeVariableNameForToken(token: Pick<Token, 'name'>, format: StringCase, parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null, prefix: string | null, findReplace?: Record<string, string>, removeDuplicateFragments?: boolean, collectionName?: string | null, globalPrefix?: string | null): string;
+    static codeSafeVariableNameForToken(token: Pick<Token, 'name'>, format: StringCase, parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null, prefix: string | null, findReplace?: Record<string, string>, removeDuplicateFragments?: boolean): string;
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
      * if they contain spaces, case changes from one letter to another and so on.

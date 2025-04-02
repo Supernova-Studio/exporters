@@ -35,11 +35,7 @@ class NamingHelper {
         }
         return result;
     }
-    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, removeDuplicateFragments = true, 
-    // @deprecated: use prefix instead
-    collectionName, 
-    // @deprecated: use prefix instead
-    globalPrefix) {
+    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, removeDuplicateFragments = true) {
         // Create array with all path segments and token name at the end
         let fragments = [];
         // Add parent path and name
@@ -76,17 +72,8 @@ class NamingHelper {
                 .map(f => f.trim());
         }
         // Step 4: Add prefix after find/replace (prefix should not be affected by find/replace)
-        // Add collection name if provided
-        if (collectionName && collectionName.length > 0) {
-            fragments.unshift(collectionName);
-        }
-        // Add type-specific prefix if provided
         if (prefix && prefix.length > 0) {
             fragments.unshift(prefix);
-        }
-        // Add global prefix first if provided
-        if (globalPrefix && globalPrefix.length > 0) {
-            fragments.unshift(globalPrefix.trim());
         }
         // Step 5: Apply case formatting to the final fragments
         return NamingHelper.codeSafeVariableName(fragments, format, undefined, removeDuplicateFragments);
