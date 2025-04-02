@@ -1,6 +1,13 @@
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters";
 import { StringCase } from "../enums/StringCase";
 export declare class NamingHelper {
+    /**
+     * Helper method to apply find/replace patterns to a string
+     * @param text The text to apply replacements to
+     * @param findReplace Record of find/replace patterns
+     * @returns The text with all replacements applied
+     */
+    private static applyFindReplace;
     static codeSafeVariableNameForToken(token: Pick<Token, 'name'>, format: StringCase, parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null, prefix: string | null, findReplace?: Record<string, string>, removeDuplicateFragments?: boolean, collectionName?: string | null, globalPrefix?: string | null): string;
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -

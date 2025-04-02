@@ -15,6 +15,44 @@ import {
 } from "change-case"
 
 export class NamingHelper {
+  /**
+   * Helper method to apply find/replace patterns to a string
+   * @param text The text to apply replacements to
+   * @param findReplace Record of find/replace patterns
+   * @returns The text with all replacements applied
+   */
+  private static applyFindReplace(text: string, findReplace?: Record<string, string>): string {
+    if (!findReplace) return text;
+    
+    // Sort find patterns by length (longest first) to handle overlapping patterns
+    const sortedPatterns = Object.entries(findReplace)
+      .sort(([a], [b]) => b.length - a.length)
+    
+    let result = text;
+    
+    for (const [find, replace] of sortedPatterns) {
+      // Escape special regex characters to ensure they're treated as literal characters
+      const escapedFind = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      
+      // Create a regex pattern that matches the word in two ways:
+      // 1. Using standard word boundaries (\b) - matches transitions between word/non-word chars
+      // 2. Using lookahead/lookbehind to match at string boundaries or between spaces
+      //    This handles cases where \b alone might not work correctly
+      const pattern = new RegExp(
+        // Part 1: Match with standard word boundaries
+        `\\b${escapedFind}\\b|` + 
+        // Part 2: Match at start of string or after space AND before end of string or space
+        `(?<=^|\\s)${escapedFind}(?=\\s|$)`, 
+        'gi' // g: global (match all occurrences), i: case-insensitive
+      )
+      
+      // Replace all occurrences with the replacement string
+      result = result.replace(pattern, replace)
+    }
+    
+    return result;
+  }
+
   static codeSafeVariableNameForToken(
     token: Pick<Token, 'name'>,
     format: StringCase,
@@ -55,32 +93,11 @@ export class NamingHelper {
     // Step 3: Apply find/replace to path and name fragments only (not prefix)
     // This allows for custom text replacements in the variable name
     if (findReplace) {
-      // Sort find patterns by length (longest first) to handle overlapping patterns
-      const sortedPatterns = Object.entries(findReplace)
-        .sort(([a], [b]) => b.length - a.length)
-      
       // Join path and name for find/replace processing
       let pathAndName = fragments.join(' ')
       
-      for (const [find, replace] of sortedPatterns) {
-        // Escape special regex characters to ensure they're treated as literal characters
-        const escapedFind = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        
-        // Create a regex pattern that matches the word in two ways:
-        // 1. Using standard word boundaries (\b) - matches transitions between word/non-word chars
-        // 2. Using lookahead/lookbehind to match at string boundaries or between spaces
-        //    This handles cases where \b alone might not work correctly
-        const pattern = new RegExp(
-          // Part 1: Match with standard word boundaries
-          `\\b${escapedFind}\\b|` + 
-          // Part 2: Match at start of string or after space AND before end of string or space
-          `(?<=^|\\s)${escapedFind}(?=\\s|$)`, 
-          'gi' // g: global (match all occurrences), i: case-insensitive
-        )
-        
-        // Replace all occurrences with the replacement string
-        pathAndName = pathAndName.replace(pattern, replace)
-      }
+      // Apply find/replace using the helper method
+      pathAndName = NamingHelper.applyFindReplace(pathAndName, findReplace)
       
       // Split back into fragments and clean up
       fragments = pathAndName
@@ -126,32 +143,8 @@ export class NamingHelper {
     // Convert fragments to a single sentence for processing
     let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ')
 
-    // Apply find/replace if provided
-    if (findReplace) {
-      // Sort find patterns by length (longest first) to handle overlapping patterns
-      const sortedPatterns = Object.entries(findReplace)
-        .sort(([a], [b]) => b.length - a.length)
-      
-      for (const [find, replace] of sortedPatterns) {
-        // Escape special regex characters to ensure they're treated as literal characters
-        const escapedFind = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        
-        // Create a regex pattern that matches the word in two ways:
-        // 1. Using standard word boundaries (\b) - matches transitions between word/non-word chars
-        // 2. Using lookahead/lookbehind to match at string boundaries or between spaces
-        //    This handles cases where \b alone might not work correctly
-        const pattern = new RegExp(
-          // Part 1: Match with standard word boundaries
-          `\\b${escapedFind}\\b|` + 
-          // Part 2: Match at start of string or after space AND before end of string or space
-          `(?<=^|\\s)${escapedFind}(?=\\s|$)`, 
-          'gi' // g: global (match all occurrences), i: case-insensitive
-        )
-        
-        // Replace all occurrences with the replacement string
-        sentence = sentence.replace(pattern, replace)
-      }
-    }
+    // Apply find/replace if provided using the helper method
+    sentence = NamingHelper.applyFindReplace(sentence, findReplace)
 
     // Only allow letters, digits, underscore and hyphen
     sentence = sentence.replaceAll(/[^a-zA-Z0-9_-]/g, '_')
