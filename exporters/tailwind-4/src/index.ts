@@ -1,7 +1,8 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, Token, TokenGroup, TokenTheme, OutputTextFile } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { styleOutputFile } from "./files/tailwind-file"
-import { ThemeHelper } from "@supernovaio/export-utils"
+import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
+import { tokenVariableName } from "./content/token"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -103,6 +104,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
         return processOutputFiles([baseTokenFiles, mergedThemeFiles])
     }
+  }
+
+  // Write property name of each token if the property to write to was provided in settings
+  if (!context.isPreview && exportConfiguration.writeNameToProperty) {
+    const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
+    await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
+        return tokenVariableName(token, tokenGroups)
+    })
   }
 
   // Default case: Generate files without themes

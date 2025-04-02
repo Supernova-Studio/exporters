@@ -99,4 +99,8 @@ export type ExporterConfiguration = {
   generateTypographyClasses: boolean
   /** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group */
   disableAllDefaults: boolean
+  /** When enabled, generated variable names will be saved back to tokens as custom properties */
+  writeNameToProperty: boolean
+  /** Name of the custom property where generated variable names will be saved */
+  propertyToWriteNameTo: string
 }

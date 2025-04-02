@@ -155,7 +155,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         token.value.referencedTokenId && token.value.referencedTokenId !== null && token.value.referencedTokenId !== undefined
     )
 
-    // Add inline option for @theme if it's the base selector and there are references
+    // Add inline flag for @theme if it's the base selector and there are references (Tailwind recommendation to avoid conflicts)
     const themeDirective = selector === '@theme' && hasReferences ? '@theme inline' : selector
     content += `${themeDirective} {\n${cssVariables}}\n`
 
