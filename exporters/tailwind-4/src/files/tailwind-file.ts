@@ -44,10 +44,13 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     // Create a map of all tokens by ID for reference resolution
     const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
-    // Start with Tailwind import with prefix if configured
-    let content = exportConfiguration.globalPrefix 
-        ? `@import "tailwindcss" prefix(${exportConfiguration.globalPrefix});\n\n`
-        : '@import "tailwindcss";\n\n'
+    // Start with Tailwind import with prefix if configured, but only for base file
+    let content = ''
+    if (!themePath) {
+        content = exportConfiguration.globalPrefix 
+            ? `@import "tailwindcss" prefix(${exportConfiguration.globalPrefix});\n\n`
+            : '@import "tailwindcss";\n\n'
+    }
 
     // Add debug information at the top if enabled
     if (exportConfiguration.debug) {
