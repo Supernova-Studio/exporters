@@ -202,6 +202,28 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 }
 
 /**
+ * Normalizes a name for Tailwind usage by ensuring it has at least one hyphen
+ * by appending "-default" if it's a single word, so it doesn't result in a class name like ".text", ".text-color", ".border", etc.
+ * @param name The name to normalize
+ * @returns The normalized name with "-default" appended if it was a single word
+ */
+function normalizeForTailwindConfig(name: string): string {
+    if (!name.includes('-') 
+      || name === "text-color" 
+      || name === "background-color" 
+      || name === "border-color"
+      || name === "box-shadow-color"
+      || name === "outline-color"
+      || name === "stroke-color"
+      || name === "fill-color"
+      || name === "ring-color"
+      ) {
+        return `${name}-default`;
+    }
+    return name;
+}
+
+/**
  * Generates a code-safe variable name for a token based on its properties and configuration.
  * Includes type-specific prefix and considers token hierarchy.
  * 
@@ -245,17 +267,20 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
           .replace(/^[-\s]+|[-\s]+$/g, '') // Remove leading/trailing hyphens and spaces
 
         // Construct the name as: utility-color-path-name
-        return NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName}`, StringCase.kebabCase, exportConfiguration.findReplace, true)
+        // We also remove the utility name from the cleanName to avoid redundancy
+        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, exportConfiguration.findReplace, true)
+
+        return normalizeForTailwindConfig(name);
       }
     }
 
     // If no utility match, use standard naming
     const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
-    return name
+    return normalizeForTailwindConfig(name);
   }
 
   // For non-color tokens or when color utility prefixes are disabled
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)
   const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
-  return name
+  return normalizeForTailwindConfig(name);
 }

@@ -91,7 +91,8 @@
                 "outline",
                 "border",
                 "stroke",
-                "fill"
+                "fill",
+                "ring"
             ],
             "type": "string"
         },
@@ -167,7 +168,7 @@
     {
         "key": "exportOnlyThemedTokens",
         "type": "boolean",
-        "default": false,
+        "default": true,
         "title": "Export only themed tokens",
         "description": "Theme files will only include tokens that have different values from the base value.",
         "category": "Themes"
@@ -441,22 +442,52 @@
         "category": "Other"
     },
     {
-        "key": "writeNameToProperty",
+        "key": "writeClassnameToProperty",
         "type": "boolean",
         "default": true,
-        "title": "Write generated variable names",
-        "description": "Save generated variable names back to tokens as custom properties.",
+        "title": "Write generated Tailwind classnames",
+        "description": "Save generated Tailwind classnames back to tokens as custom properties.",
         "category": "Automatic write-back"
     },
     {
-        "key": "propertyToWriteNameTo",
+        "key": "propertyToWriteClassnameTo",
         "type": "string",
-        "default": "Tailwind",
+        "default": "Tailwind class",
+        "title": "Custom property name",
+        "description": "Name of the custom property where generated Tailwind classnames will be saved.",
+        "category": "Automatic write-back",
+        "dependsOn": {
+            "writeClassnameToProperty": true
+        }
+    },
+    {
+        "key": "writeCSSVariableNameToProperty",
+        "type": "boolean",
+        "default": true,
+        "title": "Write generated CSS variable names",
+        "description": "Save generated CSS variable names back to tokens as custom properties.",
+        "category": "Automatic write-back"
+    },
+    {
+        "key": "propertyToWriteCSSVariableNameTo",
+        "type": "string",
+        "default": "CSS variable",
         "title": "Custom property name",
         "description": "Name of the custom property where generated variable names will be saved.",
         "category": "Automatic write-back",
         "dependsOn": {
-            "writeNameToProperty": true
+            "writeCSSVariableNameToProperty": true
+        }
+    },
+    {
+        "key": "propertyToWriteCSSVariableNameToIncludesVar",
+        "type": "boolean",
+        "default": true,
+        "title": "Include var() in property",
+        "description": "If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.",
+        "category": "Automatic write-back",
+        "dependsOn": {
+            "writeCSSVariableNameToProperty": true
         }
     }
 ]

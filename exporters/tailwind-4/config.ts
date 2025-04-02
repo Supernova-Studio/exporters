@@ -10,7 +10,15 @@ export enum ThemeExportStyle {
     MergedTheme = "mergedTheme"
 }
 
-export type ColorUtilityType = 'text' | 'boxShadow' | 'background' | 'outline' | 'border' | 'stroke'
+export type ColorUtilityType = 
+  | 'text' 
+  | 'boxShadow' 
+  | 'background' 
+  | 'outline' 
+  | 'border' 
+  | 'stroke'
+  | 'fill'
+  | 'ring'
 
 export type ColorUtilityPrefixes = Record<ColorUtilityType, string>
 
@@ -99,8 +107,14 @@ export type ExporterConfiguration = {
   generateTypographyClasses: boolean
   /** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group */
   disableAllDefaults: boolean
-  /** When enabled, generated variable names will be saved back to tokens as custom properties */
-  writeNameToProperty: boolean
-  /** Name of the custom property where generated variable names will be saved */
-  propertyToWriteNameTo: string
+  /** When enabled, generated Tailwind classnames will be saved back to tokens as custom properties */
+  writeClassnameToProperty: boolean
+  /** Name of the custom property where generated Tailwind classnames will be saved */
+  propertyToWriteClassnameTo: string
+  /** When enabled, generated CSS variable names will be saved back to tokens as custom properties */
+  writeCSSVariableNameToProperty: boolean
+  /** Name of the custom property where generated CSS variable names will be saved */
+  propertyToWriteCSSVariableNameTo: string
+  /** When enabled, the resulting written properties will be encapsulated in var() syntax for easier copying */
+  propertyToWriteCSSVariableNameToIncludesVar: boolean
 }
