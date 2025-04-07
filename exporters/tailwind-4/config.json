@@ -81,7 +81,8 @@
             "outline": "outline",
             "border": "border",
             "stroke": "stroke",
-            "fill": "fill"
+            "fill": "fill",
+            "ring": "ring"
         },
         "allowedKeys": {
             "options": [
