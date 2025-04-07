@@ -168,10 +168,7 @@
         "default": true,
         "title": "Generate empty config files",
         "description": "Generate empty config files instead of omitting them.",
-        "category": "File structure",
-        "dependsOn": {
-            "fileStructure": "separateByType"
-        }
+        "category": "File structure"
     },
     {
         "key": "customizeConfigFileNames",
@@ -179,10 +176,7 @@
         "default": false,
         "title": "Customize config file names",
         "description": "Customize the file names for each token type.",
-        "category": "File structure",
-        "dependsOn": {
-            "fileStructure": "separateByType"
-        }
+        "category": "File structure"
     },
     {
         "key": "configFileNames",
