@@ -587,7 +587,7 @@
     {
         "key": "writeClassnameToProperty",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "title": "Write generated Tailwind classnames",
         "description": "Save generated Tailwind classnames back to tokens as custom properties.",
         "category": "Automatic write-back"
@@ -606,7 +606,7 @@
     {
         "key": "writeCSSVariableNameToProperty",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "title": "Write generated CSS variable names",
         "description": "Save generated CSS variable names back to tokens as custom properties.",
         "category": "Automatic write-back"
