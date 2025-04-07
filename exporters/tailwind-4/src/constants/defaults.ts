@@ -3,7 +3,7 @@ import { TokenType } from "@supernovaio/sdk-exporters"
 export const TAILWIND_TOKEN_PREFIXES: Record<TokenType, string> = {
   Color: "color",
   Typography: "text",
-  Dimension: "size",
+  Dimension: "spacing",
   Size: "size",
   Space: "spacing",
   Opacity: "opacity",
@@ -60,6 +60,7 @@ export const TAILWIND_ALLOWED_CUSTOMIZATION: TokenType[] = [
   TokenType.blur,
   TokenType.typography,
   TokenType.border,
+  TokenType.dimension
 ] 
 
 

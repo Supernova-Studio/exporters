@@ -190,13 +190,15 @@ function getStyleFileName(type: TokenType): string {
  * Generates a single CSS output file containing all token styles in Tailwind format
  */
 export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
+    // Create a map of all tokens by ID for reference resolution
+    // This includes ALL tokens to ensure references can be resolved, even to non-themed tokens
+    const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
+
+    // Process tokens to get only themed ones if needed
     const processedTokens = processTokens(tokens, themePath, theme)
     if (processedTokens.length === 0) {
         return null
     }
-
-    // Create a map of all tokens by ID for reference resolution
-    const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
     // Start with Tailwind import with prefix if configured, but only for base file
     let content = ''
@@ -254,6 +256,11 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
  * Generates separate CSS output files for each token type in Tailwind format
  */
 export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): Array<OutputTextFile> {
+    // Create a map of all tokens by ID for reference resolution
+    // This includes ALL tokens to ensure references can be resolved, even to non-themed tokens
+    const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
+
+    // Process tokens to get only themed ones if needed
     const processedTokens = processTokens(tokens, themePath, theme)
     if (processedTokens.length === 0) {
         return []
@@ -268,9 +275,6 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         }
         tokensByType.get(type)!.push(token)
     })
-
-    // Create a map of all tokens by ID for reference resolution
-    const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
     // Use configured selector for base tokens or theme selector for themed tokens
     const selector = themePath && theme 
@@ -332,8 +336,10 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
             // For theme files, put them in a folder named after the theme
             relativePath = `./${themePath}/`
         } else if (exportConfiguration.fileStructure === FileStructure.SeparateByType) {
-            // For base files in separateByType mode, put them in a "base" folder
-            relativePath = "./base/"
+            // For base files in separateByType mode, use the configured baseStyleFilePath
+            relativePath = exportConfiguration.baseStyleFilePath.endsWith('/') 
+                ? exportConfiguration.baseStyleFilePath 
+                : `${exportConfiguration.baseStyleFilePath}/`
         }
 
         // Create and return the output file
@@ -375,7 +381,10 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
             
             tokenTypes.forEach(type => {
                 const fileName = getStyleFileName(type)
-                content += `@import "./base/${fileName}";\n`
+                const basePath = exportConfiguration.baseStyleFilePath.endsWith('/') 
+                    ? exportConfiguration.baseStyleFilePath 
+                    : `${exportConfiguration.baseStyleFilePath}/`
+                content += `@import "${basePath}${fileName}";\n`
             })
         }
     }

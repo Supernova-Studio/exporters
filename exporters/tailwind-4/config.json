@@ -69,14 +69,14 @@
         "key": "colorUtilityPrefixes",
         "type": "object",
         "title": "Color utility prefixes",
-        "description": "Define specific string patterns to identify and prefix color tokens based on their utility. Multiple patterns can be specified using comma-separated values (e.g., 'background,bg').",
+        "description": "Define patterns to prefix color tokens. Use commas for multiple patterns (e.g., 'background,bg') and ! to negate (e.g., 'bg,!fill').",
         "category": "Colors",
         "dependsOn": {
             "useColorUtilityPrefixes": true
         },
         "default": {
             "bg": "background,bg",
-            "text": "text,color",
+            "text": "foreground,text",
             "border": "border",
             "shadow": "shadow",
             "ring": "ring",
@@ -152,20 +152,28 @@
         "description": "Control how token styles are organized in files",
         "category": "File structure",
         "options": {
-            "separateByType": {
-                "label": "Separate files by type",
-                "description": "Generate separate config files for each token type"
-            },
             "singleFile": {
                 "label": "Single combined file",
                 "description": "Generate one config file containing all token types"
+            },
+            "separateByType": {
+                "label": "Separate files by type",
+                "description": "Generate separate config files for each token type"
             }
         }
     },
     {
+        "key": "baseStyleFilePath",
+        "type": "string",
+        "default": "./base",
+        "title": "Path to base style files",
+        "description": "Base directory for separate token files when using 'separate by type' structure.",
+        "category": "File structure"
+    },
+    {
         "key": "generateEmptyConfigTypeFiles",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "title": "Generate empty config files",
         "description": "Generate empty config files instead of omitting them.",
         "category": "File structure"

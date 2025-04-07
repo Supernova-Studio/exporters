@@ -39,6 +39,7 @@ function generateDebugInfo(token: Token, indentString: string): string {
   return `${indentString}/* Path: ${fullPath} */\n` +
          `${indentString}/* Token: ${JSON.stringify({
            name: token.name,
+           id: token.id,
            type: token.tokenType,
            path: token.tokenPath,
            prefix: getTokenPrefix(token.tokenType),
@@ -224,6 +225,35 @@ function normalizeForTailwindConfig(name: string): string {
 }
 
 /**
+ * Checks if a token path matches a color utility pattern, considering both positive and negative patterns.
+ * @param fullPath The full token path to check
+ * @param patternString The pattern string containing comma-separated patterns, with optional ! prefix for negation
+ * @returns An object containing whether the path matches and the first matching positive pattern
+ */
+function matchColorUtilityPattern(fullPath: string, patternString: string): { matches: boolean; matchingPattern: string } {
+  // Split pattern by comma to support multiple patterns for a single utility
+  const patterns = patternString.split(',').map(p => p.trim().toLowerCase())
+  
+  // Separate positive and negative patterns
+  const positivePatterns = patterns.filter(p => !p.startsWith('!'))
+  const negativePatterns = patterns.filter(p => p.startsWith('!')).map(p => p.slice(1))
+  
+  // Check if the path matches any positive pattern
+  const matchesPositive = positivePatterns.some(pattern => fullPath.includes(pattern))
+  
+  // Check if the path matches any negative pattern
+  const matchesNegative = negativePatterns.some(pattern => fullPath.includes(pattern))
+  
+  // A match occurs if it matches at least one positive pattern AND doesn't match any negative patterns
+  const matches = matchesPositive && !matchesNegative
+  
+  // Find the first matching positive pattern
+  const matchingPattern = matches ? (positivePatterns.find(pattern => fullPath.includes(pattern)) || '') : ''
+  
+  return { matches, matchingPattern }
+}
+
+/**
  * Generates a code-safe variable name for a token based on its properties and configuration.
  * Includes type-specific prefix and considers token hierarchy.
  * 
@@ -245,14 +275,9 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
     // Check token path against each utility pattern
     for (const [utilityName, patternString] of Object.entries(exportConfiguration.colorUtilityPrefixes)) {
-      // Split pattern by comma to support multiple patterns for a single utility
-      const patterns = patternString.split(',').map(p => p.trim().toLowerCase())
+      const { matches, matchingPattern } = matchColorUtilityPattern(fullPath, patternString)
       
-      // Check if any of the patterns match the path
-      const matchingPattern = patterns.find(pattern => fullPath.includes(pattern))
-      
-      if (matchingPattern) {
-        // Find where the pattern matches in the path
+      if (matches) {
         const patternIndex = tokenPath.findIndex(p => p.toLowerCase().includes(matchingPattern))
         
         // Get the remaining path segments after the pattern match
