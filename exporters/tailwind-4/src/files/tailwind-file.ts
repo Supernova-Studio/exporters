@@ -1,14 +1,24 @@
-import { FileHelper, ThemeHelper, GeneralHelper, FileNameHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
+/**
+ * This file contains functions for generating Tailwind CSS files from design tokens.
+ * It handles the creation of style files, reset files, and index files based on the export configuration.
+ */
+
+import { FileHelper, ThemeHelper, GeneralHelper } from "@supernovaio/export-utils"
+import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FileStructure } from "../../config"
-import { convertedToken, isAllowedTokenType, tokenVariableName } from "../content/token"
+import { convertedToken, isAllowedTokenType } from "../content/token"
 import { generateTypographyClass } from "../content/typography"
-import { CSSHelper } from "@supernovaio/export-utils"
 import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
 
 /**
  * Processes tokens based on theme settings and filters
+ * This function filters tokens based on theme settings and ensures only allowed token types are included
+ * 
+ * @param tokens - Array of tokens to process
+ * @param themePath - Path of the theme (if applicable)
+ * @param theme - Theme object (if applicable)
+ * @returns Filtered array of tokens
  */
 function processTokens(tokens: Array<Token>, themePath: string = '', theme?: TokenTheme): Array<Token> {
     // Skip if no tokens and empty files are disabled
@@ -32,6 +42,13 @@ function processTokens(tokens: Array<Token>, themePath: string = '', theme?: Tok
 
 /**
  * Generates debug information for the file
+ * This function creates debug comments that include information about the export process
+ * 
+ * @param themePath - Path of the theme (if applicable)
+ * @param tokenCount - Number of tokens in the file
+ * @param tokenTypes - Array of token types included in the file
+ * @param type - Specific token type (if applicable)
+ * @returns Debug information as a string
  */
 function generateDebugInfo(themePath: string = '', tokenCount: number, tokenTypes: Array<string> = [], type?: TokenType): string {
     if (!exportConfiguration.debug) return ''
@@ -65,10 +82,39 @@ function generateDebugInfo(themePath: string = '', tokenCount: number, tokenType
 }
 
 /**
+ * Checks if any Tailwind styles are disabled in the configuration
+ * 
+ * @returns boolean indicating if any styles are disabled
+ */
+function shouldDisableDefaultTailwindConfiguration(): boolean {
+    return exportConfiguration.disableAllDefaults || 
+           exportConfiguration.disableAnimateDefaults || 
+           exportConfiguration.disableBlurDefaults || 
+           exportConfiguration.disableBorderRadiusDefaults || 
+           exportConfiguration.disableBreakpointDefaults || 
+           exportConfiguration.disableColorDefaults || 
+           exportConfiguration.disableContainerDefaults || 
+           exportConfiguration.disableDropShadowDefaults || 
+           exportConfiguration.disableFontDefaults || 
+           exportConfiguration.disableFontWeightDefaults || 
+           exportConfiguration.disableInsetDefaults || 
+           exportConfiguration.disableLeadingDefaults || 
+           exportConfiguration.disablePerspectiveDefaults || 
+           exportConfiguration.disableShadowDefaults || 
+           exportConfiguration.disableSpacingDefaults || 
+           exportConfiguration.disableTextDefaults || 
+           exportConfiguration.disableTrackingDefaults;
+}
+
+/**
  * Generates reset rules for Tailwind configuration
+ * This function creates CSS reset rules based on the disabled styles configuration
+ * 
+ * @param selector - CSS selector to apply the reset rules to
+ * @returns CSS reset rules as a string
  */
 function generateResetRules(selector: string): string {
-    if (!exportConfiguration.disableAllDefaults && selector !== '@theme') return ''
+    if (!shouldDisableDefaultTailwindConfiguration() && selector !== '@theme') return ''
 
     const indentString = GeneralHelper.indent(exportConfiguration.indent)
     const resetRules: string[] = []
@@ -103,6 +149,11 @@ function generateResetRules(selector: string): string {
 
 /**
  * Generates typography classes for typography tokens
+ * This function creates CSS classes for typography tokens based on the configuration
+ * 
+ * @param tokens - Array of tokens to process
+ * @param tokenGroups - Array of token groups
+ * @returns Typography classes as a string
  */
 function generateTypographyContent(tokens: Array<Token>, tokenGroups: Array<TokenGroup>): string {
     if (!exportConfiguration.generateTypographyClasses) return ''
@@ -124,6 +175,13 @@ function generateTypographyContent(tokens: Array<Token>, tokenGroups: Array<Toke
 
 /**
  * Generates CSS variables for tokens
+ * This function creates CSS variable declarations for tokens based on their type
+ * 
+ * @param tokens - Array of tokens to process
+ * @param mappedTokens - Map of tokens by ID for reference resolution
+ * @param tokenGroups - Array of token groups
+ * @param type - Specific token type (if applicable)
+ * @returns CSS variable declarations as a string
  */
 function generateCSSVariables(
     tokens: Array<Token>, 
@@ -172,6 +230,10 @@ function generateCSSVariables(
 
 /**
  * Gets the filename for a token type based on configuration or defaults
+ * This function determines the appropriate filename for a token type based on the configuration
+ * 
+ * @param type - Token type to get the filename for
+ * @returns Filename for the token type
  */
 function getStyleFileName(type: TokenType): string {
     let fileName = exportConfiguration.customizeConfigFileNames
@@ -188,6 +250,13 @@ function getStyleFileName(type: TokenType): string {
 
 /**
  * Generates a single CSS output file containing all token styles in Tailwind format
+ * This function creates a single CSS file with all token styles when using SingleFile structure
+ * 
+ * @param tokens - Array of tokens to process
+ * @param tokenGroups - Array of token groups
+ * @param themePath - Path of the theme (if applicable)
+ * @param theme - Theme object (if applicable)
+ * @returns OutputTextFile object or null if no tokens
  */
 export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
     // Create a map of all tokens by ID for reference resolution
@@ -221,7 +290,13 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         : exportConfiguration.cssSelector
 
     // Generate CSS variables
-    let cssVariables = generateResetRules(selector)
+    let cssVariables = ''
+    
+    // Include reset rules in the main file if not using separate per type structure
+    if (exportConfiguration.fileStructure !== FileStructure.SeparateByType) {
+        cssVariables += generateResetRules(selector)
+    }
+    
     cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups)
 
     // Check if any tokens use references and if references are enabled
@@ -254,6 +329,13 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
 /**
  * Generates separate CSS output files for each token type in Tailwind format
+ * This function creates separate CSS files for each token type when using SeparateByType structure
+ * 
+ * @param tokens - Array of tokens to process
+ * @param tokenGroups - Array of token groups
+ * @param themePath - Path of the theme (if applicable)
+ * @param theme - Theme object (if applicable)
+ * @returns Array of OutputTextFile objects
  */
 export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): Array<OutputTextFile> {
     // Create a map of all tokens by ID for reference resolution
@@ -309,9 +391,7 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         content += generateDebugInfo(themePath, tokensOfType.length, [], type)
 
         // Generate CSS variables
-        let cssVariables = type === tokensByType.keys().next().value 
-            ? generateResetRules(selector) 
-            : ''
+        let cssVariables = ''
         cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, type)
 
         // Add the CSS variables to the content
@@ -352,7 +432,60 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
 }
 
 /**
+ * Generates a separate reset.css file with Tailwind reset rules
+ * This function creates a separate reset.css file when using SeparateByType structure
+ * and when any Tailwind styles are disabled
+ * 
+ * @returns OutputTextFile object or null if no reset rules needed
+ */
+export function resetOutputFile(): OutputTextFile | null {
+    // Only generate reset file if file structure is separate per type
+    if (exportConfiguration.fileStructure !== FileStructure.SeparateByType) {
+        return null
+    }
+
+    if (!shouldDisableDefaultTailwindConfiguration()) {
+        return null
+    }
+
+    let content = ''
+
+    // Add debug information if enabled
+    if (exportConfiguration.debug) {
+        content += `/* Debug Information\n`
+        content += ` * Exporter: Tailwind CSS by Supernova\n`
+        content += ` * File: Reset\n`
+        content += ` * Generated: ${new Date().toISOString()}\n`
+        content += ` */\n\n`
+    }
+
+    // Generate reset rules
+    const resetRules = generateResetRules(exportConfiguration.cssSelector)
+    
+    if (resetRules) {
+        content += `${exportConfiguration.cssSelector} {\n${resetRules}}\n`
+    }
+
+    // Add disclaimer if enabled
+    if (exportConfiguration.showGeneratedFileDisclaimer) {
+        content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
+    }
+
+    // Create and return the output file
+    return FileHelper.createTextFile({
+        relativePath: "./",
+        fileName: "reset.css",
+        content: content,
+    })
+}
+
+/**
  * Generates an index file that imports all token style files and theme variations
+ * This function creates an index.css file that imports all generated CSS files
+ * 
+ * @param tokens - Array of tokens to process
+ * @param themes - Array of themes to include
+ * @returns OutputTextFile object or null if index file generation is disabled
  */
 export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
     if (!exportConfiguration.generateIndexFile) {
@@ -368,6 +501,11 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
         content += ` * File: Index\n`
         content += ` * Generated: ${new Date().toISOString()}\n`
         content += ` */\n\n`
+    }
+
+    // Import reset file if it exists and file structure is separate per type
+    if (exportConfiguration.fileStructure === FileStructure.SeparateByType && shouldDisableDefaultTailwindConfiguration()) {
+        content += `@import "./reset.css";\n\n`
     }
 
     // Import base token files if they exist

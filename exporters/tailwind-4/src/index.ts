@@ -1,6 +1,12 @@
+/**
+ * This file is the main entry point for the Tailwind CSS exporter.
+ * It handles the export process, including fetching tokens, processing themes,
+ * and generating the appropriate output files based on the export configuration.
+ */
+
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, Token, TokenGroup, TokenTheme, OutputTextFile } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration, ThemeExportStyle, FileStructure } from "../config"
-import { styleOutputFile, generateStyleFiles, indexOutputFile } from "./files/tailwind-file"
+import { styleOutputFile, generateStyleFiles, indexOutputFile, resetOutputFile } from "./files/tailwind-file"
 import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
 import { tokenVariableName, isAllowedTokenType } from "./content/token"
 import { variableToTailwindClassName } from "./utils/tailwind-class"
@@ -9,7 +15,35 @@ import { variableToTailwindClassName } from "./utils/tailwind-class"
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
 /**
+ * Checks if any Tailwind styles are disabled in the configuration
+ * This function centralizes the check for disabled styles to improve code maintainability
+ * 
+ * @returns boolean indicating if any styles are disabled
+ */
+function shouldDisableDefaultTailwindConfiguration(): boolean {
+    return exportConfiguration.disableAllDefaults || 
+           exportConfiguration.disableAnimateDefaults || 
+           exportConfiguration.disableBlurDefaults || 
+           exportConfiguration.disableBorderRadiusDefaults || 
+           exportConfiguration.disableBreakpointDefaults || 
+           exportConfiguration.disableColorDefaults || 
+           exportConfiguration.disableContainerDefaults || 
+           exportConfiguration.disableDropShadowDefaults || 
+           exportConfiguration.disableFontDefaults || 
+           exportConfiguration.disableFontWeightDefaults || 
+           exportConfiguration.disableInsetDefaults || 
+           exportConfiguration.disableLeadingDefaults || 
+           exportConfiguration.disablePerspectiveDefaults || 
+           exportConfiguration.disableShadowDefaults || 
+           exportConfiguration.disableSpacingDefaults || 
+           exportConfiguration.disableTextDefaults || 
+           exportConfiguration.disableTrackingDefaults;
+}
+
+/**
  * Filters out null values from an array of output files
+ * This helper function ensures we only return valid output files
+ * 
  * @param files Array of output files that may contain null values
  * @returns Array of non-null output files
  */
@@ -100,6 +134,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     // Handle different theme export modes
     switch (exportConfiguration.exportThemesAs) {
       case ThemeExportStyle.ApplyDirectly:
+        // Apply themes directly to tokens and generate a single file
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
           return processOutputFiles([
@@ -108,11 +143,20 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
           ])
         } else {
           const styleFiles = generateStyleFiles(tokens, tokenGroups)
-          return [...styleFiles, indexOutputFile(tokens) || []].flat()
+          const resetFile = resetOutputFile()
+          const indexFile = indexOutputFile(tokens)
+          return [...styleFiles, ...(resetFile ? [resetFile] : []), ...(indexFile ? [indexFile] : [])]
         }
 
       case ThemeExportStyle.SeparateFiles:
+        // Generate separate files for each theme
         let outputFiles: Array<OutputTextFile> = []
+        
+        // Add reset file only if file structure is separate per type
+        if (exportConfiguration.fileStructure === FileStructure.SeparateByType) {
+          const resetFile = resetOutputFile()
+          if (resetFile) outputFiles.push(resetFile)
+        }
         
         // Generate base files if exportBaseValues is true
         if (exportConfiguration.exportBaseValues) {
@@ -154,7 +198,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         return outputFiles
 
       case ThemeExportStyle.MergedTheme:
+        // Generate a single merged theme file
         let mergedOutputFiles: Array<OutputTextFile> = []
+        
+        // Add reset file only if file structure is separate per type
+        if (exportConfiguration.fileStructure === FileStructure.SeparateByType) {
+          const resetFile = resetOutputFile()
+          if (resetFile) mergedOutputFiles.push(resetFile)
+        }
         
         // Generate base files if exportBaseValues is true
         if (exportConfiguration.exportBaseValues) {
@@ -198,19 +249,38 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Default case: Generate files without themes
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
     return processOutputFiles([
-      exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null,
-      indexOutputFile(tokens)
+        exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null,
+        indexOutputFile(tokens)
     ])
   } else {
     const styleFiles = exportConfiguration.exportBaseValues 
     ? generateStyleFiles(tokens, tokenGroups) 
     : []
-    return [...styleFiles, indexOutputFile(tokens) || []].flat()
+    const resetFile = exportConfiguration.fileStructure === FileStructure.SeparateByType && shouldDisableDefaultTailwindConfiguration() ? resetOutputFile() : null
+    const indexFile = indexOutputFile(tokens)
+    return [...styleFiles, ...(resetFile ? [resetFile] : []), ...(indexFile ? [indexFile] : [])]
   }
 })
 
+/**
+ * Helper function to generate files for a given set of tokens and themes
+ * This function is used by the main export function to generate files based on the configuration
+ * 
+ * @param tokens - Array of tokens to process
+ * @param tokenGroups - Array of token groups
+ * @param themes - Array of themes to include
+ * @returns Array of OutputTextFile objects
+ */
 export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes: Array<TokenTheme> = []): Array<OutputTextFile> {
     const files: Array<OutputTextFile> = []
+
+    // Add reset file only if file structure is separate per type
+    if (exportConfiguration.fileStructure === FileStructure.SeparateByType) {
+        const resetFile = resetOutputFile()
+        if (resetFile) {
+            files.push(resetFile)
+        }
+    }
 
     // Generate the main Tailwind CSS file
     if (exportConfiguration.fileStructure === FileStructure.SingleFile) {

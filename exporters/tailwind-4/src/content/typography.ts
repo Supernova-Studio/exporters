@@ -40,7 +40,8 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
   const className = NamingHelper.codeSafeVariableName(
     [...(token.tokenPath || []), token.name].join('-'),
     StringCase.kebabCase,
-    exportConfiguration.findReplace
+    exportConfiguration.findReplace,
+    true // Add removeDuplicateFragments parameter to prevent duplicated fragments
   )
 
   // Get the CSS variable name for reference

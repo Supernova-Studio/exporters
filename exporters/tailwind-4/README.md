@@ -15,6 +15,9 @@ This exporter package takes your design system tokens and converts them to Tailw
 - **Customizable formatting:** Can be configured to generate each token using various formatting options.
 - **Comment support:** Can include descriptions for each token as code comments, if provided. Can also provide a disclaimer at the top of each file to prevent people from tinkering with the generated code manually.
 - **File organization:** Can generate output in various ways, such as separate files for each token type, or a single configuration file.
+- **Reset rules:** Can generate reset rules to disable default Tailwind styles, either in a separate file or within the main CSS file.
+- **Typography classes:** Can generate typography classes in @layer components using typography tokens.
+- **Debug information:** Can include debug information in the generated files to help with troubleshooting.
 
 ## Example of Output
 
@@ -46,30 +49,25 @@ With configurations:
     "disclaimer": "This file was automatically generated. Do not modify manually.",
     "showDescriptions": true,
     "useReferences": true,
-    "tokenNameStyle": "paramCase",
     "colorFormat": "hex",
-    "indent": 2
+    "indent": 2,
+    "fileStructure": "singleFile"
 }
 ```
 
 The exporter would produce:
 
-```javascript
-// This file was automatically generated. Do not modify manually.
+```css
+/* This file was automatically generated. Do not modify manually. */
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        // The reddest of reds
-        red: '#ff0000',
-        blue: '#0000ff',
-        // The main color used throughout the application
-        primary: 'var(--color-red)'
-      }
-    }
-  }
+@import "tailwindcss";
+
+:root {
+  /* The reddest of reds */
+  --color-red: #ff0000;
+  --color-blue: #0000ff;
+  /* The main color used throughout the application */
+  --color-primary: var(--color-red);
 }
 ```
 
@@ -77,32 +75,74 @@ module.exports = {
 
 Here is a list of all the configuration options this exporter provides:
 
+### General Settings
 - **showGeneratedFileDisclaimer:** Toggle to show a disclaimer indicating the file is auto-generated.
-  
 - **disclaimer:** Set the text of the aforementioned disclaimer.
-  
-- **generateIndexFile:** Decide whether an aggregate index file should be created.
-  
 - **generateEmptyFiles:** Choose if files with no styles should still be generated.
-  
 - **showDescriptions:** Display descriptions for each token as code comments.
-  
 - **useReferences:** Use references to other tokens instead of direct values where possible.
-  
-- **tokenNameStyle:** Define the naming convention of the exported tokens.
-  
-- **colorFormat:** Set the format in which colors are exported.
-  
-- **colorPrecision:** Determine the number of decimals for exported colors.
-  
-- **indent:** Set the number of spaces for indentation.
-  
-- **tokenPrefixes:** Prefix each token type with a specific identifier.
-  
-- **styleFileNames:** Name the generated style files based on token types.
-  
+- **debug:** Include debug information in the generated files to help with troubleshooting.
+
+### File Structure
+- **fileStructure:** Controls how token styles are organized in files. Options:
+  - `singleFile`: All tokens are in a single CSS file
+  - `separateByType`: Tokens are separated into different files by type
+- **generateIndexFile:** Decide whether an aggregate index file should be created.
 - **indexFileName:** Name the generated index file.
-  
-- **baseStyleFilePath:** Define the directory path for style files.
-  
 - **baseIndexFilePath:** Define the directory path for the index file.
+- **baseStyleFilePath:** Define the directory path for style files.
+- **generateEmptyConfigTypeFiles:** Choose if empty config type files should be generated.
+- **customizeConfigFileNames:** Enable customization of config file names.
+- **configFileNames:** Define custom names for config files by token type.
+
+### Formatting
+- **colorFormat:** Set the format in which colors are exported.
+- **colorPrecision:** Determine the number of decimals for exported colors.
+- **indent:** Set the number of spaces for indentation.
+- **tokenPrefixes:** Prefix each token type with a specific identifier.
+- **globalPrefix:** Prefix for Tailwind classes and CSS variables.
+- **findReplace:** Find and replace strings in token paths and names.
+
+### Theme Settings
+- **exportThemesAs:** Controls how themes are exported in the CSS files. Options:
+  - `applyDirectly`: Apply themes directly to tokens
+  - `separateFiles`: Generate separate files for each theme
+  - `mergedTheme`: Generate a single merged theme file
+- **exportOnlyThemedTokens:** When enabled, themed files will only include tokens that have different values from the base theme.
+- **exportBaseValues:** When enabled, base token values will be exported along with themes.
+- **themeSelector:** CSS selector pattern for themes, {theme} will be replaced with theme name.
+
+### Reset Rules
+- **disableAllDefaults:** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group.
+- **disableAnimateDefaults:** When enabled, resets all animation token values to initial state.
+- **disableBlurDefaults:** When enabled, resets all blur token values to initial state.
+- **disableBorderRadiusDefaults:** When enabled, resets all border radius token values to initial state.
+- **disableBreakpointDefaults:** When enabled, resets all breakpoint token values to initial state.
+- **disableColorDefaults:** When enabled, resets all color token values to initial state.
+- **disableContainerDefaults:** When enabled, resets all container token values to initial state.
+- **disableDropShadowDefaults:** When enabled, resets all drop shadow token values to initial state.
+- **disableFontDefaults:** When enabled, resets all font family token values to initial state.
+- **disableFontWeightDefaults:** When enabled, resets all font weight token values to initial state.
+- **disableInsetDefaults:** When enabled, resets all inset token values to initial state.
+- **disableLeadingDefaults:** When enabled, resets all line height token values to initial state.
+- **disablePerspectiveDefaults:** When enabled, resets all perspective token values to initial state.
+- **disableShadowDefaults:** When enabled, resets all shadow token values to initial state.
+- **disableSpacingDefaults:** When enabled, resets all spacing token values to initial state.
+- **disableTextDefaults:** When enabled, resets all text token values to initial state.
+- **disableTrackingDefaults:** When enabled, resets all letter spacing token values to initial state.
+
+### Color Utility Prefixes
+- **useColorUtilityPrefixes:** When enabled, uses specific prefixes for different color utilities.
+- **colorUtilityPrefixes:** Configuration for color utility prefixes and their patterns.
+
+### Typography
+- **generateTypographyClasses:** When enabled, generates typography classes in @layer components using typography tokens.
+- **forceRemUnit:** When enabled, converts pixel values to rem units.
+- **remBase:** Base pixel value for rem conversion (default: 16).
+
+### Token Properties
+- **writeClassnameToProperty:** When enabled, generated Tailwind classnames will be saved back to tokens as custom properties.
+- **propertyToWriteClassnameTo:** Name of the custom property where generated Tailwind classnames will be saved.
+- **writeCSSVariableNameToProperty:** When enabled, generated CSS variable names will be saved back to tokens as custom properties.
+- **propertyToWriteCSSVariableNameTo:** Name of the custom property where generated CSS variable names will be saved.
+- **propertyToWriteCSSVariableNameToIncludesVar:** When enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.
