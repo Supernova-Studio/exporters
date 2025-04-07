@@ -187,7 +187,66 @@
         "dependsOn": {
             "customizeConfigFileNames": true
         },
-        "default": {}
+        "default": {
+            "Blur": "tailwind.blur.css",
+            "Border": "tailwind.border.css",
+            "BorderRadius": "tailwind.border-radius.css",
+            "BorderWidth": "tailwind.border-width.css",
+            "Color": "tailwind.color.css",
+            "Dimension": "tailwind.dimension.css",
+            "Duration": "tailwind.duration.css",
+            "FontFamily": "tailwind.font-family.css",
+            "FontSize": "tailwind.font-size.css",
+            "FontWeight": "tailwind.font-weight.css",
+            "Gradient": "tailwind.gradient.css",
+            "LetterSpacing": "tailwind.letter-spacing.css",
+            "LineHeight": "tailwind.line-height.css",
+            "Opacity": "tailwind.opacity.css",
+            "ParagraphSpacing": "tailwind.paragraph-spacing.css",
+            "ProductCopy": "tailwind.product-copy.css",
+            "Shadow": "tailwind.shadow.css",
+            "Size": "tailwind.size.css",
+            "Space": "tailwind.space.css",
+            "String": "tailwind.string.css",
+            "TextCase": "tailwind.text-case.css",
+            "TextDecoration": "tailwind.text-decoration.css",
+            "Typography": "tailwind.typography.css",
+            "Visibility": "tailwind.visibility.css",
+            "ZIndex": "tailwind.z-index.css"
+        },
+        "allowedKeys": {
+            "options": [
+                "Color",
+                "Typography",
+                "Dimension",
+                "Size",
+                "Space",
+                "Opacity",
+                "FontSize",
+                "LineHeight",
+                "LetterSpacing",
+                "ParagraphSpacing",
+                "BorderWidth",
+                "BorderRadius",
+                "Duration",
+                "ZIndex",
+                "Shadow",
+                "Border",
+                "Gradient",
+                "String",
+                "ProductCopy",
+                "FontFamily",
+                "FontWeight",
+                "TextCase",
+                "TextDecoration",
+                "Visibility",
+                "Blur"
+            ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
     },
     {
         "key": "generateIndexFile",
