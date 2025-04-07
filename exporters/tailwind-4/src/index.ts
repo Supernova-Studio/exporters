@@ -1,6 +1,6 @@
 import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType, Token, TokenGroup, TokenTheme, OutputTextFile } from "@supernovaio/sdk-exporters"
-import { ExporterConfiguration, ThemeExportStyle } from "../config"
-import { styleOutputFile } from "./files/tailwind-file"
+import { ExporterConfiguration, ThemeExportStyle, FileStructure } from "../config"
+import { styleOutputFile, generateStyleFiles, indexOutputFile } from "./files/tailwind-file"
 import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
 import { tokenVariableName, isAllowedTokenType } from "./content/token"
 import { variableToTailwindClassName } from "./utils/tailwind-class"
@@ -101,66 +101,156 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     switch (exportConfiguration.exportThemesAs) {
       case ThemeExportStyle.ApplyDirectly:
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        return processOutputFiles([
-          styleOutputFile(tokens, tokenGroups)
-        ])
+        if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+          return processOutputFiles([
+            styleOutputFile(tokens, tokenGroups),
+            indexOutputFile(tokens)
+          ])
+        } else {
+          const styleFiles = generateStyleFiles(tokens, tokenGroups)
+          return [...styleFiles, indexOutputFile(tokens) || []].flat()
+        }
 
       case ThemeExportStyle.SeparateFiles:
-        const themeFiles = themesToApply.flatMap((theme) => {
+        let outputFiles: Array<OutputTextFile> = []
+        
+        // Generate base files if exportBaseValues is true
+        if (exportConfiguration.exportBaseValues) {
+          if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+            const baseFile = styleOutputFile(tokens, tokenGroups)
+            if (baseFile) outputFiles.push(baseFile)
+          } else {
+            const baseFiles = generateStyleFiles(tokens, tokenGroups)
+            outputFiles = [...outputFiles, ...baseFiles]
+          }
+        }
+        
+        // Generate theme files
+        themesToApply.forEach(theme => {
           const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-          return styleOutputFile(
-            themedTokens, 
-            tokenGroups, 
-            ThemeHelper.getThemeIdentifier(theme),
-            theme
-          )
+          if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+            const themeFile = styleOutputFile(
+              themedTokens, 
+              tokenGroups, 
+              ThemeHelper.getThemeIdentifier(theme),
+              theme
+            )
+            if (themeFile) outputFiles.push(themeFile)
+          } else {
+            const themeFiles = generateStyleFiles(
+              themedTokens, 
+              tokenGroups, 
+              ThemeHelper.getThemeIdentifier(theme),
+              theme
+            )
+            outputFiles = [...outputFiles, ...themeFiles]
+          }
         })
         
-        const baseFiles = exportConfiguration.exportBaseValues
-          ? styleOutputFile(tokens, tokenGroups)
-          : null
-
-        return processOutputFiles([baseFiles, ...themeFiles])
+        // Add index file
+        const indexFile = indexOutputFile(tokens, themesToApply)
+        if (indexFile) outputFiles.push(indexFile)
+        
+        return outputFiles
 
       case ThemeExportStyle.MergedTheme:
-        const baseTokenFiles = exportConfiguration.exportBaseValues
-          ? styleOutputFile(tokens, tokenGroups)
-          : null
-
+        let mergedOutputFiles: Array<OutputTextFile> = []
+        
+        // Generate base files if exportBaseValues is true
+        if (exportConfiguration.exportBaseValues) {
+          if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+            const baseFile = styleOutputFile(tokens, tokenGroups)
+            if (baseFile) mergedOutputFiles.push(baseFile)
+          } else {
+            const baseFiles = generateStyleFiles(tokens, tokenGroups)
+            mergedOutputFiles = [...mergedOutputFiles, ...baseFiles]
+          }
+        }
+        
+        // Generate merged theme file
         const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
-        const mergedThemeFiles = styleOutputFile(
-          themedTokens, 
-          tokenGroups, 
-          'themed',
-          themesToApply[0]
-        )
-
-        return processOutputFiles([baseTokenFiles, mergedThemeFiles])
+        if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+          const mergedThemeFile = styleOutputFile(
+            themedTokens, 
+            tokenGroups, 
+            'themed',
+            themesToApply[0]
+          )
+          if (mergedThemeFile) mergedOutputFiles.push(mergedThemeFile)
+        } else {
+          const mergedThemeFiles = generateStyleFiles(
+            themedTokens, 
+            tokenGroups, 
+            'themed',
+            themesToApply[0]
+          )
+          mergedOutputFiles = [...mergedOutputFiles, ...mergedThemeFiles]
+        }
+        
+        // Add index file
+        const mergedIndexFile = indexOutputFile(tokens, ['themed'])
+        if (mergedIndexFile) mergedOutputFiles.push(mergedIndexFile)
+        
+        return mergedOutputFiles
     }
   }
 
   // Default case: Generate files without themes
-  return processOutputFiles([
-    exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null
-  ])
+  if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+    return processOutputFiles([
+      exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null,
+      indexOutputFile(tokens)
+    ])
+  } else {
+    const styleFiles = exportConfiguration.exportBaseValues 
+    ? generateStyleFiles(tokens, tokenGroups) 
+    : []
+    return [...styleFiles, indexOutputFile(tokens) || []].flat()
+  }
 })
 
 export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes: Array<TokenTheme> = []): Array<OutputTextFile> {
     const files: Array<OutputTextFile> = []
 
     // Generate the main Tailwind CSS file
-    const mainFile = styleOutputFile(tokens, tokenGroups)
-    if (mainFile) {
-        files.push(mainFile)
+    if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+        const mainFile = styleOutputFile(tokens, tokenGroups)
+        if (mainFile) {
+            files.push(mainFile)
+        }
+    } else {
+        const mainFiles = generateStyleFiles(tokens, tokenGroups)
+        files.push(...mainFiles)
     }
 
     // Generate themed files if needed
     themes.forEach(theme => {
-        const themedFile = styleOutputFile(tokens, tokenGroups, ThemeHelper.getThemeIdentifier(theme), theme)
-        if (themedFile) {
-            files.push(themedFile)
+        if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
+            const themedFile = styleOutputFile(
+                tokens, 
+                tokenGroups, 
+                ThemeHelper.getThemeIdentifier(theme), 
+                theme
+            )
+            if (themedFile) {
+                files.push(themedFile)
+            }
+        } else {
+            const themedFiles = generateStyleFiles(
+                tokens, 
+                tokenGroups, 
+                ThemeHelper.getThemeIdentifier(theme), 
+                theme
+            )
+            files.push(...themedFiles)
         }
     })
+
+    // Add index file
+    const indexFile = indexOutputFile(tokens, themes)
+    if (indexFile) {
+        files.push(indexFile)
+    }
 
     return files
 }

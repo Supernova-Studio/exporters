@@ -61,3 +61,32 @@ export const TAILWIND_ALLOWED_CUSTOMIZATION: TokenType[] = [
   TokenType.typography,
   TokenType.border,
 ] 
+
+
+export const DEFAULT_CONFIG_FILE_NAMES: Record<TokenType, string> = {
+  Color: "tailwind.color.css",
+  Typography: "tailwind.typography.css",
+  Dimension: "tailwind.dimension.css",
+  Size: "tailwind.size.css",
+  Space: "tailwind.space.css",
+  Opacity: "tailwind.opacity.css",
+  FontSize: "tailwind.font-size.css",
+  LineHeight: "tailwind.line-height.css",
+  LetterSpacing: "tailwind.letter-spacing.css",
+  ParagraphSpacing: "tailwind.paragraph-spacing.css",
+  BorderWidth: "tailwind.border-width.css",
+  BorderRadius: "tailwind.border-radius.css",
+  Duration: "tailwind.duration.css",
+  ZIndex: "tailwind.z-index.css",
+  Shadow: "tailwind.shadow.css",
+  Border: "tailwind.border.css",
+  Gradient: "tailwind.gradient.css",
+  String: "tailwind.string.css",
+  ProductCopy: "tailwind.product-copy.css",
+  FontFamily: "tailwind.font-family.css",
+  FontWeight: "tailwind.font-weight.css",
+  TextCase: "tailwind.text-case.css",
+  TextDecoration: "tailwind.text-decoration.css",
+  Visibility: "tailwind.visibility.css",
+  Blur: "tailwind.blur.css"
+}

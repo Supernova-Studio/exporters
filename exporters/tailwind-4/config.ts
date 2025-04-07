@@ -10,6 +10,11 @@ export enum ThemeExportStyle {
     MergedTheme = "mergedTheme"
 }
 
+export enum FileStructure {
+    SeparateByType = "separateByType",
+    SingleFile = "singleFile"
+}
+
 export type ColorUtilityType = 
   | 'text' 
   | 'boxShadow' 
@@ -117,4 +122,12 @@ export type ExporterConfiguration = {
   propertyToWriteCSSVariableNameTo: string
   /** When enabled, the resulting written properties will be encapsulated in var() syntax for easier copying */
   propertyToWriteCSSVariableNameToIncludesVar: boolean
+  /** Controls how token styles are organized in files */
+  fileStructure: FileStructure
+  generateEmptyConfigTypeFiles: boolean
+  customizeConfigFileNames: boolean
+  configFileNames: Record<string, string>
+  generateIndexFile: boolean
+  baseIndexFilePath: string
+  indexFileName: string
 }
