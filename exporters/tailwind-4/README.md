@@ -82,6 +82,7 @@ Here is a list of all the configuration options this exporter provides:
 - **showDescriptions:** Display descriptions for each token as code comments.
 - **useReferences:** Use references to other tokens instead of direct values where possible.
 - **debug:** Include debug information in the generated files to help with troubleshooting.
+- **indent:** Set the number of spaces for indentation in the generated files.
 
 ### File Structure
 - **fileStructure:** Controls how token styles are organized in files. Options:
@@ -94,14 +95,26 @@ Here is a list of all the configuration options this exporter provides:
 - **generateEmptyConfigTypeFiles:** Choose if empty config type files should be generated.
 - **customizeConfigFileNames:** Enable customization of config file names.
 - **configFileNames:** Define custom names for config files by token type.
+- **cssSelector:** CSS selector where variables will be defined.
+- **themeSelector:** CSS selector pattern for themes, {theme} will be replaced with theme name.
 
-### Formatting
-- **colorFormat:** Set the format in which colors are exported.
-- **colorPrecision:** Determine the number of decimals for exported colors.
-- **indent:** Set the number of spaces for indentation.
-- **tokenPrefixes:** Prefix each token type with a specific identifier.
-- **globalPrefix:** Prefix for Tailwind classes and CSS variables.
-- **findReplace:** Find and replace strings in token paths and names.
+### Colors
+- **colorFormat:** Set the format in which colors are exported. Options:
+  - `smartHashHex`: Automatically choose between #RRGGBB and #RRGGBBAA
+  - `smartRgba`: Automatically choose between rgb() and rgba()
+  - `smartHsla`: Automatically choose between hsl() and hsla()
+  - `smartOklch`: Automatically choose between oklch() and oklch() with alpha
+  - `hashHex6`: HEX (6 digits), e.g., #ff0000
+  - `hashHex8`: HEX (8 digits), e.g., #ff0000ff
+  - `rgb`: RGB, e.g., rgb(255, 0, 0)
+  - `rgba`: RGBA, e.g., rgba(255, 0, 0, 1)
+  - `hsl`: HSL, e.g., hsl(0, 100%, 50%)
+  - `hsla`: HSLA, e.g., hsla(0, 100%, 50%, 1)
+  - `oklch`: OKLCH, e.g., oklch(0.6 0.15 30)
+  - `oklcha`: OKLCHA, e.g., oklch(0.6 0.15 30 / 1)
+- **colorPrecision:** Maximum number of decimals in colors.
+- **useColorUtilityPrefixes:** Enable specific prefixes for different color utilities.
+- **colorUtilityPrefixes:** Define patterns to prefix color tokens. Use commas for multiple patterns (e.g., 'background,bg') and ! to negate (e.g., 'bg,!fill').
 
 ### Theme Settings
 - **exportThemesAs:** Controls how themes are exported in the CSS files. Options:
@@ -110,7 +123,6 @@ Here is a list of all the configuration options this exporter provides:
   - `mergedTheme`: Generate a single merged theme file
 - **exportOnlyThemedTokens:** When enabled, themed files will only include tokens that have different values from the base theme.
 - **exportBaseValues:** When enabled, base token values will be exported along with themes.
-- **themeSelector:** CSS selector pattern for themes, {theme} will be replaced with theme name.
 
 ### Reset Rules
 - **disableAllDefaults:** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group.
@@ -131,10 +143,6 @@ Here is a list of all the configuration options this exporter provides:
 - **disableTextDefaults:** When enabled, resets all text token values to initial state.
 - **disableTrackingDefaults:** When enabled, resets all letter spacing token values to initial state.
 
-### Color Utility Prefixes
-- **useColorUtilityPrefixes:** When enabled, uses specific prefixes for different color utilities.
-- **colorUtilityPrefixes:** Configuration for color utility prefixes and their patterns.
-
 ### Typography
 - **generateTypographyClasses:** When enabled, generates typography classes in @layer components using typography tokens.
 - **forceRemUnit:** When enabled, converts pixel values to rem units.
@@ -146,3 +154,8 @@ Here is a list of all the configuration options this exporter provides:
 - **writeCSSVariableNameToProperty:** When enabled, generated CSS variable names will be saved back to tokens as custom properties.
 - **propertyToWriteCSSVariableNameTo:** Name of the custom property where generated CSS variable names will be saved.
 - **propertyToWriteCSSVariableNameToIncludesVar:** When enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.
+
+### Token Formatting
+- **tokenPrefixes:** Prefix each token type with a specific identifier.
+- **globalPrefix:** Prefix for Tailwind classes and CSS variables.
+- **findReplace:** Find and replace strings in token paths and names.
