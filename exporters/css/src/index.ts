@@ -1,28 +1,50 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, TokenType } from "@supernovaio/sdk-exporters"
-import { ExporterConfiguration } from "../config"
+import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile } from "@supernovaio/sdk-exporters"
+import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
+import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
-import { styleOutputFile } from "./files/style-file"
+import { generateStyleFiles } from "./files/style-file"
+import { tokenVariableName } from "./content/token"
 
-/** Exporter configuration. Adheres to the `ExporterConfiguration` interface and its content comes from the resolved default configuration + user overrides of various configuration keys */
+/** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
 /**
- * Export entrypoint.
- * When running `export` through extensions or pipelines, this function will be called.
- * Context contains information about the design system and version that is currently being exported.
+ * Filters out null values from an array of output files
+ * @param files Array of output files that may contain null values
+ * @returns Array of non-null output files
+ */
+function processOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutputFile> {
+  return files.filter((file): file is AnyOutputFile => file !== null)
+}
+
+/**
+ * Main export function that generates CSS files from design tokens
+ *
+ * This function handles:
+ * - Fetching tokens and token groups from the design system
+ * - Filtering tokens by brand if specified
+ * - Processing themes in different modes (direct, separate files, or combined)
+ * - Generating style files for each token type
+ * - Creating an optional index file that imports all style files
+ *
+ * @param sdk - Supernova SDK instance
+ * @param context - Export context containing design system information
+ * @returns Promise resolving to an array of output files
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  // Fetch data from design system that is currently being exported (context)
+  // Fetch data from design system that is currently being exported
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
     versionId: context.versionId,
   }
 
-  // Fetch the necessary data
+  // Fetch tokens and token groups
+  let outputFiles: Array<AnyOutputFile> = []
   let tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
   let tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
+  let tokenCollections = await sdk.tokens.getTokenCollections(remoteVersionIdentifier)
 
-  // Filter by brand, if specified
+  // Filter by brand if specified
   if (context.brandId) {
     const brands = await sdk.brands.getBrands(remoteVersionIdentifier)
     const brand = brands.find((brand) => brand.id === context.brandId || brand.idInVersion === context.brandId)
@@ -34,25 +56,79 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     tokenGroups = tokenGroups.filter((tokenGroup) => tokenGroup.brandId === brand.id)
   }
 
-  // Apply theme, if specified
-  if (context.themeId) {
+  // Process themes if specified
+  if (context.themeIds && context.themeIds.length > 0) {
     const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
-    const theme = themes.find((theme) => theme.id === context.themeId || theme.idInVersion === context.themeId)
-    if (theme) {
-      tokens = await sdk.tokens.computeTokensByApplyingThemes(tokens, [theme])
-    } else {
-      // Don't allow applying theme which doesn't exist in the system
-      throw new Error("Unable to apply theme which doesn't exist in the system.")
+
+    // Find and validate requested themes
+    const themesToApply = context.themeIds.map((themeId) => {
+      const theme = themes.find((theme) => theme.id === themeId || theme.idInVersion === themeId)
+      if (!theme) {
+        throw new Error(`Unable to find theme ${themeId}.`)
+      }
+      return theme
+    })
+
+    // Handle different theme export modes
+    switch (exportConfiguration.exportThemesAs) {
+      case ThemeExportStyle.ApplyDirectly:
+        // Apply all themes directly to token values
+        tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+        const directFiles = [...generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections), indexOutputFile(tokens)]
+        outputFiles = processOutputFiles(directFiles)
+        break
+
+      case ThemeExportStyle.SeparateFiles:
+        // Generate separate files for each theme
+        const themeFiles = themesToApply.flatMap((theme) => {
+          const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
+          return generateStyleFiles(themedTokens, tokenGroups, ThemeHelper.getThemeIdentifier(theme), theme, tokenCollections)
+        })
+
+        // Generate base files without themes only if exportBaseValues is true
+        const baseFiles = exportConfiguration.exportBaseValues
+          ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)
+          : []
+
+        const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
+        outputFiles = processOutputFiles(separateFiles)
+        break
+
+      case ThemeExportStyle.MergedTheme:
+        // Generate base files without themes only if exportBaseValues is true
+        const baseTokenFiles = exportConfiguration.exportBaseValues
+          ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)
+          : []
+
+        // Generate themed files with all themes applied
+        const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
+        const mergedThemeFiles = generateStyleFiles(themedTokens, tokenGroups, "themed", themesToApply[0], tokenCollections)
+
+        const mergedFiles = [...baseTokenFiles, ...mergedThemeFiles, indexOutputFile(tokens, ["themed"])]
+        outputFiles = processOutputFiles(mergedFiles)
+        break
     }
+  } else {
+    // Default case: Generate files without themes
+    const defaultFiles = [
+      ...(exportConfiguration.exportBaseValues ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections) : []),
+      indexOutputFile(tokens),
+    ]
+    outputFiles = processOutputFiles(defaultFiles)
   }
 
-  // Generate output files
-  return [
-    // One file per token type
-    ...(Object.values(TokenType)
-      .map((type) => styleOutputFile(type, tokens, tokenGroups))
-      .filter((f) => f !== null) as Array<AnyOutputFile>),
-    // One file that imports all other files, if enabled
-    indexOutputFile(tokens),
-  ]
+  // Write property name of each token if the property to write to was provided in settings
+  if (!context.isPreview && exportConfiguration.writeNameToProperty) {
+    const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
+    await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
+      if (exportConfiguration.propertyToWriteNameToIncludesVar) {
+        return `var(--${tokenVariableName(token, tokenGroups, tokenCollections)})`
+      } else {
+        return tokenVariableName(token, tokenGroups, tokenCollections)
+      }
+    })
+  }
+
+  // Finalize export by retrieving the files to write to destination
+  return outputFiles
 })

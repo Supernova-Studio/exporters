@@ -16,7 +16,7 @@ export async function convertRenderedAssetToComponent(
   const component = FileHelper.createTextFile({
     content: applicableComponentTemplate(svg, destination.className),
     relativePath: destination.path,
-    fileName: destination.name,
+    fileName: destination.name
   })
   return component
 }
@@ -47,7 +47,7 @@ export async function convertRenderedAssetsToOriginalSVG(
     return FileHelper.createCopyRemoteFile({
       url: a.sourceUrl,
       relativePath: destination.path,
-      fileName: destination.name,
+      fileName: destination.name
     })
   })
 
@@ -66,7 +66,7 @@ export async function convertRenderedAssetsToIndexFile(
       })
       .join("\n"),
     relativePath: "./",
-    fileName: "index.ts",
+    fileName: "index.ts"
   })
 
   return indexFile
