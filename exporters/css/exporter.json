@@ -1,10 +1,10 @@
 {
     "id": "frankenstein.exporter-css",
-    "name": "CSS",
+    "name": "Tokens to CSS Exporter",
     "description": "Export your Frankenstein design tokens into CSS variables and definitions.",
     "author": "Jiri Trecak",
-    "organization": "Supernova.io",
-    "homepage": "https://supernova.io",
+    "organization": "Helsenorge",
+    "homepage": "https://frankenstein.helsenorge.design/",
     "version": "3.3.1",
     "usesBrands": true,
     "usesThemes": true,
