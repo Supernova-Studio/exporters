@@ -1,6 +1,6 @@
 {
     "id": "frankenstein.exporter-css",
-    "name": "Tokens to CSS Exporter",
+    "name": "Frankenstein Tokens to CSS Exporter",
     "description": "Export your Frankenstein design tokens into CSS variables and definitions.",
     "author": "Jiri Trecak",
     "organization": "Helsenorge",

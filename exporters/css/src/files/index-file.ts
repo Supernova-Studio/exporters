@@ -35,14 +35,14 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
     // Generate import for base tokens file (tokens.css)
     const baseImport = exportConfiguration.exportBaseValues 
-      ? `/* Base tokens */\n@import "./tokens.css";`
+      ? `/* Base tokens */\n@import './tokens.css';`
       : ''
 
     // Generate imports for theme files (tokens.{theme}.css)
     const themeImports = themes.map((theme) => {
       const themePath = ThemeHelper.getThemeIdentifier(theme)
       const themeName = ThemeHelper.getThemeName(theme)
-      return `/* Theme: ${themeName} */\n@import "./tokens.${themePath}.css";`
+      return `/* Theme: ${themeName} */\n@import './tokens.${themePath}.css';`
     }).join("\n\n")
 
     const separator = baseImport && themeImports ? "\n\n" : ""
@@ -65,7 +65,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Generate imports for base token files (./base/color.css, ./base/typography.css, etc.)
   const imports = exportConfiguration.exportBaseValues 
     ? `/* Base tokens */\n` + types
-        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${getStyleFileName(type, '.css')}";`)
+        .map((type) => `@import '${exportConfiguration.baseStyleFilePath}/${getStyleFileName(type, '.css')}';`)
         .join("\n")
     : ''
 
@@ -84,7 +84,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
     return themeTypes
       .map((type, index) => {
         const themeComment = index === 0 ? `/* Theme: ${themeName} */\n` : ''
-        return `${themeComment}@import "./${themePath}/${getStyleFileName(type, '.css')}";`
+        return `${themeComment}@import './${themePath}/${getStyleFileName(type, '.css')}';`
       })
       .join("\n")
   }).join("\n\n")
