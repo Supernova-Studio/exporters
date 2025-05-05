@@ -5,8 +5,10 @@ export class FileNameHelper {
    * Ensures a filename has the correct extension
    */
   static ensureFileExtension(fileName: string, extension: string): string {
-    if (!fileName.toLowerCase().endsWith(extension)) {
-      return fileName + extension
+    // Ensure extension starts with a dot
+    const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`
+    if (!fileName.toLowerCase().endsWith(normalizedExtension.toLowerCase())) {
+      return fileName + normalizedExtension
     }
     return fileName
   }
@@ -15,7 +17,10 @@ export class FileNameHelper {
    * Replaces file extension
    */
   static replaceFileExtension(fileName: string, oldExt: string, newExt: string): string {
-    return fileName.replace(new RegExp(`${oldExt}$`), newExt)
+    // Ensure extensions start with a dot
+    const normalizedOldExt = oldExt.startsWith('.') ? oldExt : `.${oldExt}`
+    const normalizedNewExt = newExt.startsWith('.') ? newExt : `.${newExt}`
+    return fileName.replace(new RegExp(`${normalizedOldExt}$`), normalizedNewExt)
   }
 
   /**
@@ -50,6 +55,8 @@ export class FileNameHelper {
       Blur: "blur"
     }
     
-    return baseNames[type] + extension
+    // Ensure extension starts with a dot
+    const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`
+    return baseNames[type] + normalizedExtension
   }
 } 

@@ -1,19 +1,19 @@
 {
-    "id": "supernovaio.exporter-style-dictionary",
-    "name": "Style Dictionary",
-    "description": "Export your design tokens to Style Dictionary format.",
+    "id": "supernovaio.exporter-tailwind",
+    "name": "Tailwind CSS 4",
+    "description": "Export design tokens as Tailwind CSS 4 configuration.",
     "author": "Supernova.io",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
-    "version": "2.4.1",
+    "version": "1.0.0",
     "usesBrands": true,
     "usesThemes": true,
     "executable": "/dist/build.js",
     "engine": "latest",
     "tags": [
+        "Tailwind",
         "CSS",
         "Tokens",
-        "Style Dictionary",
         "New"
-    ]
+    ]   
 }

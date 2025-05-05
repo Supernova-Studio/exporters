@@ -48,23 +48,29 @@ import {
     forceRemUnit?: boolean
     /** Base value for rem conversion (default: 16) */
     remBase?: number
+    /** Optional transformer for CSS values based on token type and value */
+    valueTransformer?: (value: string, token: Token) => string | undefined
   }
   
   /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
   export class CSSHelper {
     static tokenToCSS(
-      token: Pick<Token, 'tokenType'>,
+      token: Token,
       allTokens: Map<string, Token>,
       options: TokenToCSSOptions
     ): string {
       /** Use subroutines to convert specific token types to different css representations. Many tokens are of the same type */
+      let cssValue: string
       switch (token.tokenType) {
         case TokenType.color:
-          return this.colorTokenValueToCSS((token as ColorToken).value, allTokens, options)
+          cssValue = this.colorTokenValueToCSS((token as ColorToken).value, allTokens, options)
+          break
         case TokenType.border:
-          return this.borderTokenValueToCSS((token as BorderToken).value, allTokens, options)
+          cssValue = this.borderTokenValueToCSS((token as BorderToken).value, allTokens, options)
+          break
         case TokenType.gradient:
-          return this.gradientTokenValueToCSS((token as GradientToken).value, allTokens, options)
+          cssValue = this.gradientTokenValueToCSS((token as GradientToken).value, allTokens, options)
+          break
         case TokenType.dimension:
         case TokenType.size:
         case TokenType.space:
@@ -77,26 +83,43 @@ import {
         case TokenType.radius:
         case TokenType.duration:
         case TokenType.zIndex:
-          return this.dimensionTokenValueToCSS((token as AnyDimensionToken).value, allTokens, options)
+          cssValue = this.dimensionTokenValueToCSS((token as AnyDimensionToken).value, allTokens, options)
+          break
         case TokenType.shadow:
-          return this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
+          cssValue = this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
+          break
         case TokenType.fontWeight:
-          return this.fontWeightTokenValueToCSS((token as FontWeightToken).value, allTokens, options)
+          cssValue = this.fontWeightTokenValueToCSS((token as FontWeightToken).value, allTokens, options)
+          break
         case TokenType.fontFamily:
         case TokenType.productCopy:
         case TokenType.string:
-          return this.stringTokenValueToCSS((token as AnyStringToken).value, allTokens, options)
+          cssValue = this.stringTokenValueToCSS((token as AnyStringToken).value, allTokens, options)
+          break
         case TokenType.textCase:
         case TokenType.textDecoration:
         case TokenType.visibility:
-          return this.optionTokenValueToCSS((token as AnyOptionToken).value, allTokens, options, token.tokenType)
+          cssValue = this.optionTokenValueToCSS((token as AnyOptionToken).value, allTokens, options, token.tokenType)
+          break
         case TokenType.blur:
-          return this.blurTokenValueToCSS((token as BlurToken).value, allTokens, options)
+          cssValue = this.blurTokenValueToCSS((token as BlurToken).value, allTokens, options)
+          break
         case TokenType.typography:
-          return this.typographyTokenValueToCSS((token as TypographyToken).value, allTokens, options)
+          cssValue = this.typographyTokenValueToCSS((token as TypographyToken).value, allTokens, options)
+          break
         default:
           throw new UnreachableCaseError(token.tokenType, 'Unsupported token type for transformation to CSS:')
       }
+  
+      // Allow value transformation if transformer exists
+      if (options.valueTransformer) {
+        const transformedValue = options.valueTransformer(cssValue, token)
+        if (transformedValue !== undefined) {
+          return transformedValue
+        }
+      }
+  
+      return cssValue
     }
   
     static colorTokenValueToCSS(
@@ -485,7 +508,7 @@ import {
           return 'lowercase'
         case TextCase.camel:
           return 'capitalize'
-          case TextCase.smallCaps:
+        case TextCase.smallCaps:
           return 'small-caps'
       }
     }

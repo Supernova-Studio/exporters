@@ -707,7 +707,7 @@ import {
   test('toCSS_textCases', () => {
     const cases = [
       { textCase: TextCase.camel, expected: 'capitalize' },
-      { textCase: TextCase.smallCaps, expected: 'capitalize' }
+      { textCase: TextCase.smallCaps, expected: 'small-caps' }
     ]
 
     cases.forEach(({ textCase, expected }) => {
