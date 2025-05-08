@@ -8,6 +8,8 @@ import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { createHierarchicalStructure, deepMerge, processTokenName } from "../utils/token-hierarchy"
 import { NamingHelper } from "@supernovaio/export-utils"
 import { ThemeExportStyle, TokenNameStructure } from "../../config"
+import { createTypographyObject } from "./../utils/typography-formatter"
+
 
 /**
  * Creates a value object for a token, either as a simple value or themed values
@@ -15,7 +17,8 @@ import { ThemeExportStyle, TokenNameStructure } from "../../config"
 function createTokenValue(
   value: string,
   token: Token,
-  theme?: TokenTheme
+  theme?: TokenTheme,
+  mappedTokens?: Map<string, Token>
 ): any {
   const baseValue = value.replace(/['"]/g, '')
   const description = token.description && exportConfiguration.showDescriptions 
@@ -25,7 +28,12 @@ function createTokenValue(
   // Get the token type, forcing a return value even when prefixes are disabled
   const tokenType = getTokenPrefix(token.tokenType, true)
 
-  // For nested themes style, create an object with theme-specific values
+  const isTypography = token.tokenType === TokenType.typography
+  const updatedBaseValue = isTypography && mappedTokens 
+    ? createTypographyObject(token, mappedTokens)
+    : baseValue
+
+  // For nested themes style, create an object with theme-specific values  
   if (exportConfiguration.exportThemesAs === ThemeExportStyle.NestedThemes) {
     const valueObject = {}
 
@@ -33,7 +41,7 @@ function createTokenValue(
     // This ensures base values only come from the base file
     if (!theme && exportConfiguration.exportBaseValues) {
       valueObject['base'] = {
-        value: baseValue,
+        value: updatedBaseValue,
         type: tokenType
       }
     }
@@ -41,7 +49,7 @@ function createTokenValue(
     // Add themed value if theme is provided
     if (theme) {
       valueObject[ThemeHelper.getThemeIdentifier(theme, StringCase.kebabCase)] = {
-        value: baseValue,
+        value: updatedBaseValue,
         type: tokenType
       }
     }
@@ -55,7 +63,7 @@ function createTokenValue(
 
   // Default case - return simple value object with type
   return {
-    value: baseValue,
+    value: updatedBaseValue,
     type: tokenType,
     ...description
   }
@@ -121,7 +129,7 @@ function processTokensToObject(
   }
   
   // Process each token and build the hierarchical structure
-  sortedTokens.forEach(token => {
+  for (const token of sortedTokens) {
     // Generate the token's object key name based on configuration
     const name = tokenObjectKeyName(token, tokenGroups, true, collections)
 
@@ -188,14 +196,14 @@ function processTokensToObject(
     const hierarchicalObject = createHierarchicalStructure(
       token.tokenPath || [],
       token.name,
-      createTokenValue(value, token, theme),
+      createTokenValue(value, token, theme, mappedTokens),
       token,
       collections
     )
 
     // Merge the token's object structure into the main object
     Object.assign(tokenObject, deepMerge(tokenObject, hierarchicalObject))
-  })
+  }
 
   return tokenObject
 }
