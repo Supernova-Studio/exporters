@@ -1,11 +1,71 @@
 [
     {
+        "key": "tokenNameStyle",
+        "type": "enum",
+        "default": "kebabCase",
+        "title": "Token name style",
+        "description": "Export token names in the selected case.",
+        "category": "Token names",
+        "options": {
+            "camelCase": {
+                "label": "Camel case",
+                "description": "Example: --myVariableName"
+            },
+            "constantCase": {
+                "label": "Constant case",
+                "description": "Example: --MY_VARIABLE_NAME"
+            },
+            "flatCase": {
+                "label": "Flat case",
+                "description": "Example: --myvariablename"
+            },
+            "kebabCase": {
+                "label": "Kebab case",
+                "description": "Example: --my-variable-name"
+            },
+            "pascalCase": {
+                "label": "Pascal case",
+                "description": "Example: --MyVariableName"
+            },
+            "snakeCase": {
+                "label": "Snake case",
+                "description": "Example: --my_variable_name"
+            },
+            "trainCase": {
+                "label": "Train case",
+                "description": "Example: --My-Variable-Name"
+            }
+        }
+    },
+    {
+        "key": "tokenNameStructure",
+        "type": "enum",
+        "default": "pathAndName",
+        "title": "Token name structure",
+        "description": "Control what parts are included in the exporter token name.",
+        "category": "Token names",
+        "options": {
+            "pathAndName": {
+                "label": "Path + Name",
+                "description": "Include path and name (e.g. button-primary-background)"
+            },
+            "nameOnly": {
+                "label": "Name only",
+                "description": "Only include name (e.g. background)"
+            },
+            "collectionPathAndName": {
+                "label": "Collection + Path + Name",
+                "description": "Include collection, path, and name (e.g. core-button-primary-background)"
+            }
+        }
+    },
+    {
         "key": "colorFormat",
         "type": "enum",
-        "default": "smartOklch",
+        "default": "smartHashHex",
         "title": "Color format",
         "description": "Export color token values in the selected color format.",
-        "category": "Colors",
+        "category": "Token values",
         "options": {
             "smartHashHex": {
                 "label": "HEX (auto)",
@@ -58,66 +118,6 @@
         }
     },
     {
-        "key": "useColorUtilityPrefixes",
-        "type": "boolean",
-        "default": true,
-        "title": "Use color utility prefixes",
-        "description": "Enable specific prefixes for different color utilities. Only applies to color tokens.",
-        "category": "Colors"
-    },
-    {
-        "key": "colorUtilityPrefixes",
-        "type": "object",
-        "title": "Color utility prefixes",
-        "description": "Define patterns to prefix color tokens. Use commas for multiple patterns (e.g., 'background,bg') and ! to negate (e.g., 'bg,!fill').",
-        "category": "Colors",
-        "dependsOn": {
-            "useColorUtilityPrefixes": true
-        },
-        "default": {
-            "bg": "background,bg",
-            "text": "foreground,text",
-            "border": "border",
-            "shadow": "shadow",
-            "ring": "ring",
-            "outline": "outline",
-            "stroke": "stroke",
-            "fill": "fill"
-        },
-        "allowedKeys": {
-            "options": [
-                "bg",
-                "text",
-                "border",
-                "shadow",
-                "ring",
-                "outline",
-                "stroke",
-                "fill"
-            ],
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
-    },
-    {
-        "key": "colorPrecision",
-        "type": "number",
-        "default": 3,
-        "title": "Color precision",
-        "description": "Maximum number of decimals in colors.",
-        "category": "Colors"
-    },
-    {
-        "key": "generateTypographyClasses",
-        "type": "boolean",
-        "default": true,
-        "title": "Generate typography classes",
-        "description": "Generate typography classes in @layer components using typography tokens.",
-        "category": "Typography"
-    },
-    {
         "key": "forceRemUnit",
         "type": "boolean",
         "default": false,
@@ -145,82 +145,158 @@
         "category": "Token values"
     },
     {
-        "key": "fileStructure",
+        "key": "colorPrecision",
+        "type": "number",
+        "default": 3,
+        "title": "Color precision",
+        "description": "Maximum number of decimals in colors.",
+        "category": "Token values"
+    },
+    {
+        "key": "exportThemesAs",
         "type": "enum",
-        "default": "singleFile",
-        "title": "File structure",
-        "description": "Control how token styles are organized in files",
-        "category": "File structure",
+        "default": "separateFiles",
+        "title": "Theme export format",
+        "description": "Control how themes are exported in the CSS files.",
+        "category": "Themes",
         "options": {
-            "singleFile": {
-                "label": "Single combined file",
-                "description": "Generate one config file containing all token types"
+            "separateFiles": {
+                "label": "Separate files per theme",
+                "description": "Generate a separate CSS file for each selected theme"
             },
-            "separateByType": {
-                "label": "Separate files by type",
-                "description": "Generate separate config files for each token type"
+            "applyDirectly": {
+                "label": "Apply themes directly",
+                "description": "Apply selected themes directly to token values"
+            },
+            "mergedTheme": {
+                "label": "Merged theme file",
+                "description": "Generate theme variables with all themes applied together"
             }
         }
+    },
+    {
+        "key": "exportOnlyThemedTokens",
+        "type": "boolean",
+        "default": false,
+        "title": "Export only themed tokens",
+        "description": "Theme files will only include tokens that have different values from the base value.",
+        "category": "Themes"
+    },
+    {
+        "key": "exportBaseValues",
+        "type": "boolean",
+        "default": true,
+        "title": "Export base values",
+        "description": "Base token values will be exported along with themes.",
+        "category": "Themes"
+    },
+    {
+        "key": "generateIndexFile",
+        "type": "boolean",
+        "default": true,
+        "title": "Generate index file",
+        "description": "Generate a file with imports for all base and theme style files.",
+        "category": "Index file"
+    },
+    {
+        "key": "indexFileName",
+        "type": "string",
+        "default": "index.css",
+        "title": "Index filename",
+        "description": "The name of the index file that will be generated.",
+        "category": "Index file",
+        "dependsOn": {
+            "generateIndexFile": true
+        }
+    },
+    {
+        "key": "baseIndexFilePath",
+        "type": "string",
+        "default": "./",
+        "title": "Path to index file",
+        "description": "Index file will be written to this directory relative to export root.",
+        "category": "Index file",
+        "dependsOn": {
+            "generateIndexFile": true
+        }
+    },
+    {
+        "key": "fileStructure",
+        "type": "enum",
+        "default": "separateByType",
+        "title": "File structure",
+        "description": "Control how token styles are organized in files",
+        "category": "Style files",
+        "options": {
+            "separateByType": {
+                "label": "Separate files by type",
+                "description": "Generate separate files for each token type"
+            },
+            "singleFile": {
+                "label": "Single combined file",
+                "description": "Generate one file containing all token types"
+            }
+        }
+    },
+    {
+        "key": "generateEmptyFiles",
+        "type": "boolean",
+        "default": false,
+        "title": "Generate empty style files",
+        "description": "Generate empty style files instead of omitting them.",
+        "category": "Style files"
     },
     {
         "key": "baseStyleFilePath",
         "type": "string",
         "default": "./base",
         "title": "Path to base style files",
-        "description": "Base directory for separate token files when using 'separate by type' structure.",
-        "category": "File structure"
+        "description": "All files will be written to this directory relative to export root.",
+        "category": "Style files"
     },
     {
-        "key": "generateEmptyConfigTypeFiles",
+        "key": "customizeStyleFileNames",
         "type": "boolean",
         "default": false,
-        "title": "Generate empty config files",
-        "description": "Generate empty config files instead of omitting them.",
-        "category": "File structure"
-    },
-    {
-        "key": "customizeConfigFileNames",
-        "type": "boolean",
-        "default": false,
-        "title": "Customize config file names",
+        "title": "Customize style file names",
         "description": "Customize the file names for each token type.",
-        "category": "File structure"
+        "category": "Style files"
     },
     {
-        "key": "configFileNames",
+        "key": "styleFileNames",
         "type": "object",
-        "title": "Config file names",
+        "title": "Style file names",
         "description": "Name of each file that will be generated, grouped by token type.",
-        "category": "File structure",
+        "category": "Style files",
         "dependsOn": {
-            "customizeConfigFileNames": true
+            "customizeStyleFileNames": true
         },
         "default": {
-            "Blur": "tailwind.blur.css",
-            "Border": "tailwind.border.css",
-            "BorderRadius": "tailwind.border-radius.css",
-            "BorderWidth": "tailwind.border-width.css",
-            "Color": "tailwind.color.css",
-            "Dimension": "tailwind.dimension.css",
-            "Duration": "tailwind.duration.css",
-            "FontFamily": "tailwind.font-family.css",
-            "FontSize": "tailwind.font-size.css",
-            "FontWeight": "tailwind.font-weight.css",
-            "Gradient": "tailwind.gradient.css",
-            "LetterSpacing": "tailwind.letter-spacing.css",
-            "LineHeight": "tailwind.line-height.css",
-            "Opacity": "tailwind.opacity.css",
-            "ParagraphSpacing": "tailwind.paragraph-spacing.css",
-            "ProductCopy": "tailwind.product-copy.css",
-            "Shadow": "tailwind.shadow.css",
-            "Size": "tailwind.size.css",
-            "Space": "tailwind.space.css",
-            "String": "tailwind.string.css",
-            "TextCase": "tailwind.text-case.css",
-            "TextDecoration": "tailwind.text-decoration.css",
-            "Typography": "tailwind.typography.css",
-            "Visibility": "tailwind.visibility.css",
-            "ZIndex": "tailwind.z-index.css"
+            "Blur": "blur.css",
+            "Border": "border.css",
+            "BorderRadius": "border-radius.css",
+            "BorderWidth": "border-width.css",
+            "Color": "color.css",
+            "Dimension": "dimension.css",
+            "Duration": "duration.css",
+            "FontFamily": "font-family.css",
+            "FontSize": "font-size.css",
+            "FontWeight": "font-weight.css",
+            "Gradient": "gradient.css",
+            "LetterSpacing": "letter-spacing.css",
+            "LineHeight": "line-height.css",
+            "Opacity": "opacity.css",
+            "ParagraphSpacing": "paragraph-spacing.css",
+            "ProductCopy": "product-copy.css",
+            "Shadow": "shadow.css",
+            "Size": "size.css",
+            "Space": "space.css",
+            "String": "string.css",
+            "TextCase": "text-case.css",
+            "TextDecoration": "text-decoration.css",
+            "Typography": "typography.css",
+            "Visibility": "visibility.css",
+            "ZIndex": "z-index.css"
         },
         "allowedKeys": {
             "options": [
@@ -257,261 +333,95 @@
         }
     },
     {
-        "key": "generateIndexFile",
-        "type": "boolean",
-        "default": false,
-        "title": "Generate index file",
-        "description": "Generate a file with imports for all base and theme style files.",
-        "category": "File structure"
-    },
-    {
-        "key": "indexFileName",
+        "key": "globalNamePrefix",
         "type": "string",
-        "default": "index.css",
-        "title": "Index filename",
-        "description": "The name of the index file that will be generated.",
-        "category": "File structure",
-        "dependsOn": {
-            "generateIndexFile": true
-        }
+        "default": "",
+        "title": "Global prefix",
+        "description": "Prefix all variable names (e.g., '--ds-color-primary').",
+        "category": "Token names"
     },
     {
-        "key": "baseIndexFilePath",
-        "type": "string",
-        "default": "./",
-        "title": "Path to index file",
-        "description": "Index file will be written to this directory relative to export root.",
-        "category": "File structure",
-        "dependsOn": {
-            "generateIndexFile": true
-        }
-    },
-    {
-        "key": "exportThemesAs",
-        "type": "enum",
-        "default": "separateFiles",
-        "title": "Theme export format",
-        "description": "Control how themes are exported in the CSS files.",
-        "category": "Themes",
-        "options": {
-            "separateFiles": {
-                "label": "Separate files per theme",
-                "description": "Generate a separate CSS file for each selected theme"
-            },
-            "applyDirectly": {
-                "label": "Apply themes directly",
-                "description": "Apply selected themes directly to token values"
-            },
-            "mergedTheme": {
-                "label": "Merged theme file",
-                "description": "Generate theme variables with all themes applied together"
-            }
-        }
-    },
-    {
-        "key": "exportOnlyThemedTokens",
-        "type": "boolean",
-        "default": true,
-        "title": "Export only themed tokens",
-        "description": "Theme files will only include tokens that have different values from the base value.",
-        "category": "Themes"
-    },
-    {
-        "key": "exportBaseValues",
-        "type": "boolean",
-        "default": true,
-        "title": "Export base values",
-        "description": "Base token values will be exported along with themes.",
-        "category": "Themes"
-    },
-    {
-        "key": "disableAllDefaults",
+        "key": "customizeTokenPrefixes",
         "type": "boolean",
         "default": false,
-        "title": "Disable all default Tailwind styles",
-        "description": "Remove all default Tailwind utilities by adding --*: initial; to reset group.",
-        "category": "Disable default Tailwind configuration"
+        "title": "Customize type prefixes",
+        "description": "Customize the prefixes for each design token type.",
+        "category": "Token names"
     },
     {
-        "key": "disableAnimateDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable animation styles",
-        "description": "Remove all animation utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
+        "key": "tokenPrefixes",
+        "type": "object",
+        "title": "Token prefixes",
+        "description": "Each token of a specific type is prefixed with the following identifier.",
+        "category": "Token names",
         "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableBlurDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable blur styles",
-        "description": "Remove all blur utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableBorderRadiusDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable border radius styles",
-        "description": "Remove all border radius utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableBreakpointDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable breakpoint styles",
-        "description": "Remove all breakpoint utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableColorDefaults",
-        "type": "boolean",
-        "default": true,
-        "title": "Disable color styles",
-        "description": "Remove all color utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableContainerDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable container styles",
-        "description": "Remove all container utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableDropShadowDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable drop shadow styles",
-        "description": "Remove all drop shadow utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableFontDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable font family styles",
-        "description": "Remove all font family utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableFontWeightDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable font weight styles",
-        "description": "Remove all font weight utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableInsetDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable inset styles",
-        "description": "Remove all inset utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableLeadingDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable line height styles",
-        "description": "Remove all line height utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disablePerspectiveDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable perspective styles",
-        "description": "Remove all perspective utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableShadowDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable shadow styles",
-        "description": "Remove all shadow utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableSpacingDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable spacing styles",
-        "description": "Remove all spacing utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableTextDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable text styles",
-        "description": "Remove all text utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
-        }
-    },
-    {
-        "key": "disableTrackingDefaults",
-        "type": "boolean",
-        "default": false,
-        "title": "Disable letter spacing styles",
-        "description": "Remove all letter spacing utilities from the default Tailwind configuration.",
-        "category": "Disable default Tailwind configuration",
-        "dependsOn": {
-            "disableAllDefaults": false
+            "customizeTokenPrefixes": true
+        },
+        "default": {
+            "Blur": "blur",
+            "Border": "border",
+            "BorderRadius": "borderRadius",
+            "BorderWidth": "borderWidth",
+            "Color": "color",
+            "Dimension": "dimension",
+            "Duration": "duration",
+            "FontFamily": "fontFamily",
+            "FontSize": "fontSize",
+            "FontWeight": "fontWeight",
+            "Gradient": "gradient",
+            "LetterSpacing": "letterSpacing",
+            "LineHeight": "lineHeight",
+            "Opacity": "opacity",
+            "ParagraphSpacing": "paragraphSpacing",
+            "ProductCopy": "productCopy",
+            "Shadow": "shadow",
+            "Size": "size",
+            "Space": "space",
+            "String": "string",
+            "TextCase": "textCase",
+            "TextDecoration": "textDecoration",
+            "Typography": "typography",
+            "Visibility": "visibility",
+            "ZIndex": "zIndex"
+        },
+        "allowedKeys": {
+            "options": [
+                "Color",
+                "Typography",
+                "Dimension",
+                "Size",
+                "Space",
+                "Opacity",
+                "FontSize",
+                "LineHeight",
+                "LetterSpacing",
+                "ParagraphSpacing",
+                "BorderWidth",
+                "BorderRadius",
+                "Duration",
+                "ZIndex",
+                "Shadow",
+                "Border",
+                "Gradient",
+                "String",
+                "ProductCopy",
+                "FontFamily",
+                "FontWeight",
+                "TextCase",
+                "TextDecoration",
+                "Visibility",
+                "Blur"
+            ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
         }
     },
     {
         "key": "cssSelector",
         "type": "string",
-        "default": "@theme",
+        "default": ":root",
         "title": "CSS selector",
         "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
         "category": "CSS selectors"
@@ -523,22 +433,6 @@
         "title": "CSS selector for themes",
         "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
         "category": "CSS selectors"
-    },
-    {
-        "key": "globalPrefix",
-        "type": "string",
-        "default": "",
-        "title": "Global prefix",
-        "description": "Prefix for Tailwind classes and CSS variables (e.g., 'tw' will generate --tw-color-primary and tw:color-primary).",
-        "category": "CSS selectors"
-    },
-    {
-        "key": "findReplace",
-        "type": "object",
-        "title": "Find and replace",
-        "description": "Replace strings in token paths and names. Each key is the string to find, and its value is the string to replace it with.",
-        "category": "Find and replace",
-        "default": {}
     },
     {
         "key": "showDescriptions",
@@ -559,9 +453,8 @@
     {
         "key": "disclaimer",
         "type": "string",
-        "default": "This file was generated by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
+        "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
         "title": "Disclaimer message",
-        "isMultiline": true,
         "description": "A message explaining that the file was automatically generated will appear in all style files.",
         "category": "Other",
         "dependsOn": {
@@ -577,27 +470,30 @@
         "category": "Other"
     },
     {
-        "key": "debug",
-        "type": "boolean",
-        "default": false,
-        "title": "Debug mode",
-        "description": "Add debug information to the generated files to help with troubleshooting.",
-        "category": "Other"
-    },
-    {
         "key": "writeNameToProperty",
         "type": "boolean",
         "default": false,
-        "title": "Write generated Tailwind classnames",
-        "description": "Save generated Tailwind classnames back to tokens as custom properties.",
+        "title": "Write generated variable names",
+        "description": "Save generated variable names back to tokens as custom properties.",
         "category": "Automatic write-back"
     },
     {
         "key": "propertyToWriteNameTo",
         "type": "string",
-        "default": "Tailwind class",
+        "default": "CSS",
         "title": "Custom property name",
-        "description": "Name of the custom property where generated Tailwind classnames will be saved.",
+        "description": "Name of the custom property where generated variable names will be saved.",
+        "category": "Automatic write-back",
+        "dependsOn": {
+            "writeNameToProperty": true
+        }
+    },
+    {
+        "key": "propertyToWriteNameToIncludesVar",
+        "type": "boolean",
+        "default": true,
+        "title": "Include var() in property",
+        "description": "If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying.",
         "category": "Automatic write-back",
         "dependsOn": {
             "writeNameToProperty": true

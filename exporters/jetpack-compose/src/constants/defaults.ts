@@ -1,93 +1,57 @@
 import { TokenType } from "@supernovaio/sdk-exporters"
 
-export const TAILWIND_TOKEN_PREFIXES: Record<TokenType, string> = {
+export const DEFAULT_STYLE_FILE_NAMES: Record<TokenType, string> = {
+  Color: "color.css",
+  Typography: "typography.css",
+  Dimension: "dimension.css",
+  Size: "size.css",
+  Space: "space.css",
+  Opacity: "opacity.css",
+  FontSize: "font-size.css",
+  LineHeight: "line-height.css",
+  LetterSpacing: "letter-spacing.css",
+  ParagraphSpacing: "paragraph-spacing.css",
+  BorderWidth: "border-width.css",
+  BorderRadius: "border-radius.css",
+  Duration: "duration.css",
+  ZIndex: "z-index.css",
+  Shadow: "shadow.css",
+  Border: "border.css",
+  Gradient: "gradient.css",
+  String: "string.css",
+  ProductCopy: "product-copy.css",
+  FontFamily: "font-family.css",
+  FontWeight: "font-weight.css",
+  TextCase: "text-case.css",
+  TextDecoration: "text-decoration.css",
+  Visibility: "visibility.css",
+  Blur: "blur.css"
+}
+
+export const DEFAULT_TOKEN_PREFIXES: Record<TokenType, string> = {
   Color: "color",
-  Typography: "text",
-  Dimension: "spacing",
+  Typography: "typography",
+  Dimension: "dimension",
   Size: "size",
-  Space: "spacing",
+  Space: "space",
   Opacity: "opacity",
-  FontSize: "text",
-  LineHeight: "leading",
-  LetterSpacing: "tracking",
-  ParagraphSpacing: "paragraph",
-  BorderWidth: "border",
-  BorderRadius: "radius",
+  FontSize: "fontSize",
+  LineHeight: "lineHeight",
+  LetterSpacing: "letterSpacing",
+  ParagraphSpacing: "paragraphSpacing",
+  BorderWidth: "borderWidth",
+  BorderRadius: "borderRadius",
   Duration: "duration",
-  ZIndex: "z",
+  ZIndex: "zIndex",
   Shadow: "shadow",
   Border: "border",
   Gradient: "gradient",
   String: "string",
-  ProductCopy: "product-copy",
-  FontFamily: "font",
-  FontWeight: "font-weight",
-  TextCase: "text-case",
-  TextDecoration: "text-decoration",
+  ProductCopy: "productCopy",
+  FontFamily: "fontFamily",
+  FontWeight: "fontWeight",
+  TextCase: "textCase",
+  TextDecoration: "textDecoration",
   Visibility: "visibility",
   Blur: "blur"
 } 
-
-/**
- * List of token types that can be customized in Tailwind 4
- * These are the token types supported by Tailwind CSS configuration
- * 
- * Unsupported token types that will be filtered out:
- * - Dimension (use size or space instead)
- * - ParagraphSpacing (not directly supported by Tailwind)
- * - Gradient (not a core Tailwind property)
- * - String (not relevant for CSS variables)
- * - ProductCopy (not relevant for CSS variables)
- * - TextCase (use Tailwind text-case utilities instead)
- * - TextDecoration (use Tailwind text-decoration utilities instead)
- * - Visibility (use Tailwind visibility utilities instead)
- */
-export const TAILWIND_ALLOWED_CUSTOMIZATION: TokenType[] = [
-  TokenType.color,
-  TokenType.space,
-  TokenType.size,
-  TokenType.fontSize,
-  TokenType.lineHeight,
-  TokenType.letterSpacing,
-  TokenType.radius,
-  TokenType.borderWidth,
-  TokenType.fontFamily,
-  TokenType.fontWeight,
-  TokenType.shadow,
-  TokenType.opacity,
-  TokenType.duration,
-  TokenType.zIndex,
-  TokenType.blur,
-  TokenType.typography,
-  TokenType.border,
-  TokenType.dimension
-] 
-
-
-export const DEFAULT_CONFIG_FILE_NAMES: Record<TokenType, string> = {
-  Color: "tailwind.color.css",
-  Typography: "tailwind.typography.css",
-  Dimension: "tailwind.dimension.css",
-  Size: "tailwind.size.css",
-  Space: "tailwind.space.css",
-  Opacity: "tailwind.opacity.css",
-  FontSize: "tailwind.font-size.css",
-  LineHeight: "tailwind.line-height.css",
-  LetterSpacing: "tailwind.letter-spacing.css",
-  ParagraphSpacing: "tailwind.paragraph-spacing.css",
-  BorderWidth: "tailwind.border-width.css",
-  BorderRadius: "tailwind.border-radius.css",
-  Duration: "tailwind.duration.css",
-  ZIndex: "tailwind.z-index.css",
-  Shadow: "tailwind.shadow.css",
-  Border: "tailwind.border.css",
-  Gradient: "tailwind.gradient.css",
-  String: "tailwind.string.css",
-  ProductCopy: "tailwind.product-copy.css",
-  FontFamily: "tailwind.font-family.css",
-  FontWeight: "tailwind.font-weight.css",
-  TextCase: "tailwind.text-case.css",
-  TextDecoration: "tailwind.text-decoration.css",
-  Visibility: "tailwind.visibility.css",
-  Blur: "tailwind.blur.css"
-}

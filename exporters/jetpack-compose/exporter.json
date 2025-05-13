@@ -1,6 +1,6 @@
 {
     "id": "supernovaio.exporter-jetpack-compose",
-    "name": "Tailwind CSS 4",
+    "name": "Jetpack Compose",
     "description": "Export design tokens as Jetpack Compose configuration.",
     "author": "Supernova.io",
     "organization": "Supernova.io",
@@ -15,5 +15,5 @@
         "Android",
         "Tokens",
         "New"
-    ]   
+    ]
 }

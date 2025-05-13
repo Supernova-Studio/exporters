@@ -1,8 +1,8 @@
-# Changelog
+### Jetpack Compose exporter release notes
+All the updates to this exporter are documented in this file.
 
-All notable changes to this project will be documented in this file.
+## 1.0.0 - TODO
 
-## [1.0.0] - TODO
+### 🚀 New
 
-### Added
-- 
+TODO

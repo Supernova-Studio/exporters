@@ -6,18 +6,15 @@ The Tailwind CSS Exporter is a powerful package for converting your design syste
 
 ## Exporter Features
 
-This exporter package takes your design system tokens and converts them to Tailwind CSS configuration in various ways. Here are its key features:
+This exporter package takes your design system tokens and converts them to CSS in various ways. Here are its key features:
 
-- **Support for all Supernova token types:** Generates Tailwind configuration from all token types, including colors, text styles, shadows, dimensions and more.
-- **Branding support:** Can generate configurations for different brands you've defined in Supernova.
-- **Theming support:** Can generate configurations for different themes you've defined in Supernova.
-- **Customizable output:** Can be configured to generate Tailwind configuration in variety of ways.
-- **Customizable formatting:** Can be configured to generate each token using various formatting options.
+- **Support for all Supernova token types:** Generates CSS from all token types, including colors, text styles, shadows, dimensions and more.
+- **Branding support:** Can generate CSS for different brands you've defined in Supernova.
+- **Theming support:** Can generate CSS for different themes you've defined in Supernova.
+- **Customizable output:** Can be configured to generate CSS in variety of ways.
+- **Customizable formatting:** Can be configured to generate each token using various formatting, like hex, rgb, camelCase and so on.
 - **Comment support:** Can include descriptions for each token as code comments, if provided. Can also provide a disclaimer at the top of each file to prevent people from tinkering with the generated code manually.
-- **File organization:** Can generate output in various ways, such as separate files for each token type, or a single configuration file.
-- **Reset rules:** Can generate reset rules to disable default Tailwind styles, either in a separate file or within the main CSS file.
-- **Typography classes:** Can generate typography classes in @layer components using typography tokens.
-- **Debug information:** Can include debug information in the generated files to help with troubleshooting.
+- **File organization:** Can generate output in various ways, such as separate files for each token type, or a single file with all tokens.
 
 ## Example of Output
 
@@ -49,9 +46,9 @@ With configurations:
     "disclaimer": "This file was automatically generated. Do not modify manually.",
     "showDescriptions": true,
     "useReferences": true,
+    "tokenNameStyle": "kebabCase",
     "colorFormat": "hex",
-    "indent": 2,
-    "fileStructure": "singleFile"
+    "indent": 2
 }
 ```
 
@@ -60,13 +57,11 @@ The exporter would produce:
 ```css
 /* This file was automatically generated. Do not modify manually. */
 
-@import "tailwindcss";
-
 :root {
   /* The reddest of reds */
   --color-red: #ff0000;
   --color-blue: #0000ff;
-  /* The main color used throughout the application */
+  /* The main color used throughout the application. */
   --color-primary: var(--color-red);
 }
 ```
