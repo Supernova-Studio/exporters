@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx webpack --mode=development --watch",
-    "build": "npx webpack --mode=production",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "build": "npx webpack --mode=production"
   },
   "author": "Supernova.io",
   "license": "MIT",
@@ -21,13 +19,8 @@
     "@babel/preset-env": "^7.24.0",
     "@babel/preset-typescript": "^7.23.3",
     "@supernovaio/sdk-exporters": "2.1.1",
-    "@types/jest": "^29.5.14",
-    "@types/mocha": "^10.0.10",
-    "babel-jest": "^29.7.0",
-    "jest": "^29.7.0",
     "prettier": "3.0.3",
     "terser-webpack-plugin": "5.3.9",
-    "ts-jest": "^29.3.1",
     "ts-loader": "^7.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
