@@ -145,6 +145,7 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Typography
 - **generateTypographyClasses:** When enabled, generates typography classes in @layer components using typography tokens.
+- **generateTypographyUtility:** When enabled, generates typography @utility using typography tokens.
 - **forceRemUnit:** When enabled, converts pixel values to rem units.
 - **remBase:** Base pixel value for rem conversion (default: 16).
 

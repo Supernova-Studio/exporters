@@ -15,12 +15,12 @@ export enum FileStructure {
     SingleFile = "singleFile"
 }
 
-export type ColorUtilityType = 
-  | 'text' 
-  | 'boxShadow' 
-  | 'background' 
-  | 'outline' 
-  | 'border' 
+export type ColorUtilityType =
+  | 'text'
+  | 'boxShadow'
+  | 'background'
+  | 'outline'
+  | 'border'
   | 'stroke'
   | 'fill'
   | 'ring'
@@ -110,6 +110,8 @@ export type ExporterConfiguration = {
   debug: boolean
   /** When enabled, generates typography classes in @layer components using typography tokens */
   generateTypographyClasses: boolean
+  /** When enabled, generates typography utilities using typography tokens */
+  generateTypographyUtility: boolean
   /** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group */
   disableAllDefaults: boolean
   /** When enabled, generated Tailwind classnames will be saved back to tokens as custom properties */

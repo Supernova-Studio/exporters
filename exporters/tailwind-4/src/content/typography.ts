@@ -9,7 +9,7 @@ import { tokenVariableName } from "./token"
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @returns Formatted CSS class string or null if token is not a typography token
  */
-export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGroup>): string | null {
+export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGroup>, classPrefix = '.'): string | null {
   // Skip if not a typography token
   if (token.tokenType !== TokenType.typography) {
     return null
@@ -64,53 +64,53 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
   }
 
   // Generate the class with all typography properties
-  output += `${indentString}.${className} {\n`
-  
+  output += `${indentString}${classPrefix}${className} {\n`
+
   // Font family
   if (typographyValue.fontFamily) {
     const fontFamilyValue = typographyValue.fontFamily as FontFamilyTokenValue
     output += `${indentString}  font-family: ${CSSHelper.stringTokenValueToCSS(fontFamilyValue, emptyTokenMap, cssOptions)};\n`
   }
-  
+
   // Font size
   output += `${indentString}  font-size: var(--${variableName});\n`
-  
+
   // Font weight
   output += `${indentString}  font-weight: var(--${variableName}--font-weight);\n`
-  
+
   // Line height
   if (typographyValue.lineHeight) {
     output += `${indentString}  line-height: var(--${variableName}--line-height);\n`
   }
-  
+
   // Letter spacing
   output += `${indentString}  letter-spacing: var(--${variableName}--letter-spacing);\n`
-  
+
   // Text decoration
   if (typographyValue.textDecoration) {
     const textDecorationValue = typographyValue.textDecoration as TextDecorationTokenValue
     output += `${indentString}  text-decoration: ${CSSHelper.optionTokenValueToCSS(textDecorationValue, emptyTokenMap, cssOptions, TokenType.textDecoration)};\n`
   }
-  
+
   // Text case
   if (typographyValue.textCase) {
     const textCaseValue = typographyValue.textCase as TextCaseTokenValue
     output += `${indentString}  text-transform: ${CSSHelper.optionTokenValueToCSS(textCaseValue, emptyTokenMap, cssOptions, TokenType.textCase)};\n`
   }
-  
+
   // Paragraph indent
   if (typographyValue.paragraphIndent) {
     const paragraphIndentValue = typographyValue.paragraphIndent as ParagraphSpacingTokenValue
     output += `${indentString}  text-indent: ${CSSHelper.dimensionTokenValueToCSS(paragraphIndentValue, emptyTokenMap, cssOptions)};\n`
   }
-  
+
   // Paragraph spacing
   if (typographyValue.paragraphSpacing) {
     const paragraphSpacingValue = typographyValue.paragraphSpacing as ParagraphSpacingTokenValue
     output += `${indentString}  margin-bottom: ${CSSHelper.dimensionTokenValueToCSS(paragraphSpacingValue, emptyTokenMap, cssOptions)};\n`
   }
-  
+
   output += `${indentString}}\n`
 
   return output
-} 
+}

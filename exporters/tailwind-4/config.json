@@ -118,6 +118,14 @@
         "category": "Typography"
     },
     {
+        "key": "generateTypographyUtility",
+        "type": "boolean",
+        "default": false,
+        "title": "Generate typography utility",
+        "description": "Generate typography @utility using typography tokens.",
+        "category": "Typography"
+    },
+    {
         "key": "forceRemUnit",
         "type": "boolean",
         "default": false,
