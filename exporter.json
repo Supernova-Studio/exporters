@@ -1,0 +1,14 @@
+{
+  "id": "n3ssi3.exporter-tailwind",
+  "name": "Tailwind CSS 4",
+  "description": "Export design tokens as Tailwind CSS 4 configuration.",
+  "author": "Supernova.io",
+  "organization": "Supernova.io",
+  "homepage": "https://supernova.io",
+  "version": "1.0.0",
+  "usesBrands": true,
+  "usesThemes": true,
+  "executable": "/dist/build.js",
+  "engine": "latest",
+  "tags": ["Tailwind", "CSS", "Tokens", "New"]
+}
