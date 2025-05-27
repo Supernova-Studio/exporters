@@ -38,17 +38,21 @@ class ColorHelper {
         }
         // If there are no references, format the color raw
         if (!fullReferenceName && !colorReferenceName && !opacityReferenceName) {
-            return this.formattedColor(color, options.colorFormat, options.decimals);
+            const result = this.formattedColor(color, options.colorFormat, options.decimals);
+            return options.rawValueFormatter ? options.rawValueFormatter(result) : result;
         }
         // If there are partial references, we'll use the references where possible and return the raw format for the rest
+        let result;
         switch (options.colorFormat) {
             case ColorFormat_1.ColorFormat.rgb:
             case ColorFormat_1.ColorFormat.rgba:
             case ColorFormat_1.ColorFormat.smartRgba:
-                return this.colorToRgb(options.colorFormat, this.normalizedIntColor(color), color.opacity.measure, options.decimals, colorReferenceName, opacityReferenceName);
+                result = this.colorToRgb(options.colorFormat, this.normalizedIntColor(color), color.opacity.measure, options.decimals, colorReferenceName, opacityReferenceName);
+                break;
             default:
-                return this.formattedColor(color, options.colorFormat, options.decimals);
+                result = this.formattedColor(color, options.colorFormat, options.decimals);
         }
+        return options.rawValueFormatter ? options.rawValueFormatter(result) : result;
     }
     /**
      * Formats Supernova color token value to a string based on the selected format. For fractional formats, the number of decimals can be specified.
@@ -181,7 +185,7 @@ class ColorHelper {
     }
     // Return hex value with leading zero if hex is single digit
     static pHex(value) {
-        return value.toString(16).padStart(2, '0');
+        return value.toString(16).padStart(2, "0");
     }
     /**
      * Convert color to OKLCH format

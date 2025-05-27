@@ -2,6 +2,14 @@ import { ColorTokenValue, Token } from "@supernovaio/sdk-exporters"
 import { ColorFormat } from "../enums/ColorFormat"
 import { sureOptionalReference } from "./TokenHelper"
 
+export type ColorFormatOptions = {
+  allowReferences: boolean
+  colorFormat: ColorFormat
+  decimals: number
+  tokenToVariableRef: (token: Token) => string
+  rawValueFormatter?: (rawValue: string) => string
+}
+
 /** A utility class to help with transformation of colors to various formats */
 export class ColorHelper {
   /**
@@ -15,12 +23,7 @@ export class ColorHelper {
   static formattedColorOrVariableName(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,
-    options: {
-      allowReferences: boolean
-      colorFormat: ColorFormat
-      decimals: number
-      tokenToVariableRef: (token: Token) => string
-    }
+    options: ColorFormatOptions
   ): string {
     let fullReferenceName: string | undefined = undefined
     let colorReferenceName: string | null = null
@@ -48,15 +51,17 @@ export class ColorHelper {
 
     // If there are no references, format the color raw
     if (!fullReferenceName && !colorReferenceName && !opacityReferenceName) {
-      return this.formattedColor(color, options.colorFormat, options.decimals)
+      const result = this.formattedColor(color, options.colorFormat, options.decimals)
+      return options.rawValueFormatter ? options.rawValueFormatter(result) : result
     }
 
     // If there are partial references, we'll use the references where possible and return the raw format for the rest
+    let result: string
     switch (options.colorFormat) {
       case ColorFormat.rgb:
       case ColorFormat.rgba:
       case ColorFormat.smartRgba:
-        return this.colorToRgb(
+        result = this.colorToRgb(
           options.colorFormat,
           this.normalizedIntColor(color),
           color.opacity.measure,
@@ -64,9 +69,12 @@ export class ColorHelper {
           colorReferenceName,
           opacityReferenceName
         )
+        break
       default:
-        return this.formattedColor(color, options.colorFormat, options.decimals)
+        result = this.formattedColor(color, options.colorFormat, options.decimals)
     }
+
+    return options.rawValueFormatter ? options.rawValueFormatter(result) : result
   }
 
   /**

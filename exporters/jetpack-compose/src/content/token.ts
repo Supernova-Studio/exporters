@@ -2,23 +2,21 @@ import {
   DesignSystemCollection
 } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import {
-  NamingHelper,
-  CSSHelper,
-  GeneralHelper,
-  TokenToCSSOptions,
+  ColorFormat,
+  ColorFormatOptions,
   ColorHelper,
-  ColorFormat, StringCase
+  GeneralHelper,
+  NamingHelper,
+  StringCase
 } from "@supernovaio/export-utils"
 
 import {
-  AnyDimensionToken, AnyOptionToken, AnyStringToken, BlurToken,
-  BorderToken,
-  ColorToken, ColorTokenValue,
-  FontWeightToken,
-  GradientToken, ShadowToken,
+  ColorToken,
+  ColorTokenValue,
   Token,
   TokenGroup,
-  TokenType, TypographyToken, UnreachableCaseError
+  TokenType,
+  UnreachableCaseError
 } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
@@ -51,31 +49,27 @@ export function convertedToken(
   collections: Array<DesignSystemCollection> = []
 ): string {
   // Generate the variable name based on token properties and configuration
-  const name = getTokenVariableName(token, tokenGroups, collections)
+  const name = tokenVariableName(token, tokenGroups, collections)
 
   // Convert token value to object instance, handling references and formatting according to configuration
-  const value = getTokenVariableValue(token, mappedTokens, exportConfiguration.useReferences
-    //todo
-    // Custom handler for token references - converts them to CSS var() syntax
-    // tokenToVariableRef: (t) => {
-    //   return `var(--${tokenVariableName(t, tokenGroups, collections)})`
-    // }
-  )
+  const value = tokenVariableValue(token, mappedTokens, tokenGroups, collections, exportConfiguration.useReferences)
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   // Add description comment if enabled and description exists
   if (exportConfiguration.showDescriptions && token.description) {
-    return `${indentString}/* ${token.description.trim()} */\n${indentString}val ${name} = ${value};`
+    return `${indentString}/* ${token.description.trim()} */\n${indentString}val ${name} = ${value}`
   } else {
-    return `${indentString}val ${name}: ${value};`
+    return `${indentString}val ${name} = ${value}`
   }
 }
 
 //todo extract?
 //todo options
-function getTokenVariableValue(
+function tokenVariableValue(
   token: Token,
   allTokens: Map<string, Token>,
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection>,
   allowReferences: boolean
 ): string {
   //todo remove default value
@@ -83,7 +77,9 @@ function getTokenVariableValue(
   let value: string = ""
   switch (token.tokenType) {
     case TokenType.color:
-      value = convertColorToken((token as ColorToken).value, allTokens, allowReferences)
+      value = convertColorToken((token as ColorToken).value, allTokens, tokenGroups, collections,
+        allowReferences
+      )
       break
     case TokenType.border:
       // value = this.borderTokenValueToCSS((token as BorderToken).value, allTokens, options)
@@ -148,6 +144,8 @@ function getTokenVariableValue(
 function convertColorToken(
   color: ColorTokenValue,
   allTokens: Map<string, Token>,
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection>,
   allowReferences: boolean
 ): string {
   const options = {
@@ -156,10 +154,14 @@ function convertColorToken(
     //todo decimals
     decimals: 0,
     tokenToVariableRef: (token: Token) => {
-      return "TODO"
+      return tokenVariableName(token, tokenGroups, collections)
+    },
+    rawValueFormatter: (rawValue: string) => {
+      return `Color(0x${rawValue})`
     }
-  }
-  return `Color(0x${ColorHelper.formattedColorOrVariableName(color, allTokens, options)})`
+  } satisfies ColorFormatOptions
+  //todo test partial references
+  return ColorHelper.formattedColorOrVariableName(color, allTokens, options)
 }
 
 
@@ -173,7 +175,7 @@ function convertColorToken(
  * @returns Formatted variable name string
  * @returns Formatted variable name string
  */
-export function getTokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, collections: Array<DesignSystemCollection> = []): string {
+function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, collections: Array<DesignSystemCollection> = []): string {
   const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
 

@@ -3,7 +3,6 @@ import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
 import { ExporterConfiguration, ThemeExportStyle } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { generateStyleFiles } from "./files/style-file"
-import { getTokenVariableName } from "./content/token"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
