@@ -1,6 +1,6 @@
-import { ColorTokenValue, Token } from '@supernovaio/sdk-exporters'
-import { ColorFormat } from '../enums/ColorFormat'
-import { sureOptionalReference } from './TokenHelper'
+import { ColorTokenValue, Token } from "@supernovaio/sdk-exporters"
+import { ColorFormat } from "../enums/ColorFormat"
+import { sureOptionalReference } from "./TokenHelper"
 
 /** A utility class to help with transformation of colors to various formats */
 export class ColorHelper {
@@ -161,7 +161,7 @@ export class ColorHelper {
     } else {
       const delta = max - min
       s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min)
-      
+
       switch (max) {
         case color.r:
           h = (color.g - color.b) / delta + (color.g < color.b ? 6 : 0)
@@ -239,7 +239,7 @@ export class ColorHelper {
 
   // Return hex value with leading zero if hex is single digit
   private static pHex(value: number): string {
-    return value.toString(16).padStart(2, '0')
+    return value.toString(16).padStart(2, "0")
   }
 
   /**
@@ -257,13 +257,13 @@ export class ColorHelper {
   ): string {
     // Convert RGB to OKLCH
     const { l, c, h } = this.rgbToOklch(color.r, color.g, color.b)
-    
+
     // Format the output string based on format and alpha
     switch (format) {
       case ColorFormat.oklcha:
         return `oklch(${l}% ${c} ${h} / ${this.roundToDecimals(alpha * 100, decimals)}%)`
       case ColorFormat.smartOklch:
-        return alpha < 1 
+        return alpha < 1
           ? `oklch(${l}% ${c} ${h} / ${this.roundToDecimals(alpha * 100, decimals)}%)`
           : `oklch(${l}% ${c} ${h})`
       case ColorFormat.oklch:

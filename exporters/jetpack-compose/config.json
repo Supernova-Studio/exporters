@@ -1,43 +1,5 @@
 [
     {
-        "key": "tokenNameStyle",
-        "type": "enum",
-        "default": "kebabCase",
-        "title": "Token name style",
-        "description": "Export token names in the selected case.",
-        "category": "Token names",
-        "options": {
-            "camelCase": {
-                "label": "Camel case",
-                "description": "Example: --myVariableName"
-            },
-            "constantCase": {
-                "label": "Constant case",
-                "description": "Example: --MY_VARIABLE_NAME"
-            },
-            "flatCase": {
-                "label": "Flat case",
-                "description": "Example: --myvariablename"
-            },
-            "kebabCase": {
-                "label": "Kebab case",
-                "description": "Example: --my-variable-name"
-            },
-            "pascalCase": {
-                "label": "Pascal case",
-                "description": "Example: --MyVariableName"
-            },
-            "snakeCase": {
-                "label": "Snake case",
-                "description": "Example: --my_variable_name"
-            },
-            "trainCase": {
-                "label": "Train case",
-                "description": "Example: --My-Variable-Name"
-            }
-        }
-    },
-    {
         "key": "tokenNameStructure",
         "type": "enum",
         "default": "pathAndName",

@@ -12,6 +12,7 @@ import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typ
  * @param tokenGroups - Array of token groups for reference
  * @param themePath - Optional path for theme-specific files
  * @param theme - Optional theme configuration for themed tokens
+ * @param tokenCollections
  * @returns Array of OutputTextFile objects
  */
 export function generateStyleFiles(
@@ -86,19 +87,21 @@ export function styleOutputFile(
   const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
-  const selector = themePath 
-    ? exportConfiguration.themeSelector.replace('{theme}', themePath)
-    : exportConfiguration.cssSelector
-  
+  // const selector = themePath
+  //   ? exportConfiguration.themeSelector.replace('{theme}', themePath)
+  //   : exportConfiguration.cssSelector
+  const tokensClass = "object DesignTokens"
+
   // Construct the file content with CSS variables wrapped in selector
-  let content = `${selector} {\n${cssVariables}\n}`
+  let content = `${tokensClass} {\n${cssVariables}\n}`
   
-  // Optionally add generated file disclaimer
+  // Optionally add a generated file disclaimer
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
   }
 
-  // Build the output path, using theme subfolder for themed files
+  //todo themes
+  // Build the output path, using the theme subfolder for themed files
   const relativePath = themePath
     ? `./${themePath}`
     : exportConfiguration.baseStyleFilePath
@@ -106,11 +109,11 @@ export function styleOutputFile(
   // Get the filename based on configuration or defaults
   let fileName = exportConfiguration.customizeStyleFileNames
     ? exportConfiguration.styleFileNames[type]
-    : FileNameHelper.getDefaultStyleFileName(type)
+    : FileNameHelper.getDefaultStyleFileName(type, 'kt')
 
-  // Ensure proper .css extension
-  if (!fileName.toLowerCase().endsWith('.css')) {
-    fileName += '.css'
+  // Ensure proper .kt extension
+  if (!fileName.toLowerCase().endsWith('.kt')) {
+    fileName += '.kt'
   }
 
   // Create and return the output file object
@@ -169,7 +172,7 @@ function generateCombinedStyleFile(
   }
 
   // For single file mode, themed files go directly in root with theme-based names
-  const fileName = themePath ? `tokens.${themePath}.css` : 'tokens.css'
+  const fileName = themePath ? `tokens.${themePath}.kt` : 'tokens.kt'
   const relativePath = './' // Put files directly in root folder
 
   // Create and return the output file
