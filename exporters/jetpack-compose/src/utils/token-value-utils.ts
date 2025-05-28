@@ -14,7 +14,7 @@ import {
   TextCase,
   TextDecoration,
   Token,
-  TokenType,
+  TokenType, TypographyToken, TypographyTokenValue,
   Unit,
   UnreachableCaseError,
   VisibilityType
@@ -22,11 +22,12 @@ import {
 import {
   ColorFormat,
   ColorFormatOptions,
-  ColorHelper,
+  ColorHelper, GeneralHelper,
   sureOptionalReference, TokenToCSSOptions
 } from "@supernovaio/export-utils"
+import { exportConfiguration } from "../index"
 
-export type TokenToKotlinOptions = ColorFormatOptions
+export type TokenToKotlinOptions = ColorFormatOptions & { indent: number }
 
 //todo extract to kotlinhelper
 export function tokenValue(
@@ -34,18 +35,22 @@ export function tokenValue(
   allTokens: Map<string, Token>,
   options: TokenToKotlinOptions
 ): string {
+  const actualOptions = {
+    ...options
+  }
+
   //todo remove default value
   /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
   let value: string = ""
   switch (token.tokenType) {
     case TokenType.color:
-      value = colorTokenValueToKotlin((token as ColorToken).value, allTokens, options)
+      value = colorTokenValueToKotlin((token as ColorToken).value, allTokens, actualOptions)
       break
     case TokenType.border:
-      // value = borderTokenValueToKotlin((token as BorderToken).value, allTokens, options)
+      // value = borderTokenValueToKotlin((token as BorderToken).value, allTokens, actualOptions)
       break
     case TokenType.gradient:
-      // value = this.gradientTokenValueToCSS((token as GradientToken).value, allTokens, options)
+      // value = this.gradientTokenValueToCSS((token as GradientToken).value, allTokens, actualOptions)
       break
     case TokenType.dimension:
     case TokenType.size:
@@ -59,29 +64,29 @@ export function tokenValue(
     case TokenType.radius:
     case TokenType.duration:
     case TokenType.zIndex:
-      value = dimensionTokenValueToKotlin((token as AnyDimensionToken).value, allTokens, options)
+      value = dimensionTokenValueToKotlin((token as AnyDimensionToken).value, allTokens, actualOptions)
       break
     case TokenType.shadow:
       // value = this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
       break
     case TokenType.fontWeight:
-      value = fontWeightTokenValueToKotlin((token as FontWeightToken).value, allTokens, options)
+      value = fontWeightTokenValueToKotlin((token as FontWeightToken).value, allTokens, actualOptions)
       break
     case TokenType.fontFamily:
     case TokenType.productCopy:
     case TokenType.string:
-      value = stringTokenValueToKotlin((token as AnyStringToken).value, allTokens, options)
+      value = stringTokenValueToKotlin((token as AnyStringToken).value, allTokens, actualOptions)
       break
     case TokenType.textCase:
     case TokenType.textDecoration:
     case TokenType.visibility:
-      value = optionTokenValueToKotlin((token as AnyOptionToken).value, allTokens, options, token.tokenType)
+      value = optionTokenValueToKotlin((token as AnyOptionToken).value, allTokens, actualOptions, token.tokenType)
       break
     case TokenType.blur:
-      value = blurTokenValueToKotlin((token as BlurToken).value, allTokens, options)
+      value = blurTokenValueToKotlin((token as BlurToken).value, allTokens, actualOptions)
       break
     case TokenType.typography:
-      // value = this.typographyTokenValueToCSS((token as TypographyToken).value, allTokens, options)
+      value = typographyTokenValueToKotlin((token as TypographyToken).value, allTokens, options)
       break
     default:
       throw new UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:")
@@ -228,7 +233,7 @@ function visibilityToKotlin(visibility: VisibilityType): string {
   return visibility === VisibilityType.visible ? "true" : "false"
 }
 
-function blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string {
+function blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: TokenToKotlinOptions): string {
   const reference = sureOptionalReference(blur.referencedTokenId, allTokens, options.allowReferences)
   if (reference) {
     return options.tokenToVariableRef(reference)
@@ -326,4 +331,74 @@ function fontWeightIntToKotlin(weight: number): string {
       // Uncommon custom weight
       return `FontWeight(${weight})`
   }
+}
+
+function typographyTokenValueToKotlin(
+  typography: TypographyTokenValue,
+  allTokens: Map<string, Token>,
+  options: TokenToKotlinOptions
+): string {
+  // Reference full typography token if set
+  const reference = sureOptionalReference(typography.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+
+  // Resolve partial references
+  const fontFamilyRef = sureOptionalReference(
+    typography.fontFamily.referencedTokenId,
+    allTokens,
+    options.allowReferences
+  )
+  const fontWeightRef = sureOptionalReference(
+    typography.fontWeight.referencedTokenId,
+    allTokens,
+    options.allowReferences
+  )
+  const decorationRef = sureOptionalReference(
+    typography.textDecoration.referencedTokenId,
+    allTokens,
+    options.allowReferences
+  )
+
+  // Calculate literals
+  const fontFamilyLit = fontFamilyRef
+    ? options.tokenToVariableRef(fontFamilyRef)
+    : `"${typography.fontFamily.text}"`
+
+  const fontWeightLit = fontWeightRef
+    ? options.tokenToVariableRef(fontWeightRef)
+    : fontWeightIntToKotlin(normalizeTextWeight(typography.fontWeight.text))
+
+  const textDecorationLit = decorationRef
+    ? options.tokenToVariableRef(decorationRef)
+    : typography.textDecoration.value === TextDecoration.original
+      ? "TextDecoration.None"
+      : textDecorationToKotlin(typography.textDecoration.value as TextDecoration)
+
+  const fontSizeLit = dimensionTokenValueToKotlin(typography.fontSize, allTokens, options)
+  const lineHeightLit = typography.lineHeight
+    ? dimensionTokenValueToKotlin(typography.lineHeight, allTokens, options)
+    : undefined
+
+  const letterSpacingLit = typography.letterSpacing
+    ? dimensionTokenValueToKotlin(typography.letterSpacing, allTokens, options)
+    : undefined
+
+  // Assemble TextStyle literal
+  const parts: string[] = [
+    `fontFamily = ${fontFamilyLit}`,
+    `fontWeight = ${fontWeightLit}`,
+    `fontSize = ${fontSizeLit}`
+  ]
+  if (lineHeightLit) parts.push(`lineHeight = ${lineHeightLit}`)
+  if (letterSpacingLit) parts.push(`letterSpacing = ${letterSpacingLit}`)
+  if (textDecorationLit) parts.push(`textDecoration = ${textDecorationLit}`)
+
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+
+  // Join with commas and indents
+  const body = parts.map(p => `${indentString}${indentString}${p}`).join(",\n")
+
+  return `TextStyle(\n${body}\n${indentString})`
 }
