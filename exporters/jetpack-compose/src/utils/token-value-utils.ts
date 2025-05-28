@@ -1,17 +1,26 @@
 import {
-  BorderToken,
+  AnyDimensionToken,
+  AnyDimensionTokenValue,
+  BorderToken, BorderTokenValue,
   ColorToken,
   ColorTokenValue,
   Token,
-  TokenType,
+  TokenType, Unit,
   UnreachableCaseError
 } from "@supernovaio/sdk-exporters"
-import { ColorFormatOptions, ColorHelper } from "@supernovaio/export-utils"
+import {
+  ColorFormat,
+  ColorFormatOptions,
+  ColorHelper,
+  sureOptionalReference,
+} from "@supernovaio/export-utils"
+
+export type TokenToKotlinOptions = ColorFormatOptions
 
 export function tokenValue(
   token: Token,
   allTokens: Map<string, Token>,
-  options: ColorFormatOptions
+  options: TokenToKotlinOptions
 ): string {
   //todo remove default value
   /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
@@ -21,7 +30,7 @@ export function tokenValue(
       value = convertColorToken((token as ColorToken).value, allTokens, options)
       break
     case TokenType.border:
-      value = this.borderTokenValueToCSS((token as BorderToken).value, allTokens, options)
+      // value = convertBorderToken((token as BorderToken).value, allTokens, options)
       break
     case TokenType.gradient:
       // value = this.gradientTokenValueToCSS((token as GradientToken).value, allTokens, options)
@@ -38,7 +47,7 @@ export function tokenValue(
     case TokenType.radius:
     case TokenType.duration:
     case TokenType.zIndex:
-      // value = this.dimensionTokenValueToCSS((token as AnyDimensionToken).value, allTokens, options)
+      value = convertDimensionToken((token as AnyDimensionToken).value, allTokens, options)
       break
     case TokenType.shadow:
       // value = this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
@@ -87,4 +96,66 @@ function convertColorToken(
 ): string {
   //todo test partial references
   return ColorHelper.formattedColorOrVariableName(color, allTokens, options)
+}
+
+//todo fix options
+function convertBorderToken(
+  border: BorderTokenValue,
+  allTokens: Map<string, Token>,
+  options: TokenToKotlinOptions
+): string {
+  //todo
+  const reference = sureOptionalReference(border.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+  const data = {
+    width: this.dimensionTokenValueToCSS(border.width, allTokens, options),
+    style: this.borderStyleToCSS(border.style),
+    color: convertColorToken(border.color, allTokens, options),
+    position: this.borderPositionToCSS(border.position) // Not used for now
+  }
+  return `${data.width} ${data.style} ${data.color}`
+}
+
+function convertDimensionToken(
+  dimension: AnyDimensionTokenValue,
+  allTokens: Map<string, Token>,
+  options: TokenToKotlinOptions
+): string {
+  const reference = sureOptionalReference(dimension.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+
+  const rounded = ColorHelper.roundToDecimals(dimension.measure, options.decimals)
+
+  // Percent requires scaling to 0-1 for Kotlin float
+  if (dimension.unit === Unit.percent) {
+    const fraction = +(rounded) / 100
+    return `${fraction}f`
+  }
+
+  return `${rounded}${unitToKotlin(dimension.unit)}`
+}
+
+/** Maps Supernova units to Kotlin / Compose extension suffixes */
+function unitToKotlin(unit: Unit): string {
+  switch (unit) {
+    case Unit.percent:
+      // Float literal (0.5f)
+      return "f"
+    case Unit.pixels:
+      // density‑independent pixels
+      return ".dp"
+    case Unit.rem:
+      // scale‑independent pixels for typography
+      return ".sp"
+    case Unit.ms:
+    case Unit.raw:
+      // plain number
+      return ""
+    default:
+      return ".dp"
+  }
 }

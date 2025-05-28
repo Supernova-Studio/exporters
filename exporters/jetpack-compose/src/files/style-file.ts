@@ -86,16 +86,17 @@ export function styleOutputFile(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   // Convert tokens to CSS variable declarations
-  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
+  const classVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
 
+  //todo separate files - each has unique name
   // Determine the CSS selector based on whether this is a theme file
   // const selector = themePath
   //   ? exportConfiguration.themeSelector.replace('{theme}', themePath)
   //   : exportConfiguration.cssSelector
   const tokensClass = "object DesignTokens"
 
-  // Construct the file content with CSS variables wrapped in selector
-  let content = `${tokensClass} {\n${cssVariables}\n}`
+  // Construct the file content with a class with token variables
+  let content = `${tokensClass} {\n${classVariables}\n}`
 
   // Optionally add a generated file disclaimer
   if (exportConfiguration.showGeneratedFileDisclaimer) {
