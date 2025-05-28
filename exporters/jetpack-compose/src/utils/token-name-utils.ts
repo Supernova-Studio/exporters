@@ -17,6 +17,7 @@ import { getTokenPrefix } from "../content/token"
  * @returns Formatted variable name string
  */
 export function tokenName(token: Token, tokenGroups: Array<TokenGroup>, collections: Array<DesignSystemCollection> = []): string {
+  //todo makes sense to add prefix of type?
   const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
 
