@@ -4,7 +4,9 @@ import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileStructure } from "../../config"
-import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
+import {
+  DesignSystemCollection
+} from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 
 /**
  * Main entry point for generating style files
@@ -18,7 +20,7 @@ import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typ
 export function generateStyleFiles(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  themePath: string = '',
+  themePath: string = "",
   theme?: TokenTheme,
   tokenCollections: Array<DesignSystemCollection> = []
 ): Array<OutputTextFile> {
@@ -51,11 +53,11 @@ export function generateStyleFiles(
  * @returns OutputTextFile object if file should be generated, null otherwise
  */
 export function styleOutputFile(
-  type: TokenType, 
-  tokens: Array<Token>, 
-  tokenGroups: Array<TokenGroup>, 
-  themePath: string = '', 
-  theme?: TokenTheme, 
+  type: TokenType,
+  tokens: Array<Token>,
+  tokenGroups: Array<TokenGroup>,
+  themePath: string = "",
+  theme?: TokenTheme,
   tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
@@ -69,7 +71,7 @@ export function styleOutputFile(
   // For theme files: filter tokens to only include those that are themed
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
     tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
-    
+
     // Skip generating theme file if no tokens are themed for this type
     if (tokensOfType.length === 0) {
       return null
@@ -94,7 +96,7 @@ export function styleOutputFile(
 
   // Construct the file content with CSS variables wrapped in selector
   let content = `${tokensClass} {\n${cssVariables}\n}`
-  
+
   // Optionally add a generated file disclaimer
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
@@ -109,18 +111,16 @@ export function styleOutputFile(
   // Get the filename based on configuration or defaults
   let fileName = exportConfiguration.customizeStyleFileNames
     ? exportConfiguration.styleFileNames[type]
-    : FileNameHelper.getDefaultStyleFileName(type, 'kt')
+    : FileNameHelper.getDefaultStyleFileName(type, "kt")
 
   // Ensure proper .kt extension
-  if (!fileName.toLowerCase().endsWith('.kt')) {
-    fileName += '.kt'
-  }
+  fileName = FileNameHelper.ensureFileExtension(fileName, "kt")
 
   // Create and return the output file object
   return FileHelper.createTextFile({
     relativePath: relativePath,
     fileName: fileName,
-    content: content,
+    content: content
   })
 }
 
@@ -130,7 +130,7 @@ export function styleOutputFile(
 function generateCombinedStyleFile(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  themePath: string = '',
+  themePath: string = "",
   theme?: TokenTheme,
   tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
@@ -139,7 +139,7 @@ function generateCombinedStyleFile(
   // For theme files: filter tokens to only include those that are themed
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
     processedTokens = ThemeHelper.filterThemedTokens(processedTokens, theme)
-    
+
     // Skip generating theme file if no tokens are themed
     if (processedTokens.length === 0) {
       return null
@@ -153,32 +153,32 @@ function generateCombinedStyleFile(
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
-  
+
   // Convert all tokens to CSS variable declarations
   const cssVariables = processedTokens
     .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections))
     .join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
-  const selector = themePath 
-    ? exportConfiguration.themeSelector.replace('{theme}', themePath)
+  const selector = themePath
+    ? exportConfiguration.themeSelector.replace("{theme}", themePath)
     : exportConfiguration.cssSelector
-  
+
   // Construct the file content
   let content = `${selector} {\n${cssVariables}\n}`
-  
+
   if (exportConfiguration.showGeneratedFileDisclaimer) {
     content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
   }
 
   // For single file mode, themed files go directly in root with theme-based names
-  const fileName = themePath ? `tokens.${themePath}.kt` : 'tokens.kt'
-  const relativePath = './' // Put files directly in root folder
+  const fileName = themePath ? `tokens.${themePath}.kt` : "tokens.kt"
+  const relativePath = "./" // Put files directly in root folder
 
   // Create and return the output file
   return FileHelper.createTextFile({
     relativePath: relativePath,
     fileName: fileName,
-    content: content,
+    content: content
   })
 }

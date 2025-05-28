@@ -31,7 +31,7 @@ function processOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutput
  * @returns Promise resolving to an array of output files
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  // Fetch data from design system that is currently being exported
+  // Fetch data from the design system that is currently being exported
   const remoteVersionIdentifier: RemoteVersionIdentifier = {
     designSystemId: context.dsId,
     versionId: context.versionId,

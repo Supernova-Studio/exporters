@@ -1,26 +1,13 @@
 import {
   DesignSystemCollection
 } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
-import {
-  ColorFormat,
-  ColorFormatOptions,
-  ColorHelper,
-  GeneralHelper,
-  NamingHelper,
-  StringCase
-} from "@supernovaio/export-utils"
+import { ColorFormat, ColorFormatOptions, GeneralHelper } from "@supernovaio/export-utils"
 
-import {
-  ColorToken,
-  ColorTokenValue,
-  Token,
-  TokenGroup,
-  TokenType,
-  UnreachableCaseError
-} from "@supernovaio/sdk-exporters"
+import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
-import { TokenNameStructure } from "../../config"
+import { tokenName } from "../utils/token-name-utils"
+import { tokenValue } from "../utils/token-value-utils"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -49,10 +36,23 @@ export function convertedToken(
   collections: Array<DesignSystemCollection> = []
 ): string {
   // Generate the variable name based on token properties and configuration
-  const name = tokenVariableName(token, tokenGroups, collections)
+  const name = tokenName(token, tokenGroups, collections)
+
+  const options = {
+    colorFormat: ColorFormat.hex8,
+    allowReferences: exportConfiguration.useReferences,
+    //todo decimals
+    decimals: 0,
+    tokenToVariableRef: (token: Token) => {
+      return tokenName(token, tokenGroups, collections)
+    },
+    rawValueFormatter: (rawValue: string) => {
+      return `Color(0x${rawValue})`
+    }
+  } satisfies ColorFormatOptions
 
   // Convert token value to object instance, handling references and formatting according to configuration
-  const value = tokenVariableValue(token, mappedTokens, tokenGroups, collections, exportConfiguration.useReferences)
+  const value = tokenValue(token, mappedTokens, options)
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   // Add description comment if enabled and description exists
@@ -63,132 +63,3 @@ export function convertedToken(
   }
 }
 
-//todo extract?
-//todo options
-function tokenVariableValue(
-  token: Token,
-  allTokens: Map<string, Token>,
-  tokenGroups: Array<TokenGroup>,
-  collections: Array<DesignSystemCollection>,
-  allowReferences: boolean
-): string {
-  //todo remove default value
-  /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
-  let value: string = ""
-  switch (token.tokenType) {
-    case TokenType.color:
-      value = convertColorToken((token as ColorToken).value, allTokens, tokenGroups, collections,
-        allowReferences
-      )
-      break
-    case TokenType.border:
-      // value = this.borderTokenValueToCSS((token as BorderToken).value, allTokens, options)
-      break
-    case TokenType.gradient:
-      // value = this.gradientTokenValueToCSS((token as GradientToken).value, allTokens, options)
-      break
-    case TokenType.dimension:
-    case TokenType.size:
-    case TokenType.space:
-    case TokenType.opacity:
-    case TokenType.fontSize:
-    case TokenType.lineHeight:
-    case TokenType.letterSpacing:
-    case TokenType.paragraphSpacing:
-    case TokenType.borderWidth:
-    case TokenType.radius:
-    case TokenType.duration:
-    case TokenType.zIndex:
-      // value = this.dimensionTokenValueToCSS((token as AnyDimensionToken).value, allTokens, options)
-      break
-    case TokenType.shadow:
-      // value = this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
-      break
-    case TokenType.fontWeight:
-      // value = this.fontWeightTokenValueToCSS((token as FontWeightToken).value, allTokens, options)
-      break
-    case TokenType.fontFamily:
-    case TokenType.productCopy:
-    case TokenType.string:
-      // value = this.stringTokenValueToCSS((token as AnyStringToken).value, allTokens, options)
-      break
-    case TokenType.textCase:
-    case TokenType.textDecoration:
-    case TokenType.visibility:
-      // value = this.optionTokenValueToCSS((token as AnyOptionToken).value, allTokens, options, token.tokenType)
-      break
-    case TokenType.blur:
-      // value = this.blurTokenValueToCSS((token as BlurToken).value, allTokens, options)
-      break
-    case TokenType.typography:
-      // value = this.typographyTokenValueToCSS((token as TypographyToken).value, allTokens, options)
-      break
-    default:
-      throw new UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:")
-  }
-
-  // Allow value transformation if transformer exists
-  // if (options.valueTransformer) {
-  //   const transformedValue = options.valueTransformer(value, token)
-  //   if (transformedValue !== undefined) {
-  //     return transformedValue
-  //   }
-  // }
-
-
-  return value
-}
-
-//todo fix options
-//tdoo rem?
-function convertColorToken(
-  color: ColorTokenValue,
-  allTokens: Map<string, Token>,
-  tokenGroups: Array<TokenGroup>,
-  collections: Array<DesignSystemCollection>,
-  allowReferences: boolean
-): string {
-  const options = {
-    colorFormat: ColorFormat.hex8,
-    allowReferences: allowReferences,
-    //todo decimals
-    decimals: 0,
-    tokenToVariableRef: (token: Token) => {
-      return tokenVariableName(token, tokenGroups, collections)
-    },
-    rawValueFormatter: (rawValue: string) => {
-      return `Color(0x${rawValue})`
-    }
-  } satisfies ColorFormatOptions
-  //todo test partial references
-  return ColorHelper.formattedColorOrVariableName(color, allTokens, options)
-}
-
-
-/**
- * Generates a code-safe variable name for a token based on its properties and configuration.
- * Includes type-specific prefix and considers token hierarchy and collection.
- *
- * @param token - The token to generate a name for
- * @param tokenGroups - Array of token groups for determining token hierarchy
- * @param collections - Array of collections for resolving collection names
- * @returns Formatted variable name string
- * @returns Formatted variable name string
- */
-function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, collections: Array<DesignSystemCollection> = []): string {
-  const prefix = getTokenPrefix(token.tokenType)
-  const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
-
-  // Find a collection if needed and exists
-  let collection: DesignSystemCollection | null = null
-  if (exportConfiguration.tokenNameStructure === TokenNameStructure.CollectionPathAndName && token.collectionId) {
-    collection = collections.find((c) => c.persistentId === token.collectionId) ?? ({ name: token.collectionId } as DesignSystemCollection)
-  }
-
-  return NamingHelper.codeSafeVariableNameForToken(
-    token,
-    StringCase.camelCase,
-    exportConfiguration.tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
-    [exportConfiguration.globalNamePrefix, prefix, collection?.name].filter(Boolean).join("")
-  )
-}
