@@ -83,20 +83,32 @@ export function styleOutputFile(
     return null
   }
 
-  // Create a map of all tokens by ID for reference resolution
-  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
-  // Convert tokens to CSS variable declarations
-  const classVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
+  //todo customizable
+  const packageLiteral = "package com.supernova.tokens"
+
+  //todo all needed
+  const importsLiteral = `
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+`.trim()
 
   //todo separate files - each has unique name
   // Determine the CSS selector based on whether this is a theme file
   // const selector = themePath
   //   ? exportConfiguration.themeSelector.replace('{theme}', themePath)
   //   : exportConfiguration.cssSelector
-  const tokensClass = "object DesignTokens"
+  const classLiteral = "@Immutable\nobject DesignTokens"
+
+  // Create a map of all tokens by ID for reference resolution
+  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
+  // Convert tokens to Kotlin variable declarations
+  const tokenVariablesLiteral = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
 
   // Construct the file content with a class with token variables
-  let content = `${tokensClass} {\n${classVariables}\n}`
+  let content = `${packageLiteral}\n\n${importsLiteral}\n\n${classLiteral} {\n${tokenVariablesLiteral}\n}`
 
   // Optionally add a generated file disclaimer
   if (exportConfiguration.showGeneratedFileDisclaimer) {

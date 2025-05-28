@@ -1,12 +1,23 @@
 import {
   AnyDimensionToken,
-  AnyDimensionTokenValue, AnyOptionToken, AnyOptionTokenValue, AnyStringToken, AnyStringTokenValue,
-  BorderToken, BorderTokenValue,
+  AnyDimensionTokenValue,
+  AnyOptionToken,
+  AnyOptionTokenValue,
+  AnyStringToken,
+  AnyStringTokenValue,
+  BlurToken,
+  BlurTokenValue,
+  BorderToken,
+  BorderTokenValue,
   ColorToken,
-  ColorTokenValue, TextCase, TextDecoration,
+  ColorTokenValue, FontWeightToken,
+  TextCase,
+  TextDecoration,
   Token,
-  TokenType, Unit,
-  UnreachableCaseError, VisibilityType
+  TokenType,
+  Unit,
+  UnreachableCaseError,
+  VisibilityType
 } from "@supernovaio/sdk-exporters"
 import {
   ColorFormat,
@@ -54,7 +65,7 @@ export function tokenValue(
       // value = this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
       break
     case TokenType.fontWeight:
-      // value = this.fontWeightTokenValueToCSS((token as FontWeightToken).value, allTokens, options)
+      value = fontWeightTokenValueToKotlin((token as FontWeightToken).value, allTokens, options)
       break
     case TokenType.fontFamily:
     case TokenType.productCopy:
@@ -67,7 +78,7 @@ export function tokenValue(
       value = optionTokenValueToKotlin((token as AnyOptionToken).value, allTokens, options, token.tokenType)
       break
     case TokenType.blur:
-      // value = this.blurTokenValueToCSS((token as BlurToken).value, allTokens, options)
+      value = blurTokenValueToKotlin((token as BlurToken).value, allTokens, options)
       break
     case TokenType.typography:
       // value = this.typographyTokenValueToCSS((token as TypographyToken).value, allTokens, options)
@@ -75,15 +86,6 @@ export function tokenValue(
     default:
       throw new UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:")
   }
-
-  // Allow value transformation if transformer exists
-  // if (options.valueTransformer) {
-  //   const transformedValue = options.valueTransformer(value, token)
-  //   if (transformedValue !== undefined) {
-  //     return transformedValue
-  //   }
-  // }
-
 
   return value
 }
@@ -209,6 +211,7 @@ function textCaseToKotlin(textCase: TextCase): string {
   }
 }
 
+//todo import to the file
 function textDecorationToKotlin(textDecoration: TextDecoration): string {
   // Map directly onto androidx.compose.ui.text.TextDecoration
   switch (textDecoration) {
@@ -223,4 +226,104 @@ function textDecorationToKotlin(textDecoration: TextDecoration): string {
 
 function visibilityToKotlin(visibility: VisibilityType): string {
   return visibility === VisibilityType.visible ? "true" : "false"
+}
+
+function blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string {
+  const reference = sureOptionalReference(blur.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+  return `Modifier.blur(${dimensionTokenValueToKotlin(blur.radius, allTokens, options)})`
+}
+
+function fontWeightTokenValueToKotlin(
+  value: AnyStringTokenValue,
+  allTokens: Map<string, Token>,
+  options: TokenToKotlinOptions
+): string {
+  const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+
+  // Convert text weights to numerical values
+  const normalizedWeight = normalizeTextWeight(value.text)
+  return fontWeightIntToKotlin(normalizedWeight)
+}
+
+//todo reuse with css helper
+function normalizeTextWeight(weight: string): number {
+  // Convert to lowercase for case-insensitive comparison
+  const normalizedText = weight.toLowerCase().trim()
+
+  // First, check if it's already a valid number
+  const numericWeight = parseInt(normalizedText)
+  if (!isNaN(numericWeight)) {
+    return numericWeight
+  }
+
+  // Map common weight names to their numeric values
+  switch (normalizedText) {
+    case "thin":
+      return 100
+    case "hairline":
+      return 100
+    case "extra light":
+    case "extralight":
+    case "ultra light":
+    case "ultralight":
+      return 200
+    case "light":
+      return 300
+    case "normal":
+    case "regular":
+    case "book":
+      return 400
+    case "medium":
+      return 500
+    case "semi bold":
+    case "semibold":
+    case "demi bold":
+    case "demibold":
+      return 600
+    case "bold":
+      return 700
+    case "extra bold":
+    case "extrabold":
+    case "ultra bold":
+    case "ultrabold":
+      return 800
+    case "black":
+    case "heavy":
+      return 900
+    default:
+      // Default to normal weight (400) if the value is not recognized
+      return 400
+  }
+}
+
+function fontWeightIntToKotlin(weight: number): string {
+  switch (weight) {
+    case 100:
+      return "FontWeight.Thin"
+    case 200:
+      return "FontWeight.ExtraLight"
+    case 300:
+      return "FontWeight.Light"
+    case 400:
+      return "FontWeight.Normal"
+    case 500:
+      return "FontWeight.Medium"
+    case 600:
+      return "FontWeight.SemiBold"
+    case 700:
+      return "FontWeight.Bold"
+    case 800:
+      return "FontWeight.ExtraBold"
+    case 900:
+      return "FontWeight.Black"
+    default:
+      // Uncommon custom weight
+      return `FontWeight(${weight})`
+  }
 }
