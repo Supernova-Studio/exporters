@@ -1,6 +1,6 @@
 import {
   AnyDimensionToken,
-  AnyDimensionTokenValue,
+  AnyDimensionTokenValue, AnyStringToken, AnyStringTokenValue,
   BorderToken, BorderTokenValue,
   ColorToken,
   ColorTokenValue,
@@ -12,7 +12,7 @@ import {
   ColorFormat,
   ColorFormatOptions,
   ColorHelper,
-  sureOptionalReference,
+  sureOptionalReference, TokenToCSSOptions
 } from "@supernovaio/export-utils"
 
 export type TokenToKotlinOptions = ColorFormatOptions
@@ -58,7 +58,7 @@ export function tokenValue(
     case TokenType.fontFamily:
     case TokenType.productCopy:
     case TokenType.string:
-      // value = this.stringTokenValueToCSS((token as AnyStringToken).value, allTokens, options)
+      value = convertStringToken((token as AnyStringToken).value, allTokens, options)
       break
     case TokenType.textCase:
     case TokenType.textDecoration:
@@ -158,4 +158,16 @@ function unitToKotlin(unit: Unit): string {
     default:
       return ".dp"
   }
+}
+
+function convertStringToken(
+  value: AnyStringTokenValue,
+  allTokens: Map<string, Token>,
+  options: TokenToCSSOptions
+): string {
+  const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+  return `"${value.text}"`
 }
