@@ -47,10 +47,6 @@ export function convertedToken(
     tokenToVariableRef: (token: Token) => {
       return tokenName(token, tokenGroups, collections)
     },
-    //todo only color - change
-    rawValueFormatter: (rawValue: string) => {
-      return `Color(0x${rawValue})`
-    }
   } satisfies TokenToKotlinOptions
 
   // Convert token value to object instance, handling references and formatting according to configuration

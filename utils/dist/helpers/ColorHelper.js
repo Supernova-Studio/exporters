@@ -39,7 +39,7 @@ class ColorHelper {
         // If there are no references, format the color raw
         if (!fullReferenceName && !colorReferenceName && !opacityReferenceName) {
             const result = this.formattedColor(color, options.colorFormat, options.decimals);
-            return options.rawValueFormatter ? options.rawValueFormatter(result) : result;
+            return options.rawColorTokenFormatter ? options.rawColorTokenFormatter(result) : result;
         }
         // If there are partial references, we'll use the references where possible and return the raw format for the rest
         let result;
@@ -52,7 +52,7 @@ class ColorHelper {
             default:
                 result = this.formattedColor(color, options.colorFormat, options.decimals);
         }
-        return options.rawValueFormatter ? options.rawValueFormatter(result) : result;
+        return options.rawColorTokenFormatter ? options.rawColorTokenFormatter(result) : result;
     }
     /**
      * Formats Supernova color token value to a string based on the selected format. For fractional formats, the number of decimals can be specified.

@@ -27,7 +27,10 @@ import {
 } from "@supernovaio/export-utils"
 import { exportConfiguration } from "../index"
 
-export type TokenToKotlinOptions = ColorFormatOptions & { indent: number }
+type InternalOptions = ColorFormatOptions & { indent: number }
+
+// No need to expose rawColorTokenFormatter, the format is standardized
+export type TokenToKotlinOptions = Omit<InternalOptions, "rawColorTokenFormatter">
 
 //todo extract to kotlinhelper
 export function tokenValue(
@@ -36,8 +39,11 @@ export function tokenValue(
   options: TokenToKotlinOptions
 ): string {
   const actualOptions = {
+    rawColorTokenFormatter: (rawValue: string) => {
+      return `Color(0x${rawValue})`
+    },
     ...options
-  }
+  } satisfies InternalOptions
 
   //todo remove default value
   /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
@@ -102,14 +108,13 @@ function colorTokenValueToKotlin(
   allTokens: Map<string, Token>,
   options: ColorFormatOptions
 ): string {
-  //todo test partial references
   return ColorHelper.formattedColorOrVariableName(color, allTokens, options)
 }
 
 function borderTokenValueToKotlin(
   border: BorderTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToKotlinOptions
+  options: InternalOptions
 ): string {
   //todo
   const reference = sureOptionalReference(border.referencedTokenId, allTokens, options.allowReferences)
@@ -128,7 +133,7 @@ function borderTokenValueToKotlin(
 function dimensionTokenValueToKotlin(
   dimension: AnyDimensionTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToKotlinOptions
+  options: InternalOptions
 ): string {
   const reference = sureOptionalReference(dimension.referencedTokenId, allTokens, options.allowReferences)
   if (reference) {
@@ -170,7 +175,7 @@ function unitToKotlin(unit: Unit): string {
 function stringTokenValueToKotlin(
   value: AnyStringTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToKotlinOptions
+  options: InternalOptions
 ): string {
   const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
   if (reference) {
@@ -182,7 +187,7 @@ function stringTokenValueToKotlin(
 function optionTokenValueToKotlin(
   option: AnyOptionTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToKotlinOptions,
+  options: InternalOptions,
   tokenType: TokenType
 ): string {
   const reference = sureOptionalReference(option.referencedTokenId, allTokens, options.allowReferences)
@@ -233,7 +238,7 @@ function visibilityToKotlin(visibility: VisibilityType): string {
   return visibility === VisibilityType.visible ? "true" : "false"
 }
 
-function blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: TokenToKotlinOptions): string {
+function blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: InternalOptions): string {
   const reference = sureOptionalReference(blur.referencedTokenId, allTokens, options.allowReferences)
   if (reference) {
     return options.tokenToVariableRef(reference)
@@ -244,7 +249,7 @@ function blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Tok
 function fontWeightTokenValueToKotlin(
   value: AnyStringTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToKotlinOptions
+  options: InternalOptions
 ): string {
   const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
   if (reference) {
@@ -336,7 +341,7 @@ function fontWeightIntToKotlin(weight: number): string {
 function typographyTokenValueToKotlin(
   typography: TypographyTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToKotlinOptions
+  options: InternalOptions
 ): string {
   // Reference full typography token if set
   const reference = sureOptionalReference(typography.referencedTokenId, allTokens, options.allowReferences)

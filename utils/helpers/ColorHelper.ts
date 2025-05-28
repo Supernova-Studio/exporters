@@ -7,7 +7,7 @@ export type ColorFormatOptions = {
   colorFormat: ColorFormat
   decimals: number
   tokenToVariableRef: (token: Token) => string
-  rawValueFormatter?: (rawValue: string) => string
+  rawColorTokenFormatter?: (rawValue: string) => string
 }
 
 /** A utility class to help with transformation of colors to various formats */
@@ -52,7 +52,7 @@ export class ColorHelper {
     // If there are no references, format the color raw
     if (!fullReferenceName && !colorReferenceName && !opacityReferenceName) {
       const result = this.formattedColor(color, options.colorFormat, options.decimals)
-      return options.rawValueFormatter ? options.rawValueFormatter(result) : result
+      return options.rawColorTokenFormatter ? options.rawColorTokenFormatter(result) : result
     }
 
     // If there are partial references, we'll use the references where possible and return the raw format for the rest
@@ -74,7 +74,7 @@ export class ColorHelper {
         result = this.formattedColor(color, options.colorFormat, options.decimals)
     }
 
-    return options.rawValueFormatter ? options.rawValueFormatter(result) : result
+    return options.rawColorTokenFormatter ? options.rawColorTokenFormatter(result) : result
   }
 
   /**
