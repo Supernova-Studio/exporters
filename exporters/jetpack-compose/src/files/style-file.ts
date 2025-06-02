@@ -89,9 +89,26 @@ export function styleOutputFile(
   //todo all needed
   const importsLiteral = `
 import androidx.compose.runtime.Immutable
+
+/* Units & geometry */
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Offset
+
+/* Colors & drawing */
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.Shadow
+
+/* Border & Blur helpers */
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.unit.dp
+
+/* Typography */
+import androidx.compose.ui.text.TextDecoration
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 `.trim()
 

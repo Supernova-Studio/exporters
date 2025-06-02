@@ -6,25 +6,28 @@ import {
   AnyStringToken,
   AnyStringTokenValue,
   BlurToken,
-  BlurTokenValue, BorderPosition, BorderStyle,
+  BlurTokenValue,
   BorderToken,
   BorderTokenValue,
   ColorToken,
-  ColorTokenValue, FontWeightToken, GradientToken, GradientTokenValue, GradientType,
+  ColorTokenValue,
+  FontWeightToken,
+  GradientToken,
+  GradientTokenValue,
+  GradientType,
+  ShadowToken,
+  ShadowTokenValue,
   TextCase,
   TextDecoration,
   Token,
-  TokenType, TypographyToken, TypographyTokenValue,
+  TokenType,
+  TypographyToken,
+  TypographyTokenValue,
   Unit,
   UnreachableCaseError,
   VisibilityType
 } from "@supernovaio/sdk-exporters"
-import {
-  ColorFormat,
-  ColorFormatOptions,
-  ColorHelper, GeneralHelper,
-  sureOptionalReference, TokenToCSSOptions
-} from "@supernovaio/export-utils"
+import { ColorFormatOptions, ColorHelper, GeneralHelper, sureOptionalReference } from "@supernovaio/export-utils"
 import { exportConfiguration } from "../index"
 
 type InternalOptions = ColorFormatOptions & { indent: number }
@@ -45,9 +48,8 @@ export function tokenValue(
     ...options
   } satisfies InternalOptions
 
-  //todo remove default value
   /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
-  let value: string = ""
+  let value: string
   switch (token.tokenType) {
     case TokenType.color:
       value = colorTokenValueToKotlin((token as ColorToken).value, allTokens, actualOptions)
@@ -73,7 +75,7 @@ export function tokenValue(
       value = dimensionTokenValueToKotlin((token as AnyDimensionToken).value, allTokens, actualOptions)
       break
     case TokenType.shadow:
-      // value = this.shadowTokenValueToCSS((token as ShadowToken).value, allTokens, options)
+      value = shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, options)
       break
     case TokenType.fontWeight:
       value = fontWeightTokenValueToKotlin((token as FontWeightToken).value, allTokens, actualOptions)
@@ -101,8 +103,6 @@ export function tokenValue(
   return value
 }
 
-//todo fix options
-//todo rem? - config option
 function colorTokenValueToKotlin(
   color: ColorTokenValue,
   allTokens: Map<string, Token>,
@@ -132,75 +132,100 @@ function gradientTokenValueToKotlin(
   allTokens: Map<string, Token>,
   options: InternalOptions
 ): string {
-  // Export each layer of the gradient separately, then join the CSS background
-  return gradients.map((gradient) => gradientLayerToKotlin(gradient, allTokens, options)).join(", ")
+
+  // Compose can draw only one Brush per shape; export all layers anyway
+  // so callers may overlay them manually
+  const layers = gradients.map(g => gradientLayerToKotlin(g, allTokens, options))
+  return layers.length === 1
+    ? layers[0]
+    : `listOf(${layers.join(", ")})`
 }
 
-/** Converts gradient token value to Kotlin definition */
+/** Converts one gradient layer to a Brush literal */
 function gradientLayerToKotlin(
   value: GradientTokenValue,
   allTokens: Map<string, Token>,
-  options: TokenToCSSOptions
+  options: InternalOptions
 ): string {
   const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
   if (reference) {
     return options.tokenToVariableRef(reference)
   }
 
-  const deltaX =
-    ColorHelper.roundToDecimals(value.to.x, options.decimals) -
-    ColorHelper.roundToDecimals(value.from.x, options.decimals)
-  const deltaY =
-    ColorHelper.roundToDecimals(value.to.y, options.decimals) -
-    ColorHelper.roundToDecimals(value.from.y, options.decimals)
-
-  const rad = Math.atan2(deltaY, deltaX)
-  const deg = rad * (180 / Math.PI)
-
-  const getAngle = () => {
-    if (deltaX >= 0 && deltaY > 0) {
-      // top to bottom is 90deg but should be 180deg
-      return 90 + deg
-    }
-    if (deltaX > 0 && deltaY <= 0) {
-      // left to right is 0deg but should be 90deg
-      return 90 + deg
-    }
-    if (deltaX <= 0 && deltaY < 0) {
-      // bottom to top is -90deg but should be 0deg
-      return 90 + deg
-    }
-    // right to left is 180deg but should be -90deg
-    return deg - 270
-  }
-
-  let gradientType = ""
-  switch (value.type) {
-    case GradientType.linear:
-      gradientType = `linear-gradient(${getAngle()}deg, `
-      break
-    case GradientType.radial:
-      gradientType = "radial-gradient(circle, "
-      break
-    case GradientType.angular:
-      gradientType = "conic-gradient("
-      break
-    default:
-      gradientType = `linear-gradient(${getAngle()}deg, `
-      break
-  }
-
-  // Example: radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%);
-  const stops = value.stops
-    .map((stop) => {
-      return `${this.colorTokenValueToCSS(stop.color, allTokens, options)} ${ColorHelper.roundToDecimals(
-        stop.position * 100,
-        options.decimals
-      )}%`
-    })
+  // Convert color stops
+  const colorsLit = value.stops
+    .map(stop => colorTokenValueToKotlin(stop.color, allTokens, options))
     .join(", ")
 
-  return `${gradientType}${stops})`
+  const stopsLit = value.stops
+    .map(stop => ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
+    .join(", ")
+
+  // Choose Brush builder
+  switch (value.type) {
+    case GradientType.radial:
+      // centre = midpoint of from/to, radius = distance between them (rough)
+      const centerX = ((value.from.x + value.to.x) / 2).toFixed(2)
+      const centerY = ((value.from.y + value.to.y) / 2).toFixed(2)
+      return `Brush.radialGradient(\n` +
+        `    colors = listOf(${colorsLit}),\n` +
+        `    center = Offset(${centerX}f, ${centerY}f),\n` +
+        `    radius = 0.5f, /* relative to size */\n` +
+        `    tileMode = TileMode.Clamp,\n` +
+        `    stops = floatArrayOf(${stopsLit})\n` +
+        `)`
+
+    case GradientType.angular:
+      // sweep in Compose
+      return `Brush.sweepGradient(\n` +
+        `    colors = listOf(${colorsLit}),\n` +
+        `    center = Offset(0.5f, 0.5f), /* relative */\n` +
+        `    stops = floatArrayOf(${stopsLit})\n` +
+        `)`
+
+    case GradientType.linear:
+    default:
+      return `Brush.linearGradient(\n` +
+        `    colors = listOf(${colorsLit}),\n` +
+        `    stops = floatArrayOf(${stopsLit}),\n` +
+        `    start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
+        `    end   = Offset(${value.to.x}f,   ${value.to.y}f)\n` +
+        `)`
+  }
+}
+
+function shadowTokenValueToKotlin(
+  shadows: Array<ShadowTokenValue>,
+  allTokens: Map<string, Token>,
+  options: InternalOptions
+): string {
+  const layers = shadows.map(s => shadowLayerToKotlin(s, allTokens, options))
+
+  // Compose can draw only one shadow per shape; export all layers anyway
+  // so callers may overlay them manually
+  return layers.length === 1
+    ? layers[0]
+    : `listOf(${layers.join(", ")})`
+}
+
+function shadowLayerToKotlin(value: ShadowTokenValue, allTokens: Map<string, Token>, options: InternalOptions): string {
+  const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
+  if (reference) {
+    return options.tokenToVariableRef(reference)
+  }
+
+  const colorLit = colorTokenValueToKotlin(
+    { ...value.color, ...(value.opacity && { opacity: value.opacity }) },
+    allTokens,
+    options
+  )
+
+  // Unsupported in Compose and therefore silently ignored: spread, inner-shadow
+  const offsetX = ColorHelper.roundToDecimals(value.x, options.decimals)
+  const offsetY = ColorHelper.roundToDecimals(value.y, options.decimals)
+  const blur = ColorHelper.roundToDecimals(value.radius, options.decimals)
+
+  return `Shadow(color = ${colorLit}, offset = Offset(${offsetX}f, ${offsetY}f), blurRadius = ${blur}f)`
 }
 
 function dimensionTokenValueToKotlin(
