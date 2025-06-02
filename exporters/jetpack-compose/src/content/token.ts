@@ -1,13 +1,18 @@
 import {
   DesignSystemCollection
 } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
-import { ColorFormat, ColorFormatOptions, GeneralHelper } from "@supernovaio/export-utils"
+import {
+  ColorFormat,
+  ColorFormatOptions,
+  GeneralHelper,
+  KotlinHelper,
+  TokenToKotlinOptions
+} from "@supernovaio/export-utils"
 
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
 import { tokenName } from "../utils/token-name-utils"
-import { TokenToKotlinOptions, tokenValue } from "../utils/token-value-utils"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -41,7 +46,6 @@ export function convertedToken(
   const options = {
     colorFormat: ColorFormat.hex8,
     allowReferences: exportConfiguration.useReferences,
-    //todo decimals
     decimals: 0,
     indent: exportConfiguration.indent,
     tokenToVariableRef: (token: Token) => {
@@ -50,7 +54,7 @@ export function convertedToken(
   } satisfies TokenToKotlinOptions
 
   // Convert token value to object instance, handling references and formatting according to configuration
-  const value = tokenValue(token, mappedTokens, options)
+  const value = KotlinHelper.tokenValue(token, mappedTokens, options)
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   // Add description comment if enabled and description exists
