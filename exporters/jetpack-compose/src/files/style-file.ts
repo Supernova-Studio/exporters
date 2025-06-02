@@ -29,30 +29,31 @@ export function generateStyleFiles(
     return []
   }
 
+  const tokenTypes = [...new Set(tokens.map(token => token.tokenType))]
+
   // For single file output
-  if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-    const result = generateCombinedStyleFile(tokens, tokenGroups, themePath, theme, tokenCollections)
+  if (true) { //todo exportConfiguration.fileStructure === FileStructure.SingleFile
+    const result = generateCombinedFile(tokens, tokenGroups, themePath, theme, tokenCollections)
     return result ? [result] : []
   }
 
   // For separate files by type (existing logic)
-  const types = [...new Set(tokens.map(token => token.tokenType))]
-  return types
-    .map(type => styleOutputFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
+  return tokenTypes
+    .map(type => singleTypeFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
     .filter((file): file is OutputTextFile => file !== null)
 }
 
 /**
- * Generates a CSS output file for a specific token type, handling both base tokens and themed tokens
- * @param type - The type of tokens to generate styles for (colors, typography, etc.)
+ * Generates a Kotlin output file for a specific token type, handling both base tokens and themed tokens.
+ * @param type - The type of tokens to generate file for (colors, typography, etc.)
  * @param tokens - Array of all available tokens
  * @param tokenGroups - Array of token groups for reference
  * @param themePath - Optional path for theme-specific files (e.g. 'dark', 'light')
  * @param theme - Optional theme configuration for themed tokens
  * @param tokenCollections - Array of token collections for reference
- * @returns OutputTextFile object if file should be generated, null otherwise
+ * @returns OutputTextFile object if the file should be generated, null otherwise
  */
-export function styleOutputFile(
+function singleTypeFile(
   type: TokenType,
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
@@ -72,7 +73,7 @@ export function styleOutputFile(
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
     tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
 
-    // Skip generating theme file if no tokens are themed for this type
+    // Skip generating a theme file if no tokens are themed for this type
     if (tokensOfType.length === 0) {
       return null
     }
@@ -86,7 +87,7 @@ export function styleOutputFile(
   //todo customizable
   const packageLiteral = "package com.supernova.tokens"
 
-  //todo all needed
+  //todo only needed - check exported tokens type
   const importsLiteral = `
 import androidx.compose.runtime.Immutable
 
@@ -157,7 +158,7 @@ import androidx.compose.ui.text.font.FontWeight
 /**
  * Generates a single CSS file containing all token types
  */
-function generateCombinedStyleFile(
+function generateCombinedFile(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   themePath: string = "",
@@ -170,7 +171,7 @@ function generateCombinedStyleFile(
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
     processedTokens = ThemeHelper.filterThemedTokens(processedTokens, theme)
 
-    // Skip generating theme file if no tokens are themed
+    // Skip generating a theme file if no tokens are themed
     if (processedTokens.length === 0) {
       return null
     }
