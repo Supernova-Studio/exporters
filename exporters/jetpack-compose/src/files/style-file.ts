@@ -29,16 +29,14 @@ export function generateStyleFiles(
     return []
   }
 
-  const tokenTypes = [...new Set(tokens.map(token => token.tokenType))]
-
   // For single file output
-  if (true) { //todo exportConfiguration.fileStructure === FileStructure.SingleFile
+  if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
     const result = generateCombinedFile(tokens, tokenGroups, themePath, theme, tokenCollections)
     return result ? [result] : []
   }
 
   // For separate files by type (existing logic)
-  return tokenTypes
+  return [...new Set(tokens.map(token => token.tokenType))]
     .map(type => singleTypeFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
     .filter((file): file is OutputTextFile => file !== null)
 }
@@ -84,54 +82,7 @@ function singleTypeFile(
     return null
   }
 
-  //todo customizable
-  const packageLiteral = "package com.supernova.tokens"
-
-  //todo only needed - check exported tokens type
-  const importsLiteral = `
-import androidx.compose.runtime.Immutable
-
-/* Units & geometry */
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.geometry.Offset
-
-/* Colors & drawing */
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.Shadow
-
-/* Border & Blur helpers */
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-
-/* Typography */
-import androidx.compose.ui.text.TextDecoration
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-`.trim()
-
-  //todo separate files - each has unique name
-  // Determine the CSS selector based on whether this is a theme file
-  // const selector = themePath
-  //   ? exportConfiguration.themeSelector.replace('{theme}', themePath)
-  //   : exportConfiguration.cssSelector
-  const classLiteral = "@Immutable\nobject DesignTokens"
-
-  // Create a map of all tokens by ID for reference resolution
-  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
-  // Convert tokens to Kotlin variable declarations
-  const tokenVariablesLiteral = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
-
-  // Construct the file content with a class with token variables
-  let content = `${packageLiteral}\n\n${importsLiteral}\n\n${classLiteral} {\n${tokenVariablesLiteral}\n}`
-
-  // Optionally add a generated file disclaimer
-  if (exportConfiguration.showGeneratedFileDisclaimer) {
-    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
-  }
+  const content = generateFileContent(tokens, tokensOfType, tokenGroups, tokenCollections)
 
   //todo themes
   // Build the output path, using the theme subfolder for themed files
@@ -165,46 +116,28 @@ function generateCombinedFile(
   theme?: TokenTheme,
   tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
-  let processedTokens = tokens
+  let filteredTokens = tokens
 
   // For theme files: filter tokens to only include those that are themed
   if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
-    processedTokens = ThemeHelper.filterThemedTokens(processedTokens, theme)
+    filteredTokens = ThemeHelper.filterThemedTokens(filteredTokens, theme)
 
     // Skip generating a theme file if no tokens are themed
-    if (processedTokens.length === 0) {
+    if (filteredTokens.length === 0) {
       return null
     }
   }
 
   // Skip generating file if there are no tokens and empty files are disabled
-  if (!exportConfiguration.generateEmptyFiles && processedTokens.length === 0) {
+  if (!exportConfiguration.generateEmptyFiles && filteredTokens.length === 0) {
     return null
   }
 
-  // Create a map of all tokens by ID for reference resolution
-  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
-
-  // Convert all tokens to CSS variable declarations
-  const cssVariables = processedTokens
-    .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections))
-    .join("\n")
-
-  // Determine the CSS selector based on whether this is a theme file
-  const selector = themePath
-    ? exportConfiguration.themeSelector.replace("{theme}", themePath)
-    : exportConfiguration.cssSelector
-
-  // Construct the file content
-  let content = `${selector} {\n${cssVariables}\n}`
-
-  if (exportConfiguration.showGeneratedFileDisclaimer) {
-    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
-  }
+  const content = generateFileContent(tokens, filteredTokens, tokenGroups, tokenCollections)
 
   // For single file mode, themed files go directly in root with theme-based names
   const fileName = themePath ? `tokens.${themePath}.kt` : "tokens.kt"
-  const relativePath = "./" // Put files directly in root folder
+  const relativePath = "./" // Put files directly in the root folder
 
   // Create and return the output file
   return FileHelper.createTextFile({
@@ -212,4 +145,63 @@ function generateCombinedFile(
     fileName: fileName,
     content: content
   })
+}
+
+function generateFileContent(allTokens: Array<Token>,
+                             tokensToExport: Array<Token>,
+                             tokenGroups: Array<TokenGroup>,
+                             tokenCollections: Array<DesignSystemCollection>,
+                             themePath: string = ""
+) {
+
+  //todo customizable
+  const packageLiteral = "package com.supernova.tokens"
+
+  //todo only needed - check exported tokens type
+  const importsLiteral = `
+import androidx.compose.runtime.Immutable
+
+/* Units & geometry */
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Offset
+
+/* Colors & drawing */
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.Shadow
+
+/* Border & Blur helpers */
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+
+/* Typography */
+import androidx.compose.ui.text.TextDecoration
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+`.trim()
+
+  // Determine the Kotlin object name
+  const objectNameSuffix = themePath
+    ? exportConfiguration.objectSuffixForThemes.replace("{theme}", themePath)
+    : ""
+  const objectLiteral = `@Immutable
+object ${exportConfiguration.objectName}${objectNameSuffix}`
+
+  // Create a map of all tokens by ID for reference resolution
+  const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
+  // Convert tokens to Kotlin variable declarations
+  const tokenVariablesLiteral = tokensToExport.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
+
+  // Construct the file content with an object with token variables
+  let content = `${packageLiteral}\n\n${importsLiteral}\n\n${objectLiteral} {\n${tokenVariablesLiteral}\n}`
+
+  // Optionally add a generated file disclaimer
+  if (exportConfiguration.showGeneratedFileDisclaimer) {
+    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
+  }
+
+  return content
 }

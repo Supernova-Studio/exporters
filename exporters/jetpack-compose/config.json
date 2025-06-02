@@ -381,18 +381,18 @@
         }
     },
     {
-        "key": "cssSelector",
+        "key": "objectName",
         "type": "string",
-        "default": ":root",
-        "title": "CSS selector",
+        "default": "DesignTokens",
+        "title": "Name of the Kotlin object where tokens are defined",
         "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
         "category": "CSS selectors"
     },
     {
-        "key": "themeSelector",
+        "key": "objectSuffixForThemes",
         "type": "string",
-        "default": ".theme-{theme}",
-        "title": "CSS selector for themes",
+        "default": "{theme}Theme",
+        "title": "Theme suffix added to the Kotlin object name",
         "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
         "category": "CSS selectors"
     },

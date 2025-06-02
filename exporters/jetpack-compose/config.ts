@@ -52,10 +52,10 @@ export type ExporterConfiguration = {
   baseStyleFilePath: string
   /** Index file will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
   baseIndexFilePath: string
-  /** CSS selector where variables will be defined */
-  cssSelector: string
-  /** CSS selector pattern for themes, {theme} will be replaced with theme name */
-  themeSelector: string
+  /** Name of the Kotlin object where tokens are defined */
+  objectName: string
+  /** Theme suffix added to the Kotlin object name, {theme} will be replaced with the theme name */
+  objectSuffixForThemes: string
   /** Controls how themes are exported in the CSS files */
   exportThemesAs: ThemeExportStyle
   /** When enabled, themed files will only include tokens that have different values from the base theme */
