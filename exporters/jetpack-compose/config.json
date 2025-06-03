@@ -1,343 +1,342 @@
 [
-    {
-        "key": "tokenNameStructure",
-        "type": "enum",
-        "default": "pathAndName",
-        "title": "Token name structure",
-        "description": "Control what parts are included in the exporter token name.",
-        "category": "Token names",
-        "options": {
-            "pathAndName": {
-                "label": "Path + Name",
-                "description": "Include path and name (e.g. button-primary-background)"
-            },
-            "nameOnly": {
-                "label": "Name only",
-                "description": "Only include name (e.g. background)"
-            },
-            "collectionPathAndName": {
-                "label": "Collection + Path + Name",
-                "description": "Include collection, path, and name (e.g. core-button-primary-background)"
-            }
-        }
-    },
-    {
-        "key": "useReferences",
-        "type": "boolean",
-        "default": true,
-        "title": "Use token references",
-        "description": "Values will use references to other tokens (where applicable).",
-        "category": "Token values"
-    },
-    {
-        "key": "exportOnlyThemedTokens",
-        "type": "boolean",
-        "default": false,
-        "title": "Export only themed tokens",
-        "description": "Theme files will only include tokens that have different values from the base value.",
-        "category": "Themes"
-    },
-    {
-        "key": "exportBaseValues",
-        "type": "boolean",
-        "default": true,
-        "title": "Export base values",
-        "description": "Base token values will be exported along with themes.",
-        "category": "Themes"
-    },
-    {
-        "key": "generateIndexFile",
-        "type": "boolean",
-        "default": true,
-        "title": "Generate index file",
-        "description": "Generate a file with imports for all base and theme style files.",
-        "category": "Index file"
-    },
-    {
-        "key": "indexFileName",
-        "type": "string",
-        "default": "index.css",
-        "title": "Index filename",
-        "description": "The name of the index file that will be generated.",
-        "category": "Index file",
-        "dependsOn": {
-            "generateIndexFile": true
-        }
-    },
-    {
-        "key": "baseIndexFilePath",
-        "type": "string",
-        "default": "./",
-        "title": "Path to index file",
-        "description": "Index file will be written to this directory relative to export root.",
-        "category": "Index file",
-        "dependsOn": {
-            "generateIndexFile": true
-        }
-    },
-    {
-        "key": "fileStructure",
-        "type": "enum",
-        "default": "separateByType",
-        "title": "File structure",
-        "description": "Control how token variables are organized in files",
-        "category": "Style files",
-        "options": {
-            "separateByType": {
-                "label": "Separate files by type",
-                "description": "Generate separate files for each token type"
-            },
-            "singleFile": {
-                "label": "Single combined file",
-                "description": "Generate one file containing all token types"
-            }
-        }
-    },
-    {
-        "key": "singleObjectName",
-        "type": "string",
-        "default": "DesignTokens",
-        "title": "Name of the Kotlin object that contains all exported tokens",
-        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
-        "category": "CSS selectors"
-    },
-    {
-        "key": "generateEmptyFiles",
-        "type": "boolean",
-        "default": false,
-        "title": "Generate empty style files",
-        "description": "Generate empty style files instead of omitting them.",
-        "category": "Style files"
-    },
-    {
-        "key": "nonThemedFilePath",
-        "type": "string",
-        "default": "./base",
-        "title": "Path to non-themed object files",
-        "description": "All files without themes will be written to this directory relative to export root."
-    },
-    {
-        "key": "customizeStyleFileNames",
-        "type": "boolean",
-        "default": false,
-        "title": "Customize style file names",
-        "description": "Customize the file names for each token type."
-    },
-    {
-        "key": "styleFileNames",
-        "type": "object",
-        "title": "Style file names",
-        "description": "Name of each file that will be generated, grouped by token type.",
-        "dependsOn": {
-            "customizeStyleFileNames": true
-        },
-        "default": {
-            "Blur": "Blur.kt",
-            "Border": "Border.kt",
-            "BorderRadius": "BorderRadius.kt",
-            "BorderWidth": "BorderWidth.kt",
-            "Color": "Color.kt",
-            "Dimension": "Dimension.kt",
-            "Duration": "Duration.kt",
-            "FontFamily": "FontFamily.kt",
-            "FontSize": "FontSize.kt",
-            "FontWeight": "FontWeight.kt",
-            "Gradient": "Gradient.kt",
-            "LetterSpacing": "LetterSpacing.kt",
-            "LineHeight": "LineHeight.kt",
-            "Opacity": "Opacity.kt",
-            "ParagraphSpacing": "ParagraphSpacing.kt",
-            "ProductCopy": "ProductCopy.kt",
-            "Shadow": "Shadow.kt",
-            "Size": "Size.kt",
-            "Space": "Space.kt",
-            "String": "String.kt",
-            "TextCase": "TextCase.kt",
-            "TextDecoration": "TextDecoration.kt",
-            "Typography": "Typography.kt",
-            "Visibility": "Visibility.kt",
-            "ZIndex": "ZIndex.kt"
-        },
-        "allowedKeys": {
-            "options": [
-                "Color",
-                "Typography",
-                "Dimension",
-                "Size",
-                "Space",
-                "Opacity",
-                "FontSize",
-                "LineHeight",
-                "LetterSpacing",
-                "ParagraphSpacing",
-                "BorderWidth",
-                "BorderRadius",
-                "Duration",
-                "ZIndex",
-                "Shadow",
-                "Border",
-                "Gradient",
-                "String",
-                "ProductCopy",
-                "FontFamily",
-                "FontWeight",
-                "TextCase",
-                "TextDecoration",
-                "Visibility",
-                "Blur"
-            ],
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
-    },
-    {
-        "key": "globalNamePrefix",
-        "type": "string",
-        "default": "",
-        "title": "Global prefix",
-        "description": "Prefix all variable names (e.g., 'MyToken').",
-        "category": "Token names"
-    },
-    {
-        "key": "customizeTokenPrefixes",
-        "type": "boolean",
-        "default": false,
-        "title": "Customize type prefixes",
-        "description": "Customize the prefixes for each design token type.",
-        "category": "Token names"
-    },
-    {
-        "key": "tokenPrefixes",
-        "type": "object",
-        "title": "Token prefixes",
-        "description": "Each token of a specific type is prefixed with the following identifier.",
-        "category": "Token names",
-        "dependsOn": {
-            "customizeTokenPrefixes": true
-        },
-        "default": {
-            "Blur": "blur",
-            "Border": "border",
-            "BorderRadius": "borderRadius",
-            "BorderWidth": "borderWidth",
-            "Color": "color",
-            "Dimension": "dimension",
-            "Duration": "duration",
-            "FontFamily": "fontFamily",
-            "FontSize": "fontSize",
-            "FontWeight": "fontWeight",
-            "Gradient": "gradient",
-            "LetterSpacing": "letterSpacing",
-            "LineHeight": "lineHeight",
-            "Opacity": "opacity",
-            "ParagraphSpacing": "paragraphSpacing",
-            "ProductCopy": "productCopy",
-            "Shadow": "shadow",
-            "Size": "size",
-            "Space": "space",
-            "String": "string",
-            "TextCase": "textCase",
-            "TextDecoration": "textDecoration",
-            "Typography": "typography",
-            "Visibility": "visibility",
-            "ZIndex": "zIndex"
-        },
-        "allowedKeys": {
-            "options": [
-                "Color",
-                "Typography",
-                "Dimension",
-                "Size",
-                "Space",
-                "Opacity",
-                "FontSize",
-                "LineHeight",
-                "LetterSpacing",
-                "ParagraphSpacing",
-                "BorderWidth",
-                "BorderRadius",
-                "Duration",
-                "ZIndex",
-                "Shadow",
-                "Border",
-                "Gradient",
-                "String",
-                "ProductCopy",
-                "FontFamily",
-                "FontWeight",
-                "TextCase",
-                "TextDecoration",
-                "Visibility",
-                "Blur"
-            ],
-            "type": "string"
-        },
-        "allowedValues": {
-            "type": "string"
-        }
-    },
-
-    {
-        "key": "showDescriptions",
-        "type": "boolean",
-        "default": true,
-        "title": "Show token descriptions",
-        "description": "Show the token description as a code comment for every exported token.",
-        "category": "Other"
-    },
-    {
-        "key": "showGeneratedFileDisclaimer",
-        "type": "boolean",
-        "default": true,
-        "title": "Show file disclaimer",
-        "description": "A message explaining that the file was automatically generated will appear in all style files.",
-        "category": "Other"
-    },
-    {
-        "key": "disclaimer",
-        "type": "string",
-        "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
-        "title": "Disclaimer message",
-        "description": "A message explaining that the file was automatically generated will appear in all style files.",
-        "category": "Other",
-        "dependsOn": {
-            "showGeneratedFileDisclaimer": true
-        }
-    },
-    {
-        "key": "indent",
-        "type": "number",
-        "default": 2,
-        "title": "Indentation",
-        "description": "Number of spaces used to indent CSS variables.",
-        "category": "Other"
-    },
-    {
-        "key": "writeNameToProperty",
-        "type": "boolean",
-        "default": false,
-        "title": "Write generated variable names",
-        "description": "Save generated variable names back to tokens as custom properties.",
-        "category": "Automatic write-back"
-    },
-    {
-        "key": "propertyToWriteNameTo",
-        "type": "string",
-        "default": "CSS",
-        "title": "Custom property name",
-        "description": "Name of the custom property where generated variable names will be saved.",
-        "category": "Automatic write-back",
-        "dependsOn": {
-            "writeNameToProperty": true
-        }
-    },
-        {
-        "key": "packageName",
-        "type": "string",
-        "default": "io.supernova",
-        "title": "Package name",
-        "description": "Name of the package where tokens are exported"
+  {
+    "key": "tokenNameStructure",
+    "type": "enum",
+    "default": "pathAndName",
+    "title": "Token name structure",
+    "description": "Control what parts are included in the exporter token name.",
+    "category": "Token names",
+    "options": {
+      "pathAndName": {
+        "label": "Path + Name",
+        "description": "Include path and name (e.g. button-primary-background)"
+      },
+      "nameOnly": {
+        "label": "Name only",
+        "description": "Only include name (e.g. background)"
+      },
+      "collectionPathAndName": {
+        "label": "Collection + Path + Name",
+        "description": "Include collection, path, and name (e.g. core-button-primary-background)"
+      }
     }
+  },
+  {
+    "key": "useReferences",
+    "type": "boolean",
+    "default": true,
+    "title": "Use token references",
+    "description": "Values will use references to other tokens (where applicable).",
+    "category": "Token values"
+  },
+  {
+    "key": "exportOnlyThemedTokens",
+    "type": "boolean",
+    "default": false,
+    "title": "Export only themed tokens",
+    "description": "Theme files will only include tokens that have different values from the base value.",
+    "category": "Themes"
+  },
+  {
+    "key": "exportBaseValues",
+    "type": "boolean",
+    "default": true,
+    "title": "Export base values",
+    "description": "Base token values will be exported along with themes.",
+    "category": "Themes"
+  },
+  {
+    "key": "generateIndexFile",
+    "type": "boolean",
+    "default": true,
+    "title": "Generate index file",
+    "description": "Generate a file with imports for all base and theme style files.",
+    "category": "Index file"
+  },
+  {
+    "key": "indexFileName",
+    "type": "string",
+    "default": "index.css",
+    "title": "Index filename",
+    "description": "The name of the index file that will be generated.",
+    "category": "Index file",
+    "dependsOn": {
+      "generateIndexFile": true
+    }
+  },
+  {
+    "key": "baseIndexFilePath",
+    "type": "string",
+    "default": "./",
+    "title": "Path to index file",
+    "description": "Index file will be written to this directory relative to export root.",
+    "category": "Index file",
+    "dependsOn": {
+      "generateIndexFile": true
+    }
+  },
+  {
+    "key": "fileStructure",
+    "type": "enum",
+    "default": "separateByType",
+    "title": "File structure",
+    "description": "Control how token variables are organized in files",
+    "category": "Style files",
+    "options": {
+      "separateByType": {
+        "label": "Separate files by type",
+        "description": "Generate separate files for each token type"
+      },
+      "singleFile": {
+        "label": "Single combined file",
+        "description": "Generate one file containing all token types"
+      }
+    }
+  },
+  {
+    "key": "singleObjectName",
+    "type": "string",
+    "default": "DesignTokens",
+    "title": "Name of the Kotlin object that contains all exported tokens",
+    "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
+    "category": "CSS selectors"
+  },
+  {
+    "key": "generateEmptyFiles",
+    "type": "boolean",
+    "default": false,
+    "title": "Generate empty style files",
+    "description": "Generate empty style files instead of omitting them.",
+    "category": "Style files"
+  },
+  {
+    "key": "nonThemedFilePath",
+    "type": "string",
+    "default": "./base",
+    "title": "Path to non-themed object files",
+    "description": "All files without themes will be written to this directory relative to export root."
+  },
+  {
+    "key": "customizeStyleFileNames",
+    "type": "boolean",
+    "default": false,
+    "title": "Customize style file names",
+    "description": "Customize the file names for each token type."
+  },
+  {
+    "key": "styleFileNames",
+    "type": "object",
+    "title": "Style file names",
+    "description": "Name of each file that will be generated, grouped by token type.",
+    "dependsOn": {
+      "customizeStyleFileNames": true
+    },
+    "default": {
+      "Blur": "Blur.kt",
+      "Border": "Border.kt",
+      "BorderRadius": "BorderRadius.kt",
+      "BorderWidth": "BorderWidth.kt",
+      "Color": "Color.kt",
+      "Dimension": "Dimension.kt",
+      "Duration": "Duration.kt",
+      "FontFamily": "FontFamily.kt",
+      "FontSize": "FontSize.kt",
+      "FontWeight": "FontWeight.kt",
+      "Gradient": "Gradient.kt",
+      "LetterSpacing": "LetterSpacing.kt",
+      "LineHeight": "LineHeight.kt",
+      "Opacity": "Opacity.kt",
+      "ParagraphSpacing": "ParagraphSpacing.kt",
+      "ProductCopy": "ProductCopy.kt",
+      "Shadow": "Shadow.kt",
+      "Size": "Size.kt",
+      "Space": "Space.kt",
+      "String": "String.kt",
+      "TextCase": "TextCase.kt",
+      "TextDecoration": "TextDecoration.kt",
+      "Typography": "Typography.kt",
+      "Visibility": "Visibility.kt",
+      "ZIndex": "ZIndex.kt"
+    },
+    "allowedKeys": {
+      "options": [
+        "Color",
+        "Typography",
+        "Dimension",
+        "Size",
+        "Space",
+        "Opacity",
+        "FontSize",
+        "LineHeight",
+        "LetterSpacing",
+        "ParagraphSpacing",
+        "BorderWidth",
+        "BorderRadius",
+        "Duration",
+        "ZIndex",
+        "Shadow",
+        "Border",
+        "Gradient",
+        "String",
+        "ProductCopy",
+        "FontFamily",
+        "FontWeight",
+        "TextCase",
+        "TextDecoration",
+        "Visibility",
+        "Blur"
+      ],
+      "type": "string"
+    },
+    "allowedValues": {
+      "type": "string"
+    }
+  },
+  {
+    "key": "globalNamePrefix",
+    "type": "string",
+    "default": "",
+    "title": "Global prefix",
+    "description": "Prefix all variable names (e.g., 'MyToken').",
+    "category": "Token names"
+  },
+  {
+    "key": "customizeTokenPrefixes",
+    "type": "boolean",
+    "default": false,
+    "title": "Customize type prefixes",
+    "description": "Customize the prefixes for each design token type.",
+    "category": "Token names"
+  },
+  {
+    "key": "tokenPrefixes",
+    "type": "object",
+    "title": "Token prefixes",
+    "description": "Each token of a specific type is prefixed with the following identifier.",
+    "category": "Token names",
+    "dependsOn": {
+      "customizeTokenPrefixes": true
+    },
+    "default": {
+      "Blur": "blur",
+      "Border": "border",
+      "BorderRadius": "borderRadius",
+      "BorderWidth": "borderWidth",
+      "Color": "color",
+      "Dimension": "dimension",
+      "Duration": "duration",
+      "FontFamily": "fontFamily",
+      "FontSize": "fontSize",
+      "FontWeight": "fontWeight",
+      "Gradient": "gradient",
+      "LetterSpacing": "letterSpacing",
+      "LineHeight": "lineHeight",
+      "Opacity": "opacity",
+      "ParagraphSpacing": "paragraphSpacing",
+      "ProductCopy": "productCopy",
+      "Shadow": "shadow",
+      "Size": "size",
+      "Space": "space",
+      "String": "string",
+      "TextCase": "textCase",
+      "TextDecoration": "textDecoration",
+      "Typography": "typography",
+      "Visibility": "visibility",
+      "ZIndex": "zIndex"
+    },
+    "allowedKeys": {
+      "options": [
+        "Color",
+        "Typography",
+        "Dimension",
+        "Size",
+        "Space",
+        "Opacity",
+        "FontSize",
+        "LineHeight",
+        "LetterSpacing",
+        "ParagraphSpacing",
+        "BorderWidth",
+        "BorderRadius",
+        "Duration",
+        "ZIndex",
+        "Shadow",
+        "Border",
+        "Gradient",
+        "String",
+        "ProductCopy",
+        "FontFamily",
+        "FontWeight",
+        "TextCase",
+        "TextDecoration",
+        "Visibility",
+        "Blur"
+      ],
+      "type": "string"
+    },
+    "allowedValues": {
+      "type": "string"
+    }
+  },
+  {
+    "key": "showDescriptions",
+    "type": "boolean",
+    "default": true,
+    "title": "Show token descriptions",
+    "description": "Show the token description as a code comment for every exported token.",
+    "category": "Other"
+  },
+  {
+    "key": "showGeneratedFileDisclaimer",
+    "type": "boolean",
+    "default": true,
+    "title": "Show file disclaimer",
+    "description": "A message explaining that the file was automatically generated will appear in all style files.",
+    "category": "Other"
+  },
+  {
+    "key": "disclaimer",
+    "type": "string",
+    "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
+    "title": "Disclaimer message",
+    "description": "A message explaining that the file was automatically generated will appear in all style files.",
+    "category": "Other",
+    "dependsOn": {
+      "showGeneratedFileDisclaimer": true
+    }
+  },
+  {
+    "key": "indent",
+    "type": "number",
+    "default": 2,
+    "title": "Indentation",
+    "description": "Number of spaces used to indent CSS variables.",
+    "category": "Other"
+  },
+  {
+    "key": "writeNameToProperty",
+    "type": "boolean",
+    "default": false,
+    "title": "Write generated variable names",
+    "description": "Save generated variable names back to tokens as custom properties.",
+    "category": "Automatic write-back"
+  },
+  {
+    "key": "propertyToWriteNameTo",
+    "type": "string",
+    "default": "CSS",
+    "title": "Custom property name",
+    "description": "Name of the custom property where generated variable names will be saved.",
+    "category": "Automatic write-back",
+    "dependsOn": {
+      "writeNameToProperty": true
+    }
+  },
+  {
+    "key": "packageName",
+    "type": "string",
+    "default": "io.supernova",
+    "title": "Package name",
+    "description": "Name of the package where tokens are exported"
+  }
 ]
