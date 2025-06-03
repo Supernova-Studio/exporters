@@ -1,8 +1,7 @@
-import { FileHelper, ThemeHelper, FileNameHelper, GeneralHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { FileHelper, FileNameHelper, GeneralHelper, ImportCollector, ThemeHelper } from "@supernovaio/export-utils"
+import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
-import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileStructure } from "../../config"
 import {
   DesignSystemCollection
@@ -36,8 +35,8 @@ export function generateStyleFiles(
   }
 
   // For separate files by type (existing logic)
-  return [...new Set(tokens.map(token => token.tokenType))]
-    .map(type => singleTypeFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
+  return [...new Set(tokens.map((token) => token.tokenType))]
+    .map((type) => singleTypeFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
     .filter((file): file is OutputTextFile => file !== null)
 }
 
@@ -86,9 +85,7 @@ function singleTypeFile(
 
   //todo themes
   // Build the output path, using the theme subfolder for themed files
-  const relativePath = themePath
-    ? `./${themePath}`
-    : exportConfiguration.baseStyleFilePath
+  const relativePath = themePath ? `./${themePath}` : exportConfiguration.baseStyleFilePath
 
   // Get the filename based on configuration or defaults
   let fileName = exportConfiguration.customizeStyleFileNames
@@ -147,53 +144,32 @@ function generateCombinedFile(
   })
 }
 
-function generateFileContent(allTokens: Array<Token>,
-                             tokensToExport: Array<Token>,
-                             tokenGroups: Array<TokenGroup>,
-                             tokenCollections: Array<DesignSystemCollection>,
-                             themePath: string = ""
+function generateFileContent(
+  allTokens: Array<Token>,
+  tokensToExport: Array<Token>,
+  tokenGroups: Array<TokenGroup>,
+  tokenCollections: Array<DesignSystemCollection>,
+  themePath: string = ""
 ) {
-
   //todo customizable
   const packageLiteral = "package com.supernova.tokens"
 
-  //todo only needed - check exported tokens type
-  const importsLiteral = `
-import androidx.compose.runtime.Immutable
-
-/* Units & geometry */
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.geometry.Offset
-
-/* Colors & drawing */
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.Shadow
-
-/* Border & Blur helpers */
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-
-/* Typography */
-import androidx.compose.ui.text.TextDecoration
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-`.trim()
+  const importCollector = new ImportCollector()
 
   // Determine the Kotlin object name
-  const objectNameSuffix = themePath
-    ? exportConfiguration.objectSuffixForThemes.replace("{theme}", themePath)
-    : ""
+  const objectNameSuffix = themePath ? exportConfiguration.objectSuffixForThemes.replace("{theme}", themePath) : ""
   const objectLiteral = `@Immutable
 object ${exportConfiguration.objectName}${objectNameSuffix}`
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
   // Convert tokens to Kotlin variable declarations
-  const tokenVariablesLiteral = tokensToExport.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
+  const tokenVariablesLiteral = tokensToExport
+    .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, importCollector))
+    .join("\n")
+
+  let allImports = ["import androidx.compose.runtime.Immutable", ...importCollector.allImports()].sort()
+  const importsLiteral = allImports.join("\n")
 
   // Construct the file content with an object with token variables
   let content = `${packageLiteral}\n\n${importsLiteral}\n\n${objectLiteral} {\n${tokenVariablesLiteral}\n}`

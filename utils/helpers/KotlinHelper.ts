@@ -36,12 +36,18 @@ import { GeneralHelper } from "./GeneralHelper"
 
 export enum ImportFlag {
   Color,
-  Dp, Sp, Offset,
-  Brush, TileMode,
+  Dp,
+  Sp,
+  Offset,
+  Brush,
+  TileMode,
   Shadow,
   BorderStroke,
-  Modifier, Blur,
-  FontWeight, TextDecoration, TextStyle,
+  Modifier,
+  Blur,
+  FontWeight,
+  TextDecoration,
+  TextStyle
 }
 
 /** Collect flags while generating literals, turn into imports at the end */
@@ -52,55 +58,45 @@ export class ImportCollector {
    * Marks a specific import to be used in a token
    * @param f
    */
-  use(...f: ImportFlag[]) { f.forEach(x => this.flags.add(x)) }
+  use(...f: ImportFlag[]) {
+    f.forEach((x) => this.flags.add(x))
+  }
 
   /**
    * Output a list of all sorted import literals needed for the specified tokens.
    */
-  print(): string[] {
+  allImports(): string[] {
     const importList: string[] = []
 
-    if (this.flags.has(ImportFlag.Color))
-      importList.push("import androidx.compose.ui.graphics.Color")
+    if (this.flags.has(ImportFlag.Color)) importList.push("import androidx.compose.ui.graphics.Color")
 
-    if (this.flags.has(ImportFlag.Dp))
-      importList.push("import androidx.compose.ui.unit.dp")
-    if (this.flags.has(ImportFlag.Sp))
-      importList.push("import androidx.compose.ui.unit.sp")
+    if (this.flags.has(ImportFlag.Dp)) importList.push("import androidx.compose.ui.unit.dp")
+    if (this.flags.has(ImportFlag.Sp)) importList.push("import androidx.compose.ui.unit.sp")
 
-    if (this.flags.has(ImportFlag.Offset))
-      importList.push("import androidx.compose.ui.geometry.Offset")
+    if (this.flags.has(ImportFlag.Offset)) importList.push("import androidx.compose.ui.geometry.Offset")
 
-    if (this.flags.has(ImportFlag.Brush))
-      importList.push("import androidx.compose.ui.graphics.Brush")
-    if (this.flags.has(ImportFlag.TileMode))
-      importList.push("import androidx.compose.ui.graphics.TileMode")
+    if (this.flags.has(ImportFlag.Brush)) importList.push("import androidx.compose.ui.graphics.Brush")
+    if (this.flags.has(ImportFlag.TileMode)) importList.push("import androidx.compose.ui.graphics.TileMode")
 
-    if (this.flags.has(ImportFlag.Shadow))
-      importList.push("import androidx.compose.ui.graphics.Shadow")
+    if (this.flags.has(ImportFlag.Shadow)) importList.push("import androidx.compose.ui.graphics.Shadow")
 
-    if (this.flags.has(ImportFlag.BorderStroke))
-      importList.push("import androidx.compose.foundation.BorderStroke")
+    if (this.flags.has(ImportFlag.BorderStroke)) importList.push("import androidx.compose.foundation.BorderStroke")
 
     if (this.flags.has(ImportFlag.Modifier)) {
       importList.push("import androidx.compose.ui.Modifier")
-      if (this.flags.has(ImportFlag.Blur))
-        importList.push("import androidx.compose.ui.draw.blur")
+      if (this.flags.has(ImportFlag.Blur)) importList.push("import androidx.compose.ui.draw.blur")
     }
 
-    if (this.flags.has(ImportFlag.FontWeight))
-      importList.push("import androidx.compose.ui.text.font.FontWeight")
-    if (this.flags.has(ImportFlag.TextDecoration))
-      importList.push("import androidx.compose.ui.text.TextDecoration")
-    if (this.flags.has(ImportFlag.TextStyle))
-      importList.push("import androidx.compose.ui.text.TextStyle")
+    if (this.flags.has(ImportFlag.FontWeight)) importList.push("import androidx.compose.ui.text.font.FontWeight")
+    if (this.flags.has(ImportFlag.TextDecoration)) importList.push("import androidx.compose.ui.text.TextDecoration")
+    if (this.flags.has(ImportFlag.TextStyle)) importList.push("import androidx.compose.ui.text.TextStyle")
 
     return importList.sort()
   }
 }
 
-  // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-  // MARK: - Main helper
+// --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+// MARK: - Main helper
 
 type InternalOptions = ColorFormatOptions & { indent: number }
 
@@ -131,7 +127,12 @@ export class KotlinHelper {
         value = this.borderTokenValueToKotlin((token as BorderToken).value, allTokens, actualOptions, importCollector)
         break
       case TokenType.gradient:
-        value = this.gradientTokenValueToKotlin((token as GradientToken).value, allTokens, actualOptions, importCollector)
+        value = this.gradientTokenValueToKotlin(
+          (token as GradientToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
         break
       case TokenType.dimension:
       case TokenType.size:
@@ -145,13 +146,23 @@ export class KotlinHelper {
       case TokenType.radius:
       case TokenType.duration:
       case TokenType.zIndex:
-        value = this.dimensionTokenValueToKotlin((token as AnyDimensionToken).value, allTokens, actualOptions, importCollector)
+        value = this.dimensionTokenValueToKotlin(
+          (token as AnyDimensionToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
         break
       case TokenType.shadow:
         value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, options, importCollector)
         break
       case TokenType.fontWeight:
-        value = this.fontWeightTokenValueToKotlin((token as FontWeightToken).value, allTokens, actualOptions, importCollector)
+        value = this.fontWeightTokenValueToKotlin(
+          (token as FontWeightToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
         break
       case TokenType.fontFamily:
       case TokenType.productCopy:
@@ -161,13 +172,24 @@ export class KotlinHelper {
       case TokenType.textCase:
       case TokenType.textDecoration:
       case TokenType.visibility:
-        value = this.optionTokenValueToKotlin((token as AnyOptionToken).value, allTokens, actualOptions, token.tokenType, importCollector)
+        value = this.optionTokenValueToKotlin(
+          (token as AnyOptionToken).value,
+          allTokens,
+          actualOptions,
+          token.tokenType,
+          importCollector
+        )
         break
       case TokenType.blur:
         value = this.blurTokenValueToKotlin((token as BlurToken).value, allTokens, actualOptions, importCollector)
         break
       case TokenType.typography:
-        value = this.typographyTokenValueToKotlin((token as TypographyToken).value, allTokens, actualOptions, importCollector)
+        value = this.typographyTokenValueToKotlin(
+          (token as TypographyToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
         break
       default:
         throw new UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:")
@@ -204,20 +226,16 @@ export class KotlinHelper {
     return `BorderStroke(${widthLit}, ${colorLit})`
   }
 
-
   static gradientTokenValueToKotlin(
     gradients: Array<GradientTokenValue>,
     allTokens: Map<string, Token>,
     options: InternalOptions,
     importCollector: ImportCollector
   ): string {
-
     // Compose can draw only one Brush per shape; export all layers anyway,
     // so callers may overlay them manually
-    const layers = gradients.map(g => this.gradientLayerToKotlin(g, allTokens, options, importCollector))
-    return layers.length === 1
-      ? layers[0]
-      : `listOf(${layers.join(", ")})`
+    const layers = gradients.map((g) => this.gradientLayerToKotlin(g, allTokens, options, importCollector))
+    return layers.length === 1 ? layers[0] : `listOf(${layers.join(", ")})`
   }
 
   /** Converts one gradient layer to a Brush literal */
@@ -232,49 +250,56 @@ export class KotlinHelper {
       return options.tokenToVariableRef(reference)
     }
 
-        importCollector.use(ImportFlag.Brush, ImportFlag.Offset)
+    importCollector.use(ImportFlag.Brush, ImportFlag.Offset)
 
     // Convert color stops
     const colorsLit = value.stops
-      .map(stop => this.colorTokenValueToKotlin(stop.color, allTokens, options, importCollector))
+      .map((stop) => this.colorTokenValueToKotlin(stop.color, allTokens, options, importCollector))
       .join(", ")
 
     const stopsLit = value.stops
-      .map(stop => ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
+      .map((stop) => ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
       .join(", ")
 
+    //todo indent, check all
     // Choose Brush builder
     switch (value.type) {
       case GradientType.radial:
-          importCollector.use(ImportFlag.TileMode)
+        importCollector.use(ImportFlag.TileMode)
 
-        // centre = midpoint of from/to, radius = distance between them (rough)
+        // center = midpoint of from/to, radius = distance between them (rough)
         const centerX = ((value.from.x + value.to.x) / 2).toFixed(2)
         const centerY = ((value.from.y + value.to.y) / 2).toFixed(2)
-        return `Brush.radialGradient(\n` +
+        return (
+          `Brush.radialGradient(\n` +
           `    colors = listOf(${colorsLit}),\n` +
           `    center = Offset(${centerX}f, ${centerY}f),\n` +
           `    radius = 0.5f, /* relative to size */\n` +
           `    tileMode = TileMode.Clamp,\n` +
           `    stops = floatArrayOf(${stopsLit})\n` +
           `)`
+        )
 
       case GradientType.angular:
         // sweep in Compose
-        return `Brush.sweepGradient(\n` +
+        return (
+          `Brush.sweepGradient(\n` +
           `    colors = listOf(${colorsLit}),\n` +
           `    center = Offset(0.5f, 0.5f), /* relative */\n` +
           `    stops = floatArrayOf(${stopsLit})\n` +
           `)`
+        )
 
       case GradientType.linear:
       default:
-        return `Brush.linearGradient(\n` +
+        return (
+          `Brush.linearGradient(\n` +
           `    colors = listOf(${colorsLit}),\n` +
           `    stops = floatArrayOf(${stopsLit}),\n` +
           `    start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
           `    end   = Offset(${value.to.x}f,   ${value.to.y}f)\n` +
           `)`
+        )
     }
   }
 
@@ -283,19 +308,20 @@ export class KotlinHelper {
     allTokens: Map<string, Token>,
     options: InternalOptions,
     importCollector: ImportCollector
-
   ): string {
-    const layers = shadows.map(s => this.shadowLayerToKotlin(s, allTokens, options, importCollector))
+    const layers = shadows.map((s) => this.shadowLayerToKotlin(s, allTokens, options, importCollector))
 
-    // Compose can draw only one shadow per shape; export all layers anyway
+    // Compose can draw only one shadow per shape; export all layers anyway,
     // so callers may overlay them manually
-    return layers.length === 1
-      ? layers[0]
-      : `listOf(${layers.join(", ")})`
+    return layers.length === 1 ? layers[0] : `listOf(${layers.join(", ")})`
   }
 
-  static shadowLayerToKotlin(value: ShadowTokenValue, allTokens: Map<string, Token>, options: InternalOptions,
-    importCollector: ImportCollector): string {
+  static shadowLayerToKotlin(
+    value: ShadowTokenValue,
+    allTokens: Map<string, Token>,
+    options: InternalOptions,
+    importCollector: ImportCollector
+  ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
     if (reference) {
       return options.tokenToVariableRef(reference)
@@ -306,7 +332,8 @@ export class KotlinHelper {
     const colorLit = this.colorTokenValueToKotlin(
       { ...value.color, ...(value.opacity && { opacity: value.opacity }) },
       allTokens,
-      options, importCollector
+      options,
+      importCollector
     )
 
     // Unsupported in Compose and therefore ignored: spread, inner-shadow
@@ -332,7 +359,7 @@ export class KotlinHelper {
 
     // Percent requires scaling to 0-1 for Kotlin float
     if (dimension.unit === Unit.percent) {
-      const fraction = +(rounded) / 100
+      const fraction = +rounded / 100
       return `${fraction}f`
     }
 
@@ -340,26 +367,25 @@ export class KotlinHelper {
   }
 
   /** Maps Supernova units to Kotlin / Compose extension suffixes */
-  static unitToKotlin(unit: Unit,
-    importCollector: ImportCollector): string {
+  static unitToKotlin(unit: Unit, importCollector: ImportCollector): string {
     switch (unit) {
       case Unit.percent:
         // Float literal (0.5f)
         return "f"
       case Unit.pixels:
         // density‑independent pixels
-          importCollector.use(ImportFlag.Dp)
+        importCollector.use(ImportFlag.Dp)
         return ".dp"
       case Unit.rem:
         // scale‑independent pixels for typography
-          importCollector.use(ImportFlag.Sp)
+        importCollector.use(ImportFlag.Sp)
         return ".sp"
       case Unit.ms:
       case Unit.raw:
         // plain number
         return ""
       default:
-          importCollector.use(ImportFlag.Dp)
+        importCollector.use(ImportFlag.Dp)
         return ".dp"
     }
   }
@@ -416,7 +442,7 @@ export class KotlinHelper {
   static textDecorationToKotlin(textDecoration: TextDecoration, importCollector: ImportCollector): string {
     importCollector.use(ImportFlag.TextDecoration)
 
-      // Map directly onto androidx.compose.ui.text.TextDecoration
+    // Map directly onto androidx.compose.ui.text.TextDecoration
     switch (textDecoration) {
       case TextDecoration.original:
         return "TextDecoration.None"
@@ -431,21 +457,26 @@ export class KotlinHelper {
     return visibility === VisibilityType.visible ? "true" : "false"
   }
 
-  static blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string {
+  static blurTokenValueToKotlin(
+    blur: BlurTokenValue,
+    allTokens: Map<string, Token>,
+    options: InternalOptions,
+    importCollector: ImportCollector
+  ): string {
     const reference = sureOptionalReference(blur.referencedTokenId, allTokens, options.allowReferences)
     if (reference) {
       return options.tokenToVariableRef(reference)
     }
 
     importCollector.use(ImportFlag.Modifier, ImportFlag.Blur)
-      return `Modifier.blur(${this.dimensionTokenValueToKotlin(blur.radius, allTokens, options, importCollector)})`
+    return `Modifier.blur(${this.dimensionTokenValueToKotlin(blur.radius, allTokens, options, importCollector)})`
   }
 
   static fontWeightTokenValueToKotlin(
     value: AnyStringTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions
-    , importCollector: ImportCollector
+    options: InternalOptions,
+    importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
     if (reference) {
@@ -457,13 +488,10 @@ export class KotlinHelper {
     return this.fontWeightIntToKotlin(normalizedWeight, importCollector)
   }
 
-
-  static fontWeightIntToKotlin(weight: number
-    , importCollector: ImportCollector): string {
-
+  static fontWeightIntToKotlin(weight: number, importCollector: ImportCollector): string {
     importCollector.use(ImportFlag.FontWeight)
 
-      switch (weight) {
+    switch (weight) {
       case 100:
         return "FontWeight.Thin"
       case 200:
@@ -491,7 +519,8 @@ export class KotlinHelper {
   static typographyTokenValueToKotlin(
     typography: TypographyTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions, importCollector: ImportCollector
+    options: InternalOptions,
+    importCollector: ImportCollector
   ): string {
     // Reference full typography token if set
     const reference = sureOptionalReference(typography.referencedTokenId, allTokens, options.allowReferences)
@@ -499,7 +528,7 @@ export class KotlinHelper {
       return options.tokenToVariableRef(reference)
     }
 
-        importCollector.use(ImportFlag.TextStyle, ImportFlag.TextDecoration)
+    importCollector.use(ImportFlag.TextStyle, ImportFlag.TextDecoration)
 
     // Resolve partial references
     const fontFamilyRef = sureOptionalReference(
@@ -519,9 +548,7 @@ export class KotlinHelper {
     )
 
     // Calculate literals
-    const fontFamilyLit = fontFamilyRef
-      ? options.tokenToVariableRef(fontFamilyRef)
-      : `"${typography.fontFamily.text}"`
+    const fontFamilyLit = fontFamilyRef ? options.tokenToVariableRef(fontFamilyRef) : `"${typography.fontFamily.text}"`
 
     const fontWeightLit = fontWeightRef
       ? options.tokenToVariableRef(fontWeightRef)
@@ -530,8 +557,8 @@ export class KotlinHelper {
     const textDecorationLit = decorationRef
       ? options.tokenToVariableRef(decorationRef)
       : typography.textDecoration.value === TextDecoration.original
-        ? "TextDecoration.None"
-        : this.textDecorationToKotlin(typography.textDecoration.value as TextDecoration, importCollector)
+      ? "TextDecoration.None"
+      : this.textDecorationToKotlin(typography.textDecoration.value as TextDecoration, importCollector)
 
     const fontSizeLit = this.dimensionTokenValueToKotlin(typography.fontSize, allTokens, options, importCollector)
     const lineHeightLit = typography.lineHeight
@@ -555,7 +582,7 @@ export class KotlinHelper {
     const indentString = GeneralHelper.indent(options.indent)
 
     // Join with commas and indents
-    const body = parts.map(p => `${indentString}${indentString}${p}`).join(",\n")
+    const body = parts.map((p) => `${indentString}${indentString}${p}`).join(",\n")
 
     return `TextStyle(\n${body}\n${indentString})`
   }

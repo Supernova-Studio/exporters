@@ -1,6 +1,6 @@
 {
   "name": "@supernovaio/exporter-jetpack-compose",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Export your design system tokens into Jetpack Compose configuration using Supernova.io export engine",
   "main": "index.js",
   "scripts": {

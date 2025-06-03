@@ -5,9 +5,8 @@ const sdk_exporters_1 = require("@supernovaio/sdk-exporters");
 const ColorHelper_1 = require("./ColorHelper");
 const TokenHelper_1 = require("./TokenHelper");
 const GeneralHelper_1 = require("./GeneralHelper");
-/* ──────────────────────────────────────────────────────────────── */
-/*  Imports & flag enum                                             */
-/* ──────────────────────────────────────────────────────────────── */
+// --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+// MARK: - Imports & flag enum
 var ImportFlag;
 (function (ImportFlag) {
     ImportFlag[ImportFlag["Color"] = 0] = "Color";
@@ -33,45 +32,47 @@ class ImportCollector {
      * Marks a specific import to be used in a token
      * @param f
      */
-    use(...f) { f.forEach(x => this.flags.add(x)); }
+    use(...f) {
+        f.forEach((x) => this.flags.add(x));
+    }
     /**
      * Output a list of all sorted import literals needed for the specified tokens.
      */
-    print() {
-        const imps = [];
+    allImports() {
+        const importList = [];
         if (this.flags.has(ImportFlag.Color))
-            imps.push("import androidx.compose.ui.graphics.Color");
+            importList.push("import androidx.compose.ui.graphics.Color");
         if (this.flags.has(ImportFlag.Dp))
-            imps.push("import androidx.compose.ui.unit.dp");
+            importList.push("import androidx.compose.ui.unit.dp");
         if (this.flags.has(ImportFlag.Sp))
-            imps.push("import androidx.compose.ui.unit.sp");
+            importList.push("import androidx.compose.ui.unit.sp");
         if (this.flags.has(ImportFlag.Offset))
-            imps.push("import androidx.compose.ui.geometry.Offset");
+            importList.push("import androidx.compose.ui.geometry.Offset");
         if (this.flags.has(ImportFlag.Brush))
-            imps.push("import androidx.compose.ui.graphics.Brush");
+            importList.push("import androidx.compose.ui.graphics.Brush");
         if (this.flags.has(ImportFlag.TileMode))
-            imps.push("import androidx.compose.ui.graphics.TileMode");
+            importList.push("import androidx.compose.ui.graphics.TileMode");
         if (this.flags.has(ImportFlag.Shadow))
-            imps.push("import androidx.compose.ui.graphics.Shadow");
+            importList.push("import androidx.compose.ui.graphics.Shadow");
         if (this.flags.has(ImportFlag.BorderStroke))
-            imps.push("import androidx.compose.foundation.BorderStroke");
+            importList.push("import androidx.compose.foundation.BorderStroke");
         if (this.flags.has(ImportFlag.Modifier)) {
-            imps.push("import androidx.compose.ui.Modifier");
+            importList.push("import androidx.compose.ui.Modifier");
             if (this.flags.has(ImportFlag.Blur))
-                imps.push("import androidx.compose.ui.draw.blur");
+                importList.push("import androidx.compose.ui.draw.blur");
         }
         if (this.flags.has(ImportFlag.FontWeight))
-            imps.push("import androidx.compose.ui.text.font.FontWeight");
+            importList.push("import androidx.compose.ui.text.font.FontWeight");
         if (this.flags.has(ImportFlag.TextDecoration))
-            imps.push("import androidx.compose.ui.text.TextDecoration");
+            importList.push("import androidx.compose.ui.text.TextDecoration");
         if (this.flags.has(ImportFlag.TextStyle))
-            imps.push("import androidx.compose.ui.text.TextStyle");
-        return imps.sort();
+            importList.push("import androidx.compose.ui.text.TextStyle");
+        return importList.sort();
     }
 }
 exports.ImportCollector = ImportCollector;
 class KotlinHelper {
-    static tokenValue(token, allTokens, options) {
+    static tokenValue(token, allTokens, options, importCollector) {
         const actualOptions = {
             rawColorTokenFormatter: (rawValue) => {
                 return `Color(0x${rawValue})`;
@@ -82,13 +83,13 @@ class KotlinHelper {
         let value;
         switch (token.tokenType) {
             case sdk_exporters_1.TokenType.color:
-                value = this.colorTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.colorTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.border:
-                value = this.borderTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.borderTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.gradient:
-                value = this.gradientTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.gradientTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.dimension:
             case sdk_exporters_1.TokenType.size:
@@ -102,13 +103,13 @@ class KotlinHelper {
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.shadow:
-                value = this.shadowTokenValueToKotlin(token.value, allTokens, options);
+                value = this.shadowTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontWeight:
-                value = this.fontWeightTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.fontWeightTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontFamily:
             case sdk_exporters_1.TokenType.productCopy:
@@ -118,103 +119,105 @@ class KotlinHelper {
             case sdk_exporters_1.TokenType.textCase:
             case sdk_exporters_1.TokenType.textDecoration:
             case sdk_exporters_1.TokenType.visibility:
-                value = this.optionTokenValueToKotlin(token.value, allTokens, actualOptions, token.tokenType);
+                value = this.optionTokenValueToKotlin(token.value, allTokens, actualOptions, token.tokenType, importCollector);
                 break;
             case sdk_exporters_1.TokenType.blur:
-                value = this.blurTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.blurTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.typography:
-                value = this.typographyTokenValueToKotlin(token.value, allTokens, options);
+                value = this.typographyTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             default:
                 throw new sdk_exporters_1.UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:");
         }
         return value;
     }
-    static colorTokenValueToKotlin(color, allTokens, options) {
+    static colorTokenValueToKotlin(color, allTokens, options, importCollector) {
+        importCollector.use(ImportFlag.Color);
         return ColorHelper_1.ColorHelper.formattedColorOrVariableName(color, allTokens, options);
     }
-    static borderTokenValueToKotlin(border, allTokens, options) {
+    static borderTokenValueToKotlin(border, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(border.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        const widthLit = this.dimensionTokenValueToKotlin(border.width, allTokens, options);
-        const colorLit = this.colorTokenValueToKotlin(border.color, allTokens, options);
+        importCollector.use(ImportFlag.BorderStroke);
+        const widthLit = this.dimensionTokenValueToKotlin(border.width, allTokens, options, importCollector);
+        const colorLit = this.colorTokenValueToKotlin(border.color, allTokens, options, importCollector);
         return `BorderStroke(${widthLit}, ${colorLit})`;
     }
-    static gradientTokenValueToKotlin(gradients, allTokens, options) {
-        // Compose can draw only one Brush per shape; export all layers anyway
+    static gradientTokenValueToKotlin(gradients, allTokens, options, importCollector) {
+        // Compose can draw only one Brush per shape; export all layers anyway,
         // so callers may overlay them manually
-        const layers = gradients.map(g => this.gradientLayerToKotlin(g, allTokens, options));
-        return layers.length === 1
-            ? layers[0]
-            : `listOf(${layers.join(", ")})`;
+        const layers = gradients.map((g) => this.gradientLayerToKotlin(g, allTokens, options, importCollector));
+        return layers.length === 1 ? layers[0] : `listOf(${layers.join(", ")})`;
     }
     /** Converts one gradient layer to a Brush literal */
-    static gradientLayerToKotlin(value, allTokens, options) {
+    static gradientLayerToKotlin(value, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
+        importCollector.use(ImportFlag.Brush, ImportFlag.Offset);
         // Convert color stops
         const colorsLit = value.stops
-            .map(stop => this.colorTokenValueToKotlin(stop.color, allTokens, options))
+            .map((stop) => this.colorTokenValueToKotlin(stop.color, allTokens, options, importCollector))
             .join(", ");
         const stopsLit = value.stops
-            .map(stop => ColorHelper_1.ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
+            .map((stop) => ColorHelper_1.ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
             .join(", ");
+        //todo indent, check all
         // Choose Brush builder
         switch (value.type) {
             case sdk_exporters_1.GradientType.radial:
-                // centre = midpoint of from/to, radius = distance between them (rough)
+                importCollector.use(ImportFlag.TileMode);
+                // center = midpoint of from/to, radius = distance between them (rough)
                 const centerX = ((value.from.x + value.to.x) / 2).toFixed(2);
                 const centerY = ((value.from.y + value.to.y) / 2).toFixed(2);
-                return `Brush.radialGradient(\n` +
+                return (`Brush.radialGradient(\n` +
                     `    colors = listOf(${colorsLit}),\n` +
                     `    center = Offset(${centerX}f, ${centerY}f),\n` +
                     `    radius = 0.5f, /* relative to size */\n` +
                     `    tileMode = TileMode.Clamp,\n` +
                     `    stops = floatArrayOf(${stopsLit})\n` +
-                    `)`;
+                    `)`);
             case sdk_exporters_1.GradientType.angular:
                 // sweep in Compose
-                return `Brush.sweepGradient(\n` +
+                return (`Brush.sweepGradient(\n` +
                     `    colors = listOf(${colorsLit}),\n` +
                     `    center = Offset(0.5f, 0.5f), /* relative */\n` +
                     `    stops = floatArrayOf(${stopsLit})\n` +
-                    `)`;
+                    `)`);
             case sdk_exporters_1.GradientType.linear:
             default:
-                return `Brush.linearGradient(\n` +
+                return (`Brush.linearGradient(\n` +
                     `    colors = listOf(${colorsLit}),\n` +
                     `    stops = floatArrayOf(${stopsLit}),\n` +
                     `    start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
                     `    end   = Offset(${value.to.x}f,   ${value.to.y}f)\n` +
-                    `)`;
+                    `)`);
         }
     }
-    static shadowTokenValueToKotlin(shadows, allTokens, options) {
-        const layers = shadows.map(s => this.shadowLayerToKotlin(s, allTokens, options));
-        // Compose can draw only one shadow per shape; export all layers anyway
+    static shadowTokenValueToKotlin(shadows, allTokens, options, importCollector) {
+        const layers = shadows.map((s) => this.shadowLayerToKotlin(s, allTokens, options, importCollector));
+        // Compose can draw only one shadow per shape; export all layers anyway,
         // so callers may overlay them manually
-        return layers.length === 1
-            ? layers[0]
-            : `listOf(${layers.join(", ")})`;
+        return layers.length === 1 ? layers[0] : `listOf(${layers.join(", ")})`;
     }
-    static shadowLayerToKotlin(value, allTokens, options) {
+    static shadowLayerToKotlin(value, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        const colorLit = this.colorTokenValueToKotlin({ ...value.color, ...(value.opacity && { opacity: value.opacity }) }, allTokens, options);
-        // Unsupported in Compose and therefore silently ignored: spread, inner-shadow
+        importCollector.use(ImportFlag.Shadow, ImportFlag.Offset);
+        const colorLit = this.colorTokenValueToKotlin({ ...value.color, ...(value.opacity && { opacity: value.opacity }) }, allTokens, options, importCollector);
+        // Unsupported in Compose and therefore ignored: spread, inner-shadow
         const offsetX = ColorHelper_1.ColorHelper.roundToDecimals(value.x, options.decimals);
         const offsetY = ColorHelper_1.ColorHelper.roundToDecimals(value.y, options.decimals);
         const blur = ColorHelper_1.ColorHelper.roundToDecimals(value.radius, options.decimals);
         return `Shadow(color = ${colorLit}, offset = Offset(${offsetX}f, ${offsetY}f), blurRadius = ${blur}f)`;
     }
-    static dimensionTokenValueToKotlin(dimension, allTokens, options) {
+    static dimensionTokenValueToKotlin(dimension, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(dimension.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
@@ -222,28 +225,31 @@ class KotlinHelper {
         const rounded = ColorHelper_1.ColorHelper.roundToDecimals(dimension.measure, options.decimals);
         // Percent requires scaling to 0-1 for Kotlin float
         if (dimension.unit === sdk_exporters_1.Unit.percent) {
-            const fraction = +(rounded) / 100;
+            const fraction = +rounded / 100;
             return `${fraction}f`;
         }
-        return `${rounded}${this.unitToKotlin(dimension.unit)}`;
+        return `${rounded}${this.unitToKotlin(dimension.unit, importCollector)}`;
     }
     /** Maps Supernova units to Kotlin / Compose extension suffixes */
-    static unitToKotlin(unit) {
+    static unitToKotlin(unit, importCollector) {
         switch (unit) {
             case sdk_exporters_1.Unit.percent:
                 // Float literal (0.5f)
                 return "f";
             case sdk_exporters_1.Unit.pixels:
                 // density‑independent pixels
+                importCollector.use(ImportFlag.Dp);
                 return ".dp";
             case sdk_exporters_1.Unit.rem:
                 // scale‑independent pixels for typography
+                importCollector.use(ImportFlag.Sp);
                 return ".sp";
             case sdk_exporters_1.Unit.ms:
             case sdk_exporters_1.Unit.raw:
                 // plain number
                 return "";
             default:
+                importCollector.use(ImportFlag.Dp);
                 return ".dp";
         }
     }
@@ -254,7 +260,7 @@ class KotlinHelper {
         }
         return `"${value.text}"`;
     }
-    static optionTokenValueToKotlin(option, allTokens, options, tokenType) {
+    static optionTokenValueToKotlin(option, allTokens, options, tokenType, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(option.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
@@ -263,7 +269,7 @@ class KotlinHelper {
             return this.textCaseToKotlin(option.value);
         }
         if (tokenType === sdk_exporters_1.TokenType.textDecoration) {
-            return this.textDecorationToKotlin(option.value);
+            return this.textDecorationToKotlin(option.value, importCollector);
         }
         return this.visibilityToKotlin(option.value);
     }
@@ -282,7 +288,8 @@ class KotlinHelper {
                 return `"smallCaps"`;
         }
     }
-    static textDecorationToKotlin(textDecoration) {
+    static textDecorationToKotlin(textDecoration, importCollector) {
+        importCollector.use(ImportFlag.TextDecoration);
         // Map directly onto androidx.compose.ui.text.TextDecoration
         switch (textDecoration) {
             case sdk_exporters_1.TextDecoration.original:
@@ -296,23 +303,25 @@ class KotlinHelper {
     static visibilityToKotlin(visibility) {
         return visibility === sdk_exporters_1.VisibilityType.visible ? "true" : "false";
     }
-    static blurTokenValueToKotlin(blur, allTokens, options) {
+    static blurTokenValueToKotlin(blur, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(blur.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        return `Modifier.blur(${this.dimensionTokenValueToKotlin(blur.radius, allTokens, options)})`;
+        importCollector.use(ImportFlag.Modifier, ImportFlag.Blur);
+        return `Modifier.blur(${this.dimensionTokenValueToKotlin(blur.radius, allTokens, options, importCollector)})`;
     }
-    static fontWeightTokenValueToKotlin(value, allTokens, options) {
+    static fontWeightTokenValueToKotlin(value, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
         // Convert text weights to numerical values
         const normalizedWeight = (0, TokenHelper_1.normalizeTextWeight)(value.text);
-        return this.fontWeightIntToKotlin(normalizedWeight);
+        return this.fontWeightIntToKotlin(normalizedWeight, importCollector);
     }
-    static fontWeightIntToKotlin(weight) {
+    static fontWeightIntToKotlin(weight, importCollector) {
+        importCollector.use(ImportFlag.FontWeight);
         switch (weight) {
             case 100:
                 return "FontWeight.Thin";
@@ -337,34 +346,33 @@ class KotlinHelper {
                 return `FontWeight(${weight})`;
         }
     }
-    static typographyTokenValueToKotlin(typography, allTokens, options) {
+    static typographyTokenValueToKotlin(typography, allTokens, options, importCollector) {
         // Reference full typography token if set
         const reference = (0, TokenHelper_1.sureOptionalReference)(typography.referencedTokenId, allTokens, options.allowReferences);
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
+        importCollector.use(ImportFlag.TextStyle, ImportFlag.TextDecoration);
         // Resolve partial references
         const fontFamilyRef = (0, TokenHelper_1.sureOptionalReference)(typography.fontFamily.referencedTokenId, allTokens, options.allowReferences);
         const fontWeightRef = (0, TokenHelper_1.sureOptionalReference)(typography.fontWeight.referencedTokenId, allTokens, options.allowReferences);
         const decorationRef = (0, TokenHelper_1.sureOptionalReference)(typography.textDecoration.referencedTokenId, allTokens, options.allowReferences);
         // Calculate literals
-        const fontFamilyLit = fontFamilyRef
-            ? options.tokenToVariableRef(fontFamilyRef)
-            : `"${typography.fontFamily.text}"`;
+        const fontFamilyLit = fontFamilyRef ? options.tokenToVariableRef(fontFamilyRef) : `"${typography.fontFamily.text}"`;
         const fontWeightLit = fontWeightRef
             ? options.tokenToVariableRef(fontWeightRef)
-            : this.fontWeightIntToKotlin((0, TokenHelper_1.normalizeTextWeight)(typography.fontWeight.text));
+            : this.fontWeightIntToKotlin((0, TokenHelper_1.normalizeTextWeight)(typography.fontWeight.text), importCollector);
         const textDecorationLit = decorationRef
             ? options.tokenToVariableRef(decorationRef)
             : typography.textDecoration.value === sdk_exporters_1.TextDecoration.original
                 ? "TextDecoration.None"
-                : this.textDecorationToKotlin(typography.textDecoration.value);
-        const fontSizeLit = this.dimensionTokenValueToKotlin(typography.fontSize, allTokens, options);
+                : this.textDecorationToKotlin(typography.textDecoration.value, importCollector);
+        const fontSizeLit = this.dimensionTokenValueToKotlin(typography.fontSize, allTokens, options, importCollector);
         const lineHeightLit = typography.lineHeight
-            ? this.dimensionTokenValueToKotlin(typography.lineHeight, allTokens, options)
+            ? this.dimensionTokenValueToKotlin(typography.lineHeight, allTokens, options, importCollector)
             : undefined;
         const letterSpacingLit = typography.letterSpacing
-            ? this.dimensionTokenValueToKotlin(typography.letterSpacing, allTokens, options)
+            ? this.dimensionTokenValueToKotlin(typography.letterSpacing, allTokens, options, importCollector)
             : undefined;
         // Assemble TextStyle literal
         const parts = [
@@ -380,7 +388,7 @@ class KotlinHelper {
             parts.push(`textDecoration = ${textDecorationLit}`);
         const indentString = GeneralHelper_1.GeneralHelper.indent(options.indent);
         // Join with commas and indents
-        const body = parts.map(p => `${indentString}${indentString}${p}`).join(",\n");
+        const body = parts.map((p) => `${indentString}${indentString}${p}`).join(",\n");
         return `TextStyle(\n${body}\n${indentString})`;
     }
 }

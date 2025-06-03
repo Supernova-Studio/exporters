@@ -1,10 +1,8 @@
-import {
-  DesignSystemCollection
-} from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
+import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import {
   ColorFormat,
-  ColorFormatOptions,
   GeneralHelper,
+  ImportCollector,
   KotlinHelper,
   TokenToKotlinOptions
 } from "@supernovaio/export-utils"
@@ -21,7 +19,9 @@ import { tokenName } from "../utils/token-name-utils"
  * @returns The prefix string to use for this token type
  */
 export function getTokenPrefix(tokenType: TokenType): string {
-  return exportConfiguration.customizeTokenPrefixes ? exportConfiguration.tokenPrefixes[tokenType] : DEFAULT_TOKEN_PREFIXES[tokenType]
+  return exportConfiguration.customizeTokenPrefixes
+    ? exportConfiguration.tokenPrefixes[tokenType]
+    : DEFAULT_TOKEN_PREFIXES[tokenType]
 }
 
 /**
@@ -32,13 +32,15 @@ export function getTokenPrefix(tokenType: TokenType): string {
  * @param mappedTokens - Map of all tokens for resolving references
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @param collections - Array of collections for resolving collection names
+ * @param importCollector - Collector that gathers all imports for this token
  * @returns Formatted CSS custom property string with optional description comment
  */
 export function convertedToken(
   token: Token,
   mappedTokens: Map<string, Token>,
   tokenGroups: Array<TokenGroup>,
-  collections: Array<DesignSystemCollection> = []
+  collections: Array<DesignSystemCollection> = [],
+  importCollector: ImportCollector
 ): string {
   // Generate the variable name based on token properties and configuration
   const name = tokenName(token, tokenGroups, collections)
@@ -49,12 +51,13 @@ export function convertedToken(
     decimals: 0,
     indent: exportConfiguration.indent,
     tokenToVariableRef: (token: Token) => {
+      // TODO: add class name
       return tokenName(token, tokenGroups, collections)
-    },
+    }
   } satisfies TokenToKotlinOptions
 
   // Convert token value to object instance, handling references and formatting according to configuration
-  const value = KotlinHelper.tokenValue(token, mappedTokens, options)
+  const value = KotlinHelper.tokenValue(token, mappedTokens, options, importCollector)
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   // Add description comment if enabled and description exists
@@ -64,4 +67,3 @@ export function convertedToken(
     return `${indentString}val ${name} = ${value}`
   }
 }
-
