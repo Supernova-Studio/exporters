@@ -2,6 +2,8 @@ import { AnyOutputFile, PulsarContext, RemoteVersionIdentifier, Supernova } from
 import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
 import { generateObjectFiles } from "./files/object-file"
+import { WriteTokenPropStore } from "@supernovaio/export-utils"
+import { tokenName } from "./utils/token-name-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -80,7 +82,9 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       : []
 
     // todo index files
-    const separateFiles = [...baseFiles, ...themeFiles,
+    const separateFiles = [
+      ...baseFiles,
+      ...themeFiles
       // indexOutputFile(tokens, themesToApply)
     ]
     outputFiles = sanitizeOutputFiles(separateFiles)
@@ -95,18 +99,13 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     outputFiles = sanitizeOutputFiles(defaultFiles)
   }
 
-  // todo support
-  // Write property name of each token if the property to write to was provided in settings
-  // if (!context.isPreview && exportConfiguration.writeNameToProperty) {
-  //   const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
-  //   await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
-  //     if (exportConfiguration.propertyToWriteNameToIncludesVar) {
-  //       return `var(--${tokenVariableName(token, tokenGroups, tokenCollections)})`
-  //     } else {
-  //       return tokenVariableName(token, tokenGroups, tokenCollections)
-  //     }
-  //   })
-  // }
+  // Write the property name of each token if it is enabled in the settings
+  if (!context.isPreview && exportConfiguration.writeNameToProperty) {
+    const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
+    await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
+      return tokenName(token, tokenGroups, tokenCollections)
+    })
+  }
 
   // Finalize export by retrieving the files to write to destination
   return outputFiles
