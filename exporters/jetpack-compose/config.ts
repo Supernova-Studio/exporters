@@ -1,6 +1,7 @@
 import { StringCase, ColorFormat } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 
+//todo make sure comments and structure up to date
 /**
  * Main configuration of the exporter - type interface. Default values for it can be set through `config.json` and users can override the behavior when creating the pipelines.
  */
@@ -41,15 +42,15 @@ export type ExporterConfiguration = {
   /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
   tokenPrefixes: Record<TokenType, string>
   /** Name of each file that will be generated. Tokens are grouped by the type and will land in each of those files */
-  styleFileNames: Record<TokenType, string>
+  separatedByTypeFileNames: Record<TokenType, string>
   /** Name of the index file that will be generated */
   indexFileName: string
   /** Path to non-themed object files */
   nonThemedFilePath: string
   /** Index file will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
   baseIndexFilePath: string
-  /** Name of the Kotlin object that contains all exported tokens */
-  singleObjectName: string
+  /** Name of the Kotlin file that contains all exported tokens */
+  singleFileName: string
   /** Theme suffix added to the Kotlin object name, {theme} will be replaced with the theme name */
   objectSuffixForThemes: string
   /** When enabled, themed files will only include tokens that have different values from the base theme */
@@ -57,7 +58,7 @@ export type ExporterConfiguration = {
   /** When enabled, base token values will be exported along with themes */
   exportBaseValues: boolean
   /** When enabled, allows customization of style file names */
-  customizeStyleFileNames: boolean
+  customizeSeparatedByTypeFileNames: boolean
   /** When enabled, allows customization of token prefixes */
   customizeTokenPrefixes: boolean
   /** Global prefix for all token names. When set, all tokens will be prefixed with this value */

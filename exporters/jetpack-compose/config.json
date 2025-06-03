@@ -81,7 +81,7 @@
     "default": "separateByType",
     "title": "File structure",
     "description": "Control how token variables are organized in files",
-    "category": "Style files",
+    "category": "Token files",
     "options": {
       "separateByType": {
         "label": "Separate files by type",
@@ -94,12 +94,12 @@
     }
   },
   {
-    "key": "singleObjectName",
+    "key": "singleFileName",
     "type": "string",
     "default": "DesignTokens",
-    "title": "Name of the Kotlin object that contains all exported tokens",
-    "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
-    "category": "CSS selectors"
+    "title": "Name of the single combined file",
+    "description": "File and object name where all tokens are exported (e.g. 'DesignTokens').",
+    "category": "Token files"
   },
   {
     "key": "generateEmptyFiles",
@@ -107,29 +107,32 @@
     "default": false,
     "title": "Generate empty style files",
     "description": "Generate empty style files instead of omitting them.",
-    "category": "Style files"
+    "category": "Token files"
   },
   {
     "key": "nonThemedFilePath",
     "type": "string",
     "default": "./base",
-    "title": "Path to non-themed object files",
-    "description": "All files without themes will be written to this directory relative to export root."
+    "title": "Path to non-themed files",
+    "description": "All files without themes will be written to this directory (relative to export root).",
+    "category": "Token files"
   },
   {
-    "key": "customizeStyleFileNames",
+    "key": "customizeSeparatedByTypeFileNames",
     "type": "boolean",
     "default": false,
-    "title": "Customize style file names",
-    "description": "Customize the file names for each token type."
+    "title": "Customize token file names",
+    "description": "Customize the file names for each token type.",
+    "category": "Token files"
   },
   {
-    "key": "styleFileNames",
+    "key": "separatedByTypeFileNames",
     "type": "object",
-    "title": "Style file names",
+    "title": "Token file names",
     "description": "Name of each file that will be generated, grouped by token type.",
+    "category": "Token files",
     "dependsOn": {
-      "customizeStyleFileNames": true
+      "customizeSeparatedByTypeFileNames": true
     },
     "default": {
       "Blur": "Blur.kt",

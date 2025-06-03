@@ -1,4 +1,5 @@
 import { TokenType } from "@supernovaio/sdk-exporters";
+import { StringCase } from "../enums/StringCase";
 export declare class FileNameHelper {
     /**
      * Ensures a filename has the correct extension
@@ -11,5 +12,5 @@ export declare class FileNameHelper {
     /**
      * Gets the default style file name for a token type
      */
-    static getDefaultStyleFileName(type: TokenType, extension?: string): string;
+    static getDefaultStyleFileName(type: TokenType, extension?: string, stringCase?: StringCase): string;
 }

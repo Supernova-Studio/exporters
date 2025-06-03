@@ -92,9 +92,9 @@ function singleTokenTypeFile(
 
   //todo capitalized file names - everywhere
   // Get the filename based on configuration or defaults
-  let fileName = exportConfiguration.customizeStyleFileNames
-    ? exportConfiguration.styleFileNames[type]
-    : FileNameHelper.getDefaultStyleFileName(type, "kt")
+  let fileName = exportConfiguration.customizeSeparatedByTypeFileNames
+    ? exportConfiguration.separatedByTypeFileNames[type]
+    : FileNameHelper.getDefaultStyleFileName(type, "kt", StringCase.pascalCase)
 
   // Ensure proper .kt extension
   fileName = FileNameHelper.ensureFileExtension(fileName, "kt")
@@ -136,7 +136,7 @@ function generateCombinedFile(
   const content = generateFileContent(tokens, filteredTokens, theme, tokenGroups, tokenCollections)
 
   // For single file mode, all files are named identically but are placed in different folders
-  const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.singleObjectName, "kt")
+  const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.singleFileName, "kt")
   const relativePath = theme
     ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
     : exportConfiguration.nonThemedFilePath
@@ -168,7 +168,7 @@ function generateFileContent(
 
   //todo change depending on token type
   // Determine the Kotlin object name
-  const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.singleObjectName}`
+  const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.singleFileName}`
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
