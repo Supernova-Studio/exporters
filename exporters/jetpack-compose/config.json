@@ -76,6 +76,14 @@
     }
   },
   {
+    "key": "packagePrefixName",
+    "type": "string",
+    "default": "io.supernova.tokens",
+    "title": "Package prefix name",
+    "description": "Beginning of the package name tokens are exported to",
+    "category": "Token files"
+  },
+  {
     "key": "fileStructure",
     "type": "enum",
     "default": "separateByType",
@@ -280,14 +288,6 @@
     "allowedValues": {
       "type": "string"
     }
-  },
-  {
-    "key": "packagePrefixName",
-    "type": "string",
-    "default": "io.supernova.tokens",
-    "title": "Package prefix name",
-    "description": "Beginning of the package name tokens are exported to",
-    "category": "Other"
   },
   {
     "key": "showDescriptions",
