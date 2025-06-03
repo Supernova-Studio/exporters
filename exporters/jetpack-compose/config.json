@@ -78,7 +78,7 @@
     {
         "key": "fileStructure",
         "type": "enum",
-        "default": "singleFile",
+        "default": "separateByType",
         "title": "File structure",
         "description": "Control how token variables are organized in files",
         "category": "Style files",
@@ -94,6 +94,14 @@
         }
     },
     {
+        "key": "singleObjectName",
+        "type": "string",
+        "default": "DesignTokens",
+        "title": "Name of the Kotlin object that contains all exported tokens",
+        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
+        "category": "CSS selectors"
+    },
+    {
         "key": "generateEmptyFiles",
         "type": "boolean",
         "default": false,
@@ -106,52 +114,49 @@
         "type": "string",
         "default": "./base",
         "title": "Path to non-themed object files",
-        "description": "All files without themes will be written to this directory relative to export root.",
-        "category": "Style files"
+        "description": "All files without themes will be written to this directory relative to export root."
     },
     {
         "key": "customizeStyleFileNames",
         "type": "boolean",
         "default": false,
         "title": "Customize style file names",
-        "description": "Customize the file names for each token type.",
-        "category": "Style files"
+        "description": "Customize the file names for each token type."
     },
     {
         "key": "styleFileNames",
         "type": "object",
         "title": "Style file names",
         "description": "Name of each file that will be generated, grouped by token type.",
-        "category": "Style files",
         "dependsOn": {
             "customizeStyleFileNames": true
         },
         "default": {
-            "Blur": "blur.css",
-            "Border": "border.css",
-            "BorderRadius": "border-radius.css",
-            "BorderWidth": "border-width.css",
-            "Color": "color.css",
-            "Dimension": "dimension.css",
-            "Duration": "duration.css",
-            "FontFamily": "font-family.css",
-            "FontSize": "font-size.css",
-            "FontWeight": "font-weight.css",
-            "Gradient": "gradient.css",
-            "LetterSpacing": "letter-spacing.css",
-            "LineHeight": "line-height.css",
-            "Opacity": "opacity.css",
-            "ParagraphSpacing": "paragraph-spacing.css",
-            "ProductCopy": "product-copy.css",
-            "Shadow": "shadow.css",
-            "Size": "size.css",
-            "Space": "space.css",
-            "String": "string.css",
-            "TextCase": "text-case.css",
-            "TextDecoration": "text-decoration.css",
-            "Typography": "typography.css",
-            "Visibility": "visibility.css",
-            "ZIndex": "z-index.css"
+            "Blur": "Blur.kt",
+            "Border": "Border.kt",
+            "BorderRadius": "BorderRadius.kt",
+            "BorderWidth": "BorderWidth.kt",
+            "Color": "Color.kt",
+            "Dimension": "Dimension.kt",
+            "Duration": "Duration.kt",
+            "FontFamily": "FontFamily.kt",
+            "FontSize": "FontSize.kt",
+            "FontWeight": "FontWeight.kt",
+            "Gradient": "Gradient.kt",
+            "LetterSpacing": "LetterSpacing.kt",
+            "LineHeight": "LineHeight.kt",
+            "Opacity": "Opacity.kt",
+            "ParagraphSpacing": "ParagraphSpacing.kt",
+            "ProductCopy": "ProductCopy.kt",
+            "Shadow": "Shadow.kt",
+            "Size": "Size.kt",
+            "Space": "Space.kt",
+            "String": "String.kt",
+            "TextCase": "TextCase.kt",
+            "TextDecoration": "TextDecoration.kt",
+            "Typography": "Typography.kt",
+            "Visibility": "Visibility.kt",
+            "ZIndex": "ZIndex.kt"
         },
         "allowedKeys": {
             "options": [
@@ -192,7 +197,7 @@
         "type": "string",
         "default": "",
         "title": "Global prefix",
-        "description": "Prefix all variable names (e.g., '--ds-color-primary').",
+        "description": "Prefix all variable names (e.g., 'MyToken').",
         "category": "Token names"
     },
     {
@@ -273,14 +278,7 @@
             "type": "string"
         }
     },
-    {
-        "key": "singleObjectName",
-        "type": "string",
-        "default": "DesignTokens",
-        "title": "Name of the Kotlin object that contains all exported tokens",
-        "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
-        "category": "CSS selectors"
-    },
+
     {
         "key": "showDescriptions",
         "type": "boolean",
