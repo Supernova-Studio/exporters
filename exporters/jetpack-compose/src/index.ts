@@ -74,7 +74,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return generateStyleFiles(
         themedTokens,
         tokenGroups,
-        ThemeHelper.getThemeIdentifier(theme),
         theme,
         tokenCollections
       )
@@ -82,7 +81,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
     // Generate base files without themes only if exportBaseValues is true
     const baseFiles = exportConfiguration.exportBaseValues
-      ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)
+      ? generateStyleFiles(tokens, tokenGroups, undefined, tokenCollections)
       : []
 
     const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
@@ -91,7 +90,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     // Default case: Generate files without themes
     const defaultFiles = [
       ...(exportConfiguration.exportBaseValues
-        ? generateStyleFiles(tokens, tokenGroups, "", undefined, tokenCollections)
+        ? generateStyleFiles(tokens, tokenGroups, undefined, tokenCollections)
         : [])
       // indexOutputFile(tokens),
     ]

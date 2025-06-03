@@ -1,4 +1,11 @@
-import { FileHelper, FileNameHelper, GeneralHelper, ImportCollector, ThemeHelper } from "@supernovaio/export-utils"
+import {
+  FileHelper,
+  FileNameHelper,
+  GeneralHelper,
+  ImportCollector,
+  StringCase,
+  ThemeHelper
+} from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
@@ -18,24 +25,23 @@ import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typ
 export function generateStyleFiles(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  themePath: string = "",
   theme?: TokenTheme,
   tokenCollections: Array<DesignSystemCollection> = []
 ): Array<OutputTextFile> {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
-  if (!exportConfiguration.exportBaseValues && !themePath) {
+  if (!exportConfiguration.exportBaseValues && !theme) {
     return []
   }
 
   // For single file output
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-    const result = generateCombinedFile(tokens, tokenGroups, themePath, theme, tokenCollections)
+    const result = generateCombinedFile(tokens, tokenGroups, theme, tokenCollections)
     return result ? [result] : []
   }
 
   // For separate files by type (existing logic)
   return [...new Set(tokens.map((token) => token.tokenType))]
-    .map((type) => singleTypeFile(type, tokens, tokenGroups, themePath, theme, tokenCollections))
+    .map((type) => singleTokenTypeFile(type, tokens, tokenGroups, theme, tokenCollections))
     .filter((file): file is OutputTextFile => file !== null)
 }
 
@@ -44,21 +50,19 @@ export function generateStyleFiles(
  * @param type - The type of tokens to generate file for (colors, typography, etc.)
  * @param tokens - Array of all available tokens
  * @param tokenGroups - Array of token groups for reference
- * @param themePath - Optional path for theme-specific files (e.g. 'dark', 'light')
  * @param theme - Optional theme configuration for themed tokens
  * @param tokenCollections - Array of token collections for reference
  * @returns OutputTextFile object if the file should be generated, null otherwise
  */
-function singleTypeFile(
+function singleTokenTypeFile(
   type: TokenType,
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  themePath: string = "",
-  theme?: TokenTheme,
+  theme: TokenTheme | undefined,
   tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
-  if (!exportConfiguration.exportBaseValues && !themePath) {
+  if (!exportConfiguration.exportBaseValues && !theme) {
     return null
   }
 
@@ -66,7 +70,7 @@ function singleTypeFile(
   let tokensOfType = tokens.filter((token) => token.tokenType === type)
 
   // For theme files: filter tokens to only include those that are themed
-  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
+  if (theme && exportConfiguration.exportOnlyThemedTokens) {
     tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
 
     // Skip generating a theme file if no tokens are themed for this type
@@ -80,11 +84,10 @@ function singleTypeFile(
     return null
   }
 
-  const content = generateFileContent(tokens, tokensOfType, tokenGroups, tokenCollections)
+  const content = generateFileContent(tokens, tokensOfType, theme, tokenGroups, tokenCollections)
 
-  //todo themes
   // Build the output path, using the theme subfolder for themed files
-  const relativePath = themePath ? `./${themePath}` : exportConfiguration.baseStyleFilePath
+  const relativePath = theme ? `./${ThemeHelper.getThemeIdentifier(theme)}` : exportConfiguration.baseStyleFilePath
 
   // Get the filename based on configuration or defaults
   let fileName = exportConfiguration.customizeStyleFileNames
@@ -108,14 +111,13 @@ function singleTypeFile(
 function generateCombinedFile(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  themePath: string = "",
   theme?: TokenTheme,
   tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
   let filteredTokens = tokens
 
   // For theme files: filter tokens to only include those that are themed
-  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
+  if (theme && exportConfiguration.exportOnlyThemedTokens) {
     filteredTokens = ThemeHelper.filterThemedTokens(filteredTokens, theme)
 
     // Skip generating a theme file if no tokens are themed
@@ -129,10 +131,10 @@ function generateCombinedFile(
     return null
   }
 
-  const content = generateFileContent(tokens, filteredTokens, tokenGroups, tokenCollections)
+  const content = generateFileContent(tokens, filteredTokens, theme, tokenGroups, tokenCollections)
 
   // For single file mode, themed files go directly in root with theme-based names
-  const fileName = themePath ? `tokens.${themePath}.kt` : "tokens.kt"
+  const fileName = theme ? `tokens.${ThemeHelper.getThemeIdentifier(theme)}.kt` : "tokens.kt"
   const relativePath = "./" // Put files directly in the root folder
 
   // Create and return the output file
@@ -146,17 +148,22 @@ function generateCombinedFile(
 function generateFileContent(
   allTokens: Array<Token>,
   tokensToExport: Array<Token>,
+  theme: TokenTheme | undefined,
   tokenGroups: Array<TokenGroup>,
-  tokenCollections: Array<DesignSystemCollection>,
-  themePath: string = ""
+  tokenCollections: Array<DesignSystemCollection>
 ) {
   //todo customizable
-  const packageLiteral = "package com.supernova.tokens"
+  const packageLiteral = "package io.supernova.tokens"
 
   const importCollector = new ImportCollector()
 
   // Determine the Kotlin object name
-  const objectNameSuffix = themePath ? exportConfiguration.objectSuffixForThemes.replace("{theme}", themePath) : ""
+  const objectNameSuffix = theme
+    ? exportConfiguration.objectSuffixForThemes.replace(
+        "{theme}",
+        ThemeHelper.getThemeIdentifier(theme, StringCase.pascalCase)
+      )
+    : ""
   const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.objectName}${objectNameSuffix}`
 
   // Create a map of all tokens by ID for reference resolution
