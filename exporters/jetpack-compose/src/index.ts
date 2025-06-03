@@ -1,8 +1,7 @@
-import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile } from "@supernovaio/sdk-exporters"
-import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
-import { ExporterConfiguration, ThemeExportStyle } from "../config"
+import { AnyOutputFile, PulsarContext, RemoteVersionIdentifier, Supernova } from "@supernovaio/sdk-exporters"
+import { ExporterConfiguration } from "../config"
 import { indexOutputFile } from "./files/index-file"
-import { generateStyleFiles } from "./files/style-file"
+import { generateObjectFiles } from "./files/object-file"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -71,17 +70,12 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     // Generate separate files for each theme
     const themeFiles = themesToApply.flatMap((theme) => {
       const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
-      return generateStyleFiles(
-        themedTokens,
-        tokenGroups,
-        theme,
-        tokenCollections
-      )
+      return generateObjectFiles(themedTokens, tokenGroups, theme, tokenCollections)
     })
 
     // Generate base files without themes only if exportBaseValues is true
     const baseFiles = exportConfiguration.exportBaseValues
-      ? generateStyleFiles(tokens, tokenGroups, undefined, tokenCollections)
+      ? generateObjectFiles(tokens, tokenGroups, undefined, tokenCollections)
       : []
 
     const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
@@ -90,7 +84,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     // Default case: Generate files without themes
     const defaultFiles = [
       ...(exportConfiguration.exportBaseValues
-        ? generateStyleFiles(tokens, tokenGroups, undefined, tokenCollections)
+        ? generateObjectFiles(tokens, tokenGroups, undefined, tokenCollections)
         : [])
       // indexOutputFile(tokens),
     ]

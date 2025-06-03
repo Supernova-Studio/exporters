@@ -12,16 +12,15 @@ import { convertedToken } from "../content/token"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 
-//todo rename file, function?
 /**
- * Main entry point for generating style files
+ * Main entry point for generating Kotlin object files
  * @param tokens - Array of all available tokens
  * @param tokenGroups - Array of token groups for reference
  * @param theme - Optional theme configuration for themed tokens
  * @param tokenCollections - Array of token collections
  * @returns Array of OutputTextFile objects
  */
-export function generateStyleFiles(
+export function generateObjectFiles(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   theme: TokenTheme | undefined,
