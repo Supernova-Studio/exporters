@@ -86,7 +86,9 @@ function singleTokenTypeFile(
   const content = generateFileContent(tokens, tokensOfType, theme, tokenGroups, tokenCollections)
 
   // Build the output path, using the theme subfolder for themed files
-  const relativePath = theme ? `./${ThemeHelper.getThemeIdentifier(theme)}` : exportConfiguration.nonThemedFilePath
+  const relativePath = theme
+    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
+    : exportConfiguration.nonThemedFilePath
 
   //todo capitalized file names - everywhere
   // Get the filename based on configuration or defaults
@@ -135,7 +137,9 @@ function generateCombinedFile(
 
   // For single file mode, all files are named identically but are placed in different folders
   const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.singleObjectName, "kt")
-  const relativePath = theme ? `./${ThemeHelper.getThemeIdentifier(theme)}` : exportConfiguration.nonThemedFilePath
+  const relativePath = theme
+    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
+    : exportConfiguration.nonThemedFilePath
 
   // Create and return the output file
   return FileHelper.createTextFile({
