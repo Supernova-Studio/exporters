@@ -161,7 +161,7 @@ function generateFileContent(
   const packageNameSuffix = theme
     ? ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)
     : NamingHelper.codeSafeVariableName(exportConfiguration.nonThemedFilePath, StringCase.dotCase)
-  const fullPackageName = [`${exportConfiguration.packageName}.tokens`, packageNameSuffix].filter(Boolean).join(".")
+  const fullPackageName = [exportConfiguration.packagePrefixName, packageNameSuffix].filter(Boolean).join(".")
   const packageLiteral = `package ${fullPackageName}`
 
   const importCollector = new ImportCollector()

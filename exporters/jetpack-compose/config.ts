@@ -72,5 +72,5 @@ export type ExporterConfiguration = {
   /** Name of the custom property where generated variable names will be saved */
   propertyToWriteNameTo: string
   /** Name of the package where tokens are exported */
-  packageName: string
+  packagePrefixName: string
 }

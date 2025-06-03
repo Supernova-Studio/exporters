@@ -76,14 +76,6 @@
     }
   },
   {
-    "key": "generateEmptyFiles",
-    "type": "boolean",
-    "default": false,
-    "title": "Generate empty token files",
-    "description": "Generate empty token files instead of omitting them.",
-    "category": "Token files"
-  },
-  {
     "key": "fileStructure",
     "type": "enum",
     "default": "separateByType",
@@ -196,6 +188,14 @@
     }
   },
   {
+    "key": "generateEmptyFiles",
+    "type": "boolean",
+    "default": false,
+    "title": "Generate empty token files",
+    "description": "Generate empty token files instead of omitting them.",
+    "category": "Token files"
+  },
+  {
     "key": "globalNamePrefix",
     "type": "string",
     "default": "",
@@ -282,11 +282,11 @@
     }
   },
   {
-    "key": "packageName",
+    "key": "packagePrefixName",
     "type": "string",
-    "default": "io.supernova",
-    "title": "Package name",
-    "description": "Name of the package tokens are exported to",
+    "default": "io.supernova.tokens",
+    "title": "Package prefix name",
+    "description": "Beginning of the package name tokens are exported to",
     "category": "Other"
   },
   {
