@@ -4,6 +4,8 @@ import { exportConfiguration } from ".."
 import { getStyleFileName } from "../utils/file-utils"
 import { FileStructure } from "../../config"
 
+// TODO clean, polish
+
 /**
  * Generates an index CSS file that imports all token style files and theme variations.
  * This file serves as the main entry point for all token styles.
@@ -65,7 +67,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Generate imports for base token files (./base/color.css, ./base/typography.css, etc.)
   const imports = exportConfiguration.exportBaseValues 
     ? `/* Base tokens */\n` + types
-        .map((type) => `@import "${exportConfiguration.baseStyleFilePath}/${getStyleFileName(type, '.css')}";`)
+        .map((type) => `@import "${exportConfiguration.nonThemedFilePath}/${getStyleFileName(type, '.css')}";`)
         .join("\n")
     : ''
 

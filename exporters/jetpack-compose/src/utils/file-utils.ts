@@ -3,10 +3,9 @@ import { TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 
-//todo needed?
 export function getStyleFileName(type: TokenType, extension: string): string {
-  const fileName = exportConfiguration.customizeStyleFileNames
-    ? exportConfiguration.styleFileNames[type]
+  const fileName = exportConfiguration.customizeSeparatedByTypeFileNames
+    ? exportConfiguration.separatedByTypeFileNames[type]
     : DEFAULT_STYLE_FILE_NAMES[type]
   
   // Ensure the file name ends with the specified extension
