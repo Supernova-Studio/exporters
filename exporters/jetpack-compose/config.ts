@@ -44,12 +44,12 @@ export type ExporterConfiguration = {
   styleFileNames: Record<TokenType, string>
   /** Name of the index file that will be generated */
   indexFileName: string
-  /** All files will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
-  baseStyleFilePath: string
+  /** Path to non-themed object files */
+  nonThemedFilePath: string
   /** Index file will be written to this directory (relative to export root set by the exporter / pipeline configuration / VSCode extension) */
   baseIndexFilePath: string
-  /** Name of the Kotlin object where tokens are defined */
-  objectName: string
+  /** Name of the Kotlin object that contains all exported tokens */
+  singleObjectName: string
   /** Theme suffix added to the Kotlin object name, {theme} will be replaced with the theme name */
   objectSuffixForThemes: string
   /** When enabled, themed files will only include tokens that have different values from the base theme */
@@ -70,4 +70,6 @@ export type ExporterConfiguration = {
   writeNameToProperty: boolean
   /** Name of the custom property where generated variable names will be saved */
   propertyToWriteNameTo: string
+  /** Name of the package where tokens are exported */
+  packageName: string
 }

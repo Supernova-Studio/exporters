@@ -78,9 +78,9 @@
     {
         "key": "fileStructure",
         "type": "enum",
-        "default": "separateByType",
+        "default": "singleFile",
         "title": "File structure",
-        "description": "Control how token styles are organized in files",
+        "description": "Control how token variables are organized in files",
         "category": "Style files",
         "options": {
             "separateByType": {
@@ -102,11 +102,11 @@
         "category": "Style files"
     },
     {
-        "key": "baseStyleFilePath",
+        "key": "nonThemedFilePath",
         "type": "string",
         "default": "./base",
-        "title": "Path to base style files",
-        "description": "All files will be written to this directory relative to export root.",
+        "title": "Path to non-themed object files",
+        "description": "All files without themes will be written to this directory relative to export root.",
         "category": "Style files"
     },
     {
@@ -274,19 +274,11 @@
         }
     },
     {
-        "key": "objectName",
+        "key": "singleObjectName",
         "type": "string",
         "default": "DesignTokens",
-        "title": "Name of the Kotlin object where tokens are defined",
+        "title": "Name of the Kotlin object that contains all exported tokens",
         "description": "CSS selector for base token variables (e.g. ':root' for global scope).",
-        "category": "CSS selectors"
-    },
-    {
-        "key": "objectSuffixForThemes",
-        "type": "string",
-        "default": "{theme}Theme",
-        "title": "Theme suffix added to the Kotlin object name",
-        "description": "CSS selector for theme files. Use {theme} placeholder to insert theme name.",
         "category": "CSS selectors"
     },
     {
@@ -342,5 +334,12 @@
         "dependsOn": {
             "writeNameToProperty": true
         }
+    },
+        {
+        "key": "packageName",
+        "type": "string",
+        "default": "io.supernova",
+        "title": "Package name",
+        "description": "Name of the package where tokens are exported"
     }
 ]

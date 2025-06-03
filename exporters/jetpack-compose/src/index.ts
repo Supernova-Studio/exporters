@@ -11,7 +11,7 @@ export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
  * @param files Array of output files that may contain null values
  * @returns Array of non-null output files
  */
-function processOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutputFile> {
+function sanitizeOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutputFile> {
   return files.filter((file): file is AnyOutputFile => file !== null)
 }
 
@@ -67,6 +67,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return theme
     })
 
+    // TODO: support different modes
     // Generate separate files for each theme
     const themeFiles = themesToApply.flatMap((theme) => {
       const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
@@ -78,8 +79,11 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       ? generateObjectFiles(tokens, tokenGroups, undefined, tokenCollections)
       : []
 
-    const separateFiles = [...baseFiles, ...themeFiles, indexOutputFile(tokens, themesToApply)]
-    outputFiles = processOutputFiles(separateFiles)
+    // todo index files
+    const separateFiles = [...baseFiles, ...themeFiles,
+      // indexOutputFile(tokens, themesToApply)
+    ]
+    outputFiles = sanitizeOutputFiles(separateFiles)
   } else {
     // Default case: Generate files without themes
     const defaultFiles = [
@@ -88,7 +92,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         : [])
       // indexOutputFile(tokens),
     ]
-    outputFiles = processOutputFiles(defaultFiles)
+    outputFiles = sanitizeOutputFiles(defaultFiles)
   }
 
   // todo support

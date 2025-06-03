@@ -3,6 +3,7 @@ import {
   FileNameHelper,
   GeneralHelper,
   ImportCollector,
+  NamingHelper,
   StringCase,
   ThemeHelper
 } from "@supernovaio/export-utils"
@@ -85,8 +86,9 @@ function singleTokenTypeFile(
   const content = generateFileContent(tokens, tokensOfType, theme, tokenGroups, tokenCollections)
 
   // Build the output path, using the theme subfolder for themed files
-  const relativePath = theme ? `./${ThemeHelper.getThemeIdentifier(theme)}` : exportConfiguration.baseStyleFilePath
+  const relativePath = theme ? `./${ThemeHelper.getThemeIdentifier(theme)}` : exportConfiguration.nonThemedFilePath
 
+  //todo capitalized file names - everywhere
   // Get the filename based on configuration or defaults
   let fileName = exportConfiguration.customizeStyleFileNames
     ? exportConfiguration.styleFileNames[type]
@@ -131,9 +133,9 @@ function generateCombinedFile(
 
   const content = generateFileContent(tokens, filteredTokens, theme, tokenGroups, tokenCollections)
 
-  // For single file mode, themed files go directly in root with theme-based names
-  const fileName = theme ? `tokens.${ThemeHelper.getThemeIdentifier(theme)}.kt` : "tokens.kt"
-  const relativePath = "./" // Put files directly in the root folder
+  // For single file mode, all files are named identically but are placed in different folders
+  const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.singleObjectName, "kt")
+  const relativePath = theme ? `./${ThemeHelper.getThemeIdentifier(theme)}` : exportConfiguration.nonThemedFilePath
 
   // Create and return the output file
   return FileHelper.createTextFile({
@@ -150,19 +152,19 @@ function generateFileContent(
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<DesignSystemCollection>
 ) {
-  //todo customizable
-  const packageLiteral = "package io.supernova.tokens"
+  // Every theme is located in a folder with the same name;
+  // However, the non-themed path can be nested and contain several segments
+  const packageNameSuffix = theme
+    ? ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)
+    : NamingHelper.codeSafeVariableName(exportConfiguration.nonThemedFilePath, StringCase.dotCase)
+  const fullPackageName = [`${exportConfiguration.packageName}.tokens`, packageNameSuffix].filter(Boolean).join(".")
+  const packageLiteral = `package ${fullPackageName}`
 
   const importCollector = new ImportCollector()
 
+  //todo change depending on token type
   // Determine the Kotlin object name
-  const objectNameSuffix = theme
-    ? exportConfiguration.objectSuffixForThemes.replace(
-        "{theme}",
-        ThemeHelper.getThemeIdentifier(theme, StringCase.pascalCase)
-      )
-    : ""
-  const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.objectName}${objectNameSuffix}`
+  const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.singleObjectName}`
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
