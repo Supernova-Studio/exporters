@@ -1,5 +1,33 @@
 import { AnyDimensionTokenValue, AnyOptionTokenValue, AnyStringTokenValue, BlurTokenValue, BorderTokenValue, ColorTokenValue, GradientTokenValue, ShadowTokenValue, TextCase, TextDecoration, Token, TokenType, TypographyTokenValue, Unit, VisibilityType } from "@supernovaio/sdk-exporters";
 import { ColorFormatOptions } from "./ColorHelper";
+export declare enum ImportFlag {
+    Color = 0,
+    Dp = 1,
+    Sp = 2,
+    Offset = 3,
+    Brush = 4,
+    TileMode = 5,
+    Shadow = 6,
+    BorderStroke = 7,
+    Modifier = 8,
+    Blur = 9,
+    FontWeight = 10,
+    TextDecoration = 11,
+    TextStyle = 12
+}
+/** Collect flags while generating literals, turn into imports at the end */
+export declare class ImportCollector {
+    private flags;
+    /**
+     * Marks a specific import to be used in a token
+     * @param f
+     */
+    use(...f: ImportFlag[]): void;
+    /**
+     * Output a list of all sorted import literals needed for the specified tokens.
+     */
+    print(): string[];
+}
 type InternalOptions = ColorFormatOptions & {
     indent: number;
 };

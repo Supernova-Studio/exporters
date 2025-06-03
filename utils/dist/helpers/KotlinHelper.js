@@ -1,10 +1,75 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KotlinHelper = void 0;
+exports.KotlinHelper = exports.ImportCollector = exports.ImportFlag = void 0;
 const sdk_exporters_1 = require("@supernovaio/sdk-exporters");
 const ColorHelper_1 = require("./ColorHelper");
 const TokenHelper_1 = require("./TokenHelper");
 const GeneralHelper_1 = require("./GeneralHelper");
+/* ──────────────────────────────────────────────────────────────── */
+/*  Imports & flag enum                                             */
+/* ──────────────────────────────────────────────────────────────── */
+var ImportFlag;
+(function (ImportFlag) {
+    ImportFlag[ImportFlag["Color"] = 0] = "Color";
+    ImportFlag[ImportFlag["Dp"] = 1] = "Dp";
+    ImportFlag[ImportFlag["Sp"] = 2] = "Sp";
+    ImportFlag[ImportFlag["Offset"] = 3] = "Offset";
+    ImportFlag[ImportFlag["Brush"] = 4] = "Brush";
+    ImportFlag[ImportFlag["TileMode"] = 5] = "TileMode";
+    ImportFlag[ImportFlag["Shadow"] = 6] = "Shadow";
+    ImportFlag[ImportFlag["BorderStroke"] = 7] = "BorderStroke";
+    ImportFlag[ImportFlag["Modifier"] = 8] = "Modifier";
+    ImportFlag[ImportFlag["Blur"] = 9] = "Blur";
+    ImportFlag[ImportFlag["FontWeight"] = 10] = "FontWeight";
+    ImportFlag[ImportFlag["TextDecoration"] = 11] = "TextDecoration";
+    ImportFlag[ImportFlag["TextStyle"] = 12] = "TextStyle";
+})(ImportFlag || (exports.ImportFlag = ImportFlag = {}));
+/** Collect flags while generating literals, turn into imports at the end */
+class ImportCollector {
+    constructor() {
+        this.flags = new Set();
+    }
+    /**
+     * Marks a specific import to be used in a token
+     * @param f
+     */
+    use(...f) { f.forEach(x => this.flags.add(x)); }
+    /**
+     * Output a list of all sorted import literals needed for the specified tokens.
+     */
+    print() {
+        const imps = [];
+        if (this.flags.has(ImportFlag.Color))
+            imps.push("import androidx.compose.ui.graphics.Color");
+        if (this.flags.has(ImportFlag.Dp))
+            imps.push("import androidx.compose.ui.unit.dp");
+        if (this.flags.has(ImportFlag.Sp))
+            imps.push("import androidx.compose.ui.unit.sp");
+        if (this.flags.has(ImportFlag.Offset))
+            imps.push("import androidx.compose.ui.geometry.Offset");
+        if (this.flags.has(ImportFlag.Brush))
+            imps.push("import androidx.compose.ui.graphics.Brush");
+        if (this.flags.has(ImportFlag.TileMode))
+            imps.push("import androidx.compose.ui.graphics.TileMode");
+        if (this.flags.has(ImportFlag.Shadow))
+            imps.push("import androidx.compose.ui.graphics.Shadow");
+        if (this.flags.has(ImportFlag.BorderStroke))
+            imps.push("import androidx.compose.foundation.BorderStroke");
+        if (this.flags.has(ImportFlag.Modifier)) {
+            imps.push("import androidx.compose.ui.Modifier");
+            if (this.flags.has(ImportFlag.Blur))
+                imps.push("import androidx.compose.ui.draw.blur");
+        }
+        if (this.flags.has(ImportFlag.FontWeight))
+            imps.push("import androidx.compose.ui.text.font.FontWeight");
+        if (this.flags.has(ImportFlag.TextDecoration))
+            imps.push("import androidx.compose.ui.text.TextDecoration");
+        if (this.flags.has(ImportFlag.TextStyle))
+            imps.push("import androidx.compose.ui.text.TextStyle");
+        return imps.sort();
+    }
+}
+exports.ImportCollector = ImportCollector;
 class KotlinHelper {
     static tokenValue(token, allTokens, options) {
         const actualOptions = {
