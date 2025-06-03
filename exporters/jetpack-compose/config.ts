@@ -36,10 +36,6 @@ export type ExporterConfiguration = {
   useReferences: boolean
   /** Style of exported token names */
   tokenNameStyle: StringCase
-  /** Format of the exported colors */
-  colorFormat: ColorFormat
-  /** Max number of decimals in colors */
-  colorPrecision: number
   /** Number of spaces used to indent every css variables */
   indent: number
   /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
@@ -62,10 +58,6 @@ export type ExporterConfiguration = {
   exportOnlyThemedTokens: boolean
   /** When enabled, base token values will be exported along with themes */
   exportBaseValues: boolean
-  /** When enabled, converts pixel values to rem units */
-  forceRemUnit: boolean
-  /** Base pixel value for rem conversion (default: 16) */
-  remBase: number
   /** When enabled, allows customization of style file names */
   customizeStyleFileNames: boolean
   /** When enabled, allows customization of token prefixes */
@@ -80,6 +72,4 @@ export type ExporterConfiguration = {
   writeNameToProperty: boolean
   /** Name of the custom property where generated variable names will be saved */
   propertyToWriteNameTo: string
-  /** If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying */
-  propertyToWriteNameToIncludesVar: boolean
 }
