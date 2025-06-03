@@ -166,7 +166,7 @@ class KotlinHelper {
         const stopsLit = value.stops
             .map((stop) => ColorHelper_1.ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
             .join(", ");
-        //todo indent, check all
+        const indentString = GeneralHelper_1.GeneralHelper.indent(options.indent);
         // Choose Brush builder
         switch (value.type) {
             case sdk_exporters_1.GradientType.radial:
@@ -175,34 +175,37 @@ class KotlinHelper {
                 const centerX = ((value.from.x + value.to.x) / 2).toFixed(2);
                 const centerY = ((value.from.y + value.to.y) / 2).toFixed(2);
                 return (`Brush.radialGradient(\n` +
-                    `    colors = listOf(${colorsLit}),\n` +
-                    `    center = Offset(${centerX}f, ${centerY}f),\n` +
-                    `    radius = 0.5f, /* relative to size */\n` +
-                    `    tileMode = TileMode.Clamp,\n` +
-                    `    stops = floatArrayOf(${stopsLit})\n` +
-                    `)`);
+                    `${indentString}${indentString}colors = listOf(${colorsLit}),\n` +
+                    `${indentString}${indentString}center = Offset(${centerX}f, ${centerY}f),\n` +
+                    `${indentString}${indentString}radius = 0.5f,\n` +
+                    `${indentString}${indentString}tileMode = TileMode.Clamp,\n` +
+                    `${indentString}${indentString}stops = floatArrayOf(${stopsLit})\n` +
+                    `${indentString})`);
             case sdk_exporters_1.GradientType.angular:
                 // sweep in Compose
                 return (`Brush.sweepGradient(\n` +
-                    `    colors = listOf(${colorsLit}),\n` +
-                    `    center = Offset(0.5f, 0.5f), /* relative */\n` +
-                    `    stops = floatArrayOf(${stopsLit})\n` +
-                    `)`);
+                    `${indentString}${indentString}colors = listOf(${colorsLit}),\n` +
+                    `${indentString}${indentString}center = Offset(0.5f, 0.5f),\n` +
+                    `${indentString}${indentString}stops = floatArrayOf(${stopsLit})\n` +
+                    `${indentString})`);
             case sdk_exporters_1.GradientType.linear:
             default:
                 return (`Brush.linearGradient(\n` +
-                    `    colors = listOf(${colorsLit}),\n` +
-                    `    stops = floatArrayOf(${stopsLit}),\n` +
-                    `    start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
-                    `    end   = Offset(${value.to.x}f,   ${value.to.y}f)\n` +
-                    `)`);
+                    `${indentString}${indentString}colors = listOf(${colorsLit}),\n` +
+                    `${indentString}${indentString}stops = floatArrayOf(${stopsLit}),\n` +
+                    `${indentString}${indentString}start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
+                    `${indentString}${indentString}end = Offset(${value.to.x}f, ${value.to.y}f)\n` +
+                    `${indentString})`);
         }
     }
     static shadowTokenValueToKotlin(shadows, allTokens, options, importCollector) {
         const layers = shadows.map((s) => this.shadowLayerToKotlin(s, allTokens, options, importCollector));
+        const indentString = GeneralHelper_1.GeneralHelper.indent(options.indent);
         // Compose can draw only one shadow per shape; export all layers anyway,
         // so callers may overlay them manually
-        return layers.length === 1 ? layers[0] : `listOf(${layers.join(", ")})`;
+        return layers.length === 1
+            ? layers[0]
+            : `listOf(\n` + `${layers.map((l) => `${indentString}${indentString}${l}`).join(",\n")}` + `\n${indentString})`;
     }
     static shadowLayerToKotlin(value, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
