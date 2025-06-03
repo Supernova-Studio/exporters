@@ -9,15 +9,15 @@
     "options": {
       "pathAndName": {
         "label": "Path + Name",
-        "description": "Include path and name (e.g. button-primary-background)"
+        "description": "Include path and name (e.g. ButtonPrimaryBackground)"
       },
       "nameOnly": {
         "label": "Name only",
-        "description": "Only include name (e.g. background)"
+        "description": "Only include name (e.g. Background)"
       },
       "collectionPathAndName": {
         "label": "Collection + Path + Name",
-        "description": "Include collection, path, and name (e.g. core-button-primary-background)"
+        "description": "Include collection, path, and name (e.g. CoreButtonPrimaryBackground)"
       }
     }
   },
@@ -50,13 +50,13 @@
     "type": "boolean",
     "default": true,
     "title": "Generate index file",
-    "description": "Generate a file with imports for all base and theme style files.",
+    "description": "Generate a file with imports for all base and theme token files.",
     "category": "Index file"
   },
   {
     "key": "indexFileName",
     "type": "string",
-    "default": "index.css",
+    "default": "TODO.kt",
     "title": "Index filename",
     "description": "The name of the index file that will be generated.",
     "category": "Index file",
@@ -74,6 +74,14 @@
     "dependsOn": {
       "generateIndexFile": true
     }
+  },
+  {
+    "key": "generateEmptyFiles",
+    "type": "boolean",
+    "default": false,
+    "title": "Generate empty token files",
+    "description": "Generate empty token files instead of omitting them.",
+    "category": "Token files"
   },
   {
     "key": "fileStructure",
@@ -99,14 +107,6 @@
     "default": "DesignTokens",
     "title": "Name of the single combined file",
     "description": "File and object name where all tokens are exported (e.g. 'DesignTokens').",
-    "category": "Token files"
-  },
-  {
-    "key": "generateEmptyFiles",
-    "type": "boolean",
-    "default": false,
-    "title": "Generate empty style files",
-    "description": "Generate empty style files instead of omitting them.",
     "category": "Token files"
   },
   {
@@ -282,6 +282,14 @@
     }
   },
   {
+    "key": "packageName",
+    "type": "string",
+    "default": "io.supernova",
+    "title": "Package name",
+    "description": "Name of the package tokens are exported to",
+    "category": "Other"
+  },
+  {
     "key": "showDescriptions",
     "type": "boolean",
     "default": true,
@@ -294,7 +302,7 @@
     "type": "boolean",
     "default": true,
     "title": "Show file disclaimer",
-    "description": "A message explaining that the file was automatically generated will appear in all style files.",
+    "description": "A message explaining that the file was automatically generated will appear in all token files.",
     "category": "Other"
   },
   {
@@ -302,7 +310,7 @@
     "type": "string",
     "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
     "title": "Disclaimer message",
-    "description": "A message explaining that the file was automatically generated will appear in all style files.",
+    "description": "A message explaining that the file was automatically generated will appear in all token files.",
     "category": "Other",
     "dependsOn": {
       "showGeneratedFileDisclaimer": true
@@ -313,7 +321,7 @@
     "type": "number",
     "default": 2,
     "title": "Indentation",
-    "description": "Number of spaces used to indent CSS variables.",
+    "description": "Number of spaces used in generated Kotlin files.",
     "category": "Other"
   },
   {
@@ -327,19 +335,12 @@
   {
     "key": "propertyToWriteNameTo",
     "type": "string",
-    "default": "CSS",
+    "default": "Jetpack Compose",
     "title": "Custom property name",
     "description": "Name of the custom property where generated variable names will be saved.",
     "category": "Automatic write-back",
     "dependsOn": {
       "writeNameToProperty": true
     }
-  },
-  {
-    "key": "packageName",
-    "type": "string",
-    "default": "io.supernova",
-    "title": "Package name",
-    "description": "Name of the package where tokens are exported"
   }
 ]
