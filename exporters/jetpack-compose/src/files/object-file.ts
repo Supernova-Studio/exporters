@@ -83,18 +83,17 @@ function singleTokenTypeFile(
     return null
   }
 
-  const content = generateFileContent(tokens, tokensOfType, theme, tokenGroups, tokenCollections)
+  // Get the filename based on configuration or defaults
+  let fileName = exportConfiguration.customizeSeparatedByTypeFileNames
+    ? exportConfiguration.separatedByTypeFileNames[type]
+    : FileNameHelper.getDefaultStyleFileName(type, "kt", StringCase.pascalCase)
 
   // Build the output path, using the theme subfolder for themed files
   const relativePath = theme
     ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
     : exportConfiguration.nonThemedFilePath
 
-  //todo capitalized file names - everywhere
-  // Get the filename based on configuration or defaults
-  let fileName = exportConfiguration.customizeSeparatedByTypeFileNames
-    ? exportConfiguration.separatedByTypeFileNames[type]
-    : FileNameHelper.getDefaultStyleFileName(type, "kt", StringCase.pascalCase)
+  const content = generateFileContent(tokensOfType, fileName, theme, tokens, tokenGroups, tokenCollections)
 
   // Ensure proper .kt extension
   fileName = FileNameHelper.ensureFileExtension(fileName, "kt")
@@ -133,13 +132,13 @@ function generateCombinedFile(
     return null
   }
 
-  const content = generateFileContent(tokens, filteredTokens, theme, tokenGroups, tokenCollections)
-
   // For single file mode, all files are named identically but are placed in different folders
   const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.singleFileName, "kt")
   const relativePath = theme
     ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
     : exportConfiguration.nonThemedFilePath
+
+  const content = generateFileContent(filteredTokens, fileName, theme, tokens, tokenGroups, tokenCollections)
 
   // Create and return the output file
   return FileHelper.createTextFile({
@@ -150,9 +149,10 @@ function generateCombinedFile(
 }
 
 function generateFileContent(
-  allTokens: Array<Token>,
   tokensToExport: Array<Token>,
+  fileName: string,
   theme: TokenTheme | undefined,
+  allTokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<DesignSystemCollection>
 ) {
@@ -166,9 +166,9 @@ function generateFileContent(
 
   const importCollector = new ImportCollector()
 
-  //todo change depending on token type
-  // Determine the Kotlin object name
-  const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.singleFileName}`
+  // Determine the Kotlin object name - it is the same as file name, but without the extension
+  const sanitizedObjectName = fileName.endsWith(".kt") ? fileName.slice(0, -3) : fileName
+  const objectLiteral = `@Immutable\n` + `object ${sanitizedObjectName}`
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
