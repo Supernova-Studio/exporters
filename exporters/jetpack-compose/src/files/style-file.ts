@@ -17,16 +17,15 @@ import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typ
  * Main entry point for generating style files
  * @param tokens - Array of all available tokens
  * @param tokenGroups - Array of token groups for reference
- * @param themePath - Optional path for theme-specific files
  * @param theme - Optional theme configuration for themed tokens
- * @param tokenCollections
+ * @param tokenCollections - Array of token collections
  * @returns Array of OutputTextFile objects
  */
 export function generateStyleFiles(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
-  theme?: TokenTheme,
-  tokenCollections: Array<DesignSystemCollection> = []
+  theme: TokenTheme | undefined,
+  tokenCollections: Array<DesignSystemCollection>
 ): Array<OutputTextFile> {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
   if (!exportConfiguration.exportBaseValues && !theme) {
@@ -59,7 +58,7 @@ function singleTokenTypeFile(
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
   theme: TokenTheme | undefined,
-  tokenCollections: Array<DesignSystemCollection> = []
+  tokenCollections: Array<DesignSystemCollection>
 ): OutputTextFile | null {
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
   if (!exportConfiguration.exportBaseValues && !theme) {
