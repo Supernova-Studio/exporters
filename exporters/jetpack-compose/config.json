@@ -30,28 +30,6 @@
         "category": "Token values"
     },
     {
-        "key": "exportThemesAs",
-        "type": "enum",
-        "default": "separateFiles",
-        "title": "Theme export format",
-        "description": "Control how themes are exported in the CSS files.",
-        "category": "Themes",
-        "options": {
-            "separateFiles": {
-                "label": "Separate files per theme",
-                "description": "Generate a separate CSS file for each selected theme"
-            },
-            "applyDirectly": {
-                "label": "Apply themes directly",
-                "description": "Apply selected themes directly to token values"
-            },
-            "mergedTheme": {
-                "label": "Merged theme file",
-                "description": "Generate theme variables with all themes applied together"
-            }
-        }
-    },
-    {
         "key": "exportOnlyThemedTokens",
         "type": "boolean",
         "default": false,

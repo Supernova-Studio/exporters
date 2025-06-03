@@ -52,8 +52,6 @@ export type ExporterConfiguration = {
   objectName: string
   /** Theme suffix added to the Kotlin object name, {theme} will be replaced with the theme name */
   objectSuffixForThemes: string
-  /** Controls how themes are exported in the CSS files */
-  exportThemesAs: ThemeExportStyle
   /** When enabled, themed files will only include tokens that have different values from the base theme */
   exportOnlyThemedTokens: boolean
   /** When enabled, base token values will be exported along with themes */

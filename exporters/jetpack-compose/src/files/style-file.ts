@@ -3,10 +3,9 @@ import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@super
 import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 import { FileStructure } from "../../config"
-import {
-  DesignSystemCollection
-} from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
+import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 
+//todo rename file, function?
 /**
  * Main entry point for generating style files
  * @param tokens - Array of all available tokens
@@ -158,8 +157,7 @@ function generateFileContent(
 
   // Determine the Kotlin object name
   const objectNameSuffix = themePath ? exportConfiguration.objectSuffixForThemes.replace("{theme}", themePath) : ""
-  const objectLiteral = `@Immutable
-object ${exportConfiguration.objectName}${objectNameSuffix}`
+  const objectLiteral = `@Immutable\n` + `object ${exportConfiguration.objectName}${objectNameSuffix}`
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))

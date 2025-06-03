@@ -51,7 +51,7 @@ export function convertedToken(
     decimals: 0,
     indent: exportConfiguration.indent,
     tokenToVariableRef: (token: Token) => {
-      // TODO: add class name
+      // TODO: add class name, import it if needed
       return tokenName(token, tokenGroups, collections)
     }
   } satisfies TokenToKotlinOptions
