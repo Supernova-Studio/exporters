@@ -1,7 +1,7 @@
 import { FileHelper, FileNameHelper, ThemeHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { getStyleFileName } from "../utils/file-utils"
+import { getTokenTypeFileName } from "../utils/file-utils"
 import { FileStructure } from "../../config"
 
 // TODO clean, polish
@@ -67,7 +67,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // Generate imports for base token files (./base/color.css, ./base/typography.css, etc.)
   const imports = exportConfiguration.exportBaseValues 
     ? `/* Base tokens */\n` + types
-        .map((type) => `@import "${exportConfiguration.nonThemedFilePath}/${getStyleFileName(type, '.css')}";`)
+        .map((type) => `@import "${exportConfiguration.nonThemedFilePath}/${getTokenTypeFileName(type)}";`)
         .join("\n")
     : ''
 
@@ -86,7 +86,7 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
     return themeTypes
       .map((type, index) => {
         const themeComment = index === 0 ? `/* Theme: ${themeName} */\n` : ''
-        return `${themeComment}@import "./${themePath}/${getStyleFileName(type, '.css')}";`
+        return `${themeComment}@import "./${themePath}/${getTokenTypeFileName(type)}";`
       })
       .join("\n")
   }).join("\n\n")

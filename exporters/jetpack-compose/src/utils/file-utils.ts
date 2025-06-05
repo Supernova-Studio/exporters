@@ -1,13 +1,12 @@
-import { FileNameHelper } from '@supernovaio/export-utils';
+import { FileNameHelper, NamingHelper, StringCase } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
+import { DEFAULT_TOKEN_TYPE_FILE_NAMES } from "../constants/defaults"
 
-export function getStyleFileName(type: TokenType, extension: string): string {
+export function getTokenTypeFileName(type: TokenType): string {
   const fileName = exportConfiguration.customizeSeparatedByTypeFileNames
     ? exportConfiguration.separatedByTypeFileNames[type]
-    : DEFAULT_STYLE_FILE_NAMES[type]
-  
-  // Ensure the file name ends with the specified extension
-  return FileNameHelper.ensureFileExtension(fileName, extension)
-} 
+    : DEFAULT_TOKEN_TYPE_FILE_NAMES[type]
+
+  return FileNameHelper.ensureFileExtension(fileName, "kt")
+}

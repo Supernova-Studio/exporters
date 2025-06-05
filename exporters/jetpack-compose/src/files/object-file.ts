@@ -12,6 +12,7 @@ import { exportConfiguration } from ".."
 import { convertedToken } from "../content/token"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
+import { getTokenTypeFileName } from "../utils/file-utils"
 
 /**
  * Main entry point for generating Kotlin object files
@@ -40,7 +41,7 @@ export function generateObjectFiles(
 
   // For separate files by type (existing logic)
   return [...new Set(tokens.map((token) => token.tokenType))]
-    .map((type) => singleTokenTypeFile(type, tokens, tokenGroups, theme, tokenCollections))
+    .map((type) => separateTokenTypeFile(type, tokens, tokenGroups, theme, tokenCollections))
     .filter((file): file is OutputTextFile => file !== null)
 }
 
@@ -53,7 +54,7 @@ export function generateObjectFiles(
  * @param tokenCollections - Array of token collections for reference
  * @returns OutputTextFile object if the file should be generated, null otherwise
  */
-function singleTokenTypeFile(
+function separateTokenTypeFile(
   type: TokenType,
   tokens: Array<Token>,
   tokenGroups: Array<TokenGroup>,
@@ -84,9 +85,7 @@ function singleTokenTypeFile(
   }
 
   // Get the filename based on configuration or defaults
-  let fileName = exportConfiguration.customizeSeparatedByTypeFileNames
-    ? exportConfiguration.separatedByTypeFileNames[type]
-    : FileNameHelper.getDefaultStyleFileName(type, "kt", StringCase.pascalCase)
+  let fileName = getTokenTypeFileName(type)
 
   // Build the output path, using the theme subfolder for themed files
   const relativePath = theme
@@ -94,9 +93,6 @@ function singleTokenTypeFile(
     : exportConfiguration.nonThemedFilePath
 
   const content = generateFileContent(tokensOfType, fileName, theme, tokens, tokenGroups, tokenCollections)
-
-  // Ensure proper .kt extension
-  fileName = FileNameHelper.ensureFileExtension(fileName, "kt")
 
   // Create and return the output file object
   return FileHelper.createTextFile({
@@ -107,7 +103,7 @@ function singleTokenTypeFile(
 }
 
 /**
- * Generates a single CSS file containing all token types
+ * Generates a single Kotlin file containing all token types
  */
 function generateCombinedFile(
   tokens: Array<Token>,
