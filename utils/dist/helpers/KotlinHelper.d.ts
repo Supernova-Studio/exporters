@@ -20,9 +20,9 @@ export declare class ImportCollector {
     private flags;
     /**
      * Marks a specific import to be used in a token
-     * @param f
+     * @param flags
      */
-    use(...f: ImportFlag[]): void;
+    use(...flags: ImportFlag[]): void;
     /**
      * Output a list of all sorted import literals needed for the specified tokens.
      */

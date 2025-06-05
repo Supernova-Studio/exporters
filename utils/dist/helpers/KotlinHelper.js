@@ -30,10 +30,10 @@ class ImportCollector {
     }
     /**
      * Marks a specific import to be used in a token
-     * @param f
+     * @param flags
      */
-    use(...f) {
-        f.forEach((x) => this.flags.add(x));
+    use(...flags) {
+        flags.forEach((x) => this.flags.add(x));
     }
     /**
      * Output a list of all sorted import literals needed for the specified tokens.
@@ -106,7 +106,7 @@ class KotlinHelper {
                 value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.shadow:
-                value = this.shadowTokenValueToKotlin(token.value, allTokens, options, importCollector);
+                value = this.shadowTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontWeight:
                 value = this.fontWeightTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);

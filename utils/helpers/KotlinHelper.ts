@@ -56,10 +56,10 @@ export class ImportCollector {
 
   /**
    * Marks a specific import to be used in a token
-   * @param f
+   * @param flags
    */
-  use(...f: ImportFlag[]) {
-    f.forEach((x) => this.flags.add(x))
+  use(...flags: ImportFlag[]) {
+    flags.forEach((x) => this.flags.add(x))
   }
 
   /**
@@ -154,7 +154,7 @@ export class KotlinHelper {
         )
         break
       case TokenType.shadow:
-        value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, options, importCollector)
+        value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, actualOptions, importCollector)
         break
       case TokenType.fontWeight:
         value = this.fontWeightTokenValueToKotlin(
