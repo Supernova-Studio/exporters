@@ -11,7 +11,9 @@ import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@super
 import { exportConfiguration } from ".."
 import { convertedToken, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
-import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
+import {
+  DesignSystemCollection
+} from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
 import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
 
@@ -170,17 +172,19 @@ function generateFileContent(
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
+
   // Sort tokens to ensure proper declaration order:
   // - Tokens with direct values come first
   // - Tokens that reference other tokens come after
   // This prevents reference errors where a token tries to use another token that hasn't been declared yet
-  const sortedForDeclarations = [...tokensToExport].sort((a, b) => {
+  const sortedTokensToExport = [...tokensToExport].sort((a, b) => {
     const aHasRef = !!(a as any)?.value?.referencedTokenId
     const bHasRef = !!(b as any)?.value?.referencedTokenId
     return aHasRef === bHasRef ? 0 : aHasRef ? 1 : -1
   })
+
   // Convert tokens to Kotlin variable declarations
-  const tokenVariablesLiteral = sortedForDeclarations
+  const tokenVariablesLiteral = sortedTokensToExport
     .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, importCollector))
     .join("\n")
 
