@@ -170,8 +170,17 @@ function generateFileContent(
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
+  // Sort tokens to ensure proper declaration order:
+  // - Tokens with direct values come first
+  // - Tokens that reference other tokens come after
+  // This prevents reference errors where a token tries to use another token that hasn't been declared yet
+  const sortedForDeclarations = [...tokensToExport].sort((a, b) => {
+    const aHasRef = !!(a as any)?.value?.referencedTokenId
+    const bHasRef = !!(b as any)?.value?.referencedTokenId
+    return aHasRef === bHasRef ? 0 : aHasRef ? 1 : -1
+  })
   // Convert tokens to Kotlin variable declarations
-  const tokenVariablesLiteral = tokensToExport
+  const tokenVariablesLiteral = sortedForDeclarations
     .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, importCollector))
     .join("\n")
 
