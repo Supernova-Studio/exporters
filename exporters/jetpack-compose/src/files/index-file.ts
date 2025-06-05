@@ -50,11 +50,12 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
     const separator = baseImport && themeImports ? "\n\n" : ""
     const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, '.css')
 
-    return FileHelper.createTextFile({
-      relativePath: exportConfiguration.baseIndexFilePath,
-      fileName: fileName,
-      content: baseImport + separator + themeImports,
-    })
+    // todo
+    // return FileHelper.createTextFile({
+    //   relativePath: exportConfiguration.baseIndexFilePath,
+    //   fileName: fileName,
+    //   content: baseImport + separator + themeImports,
+    // })
   }
 
   // =========================================

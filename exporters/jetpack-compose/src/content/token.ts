@@ -121,7 +121,7 @@ export function convertedToken(
   // Add description comment if enabled and description exists
   const comment =
     exportConfiguration.showDescriptions && token.description?.trim()
-      ? `/* ${token.description.trim()} */\n${indentString}`
+      ? `/** ${token.description.trim()} */\n${indentString}`
       : ""
 
   return `${indentString}${comment}val ${name} = ${value}`

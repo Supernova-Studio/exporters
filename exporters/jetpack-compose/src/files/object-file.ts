@@ -175,7 +175,7 @@ function generateFileContent(
     .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, importCollector))
     .join("\n")
 
-  let dynamicImports = importCollector.allImports(fullPackageName, (tokenType) => getObjectNameFromTokenType(tokenType))
+  let dynamicImports = importCollector.allImports()
   let allImports = ["import androidx.compose.runtime.Immutable", ...dynamicImports].sort()
   const importsLiteral = allImports.join("\n")
 
