@@ -61,9 +61,8 @@ export function convertedToken(
 
         return name
       } else {
-        // Tokens are stored separately - we need to add a prefix and import another object
-
-        importCollector.useTokenTypes(refToken.tokenType)
+        // Tokens are stored separately - we need to add a prefix.
+        // Imports are not necessary - all files in the same package.
 
         const prefix = getObjectNameFromTokenType(refToken.tokenType)
         return `${prefix}.${name}`

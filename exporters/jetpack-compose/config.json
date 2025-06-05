@@ -319,7 +319,7 @@
   {
     "key": "indent",
     "type": "number",
-    "default": 2,
+    "default": 4,
     "title": "Indentation",
     "description": "Number of spaces used in generated Kotlin files.",
     "category": "Other"

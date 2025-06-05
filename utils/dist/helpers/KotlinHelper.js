@@ -26,56 +26,47 @@ var ImportFlag;
 /** Collect flags while generating literals, turn into imports at the end */
 class ImportCollector {
     constructor() {
-        this.dependencyFlags = new Set();
-        this.dependencyTokenTypes = new Set();
+        this.importFlags = new Set();
     }
     /**
      * Marks a specific feature to be imported.
      * @param flags
      */
     use(...flags) {
-        flags.forEach((x) => this.dependencyFlags.add(x));
-    }
-    /**
-     * Marks a specific token type to be imported.
-     * @param t
-     */
-    useTokenTypes(...t) {
-        t.forEach((x) => this.dependencyTokenTypes.add(x));
+        flags.forEach((x) => this.importFlags.add(x));
     }
     /**
      * Output a list of all sorted import literals needed for the specified tokens.
      */
-    allImports(packageName, objectNameProvider) {
+    allImports() {
         const importList = [];
-        if (this.dependencyFlags.has(ImportFlag.Color))
+        if (this.importFlags.has(ImportFlag.Color))
             importList.push("import androidx.compose.ui.graphics.Color");
-        if (this.dependencyFlags.has(ImportFlag.Dp))
+        if (this.importFlags.has(ImportFlag.Dp))
             importList.push("import androidx.compose.ui.unit.dp");
-        if (this.dependencyFlags.has(ImportFlag.Sp))
+        if (this.importFlags.has(ImportFlag.Sp))
             importList.push("import androidx.compose.ui.unit.sp");
-        if (this.dependencyFlags.has(ImportFlag.Offset))
+        if (this.importFlags.has(ImportFlag.Offset))
             importList.push("import androidx.compose.ui.geometry.Offset");
-        if (this.dependencyFlags.has(ImportFlag.Brush))
+        if (this.importFlags.has(ImportFlag.Brush))
             importList.push("import androidx.compose.ui.graphics.Brush");
-        if (this.dependencyFlags.has(ImportFlag.TileMode))
+        if (this.importFlags.has(ImportFlag.TileMode))
             importList.push("import androidx.compose.ui.graphics.TileMode");
-        if (this.dependencyFlags.has(ImportFlag.Shadow))
+        if (this.importFlags.has(ImportFlag.Shadow))
             importList.push("import androidx.compose.ui.graphics.Shadow");
-        if (this.dependencyFlags.has(ImportFlag.BorderStroke))
+        if (this.importFlags.has(ImportFlag.BorderStroke))
             importList.push("import androidx.compose.foundation.BorderStroke");
-        if (this.dependencyFlags.has(ImportFlag.Modifier)) {
+        if (this.importFlags.has(ImportFlag.Modifier)) {
             importList.push("import androidx.compose.ui.Modifier");
-            if (this.dependencyFlags.has(ImportFlag.Blur))
+            if (this.importFlags.has(ImportFlag.Blur))
                 importList.push("import androidx.compose.ui.draw.blur");
         }
-        if (this.dependencyFlags.has(ImportFlag.FontWeight))
+        if (this.importFlags.has(ImportFlag.FontWeight))
             importList.push("import androidx.compose.ui.text.font.FontWeight");
-        if (this.dependencyFlags.has(ImportFlag.TextDecoration))
+        if (this.importFlags.has(ImportFlag.TextDecoration))
             importList.push("import androidx.compose.ui.text.TextDecoration");
-        if (this.dependencyFlags.has(ImportFlag.TextStyle))
+        if (this.importFlags.has(ImportFlag.TextStyle))
             importList.push("import androidx.compose.ui.text.TextStyle");
-        this.dependencyTokenTypes.forEach((tokenType) => importList.push(`import ${packageName}.${objectNameProvider(tokenType)}`));
         return importList.sort();
     }
 }
