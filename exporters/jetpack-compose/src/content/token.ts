@@ -61,9 +61,10 @@ export function convertedToken(
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   // Add description comment if enabled and description exists
-  if (exportConfiguration.showDescriptions && token.description) {
-    return `${indentString}/* ${token.description.trim()} */\n${indentString}val ${name} = ${value}`
-  } else {
-    return `${indentString}val ${name} = ${value}`
-  }
+  const comment =
+    exportConfiguration.showDescriptions && token.description?.trim()
+      ? `/* ${token.description.trim()} */\n${indentString}`
+      : ""
+
+  return `${indentString}${comment}val ${name} = ${value}`
 }
