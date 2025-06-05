@@ -9,7 +9,7 @@ import {
 } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken } from "../content/token"
+import { convertedToken, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
@@ -29,6 +29,9 @@ export function generateObjectFiles(
   theme: TokenTheme | undefined,
   tokenCollections: Array<DesignSystemCollection>
 ): Array<OutputTextFile> {
+  // Clear any previously cached token names to ensure clean generation
+  resetTokenNameTracking()
+
   // Skip generating base token files if exportBaseValues is disabled and this isn't a theme file
   if (!exportConfiguration.exportBaseValues && !theme) {
     return []

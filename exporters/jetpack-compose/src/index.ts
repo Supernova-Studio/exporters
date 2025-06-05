@@ -1,9 +1,7 @@
 import { AnyOutputFile, PulsarContext, RemoteVersionIdentifier, Supernova } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
-import { indexOutputFile } from "./files/index-file"
 import { generateObjectFiles } from "./files/object-file"
 import { WriteTokenPropStore } from "@supernovaio/export-utils"
-import { tokenName } from "./utils/token-name-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()

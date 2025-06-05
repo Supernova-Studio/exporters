@@ -65,17 +65,6 @@
     }
   },
   {
-    "key": "baseIndexFilePath",
-    "type": "string",
-    "default": "./",
-    "title": "Path to index file",
-    "description": "Index file will be written to this directory relative to export root.",
-    "category": "Index file",
-    "dependsOn": {
-      "generateIndexFile": true
-    }
-  },
-  {
     "key": "packagePrefixName",
     "type": "string",
     "default": "io.supernova.tokens",

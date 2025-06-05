@@ -4,16 +4,22 @@ import {
   GeneralHelper,
   ImportCollector,
   KotlinHelper,
+  NamingHelper,
+  StringCase,
+  TokenNameTracker,
   TokenToKotlinOptions
 } from "@supernovaio/export-utils"
 
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
-import { tokenName } from "../utils/token-name-utils"
-import { FileStructure } from "../../config"
-import { getTokenTypeFileName } from "../utils/file-utils"
-import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
+import { FileStructure, TokenNameStructure } from "../../config"
+import { getObjectNameFromTokenType } from "../utils/object-utils"
+
+/**
+ * Create a single instance of the tracker for consistent name generation
+ */
+const tokenNameTracker = new TokenNameTracker()
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -21,10 +27,48 @@ import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/
  * @param tokenType - The type of token (e.g., color, typography, etc.)
  * @returns The prefix string to use for this token type
  */
-export function getTokenPrefix(tokenType: TokenType): string {
+function getTokenPrefix(tokenType: TokenType): string {
   return exportConfiguration.customizeTokenPrefixes
     ? exportConfiguration.tokenPrefixes[tokenType]
     : DEFAULT_TOKEN_PREFIXES[tokenType]
+}
+
+/**
+ * Use the tracker's reset method instead of managing maps directly
+ */
+export function resetTokenNameTracking(): void {
+  tokenNameTracker.reset()
+}
+
+/**
+ * Generates a code-safe variable name for a token based on its properties and configuration.
+ * Includes type-specific prefix and considers token hierarchy and collection.
+ *
+ * @param token - The token to generate a name for
+ * @param tokenGroups - Array of token groups for determining token hierarchy
+ * @param collections - Array of collections for resolving collection names
+ * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
+ * @returns Formatted variable name string
+ */
+export function tokenName(
+  token: Token,
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection>,
+  forExport: boolean = false
+): string {
+  // Find a collection if needed and exists
+  let collection: DesignSystemCollection | null = null
+  if (exportConfiguration.tokenNameStructure === TokenNameStructure.CollectionPathAndName && token.collectionId) {
+    collection =
+      collections.find((c) => c.persistentId === token.collectionId) ??
+      ({ name: token.collectionId } as DesignSystemCollection)
+  }
+
+  const prefix = [exportConfiguration.globalNamePrefix, getTokenPrefix(token.tokenType), collection?.name]
+    .filter(Boolean)
+    .join("")
+
+  return tokenNameTracker.getTokenName(token, tokenGroups, StringCase.camelCase, prefix, false, "Copy")
 }
 
 /**

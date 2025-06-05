@@ -35,7 +35,7 @@ export class TokenNameTracker {
     path: string[] = [] // Add path parameter to check hierarchy level
   ): string {
     // Create a unique key for this hierarchy level
-    const hierarchyKey = path.join('/')
+    const hierarchyKey = path.join("/")
     const hierarchyFullKey = `${hierarchyKey}/${token.name}`
 
     // If we're looking up a name for reference and it was already generated, use that
@@ -65,17 +65,18 @@ export class TokenNameTracker {
       this.tokenNameMap.set(token.id, name)
       this.nameToTokenMap.set(name, token.id)
     }
-    
+
     return name
   }
 
   /**
    * Generates or retrieves a unique, code-safe name for a given token.
-   * 
+   *
    * @param token - The design token that needs a name
    * @param tokenGroups - Array of all token groups, used to find the token's parent group
    * @param format - The desired case format for the generated name (e.g., camelCase, snake_case)
    * @param prefix - Optional prefix to add to the generated name
+   * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
    * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
    * @returns A unique, code-safe name for the token
    */
@@ -84,7 +85,8 @@ export class TokenNameTracker {
     tokenGroups: Array<TokenGroup>,
     format: StringCase,
     prefix: string | null,
-    forExport: boolean = false
+    forExport: boolean = false,
+    uniqueSuffix: string = "_copy_"
   ): string {
     // If we're looking up a name for reference and it was already generated, use that
     if (!forExport && this.tokenNameMap.has(token.id)) {
@@ -92,14 +94,14 @@ export class TokenNameTracker {
     }
 
     const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
-    
+
     // Get the base name
     let name = NamingHelper.codeSafeVariableNameForToken(token, format, parent, prefix)
     let counter = 1
 
     // If name is taken by a different token, add a suffix
     while (this.nameToTokenMap.has(name) && this.nameToTokenMap.get(name) !== token.id) {
-      name = `${name}_copy_${counter++}`
+      name = `${name}${uniqueSuffix}${counter++}`
     }
 
     // Track the name if not for export
@@ -107,7 +109,7 @@ export class TokenNameTracker {
       this.tokenNameMap.set(token.id, name)
       this.nameToTokenMap.set(name, token.id)
     }
-    
+
     return name
   }
-} 
+}
