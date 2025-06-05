@@ -17,16 +17,22 @@ export declare enum ImportFlag {
 }
 /** Collect flags while generating literals, turn into imports at the end */
 export declare class ImportCollector {
-    private flags;
+    private dependencyFlags;
+    private dependencyTokenTypes;
     /**
-     * Marks a specific import to be used in a token
+     * Marks a specific feature to be imported.
      * @param flags
      */
     use(...flags: ImportFlag[]): void;
     /**
+     * Marks a specific token type to be imported.
+     * @param t
+     */
+    useTokenTypes(...t: TokenType[]): void;
+    /**
      * Output a list of all sorted import literals needed for the specified tokens.
      */
-    allImports(): string[];
+    allImports(packageName: string, objectNameProvider: (tokenType: TokenType) => string): string[];
 }
 type InternalOptions = ColorFormatOptions & {
     indent: number;

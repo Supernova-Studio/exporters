@@ -13,6 +13,7 @@ import { convertedToken } from "../content/token"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
+import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
 
 /**
  * Main entry point for generating Kotlin object files
@@ -162,9 +163,7 @@ function generateFileContent(
 
   const importCollector = new ImportCollector()
 
-  // Determine the Kotlin object name - it is the same as file name, but without the extension
-  const sanitizedObjectName = fileName.endsWith(".kt") ? fileName.slice(0, -3) : fileName
-  const objectLiteral = `@Immutable\n` + `object ${sanitizedObjectName}`
+  const objectLiteral = `@Immutable\n` + `object ${getObjectNameFromFileName(fileName)}`
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
@@ -173,7 +172,8 @@ function generateFileContent(
     .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, importCollector))
     .join("\n")
 
-  let allImports = ["import androidx.compose.runtime.Immutable", ...importCollector.allImports()].sort()
+  let dynamicImports = importCollector.allImports(fullPackageName, (tokenType) => getObjectNameFromTokenType(tokenType))
+  let allImports = ["import androidx.compose.runtime.Immutable", ...dynamicImports].sort()
   const importsLiteral = allImports.join("\n")
 
   // Construct the file content with an object with token variables
