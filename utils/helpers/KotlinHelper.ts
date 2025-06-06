@@ -94,12 +94,9 @@ export class ImportCollector {
       if (this.importFlags.has(ImportFlag.Blur)) importList.push("import androidx.compose.ui.draw.blur")
     }
 
-    if (this.importFlags.has(ImportFlag.FontFamily))
-      importList.push("import androidx.compose.ui.text.font.FontFamily")
-    if (this.importFlags.has(ImportFlag.Font))
-      importList.push("import androidx.compose.ui.text.font.Font")
-    if (this.importFlags.has(ImportFlag.FontWeight))
-      importList.push("import androidx.compose.ui.text.font.FontWeight")
+    if (this.importFlags.has(ImportFlag.FontFamily)) importList.push("import androidx.compose.ui.text.font.FontFamily")
+    if (this.importFlags.has(ImportFlag.Font)) importList.push("import androidx.compose.ui.text.font.Font")
+    if (this.importFlags.has(ImportFlag.FontWeight)) importList.push("import androidx.compose.ui.text.font.FontWeight")
     if (this.importFlags.has(ImportFlag.TextDecoration))
       importList.push("import androidx.compose.ui.text.TextDecoration")
     if (this.importFlags.has(ImportFlag.TextStyle)) importList.push("import androidx.compose.ui.text.TextStyle")
@@ -121,7 +118,6 @@ export type TokenToKotlinOptions = Omit<InternalOptions, "rawColorTokenFormatter
  * This class provides methods to transform design tokens (e.g., colors, borders, gradients, shadows) into Kotlin representations.
  */
 export class KotlinHelper {
-
   /**
    * Converts a given token to its Kotlin string representation based on its type.
    *
@@ -161,40 +157,38 @@ export class KotlinHelper {
           importCollector
         )
         break
+      case TokenType.fontSize:
+      case TokenType.lineHeight:
+        value = this.textUnitTokenValueToKotlin(
+          (token as AnyDimensionToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
+        break
+      case TokenType.letterSpacing:
+        value = this.letterSpacingTokenValueToKotlin(
+          (token as AnyDimensionToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
+        break
       case TokenType.dimension:
       case TokenType.size:
       case TokenType.space:
       case TokenType.opacity:
-      case TokenType.fontSize:
-      case TokenType.lineHeight:
-      case TokenType.letterSpacing:
       case TokenType.paragraphSpacing:
       case TokenType.borderWidth:
       case TokenType.radius:
       case TokenType.duration:
       case TokenType.zIndex:
-        if (token.tokenType === TokenType.fontSize || token.tokenType === TokenType.lineHeight) {
-          value = this.textUnitTokenValueToKotlin(
-            (token as AnyDimensionToken).value,
-            allTokens,
-            actualOptions,
-            importCollector
-          )
-        } else if (token.tokenType === TokenType.letterSpacing) {
-          value = this.letterSpacingTokenValueToKotlin(
-            (token as AnyDimensionToken).value,
-            allTokens,
-            actualOptions,
-            importCollector
-          )
-        } else {
-          value = this.dimensionTokenValueToKotlin(
-            (token as AnyDimensionToken).value,
-            allTokens,
-            actualOptions,
-            importCollector
-          )
-        }
+        value = this.dimensionTokenValueToKotlin(
+          (token as AnyDimensionToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
         break
       case TokenType.shadow:
         value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, actualOptions, importCollector)
@@ -429,11 +423,7 @@ export class KotlinHelper {
     importCollector: ImportCollector,
     useEmForPercent = false
   ): string {
-    const reference = sureOptionalReference(
-      dimension.referencedTokenId,
-      allTokens,
-      options.allowReferences
-    )
+    const reference = sureOptionalReference(dimension.referencedTokenId, allTokens, options.allowReferences)
     if (reference) {
       return options.tokenToVariableRef(reference)
     }
@@ -460,13 +450,7 @@ export class KotlinHelper {
     options: InternalOptions,
     importCollector: ImportCollector
   ): string {
-    return this.textUnitTokenValueToKotlin(
-      dimension,
-      allTokens,
-      options,
-      importCollector,
-      true
-    )
+    return this.textUnitTokenValueToKotlin(dimension, allTokens, options, importCollector, true)
   }
 
   /** Maps Supernova units to Kotlin / Compose extension suffixes */
@@ -669,12 +653,7 @@ export class KotlinHelper {
     // Calculate literals
     const fontFamilyLit = fontFamilyRef
       ? options.tokenToVariableRef(fontFamilyRef)
-      : this.fontFamilyTokenValueToKotlin(
-          typography.fontFamily,
-          allTokens,
-          options,
-          importCollector
-        )
+      : this.fontFamilyTokenValueToKotlin(typography.fontFamily, allTokens, options, importCollector)
 
     const fontWeightLit = fontWeightRef
       ? options.tokenToVariableRef(fontWeightRef)
@@ -686,28 +665,13 @@ export class KotlinHelper {
       ? "TextDecoration.None"
       : this.textDecorationToKotlin(typography.textDecoration.value as TextDecoration, importCollector)
 
-    const fontSizeLit = this.textUnitTokenValueToKotlin(
-      typography.fontSize,
-      allTokens,
-      options,
-      importCollector
-    )
+    const fontSizeLit = this.textUnitTokenValueToKotlin(typography.fontSize, allTokens, options, importCollector)
     const lineHeightLit = typography.lineHeight
-      ? this.textUnitTokenValueToKotlin(
-          typography.lineHeight,
-          allTokens,
-          options,
-          importCollector
-        )
+      ? this.textUnitTokenValueToKotlin(typography.lineHeight, allTokens, options, importCollector)
       : undefined
 
     const letterSpacingLit = typography.letterSpacing
-      ? this.letterSpacingTokenValueToKotlin(
-          typography.letterSpacing,
-          allTokens,
-          options,
-          importCollector
-        )
+      ? this.letterSpacingTokenValueToKotlin(typography.letterSpacing, allTokens, options, importCollector)
       : undefined
 
     // Assemble TextStyle literal
