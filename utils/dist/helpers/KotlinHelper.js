@@ -115,27 +115,23 @@ class KotlinHelper {
             case sdk_exporters_1.TokenType.gradient:
                 value = this.gradientTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
+            case sdk_exporters_1.TokenType.fontSize:
+            case sdk_exporters_1.TokenType.lineHeight:
+                value = this.textUnitTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                break;
+            case sdk_exporters_1.TokenType.letterSpacing:
+                value = this.letterSpacingTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                break;
             case sdk_exporters_1.TokenType.dimension:
             case sdk_exporters_1.TokenType.size:
             case sdk_exporters_1.TokenType.space:
             case sdk_exporters_1.TokenType.opacity:
-            case sdk_exporters_1.TokenType.fontSize:
-            case sdk_exporters_1.TokenType.lineHeight:
-            case sdk_exporters_1.TokenType.letterSpacing:
             case sdk_exporters_1.TokenType.paragraphSpacing:
             case sdk_exporters_1.TokenType.borderWidth:
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                if (token.tokenType === sdk_exporters_1.TokenType.fontSize || token.tokenType === sdk_exporters_1.TokenType.lineHeight) {
-                    value = this.textUnitTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
-                }
-                else if (token.tokenType === sdk_exporters_1.TokenType.letterSpacing) {
-                    value = this.letterSpacingTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
-                }
-                else {
-                    value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
-                }
+                value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.shadow:
                 value = this.shadowTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
