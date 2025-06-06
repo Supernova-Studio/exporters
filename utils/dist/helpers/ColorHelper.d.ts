@@ -5,7 +5,6 @@ export type ColorFormatOptions = {
     colorFormat: ColorFormat;
     decimals: number;
     tokenToVariableRef: (token: Token) => string;
-    rawColorTokenFormatter?: (rawValue: string) => string;
 };
 /** A utility class to help with transformation of colors to various formats */
 export declare class ColorHelper {

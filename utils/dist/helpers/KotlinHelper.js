@@ -7,6 +7,7 @@ const TokenHelper_1 = require("./TokenHelper");
 const GeneralHelper_1 = require("./GeneralHelper");
 const NamingHelper_1 = require("./NamingHelper");
 const StringCase_1 = require("../enums/StringCase");
+const ColorFormat_1 = require("../enums/ColorFormat");
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Imports & flag enum
 var ImportFlag;
@@ -102,31 +103,24 @@ class KotlinHelper {
      * @return The Kotlin string representation of the given token.
      */
     static tokenValue(token, allTokens, options, importCollector) {
-        const actualOptions = {
-            rawColorTokenFormatter: (rawValue) => {
-                //todo fix - ARGB
-                return `Color(0x${rawValue})`;
-            },
-            ...options
-        };
         /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
         let value;
         switch (token.tokenType) {
             case sdk_exporters_1.TokenType.color:
-                value = this.colorTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.colorTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.border:
-                value = this.borderTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.borderTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.gradient:
-                value = this.gradientTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.gradientTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontSize:
             case sdk_exporters_1.TokenType.lineHeight:
-                value = this.textUnitTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.textUnitTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.letterSpacing:
-                value = this.letterSpacingTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.letterSpacingTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.dimension:
             case sdk_exporters_1.TokenType.size:
@@ -137,31 +131,31 @@ class KotlinHelper {
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.dimensionTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.shadow:
-                value = this.shadowTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.shadowTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontWeight:
-                value = this.fontWeightTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.fontWeightTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontFamily:
-                value = this.fontFamilyTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.fontFamilyTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.productCopy:
             case sdk_exporters_1.TokenType.string:
-                value = this.stringTokenValueToKotlin(token.value, allTokens, actualOptions);
+                value = this.stringTokenValueToKotlin(token.value, allTokens, options);
                 break;
             case sdk_exporters_1.TokenType.textCase:
             case sdk_exporters_1.TokenType.textDecoration:
             case sdk_exporters_1.TokenType.visibility:
-                value = this.optionTokenValueToKotlin(token.value, allTokens, actualOptions, token.tokenType, importCollector);
+                value = this.optionTokenValueToKotlin(token.value, allTokens, options, token.tokenType, importCollector);
                 break;
             case sdk_exporters_1.TokenType.blur:
-                value = this.blurTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.blurTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             case sdk_exporters_1.TokenType.typography:
-                value = this.typographyTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                value = this.typographyTokenValueToKotlin(token.value, allTokens, options, importCollector);
                 break;
             default:
                 throw new sdk_exporters_1.UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:");
@@ -170,7 +164,11 @@ class KotlinHelper {
     }
     static colorTokenValueToKotlin(color, allTokens, options, importCollector) {
         importCollector.use(ImportFlag.Color);
-        return ColorHelper_1.ColorHelper.formattedColorOrVariableName(color, allTokens, options);
+        const colorOptions = {
+            ...options,
+            colorFormat: ColorFormat_1.ColorFormat.argbInt
+        };
+        return ColorHelper_1.ColorHelper.formattedColorOrVariableName(color, allTokens, colorOptions);
     }
     static borderTokenValueToKotlin(border, allTokens, options, importCollector) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(border.referencedTokenId, allTokens, options.allowReferences);

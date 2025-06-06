@@ -32,6 +32,7 @@ import { normalizeTextWeight, sureOptionalReference } from "./TokenHelper"
 import { GeneralHelper } from "./GeneralHelper"
 import { NamingHelper } from "./NamingHelper"
 import { StringCase } from "../enums/StringCase"
+import { ColorFormat } from "../enums/ColorFormat"
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Imports & flag enum
@@ -115,10 +116,9 @@ export class ImportCollector {
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Main helper
 
-type InternalOptions = ColorFormatOptions & { indent: number }
-
-// No need to expose rawColorTokenFormatter, the color format is the same in Kotlin
-export type TokenToKotlinOptions = Omit<InternalOptions, "rawColorTokenFormatter">
+export type TokenToKotlinOptions = Pick<ColorFormatOptions, "allowReferences" | "decimals" | "tokenToVariableRef"> & {
+  indent: number
+}
 
 /**
  * A utility class for working with Kotlin code generation for various token types.
@@ -140,45 +140,27 @@ export class KotlinHelper {
     options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
-    const actualOptions = {
-      rawColorTokenFormatter: (rawValue: string) => {
-        //todo fix - ARGB
-        return `Color(0x${rawValue})`
-      },
-      ...options
-    } satisfies InternalOptions
-
     /** Use subroutines to convert specific token types to different representations. Many tokens are of the same type */
     let value: string
     switch (token.tokenType) {
       case TokenType.color:
-        value = this.colorTokenValueToKotlin((token as ColorToken).value, allTokens, actualOptions, importCollector)
+        value = this.colorTokenValueToKotlin((token as ColorToken).value, allTokens, options, importCollector)
         break
       case TokenType.border:
-        value = this.borderTokenValueToKotlin((token as BorderToken).value, allTokens, actualOptions, importCollector)
+        value = this.borderTokenValueToKotlin((token as BorderToken).value, allTokens, options, importCollector)
         break
       case TokenType.gradient:
-        value = this.gradientTokenValueToKotlin(
-          (token as GradientToken).value,
-          allTokens,
-          actualOptions,
-          importCollector
-        )
+        value = this.gradientTokenValueToKotlin((token as GradientToken).value, allTokens, options, importCollector)
         break
       case TokenType.fontSize:
       case TokenType.lineHeight:
-        value = this.textUnitTokenValueToKotlin(
-          (token as AnyDimensionToken).value,
-          allTokens,
-          actualOptions,
-          importCollector
-        )
+        value = this.textUnitTokenValueToKotlin((token as AnyDimensionToken).value, allTokens, options, importCollector)
         break
       case TokenType.letterSpacing:
         value = this.letterSpacingTokenValueToKotlin(
           (token as AnyDimensionToken).value,
           allTokens,
-          actualOptions,
+          options,
           importCollector
         )
         break
@@ -194,32 +176,22 @@ export class KotlinHelper {
         value = this.dimensionTokenValueToKotlin(
           (token as AnyDimensionToken).value,
           allTokens,
-          actualOptions,
+          options,
           importCollector
         )
         break
       case TokenType.shadow:
-        value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, actualOptions, importCollector)
+        value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, options, importCollector)
         break
       case TokenType.fontWeight:
-        value = this.fontWeightTokenValueToKotlin(
-          (token as FontWeightToken).value,
-          allTokens,
-          actualOptions,
-          importCollector
-        )
+        value = this.fontWeightTokenValueToKotlin((token as FontWeightToken).value, allTokens, options, importCollector)
         break
       case TokenType.fontFamily:
-        value = this.fontFamilyTokenValueToKotlin(
-          (token as AnyStringToken).value,
-          allTokens,
-          actualOptions,
-          importCollector
-        )
+        value = this.fontFamilyTokenValueToKotlin((token as AnyStringToken).value, allTokens, options, importCollector)
         break
       case TokenType.productCopy:
       case TokenType.string:
-        value = this.stringTokenValueToKotlin((token as AnyStringToken).value, allTokens, actualOptions)
+        value = this.stringTokenValueToKotlin((token as AnyStringToken).value, allTokens, options)
         break
       case TokenType.textCase:
       case TokenType.textDecoration:
@@ -227,21 +199,16 @@ export class KotlinHelper {
         value = this.optionTokenValueToKotlin(
           (token as AnyOptionToken).value,
           allTokens,
-          actualOptions,
+          options,
           token.tokenType,
           importCollector
         )
         break
       case TokenType.blur:
-        value = this.blurTokenValueToKotlin((token as BlurToken).value, allTokens, actualOptions, importCollector)
+        value = this.blurTokenValueToKotlin((token as BlurToken).value, allTokens, options, importCollector)
         break
       case TokenType.typography:
-        value = this.typographyTokenValueToKotlin(
-          (token as TypographyToken).value,
-          allTokens,
-          actualOptions,
-          importCollector
-        )
+        value = this.typographyTokenValueToKotlin((token as TypographyToken).value, allTokens, options, importCollector)
         break
       default:
         throw new UnreachableCaseError(token.tokenType, "Unsupported token type for transformation:")
@@ -253,17 +220,22 @@ export class KotlinHelper {
   static colorTokenValueToKotlin(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     importCollector.use(ImportFlag.Color)
-    return ColorHelper.formattedColorOrVariableName(color, allTokens, options)
+    const colorOptions = {
+      ...options,
+      colorFormat: ColorFormat.argbInt
+    } satisfies ColorFormatOptions
+
+    return ColorHelper.formattedColorOrVariableName(color, allTokens, colorOptions)
   }
 
   static borderTokenValueToKotlin(
     border: BorderTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(border.referencedTokenId, allTokens, options.allowReferences)
@@ -281,7 +253,7 @@ export class KotlinHelper {
   static gradientTokenValueToKotlin(
     gradients: Array<GradientTokenValue>,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     // Compose can draw only one Brush per shape; export all layers anyway,
@@ -294,7 +266,7 @@ export class KotlinHelper {
   static gradientLayerToKotlin(
     value: GradientTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
@@ -359,7 +331,7 @@ export class KotlinHelper {
   static shadowTokenValueToKotlin(
     shadows: Array<ShadowTokenValue>,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const layers = shadows.map((s) => this.shadowLayerToKotlin(s, allTokens, options, importCollector))
@@ -376,7 +348,7 @@ export class KotlinHelper {
   static shadowLayerToKotlin(
     value: ShadowTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
@@ -404,7 +376,7 @@ export class KotlinHelper {
   static dimensionTokenValueToKotlin(
     dimension: AnyDimensionTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(dimension.referencedTokenId, allTokens, options.allowReferences)
@@ -427,7 +399,7 @@ export class KotlinHelper {
   static textUnitTokenValueToKotlin(
     dimension: AnyDimensionTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector,
     useEmForPercent = false
   ): string {
@@ -455,7 +427,7 @@ export class KotlinHelper {
   static letterSpacingTokenValueToKotlin(
     dimension: AnyDimensionTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     return this.textUnitTokenValueToKotlin(dimension, allTokens, options, importCollector, true)
@@ -488,7 +460,7 @@ export class KotlinHelper {
   static stringTokenValueToKotlin(
     value: AnyStringTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions
+    options: TokenToKotlinOptions
   ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
     if (reference) {
@@ -500,7 +472,7 @@ export class KotlinHelper {
   static optionTokenValueToKotlin(
     option: AnyOptionTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     tokenType: TokenType,
     importCollector: ImportCollector
   ): string {
@@ -555,7 +527,7 @@ export class KotlinHelper {
   static blurTokenValueToKotlin(
     blur: BlurTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(blur.referencedTokenId, allTokens, options.allowReferences)
@@ -570,7 +542,7 @@ export class KotlinHelper {
   static fontWeightTokenValueToKotlin(
     value: AnyStringTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
@@ -614,7 +586,7 @@ export class KotlinHelper {
   static fontFamilyTokenValueToKotlin(
     value: AnyStringTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
@@ -630,7 +602,7 @@ export class KotlinHelper {
   static typographyTokenValueToKotlin(
     typography: TypographyTokenValue,
     allTokens: Map<string, Token>,
-    options: InternalOptions,
+    options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string {
     // Reference full typography token if set
