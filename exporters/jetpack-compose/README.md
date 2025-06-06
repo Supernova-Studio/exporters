@@ -46,29 +46,29 @@ With configurations:
     "disclaimer": "This file was automatically generated. Do not modify manually.",
     "showDescriptions": true,
     "useReferences": true,
-    "indent": 4
+    "indent": 4,
+    "packageNamePrefix": "com.company.app.tokens"
 }
 ```
 
 The exporter would produce:
 
 ```kotlin
-/*
-* This file was generated automatically by Supernova.io and should not be changed manually.
-* To modify the format or content of this file, please contact your design system team.
+/**
+* This file was automatically generated. Do not modify manually.
 */
 
-package io.supernova.tokens
+package com.company.app.tokens
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 @Immutable
 object ColorTokens {
-    /* The reddest of reds */
+    /** The reddest of reds */
     val colorRed = Color(0xFFFF0000)
     val colorBlue = Color(0xFF0000FF)
-    /* The main color used throughout the application. */
+    /** The main color used throughout the application. */
     val colorPrimary = colorRed
 }
 ```
@@ -94,7 +94,7 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Files
 - **fileStructure:** Choose how generated token files are organized (`separateByType` or `singleFile`).
-- **singleFileName:** Base name for the Kotlin file and object containing all tokens when using single file mode.
+- **singleFileName:** Name for the base Kotlin file and object containing all tokens when using single file mode.
 - **nonThemedFilePath:** Directory for files without applied themes, relative to the export root.
 - **customizeSeparatedByTypeFileNames:** Enable to override default file names for each token type.
 - **separatedByTypeFileNames:** Specify file name for each token type (requires customizeSeparatedByTypeFileNames).
