@@ -276,54 +276,50 @@ export class KotlinHelper {
 
     importCollector.use(ImportFlag.Brush, ImportFlag.Offset)
 
-    // Convert color stops
-    const colorsLit = value.stops
-      .map((stop) => this.colorTokenValueToKotlin(stop.color, allTokens, options, importCollector))
+    // Builds "<pos>f to <colorLit>" pairs for var-arg overload
+    const stopPairs = value.stops
+      .map((s) => {
+        const pos = ColorHelper.roundToDecimals(s.position, options.decimals) + "f"
+        const col = this.colorTokenValueToKotlin(s.color, allTokens, options, importCollector)
+        return `${pos} to ${col}`
+      })
       .join(", ")
 
-    const stopsLit = value.stops
-      .map((stop) => ColorHelper.roundToDecimals(stop.position, options.decimals) + "f")
-      .join(", ")
+    const indent = GeneralHelper.indent(options.indent)
 
-    const indentString = GeneralHelper.indent(options.indent)
-
-    // Choose Brush builder
     switch (value.type) {
-      case GradientType.radial:
+      case GradientType.radial: {
         importCollector.use(ImportFlag.TileMode)
 
-        // center = midpoint of from/to, radius = distance between them (rough)
         const centerX = ((value.from.x + value.to.x) / 2).toFixed(2)
         const centerY = ((value.from.y + value.to.y) / 2).toFixed(2)
+
         return (
           `Brush.radialGradient(\n` +
-          `${indentString}${indentString}colors = listOf(${colorsLit}),\n` +
-          `${indentString}${indentString}center = Offset(${centerX}f, ${centerY}f),\n` +
-          `${indentString}${indentString}radius = 0.5f,\n` +
-          `${indentString}${indentString}tileMode = TileMode.Clamp,\n` +
-          `${indentString}${indentString}stops = floatArrayOf(${stopsLit})\n` +
-          `${indentString})`
+          `${indent}${indent}${stopPairs},\n` +
+          `${indent}${indent}center = Offset(${centerX}f, ${centerY}f),\n` +
+          `${indent}${indent}radius = 0.5f,\n` +
+          `${indent}${indent}tileMode = TileMode.Clamp\n` +
+          `${indent})`
         )
+      }
 
-      case GradientType.angular:
-        // sweep in Compose
+      case GradientType.angular: // sweep
         return (
           `Brush.sweepGradient(\n` +
-          `${indentString}${indentString}colors = listOf(${colorsLit}),\n` +
-          `${indentString}${indentString}center = Offset(0.5f, 0.5f),\n` +
-          `${indentString}${indentString}stops = floatArrayOf(${stopsLit})\n` +
-          `${indentString})`
+          `${indent}${indent}${stopPairs},\n` +
+          `${indent}${indent}center = Offset(0.5f, 0.5f)\n` +
+          `${indent})`
         )
 
       case GradientType.linear:
       default:
         return (
           `Brush.linearGradient(\n` +
-          `${indentString}${indentString}colors = listOf(${colorsLit}),\n` +
-          `${indentString}${indentString}stops = floatArrayOf(${stopsLit}),\n` +
-          `${indentString}${indentString}start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
-          `${indentString}${indentString}end = Offset(${value.to.x}f, ${value.to.y}f)\n` +
-          `${indentString})`
+          `${indent}${indent}${stopPairs},\n` +
+          `${indent}${indent}start = Offset(${value.from.x}f, ${value.from.y}f),\n` +
+          `${indent}${indent}end = Offset(${value.to.x}f, ${value.to.y}f)\n` +
+          `${indent})`
         )
     }
   }
