@@ -79,9 +79,9 @@
   {
     "key": "singleFileName",
     "type": "string",
-    "default": "DesignTokens",
+    "default": "DesignTokens.kt",
     "title": "Single file name",
-    "description": "Base name for the Kotlin file and object containing all tokens.",
+    "description": "Name for the base Kotlin file and object containing all tokens.",
     "category": "Files"
   },
   {
