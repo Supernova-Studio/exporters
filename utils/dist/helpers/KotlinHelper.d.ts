@@ -16,11 +16,14 @@ export declare enum ImportFlag {
     FontFamily = 12,
     FontWeight = 13,
     TextDecoration = 14,
-    TextStyle = 15
+    TextStyle = 15,
+    R = 16
 }
 /** Collect flags while generating literals, turn into imports at the end */
 export declare class ImportCollector {
+    private readonly rPackageName;
     private importFlags;
+    constructor(rPackageName: string);
     /**
      * Marks a specific feature to be imported.
      * @param flags

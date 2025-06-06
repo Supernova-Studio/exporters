@@ -52,12 +52,15 @@ export enum ImportFlag {
   FontFamily,
   FontWeight,
   TextDecoration,
-  TextStyle
+  TextStyle,
+  R
 }
 
 /** Collect flags while generating literals, turn into imports at the end */
 export class ImportCollector {
   private importFlags = new Set<ImportFlag>()
+
+  constructor(private readonly rPackageName: string) {}
 
   /**
    * Marks a specific feature to be imported.
@@ -72,6 +75,10 @@ export class ImportCollector {
    */
   allImports(): string[] {
     const importList: string[] = []
+
+    if (this.rPackageName && this.importFlags.has(ImportFlag.R)) {
+      importList.push(`import ${this.rPackageName}.R`)
+    }
 
     if (this.importFlags.has(ImportFlag.Color)) importList.push("import androidx.compose.ui.graphics.Color")
 
@@ -135,6 +142,7 @@ export class KotlinHelper {
   ): string {
     const actualOptions = {
       rawColorTokenFormatter: (rawValue: string) => {
+        //todo fix - ARGB
         return `Color(0x${rawValue})`
       },
       ...options
@@ -614,7 +622,7 @@ export class KotlinHelper {
       return options.tokenToVariableRef(reference)
     }
     // Map font names to Android font resources using snake_case
-    importCollector.use(ImportFlag.FontFamily, ImportFlag.Font)
+    importCollector.use(ImportFlag.FontFamily, ImportFlag.Font, ImportFlag.R)
     const resName = NamingHelper.codeSafeVariableName(value.text, StringCase.snakeCase)
     return `FontFamily(Font(R.font.${resName}))`
   }

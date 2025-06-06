@@ -11,9 +11,7 @@ import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@super
 import { exportConfiguration } from ".."
 import { convertedToken, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
-import {
-  DesignSystemCollection
-} from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
+import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
 import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
 import { getPackageName } from "../utils/package-utils"
@@ -159,11 +157,10 @@ function generateFileContent(
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<DesignSystemCollection>
 ) {
-
   const fullPackageName = getPackageName(theme)
   const packageLiteral = `package ${fullPackageName}`
 
-  const importCollector = new ImportCollector()
+  const importCollector = new ImportCollector(exportConfiguration.rPackageName || exportConfiguration.packageNamePrefix)
 
   const objectLiteral = `@Immutable\n` + `object ${getObjectNameFromFileName(fileName)}`
 

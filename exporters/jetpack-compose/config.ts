@@ -27,6 +27,8 @@ export type ExporterConfiguration = {
   indexFileName: string
   /** Base package name used for all generated files. */
   packageNamePrefix: string
+  /** Package name used for resource (R) imports; empty falls back to the package name prefix. */
+  rPackageName: string
   /** Choose how generated token files are organized. */
   fileStructure: FileStructure
   /** Base name for the Kotlin file and object containing all tokens. */

@@ -51,6 +51,14 @@
     "category": "Packages"
   },
   {
+    "key": "rPackageName",
+    "type": "string",
+    "default": "",
+    "title": "Resources package name",
+    "description": "Package name used for resource (R) imports. Leave empty to reuse the package name prefix.",
+    "category": "Packages"
+  },
+  {
     "key": "fileStructure",
     "type": "enum",
     "default": "separateByType",

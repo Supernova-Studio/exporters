@@ -27,10 +27,12 @@ var ImportFlag;
     ImportFlag[ImportFlag["FontWeight"] = 13] = "FontWeight";
     ImportFlag[ImportFlag["TextDecoration"] = 14] = "TextDecoration";
     ImportFlag[ImportFlag["TextStyle"] = 15] = "TextStyle";
+    ImportFlag[ImportFlag["R"] = 16] = "R";
 })(ImportFlag || (exports.ImportFlag = ImportFlag = {}));
 /** Collect flags while generating literals, turn into imports at the end */
 class ImportCollector {
-    constructor() {
+    constructor(rPackageName) {
+        this.rPackageName = rPackageName;
         this.importFlags = new Set();
     }
     /**
@@ -45,6 +47,9 @@ class ImportCollector {
      */
     allImports() {
         const importList = [];
+        if (this.rPackageName && this.importFlags.has(ImportFlag.R)) {
+            importList.push(`import ${this.rPackageName}.R`);
+        }
         if (this.importFlags.has(ImportFlag.Color))
             importList.push("import androidx.compose.ui.graphics.Color");
         if (this.importFlags.has(ImportFlag.Dp))
@@ -99,6 +104,7 @@ class KotlinHelper {
     static tokenValue(token, allTokens, options, importCollector) {
         const actualOptions = {
             rawColorTokenFormatter: (rawValue) => {
+                //todo fix - ARGB
                 return `Color(0x${rawValue})`;
             },
             ...options
@@ -407,7 +413,7 @@ class KotlinHelper {
             return options.tokenToVariableRef(reference);
         }
         // Map font names to Android font resources using snake_case
-        importCollector.use(ImportFlag.FontFamily, ImportFlag.Font);
+        importCollector.use(ImportFlag.FontFamily, ImportFlag.Font, ImportFlag.R);
         const resName = NamingHelper_1.NamingHelper.codeSafeVariableName(value.text, StringCase_1.StringCase.snakeCase);
         return `FontFamily(Font(R.font.${resName}))`;
     }
