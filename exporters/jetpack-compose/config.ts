@@ -1,25 +1,17 @@
-import { StringCase, ColorFormat } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 
-//todo make sure comments and structure up to date
 /**
  * Main configuration of the exporter - type interface. Default values for it can be set through `config.json` and users can override the behavior when creating the pipelines.
  */
-export enum ThemeExportStyle {
-  ApplyDirectly = "applyDirectly",
-  SeparateFiles = "separateFiles",
-  MergedTheme = "mergedTheme",
-}
-
 export enum FileStructure {
   SeparateByType = "separateByType",
-  SingleFile = "singleFile",
+  SingleFile = "singleFile"
 }
 
 export enum TokenNameStructure {
   PathAndName = "pathAndName",
   NameOnly = "nameOnly",
-  CollectionPathAndName = "collectionPathAndName",
+  CollectionPathAndName = "collectionPathAndName"
 }
 
 export type ExporterConfiguration = {
