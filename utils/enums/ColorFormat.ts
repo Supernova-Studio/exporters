@@ -9,6 +9,8 @@ export enum ColorFormat {
     hex6 = 'hex6',
     /** HEXA - ffffff00 */
     hex8 = 'hex8',
+    /** Android/Compose ARGB int – e.g. Color(0x00FFFFFF) */
+    argbInt = 'argbInt',
     /** Example: #ff0000 */
     hashHex6 = 'hashHex6',
     /** Example: #ff0000ff */

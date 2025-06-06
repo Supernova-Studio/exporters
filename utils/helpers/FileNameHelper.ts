@@ -1,4 +1,6 @@
 import { TokenType } from "@supernovaio/sdk-exporters"
+import { StringCase } from "../enums/StringCase"
+import { NamingHelper } from "./NamingHelper"
 
 export class FileNameHelper {
   /**
@@ -6,7 +8,7 @@ export class FileNameHelper {
    */
   static ensureFileExtension(fileName: string, extension: string): string {
     // Ensure extension starts with a dot
-    const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`
+    const normalizedExtension = extension.startsWith(".") ? extension : `.${extension}`
     if (!fileName.toLowerCase().endsWith(normalizedExtension.toLowerCase())) {
       return fileName + normalizedExtension
     }
@@ -18,18 +20,22 @@ export class FileNameHelper {
    */
   static replaceFileExtension(fileName: string, oldExt: string, newExt: string): string {
     // Ensure extensions start with a dot
-    const normalizedOldExt = oldExt.startsWith('.') ? oldExt : `.${oldExt}`
-    const normalizedNewExt = newExt.startsWith('.') ? newExt : `.${newExt}`
+    const normalizedOldExt = oldExt.startsWith(".") ? oldExt : `.${oldExt}`
+    const normalizedNewExt = newExt.startsWith(".") ? newExt : `.${newExt}`
     return fileName.replace(new RegExp(`${normalizedOldExt}$`), normalizedNewExt)
   }
 
   /**
    * Gets the default style file name for a token type
    */
-  static getDefaultStyleFileName(type: TokenType, extension: string = '.css'): string {
+  static getDefaultStyleFileName(
+    type: TokenType,
+    extension: string = ".css",
+    stringCase: StringCase = StringCase.kebabCase
+  ): string {
     const baseNames: Record<TokenType, string> = {
       Color: "color",
-      Typography: "typography", 
+      Typography: "typography",
       Dimension: "dimension",
       Size: "size",
       Space: "space",
@@ -54,9 +60,9 @@ export class FileNameHelper {
       Visibility: "visibility",
       Blur: "blur"
     }
-    
-    // Ensure extension starts with a dot
-    const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`
-    return baseNames[type] + normalizedExtension
+
+    // Ensure the extension starts with a dot
+    const normalizedExtension = extension.startsWith(".") ? extension : `.${extension}`
+    return NamingHelper.codeSafeVariableName(baseNames[type], stringCase) + normalizedExtension
   }
-} 
+}
