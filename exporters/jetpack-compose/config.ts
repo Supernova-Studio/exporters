@@ -23,50 +23,46 @@ export enum TokenNameStructure {
 }
 
 export type ExporterConfiguration = {
-  /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
-  showGeneratedFileDisclaimer: boolean
-  /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
-  disclaimer: string
-  /** When enabled, file with all css style files imported will be generated */
-  generateIndexFile: boolean
-  /** When enabled, empty style files will be generated. Otherwise empty are omitted */
-  generateEmptyFiles: boolean
-  /** When enabled, token description will be shown as code comments for every exported token */
-  showDescriptions: boolean
-  /** When enabled, values will use references to other tokens where applicable */
+  /** Values will use references to other tokens (where applicable). */
   useReferences: boolean
-  /** Number of spaces used to indent every css variables */
-  indent: number
-  /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
-  tokenPrefixes: Record<TokenType, string>
-  /** Name of each file that will be generated. Tokens are grouped by the type and will land in each of those files */
-  separatedByTypeFileNames: Record<TokenType, string>
-  /** Name of the index file that will be generated */
-  indexFileName: string
-  /** Path to non-themed object files */
-  nonThemedFilePath: string
-  /** Name of the Kotlin file that contains all exported tokens */
-  singleFileName: string
-  /** Theme suffix added to the Kotlin object name, {theme} will be replaced with the theme name */
-  objectSuffixForThemes: string
-  /** When enabled, themed files will only include tokens that have different values from the base theme */
+  /** Theme files will only include tokens that have different values from the base value. */
   exportOnlyThemedTokens: boolean
-  /** When enabled, base token values will be exported along with themes */
+  /** Base token values will be exported along with themes. */
   exportBaseValues: boolean
-  /** When enabled, allows customization of style file names */
-  customizeSeparatedByTypeFileNames: boolean
-  /** When enabled, allows customization of token prefixes */
-  customizeTokenPrefixes: boolean
-  /** Global prefix for all token names. When set, all tokens will be prefixed with this value */
-  globalNamePrefix: string
-  /** Controls how token styles are organized in files */
-  fileStructure: FileStructure
-  /** Controls what parts are included in the token name */
-  tokenNameStructure: TokenNameStructure
-  /** When enabled, generated variable names will be saved back to tokens as custom properties */
-  writeNameToProperty: boolean
-  /** Name of the custom property where generated variable names will be saved */
-  propertyToWriteNameTo: string
-  /** Base package name used for all generated files */
+  /** Create a Kotlin object that references all token files. */
+  generateIndexFile: boolean
+  /** File name of the generated index object. */
+  indexFileName: string
+  /** Base package name used for all generated files. */
   packageNamePrefix: string
+  /** Choose how generated token files are organized. */
+  fileStructure: FileStructure
+  /** Base name for the Kotlin file and object containing all tokens. */
+  singleFileName: string
+  /** Directory for files without applied themes, relative to the export root. */
+  nonThemedFilePath: string
+  /** Enable to override default file names for each token type. */
+  customizeSeparatedByTypeFileNames: boolean
+  /** Specify file name for each token type. */
+  separatedByTypeFileNames: Record<TokenType, string>
+  /** Create empty token files instead of skipping them. */
+  generateEmptyFiles: boolean
+  /** Prefix added to every generated property name. */
+  globalNamePrefix: string
+  /** Customize the prefixes for each design token type. */
+  customizeTokenPrefixes: boolean
+  /** Each token of a specific type is prefixed with the following identifier. */
+  tokenPrefixes: Record<TokenType, string>
+  /** Show the token description as a code comment for every exported token. */
+  showDescriptions: boolean
+  /** A message explaining that the file was automatically generated will appear in all token files. */
+  showGeneratedFileDisclaimer: boolean
+  /** A message explaining that the file was automatically generated will appear in all token files. */
+  disclaimer: string
+  /** Number of spaces used in generated Kotlin files. */
+  indent: number
+  /** Save generated variable names back to tokens as custom properties. */
+  writeNameToProperty: boolean
+  /** Name of the custom property where generated variable names will be saved. */
+  propertyToWriteNameTo: string
 }
