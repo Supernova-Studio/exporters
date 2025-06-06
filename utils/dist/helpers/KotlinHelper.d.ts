@@ -11,9 +11,10 @@ export declare enum ImportFlag {
     BorderStroke = 7,
     Modifier = 8,
     Blur = 9,
-    FontWeight = 10,
-    TextDecoration = 11,
-    TextStyle = 12
+    FontFamily = 10,
+    FontWeight = 11,
+    TextDecoration = 12,
+    TextStyle = 13
 }
 /** Collect flags while generating literals, turn into imports at the end */
 export declare class ImportCollector {
@@ -65,6 +66,7 @@ export declare class KotlinHelper {
     static blurTokenValueToKotlin(blur: BlurTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
     static fontWeightTokenValueToKotlin(value: AnyStringTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
     static fontWeightIntToKotlin(weight: number, importCollector: ImportCollector): string;
+    static fontFamilyTokenValueToKotlin(value: AnyStringTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
     static typographyTokenValueToKotlin(typography: TypographyTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
 }
 export {};
