@@ -15,5 +15,5 @@ export function getPackageName(theme: TokenTheme | undefined): string {
     ? ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)
     : NamingHelper.codeSafeVariableName(exportConfiguration.nonThemedFilePath, StringCase.dotCase)
 
-  return [exportConfiguration.packagePrefixName, packageNameSuffix].filter(Boolean).join(".")
+  return [exportConfiguration.packageNamePrefix, packageNameSuffix].filter(Boolean).join(".")
 }

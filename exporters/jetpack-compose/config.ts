@@ -35,8 +35,6 @@ export type ExporterConfiguration = {
   showDescriptions: boolean
   /** When enabled, values will use references to other tokens where applicable */
   useReferences: boolean
-  /** Style of exported token names */
-  tokenNameStyle: StringCase
   /** Number of spaces used to indent every css variables */
   indent: number
   /** When set, will prefix each token of a specific type with provided identifier. Put empty string if not necessary */
@@ -69,6 +67,6 @@ export type ExporterConfiguration = {
   writeNameToProperty: boolean
   /** Name of the custom property where generated variable names will be saved */
   propertyToWriteNameTo: string
-  /** Name of the package where tokens are exported */
-  packagePrefixName: string
+  /** Base package name used for all generated files */
+  packageNamePrefix: string
 }

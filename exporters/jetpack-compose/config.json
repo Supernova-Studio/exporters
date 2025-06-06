@@ -49,36 +49,36 @@
     "key": "generateIndexFile",
     "type": "boolean",
     "default": true,
-    "title": "Generate index files",
-    "description": "Generate files with imports for all base and theme token files.",
-    "category": "Index file"
+    "title": "Generate index object",
+    "description": "Create a Kotlin object that references all token files.",
+    "category": "Index"
   },
   {
     "key": "indexFileName",
     "type": "string",
     "default": "DesignTokens.kt",
-    "title": "Index filename",
-    "description": "The name of the index file that will be generated.",
-    "category": "Index file",
+    "title": "Index file name",
+    "description": "File name of the generated index object.",
+    "category": "Index",
     "dependsOn": {
       "generateIndexFile": true
     }
   },
   {
-    "key": "packagePrefixName",
+    "key": "packageNamePrefix",
     "type": "string",
     "default": "io.supernova.tokens",
-    "title": "Package prefix name",
-    "description": "Beginning of the package name tokens are exported to",
-    "category": "Token files"
+    "title": "Package name prefix",
+    "description": "Base package name used for all generated files.",
+    "category": "Packages"
   },
   {
     "key": "fileStructure",
     "type": "enum",
     "default": "separateByType",
-    "title": "File structure",
-    "description": "Control how token variables are organized in files",
-    "category": "Token files",
+    "title": "Token file structure",
+    "description": "Choose how generated token files are organized",
+    "category": "Files",
     "options": {
       "separateByType": {
         "label": "Separate files by type",
@@ -94,32 +94,32 @@
     "key": "singleFileName",
     "type": "string",
     "default": "DesignTokens",
-    "title": "Name of the single combined file",
-    "description": "File and object name where all tokens are exported (e.g. 'DesignTokens').",
-    "category": "Token files"
+    "title": "Single file name",
+    "description": "Base name for the Kotlin file and object containing all tokens.",
+    "category": "Files"
   },
   {
     "key": "nonThemedFilePath",
     "type": "string",
     "default": "./base",
-    "title": "Path to non-themed files",
-    "description": "All files without themes will be written to this directory (relative to export root).",
-    "category": "Token files"
+    "title": "Path for base tokens",
+    "description": "Directory for files without applied themes, relative to the export root.",
+    "category": "Files"
   },
   {
     "key": "customizeSeparatedByTypeFileNames",
     "type": "boolean",
     "default": false,
-    "title": "Customize token file names",
-    "description": "Customize the file names for each token type.",
-    "category": "Token files"
+    "title": "Use custom file names",
+    "description": "Enable to override default file names for each token type.",
+    "category": "Files"
   },
   {
     "key": "separatedByTypeFileNames",
     "type": "object",
-    "title": "Token file names",
-    "description": "Name of each file that will be generated, grouped by token type.",
-    "category": "Token files",
+    "title": "Custom file names",
+    "description": "Specify file name for each token type.",
+    "category": "Files",
     "dependsOn": {
       "customizeSeparatedByTypeFileNames": true
     },
@@ -188,16 +188,16 @@
     "key": "generateEmptyFiles",
     "type": "boolean",
     "default": false,
-    "title": "Generate empty token files",
-    "description": "Generate empty token files instead of omitting them.",
-    "category": "Token files"
+    "title": "Generate empty files",
+    "description": "Create empty token files instead of skipping them.",
+    "category": "Files"
   },
   {
     "key": "globalNamePrefix",
     "type": "string",
     "default": "",
     "title": "Global prefix",
-    "description": "Prefix all variable names (e.g., 'MyToken').",
+    "description": "Prefix added to every generated property name.",
     "category": "Token names"
   },
   {
