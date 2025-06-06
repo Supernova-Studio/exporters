@@ -77,6 +77,10 @@ object ColorTokens {
 
 Here is a list of all the configuration options this exporter provides:
 
+### Packages
+- **packageNamePrefix:** Base package name used for all generated files.
+- **rPackageName:** Package name used for resource (R) imports. Leave empty to reuse the package name prefix.
+
 ### Token values
 - **useReferences:** Values will use references to other tokens where applicable.
 
@@ -87,10 +91,6 @@ Here is a list of all the configuration options this exporter provides:
 ### Index
 - **generateIndexFile:** Generate a Kotlin object that references all token files.
 - **indexFileName:** File name of the generated index object.
-
-### Packages
-- **packageNamePrefix:** Base package name used for all generated files.
-- **rPackageName:** Package name used for resource (R) imports. Leave empty to reuse the package name prefix.
 
 ### Files
 - **fileStructure:** Choose how generated token files are organized (`separateByType` or `singleFile`).
