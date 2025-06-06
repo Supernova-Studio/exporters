@@ -15,8 +15,8 @@ export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
  * - Fetching tokens and token groups from the design system
  * - Filtering tokens by brand if specified
  * - Processing themes in different modes (direct, separate files, or combined)
- * - Generating style files for each token type
- * - Creating an optional index file that imports all style files
+ * - Generating files for each token type
+ * - Creating optional index files that expose all token files
  *
  * @param sdk - Supernova SDK instance
  * @param context - Export context containing design system information
@@ -60,7 +60,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return theme
     })
 
-    // TODO: support different modes
     // Generate separate files for each theme
     const themeFiles = themesToApply.flatMap((theme) => {
       const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])

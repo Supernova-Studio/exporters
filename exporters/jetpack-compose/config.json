@@ -1,27 +1,5 @@
 [
   {
-    "key": "tokenNameStructure",
-    "type": "enum",
-    "default": "pathAndName",
-    "title": "Token name structure",
-    "description": "Control what parts are included in the exporter token name.",
-    "category": "Token names",
-    "options": {
-      "pathAndName": {
-        "label": "Path + Name",
-        "description": "Include path and name (e.g. ButtonPrimaryBackground)"
-      },
-      "nameOnly": {
-        "label": "Name only",
-        "description": "Only include name (e.g. Background)"
-      },
-      "collectionPathAndName": {
-        "label": "Collection + Path + Name",
-        "description": "Include collection, path, and name (e.g. CoreButtonPrimaryBackground)"
-      }
-    }
-  },
-  {
     "key": "useReferences",
     "type": "boolean",
     "default": true,

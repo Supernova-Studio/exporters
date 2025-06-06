@@ -106,7 +106,21 @@ type InternalOptions = ColorFormatOptions & { indent: number }
 // No need to expose rawColorTokenFormatter, the color format is the same in Kotlin
 export type TokenToKotlinOptions = Omit<InternalOptions, "rawColorTokenFormatter">
 
+/**
+ * A utility class for working with Kotlin code generation for various token types.
+ * This class provides methods to transform design tokens (e.g., colors, borders, gradients, shadows) into Kotlin representations.
+ */
 export class KotlinHelper {
+
+  /**
+   * Converts a given token to its Kotlin string representation based on its type.
+   *
+   * @param token - The token to be converted.
+   * @param allTokens - A map of all tokens, used for reference during conversion.
+   * @param options - The options used to customize the token conversion process.
+   * @param importCollector - An object responsible for managing and collecting imports needed for the Kotlin representation.
+   * @return The Kotlin string representation of the given token.
+   */
   static tokenValue(
     token: Token,
     allTokens: Map<string, Token>,

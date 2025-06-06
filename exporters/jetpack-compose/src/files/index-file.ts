@@ -13,26 +13,12 @@ import { FileStructure } from "../../config"
 import { getPackageName } from "../utils/package-utils"
 import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
 
-// TODO clean, polish, doc comment
-
 /**
- * Generates an index CSS file that imports all token style files and theme variations.
- * This file serves as the main entry point for all token styles.
+ * Generates index files based on token data and themes provided.
  *
- * The function supports two file structure modes:
- * 1. Single File: All tokens are combined into one file per theme
- *    - tokens.css (base tokens)
- *    - tokens.dark.css (dark theme)
- *    - tokens.light.css (light theme)
- *
- * 2. Separate by Type: Tokens are split into files by type for each theme
- *    - base/colors.css, base/typography.css (base tokens)
- *    - dark/colors.css, dark/typography.css (dark theme)
- *    - light/colors.css, light/typography.css (light theme)
- *
- * @param tokens - Array of design tokens to process
- * @param themes - Array of token themes or theme names to include
- * @returns OutputTextFile array with index files
+ * @param tokens - The array of tokens to process for index file generation.
+ * @param themes - The array of token themes. If undefined, only base tokens are considered.
+ * @return An array of index files generated based on the provided configuration, tokens, and themes.
  */
 export function indexFiles(tokens: Array<Token>, themes: Array<TokenTheme> | undefined): OutputTextFile[] {
   // Skip if index file generation is disabled in configuration
@@ -43,28 +29,10 @@ export function indexFiles(tokens: Array<Token>, themes: Array<TokenTheme> | und
   // =========================================
   // Single File Mode
   // =========================================
+
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-    // Generate import for base tokens file (tokens.css)
-    const baseImport = exportConfiguration.exportBaseValues ? `/* Base tokens */\n@import "./tokens.css";` : ""
-
-    // Generate imports for theme files (tokens.{theme}.css)
-    const themeImports = themes
-      .map((theme) => {
-        const themePath = ThemeHelper.getThemeIdentifier(theme)
-        const themeName = ThemeHelper.getThemeName(theme)
-        return `/* Theme: ${themeName} */\n@import "./tokens.${themePath}.css";`
-      })
-      .join("\n\n")
-
-    const separator = baseImport && themeImports ? "\n\n" : ""
-    const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, ".css")
-
-    // todo
-    // return FileHelper.createTextFile({
-    //   relativePath: exportConfiguration.baseIndexFilePath,
-    //   fileName: fileName,
-    //   content: baseImport + separator + themeImports,
-    // })
+    // No need to generate any umbrella files since all tokens are already combined into one file per theme
+    return []
   }
 
   // =========================================
