@@ -30,6 +30,8 @@ import {
 import { ColorFormatOptions, ColorHelper } from "./ColorHelper"
 import { normalizeTextWeight, sureOptionalReference } from "./TokenHelper"
 import { GeneralHelper } from "./GeneralHelper"
+import { NamingHelper } from "./NamingHelper"
+import { StringCase } from "../enums/StringCase"
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Imports & flag enum
@@ -38,6 +40,7 @@ export enum ImportFlag {
   Color,
   Dp,
   Sp,
+  Em,
   Offset,
   Brush,
   TileMode,
@@ -45,6 +48,7 @@ export enum ImportFlag {
   BorderStroke,
   Modifier,
   Blur,
+  Font,
   FontFamily,
   FontWeight,
   TextDecoration,
@@ -73,6 +77,7 @@ export class ImportCollector {
 
     if (this.importFlags.has(ImportFlag.Dp)) importList.push("import androidx.compose.ui.unit.dp")
     if (this.importFlags.has(ImportFlag.Sp)) importList.push("import androidx.compose.ui.unit.sp")
+    if (this.importFlags.has(ImportFlag.Em)) importList.push("import androidx.compose.ui.unit.em")
 
     if (this.importFlags.has(ImportFlag.Offset)) importList.push("import androidx.compose.ui.geometry.Offset")
 
@@ -91,6 +96,8 @@ export class ImportCollector {
 
     if (this.importFlags.has(ImportFlag.FontFamily))
       importList.push("import androidx.compose.ui.text.font.FontFamily")
+    if (this.importFlags.has(ImportFlag.Font))
+      importList.push("import androidx.compose.ui.text.font.Font")
     if (this.importFlags.has(ImportFlag.FontWeight))
       importList.push("import androidx.compose.ui.text.font.FontWeight")
     if (this.importFlags.has(ImportFlag.TextDecoration))
@@ -166,12 +173,28 @@ export class KotlinHelper {
       case TokenType.radius:
       case TokenType.duration:
       case TokenType.zIndex:
-        value = this.dimensionTokenValueToKotlin(
-          (token as AnyDimensionToken).value,
-          allTokens,
-          actualOptions,
-          importCollector
-        )
+        if (token.tokenType === TokenType.fontSize || token.tokenType === TokenType.lineHeight) {
+          value = this.textUnitTokenValueToKotlin(
+            (token as AnyDimensionToken).value,
+            allTokens,
+            actualOptions,
+            importCollector
+          )
+        } else if (token.tokenType === TokenType.letterSpacing) {
+          value = this.letterSpacingTokenValueToKotlin(
+            (token as AnyDimensionToken).value,
+            allTokens,
+            actualOptions,
+            importCollector
+          )
+        } else {
+          value = this.dimensionTokenValueToKotlin(
+            (token as AnyDimensionToken).value,
+            allTokens,
+            actualOptions,
+            importCollector
+          )
+        }
         break
       case TokenType.shadow:
         value = this.shadowTokenValueToKotlin((token as ShadowToken).value, allTokens, actualOptions, importCollector)
@@ -398,6 +421,54 @@ export class KotlinHelper {
     return `${rounded}${this.unitToKotlin(dimension.unit, importCollector)}`
   }
 
+  /** Always output a Compose TextUnit value (sp or em) for typography tokens */
+  static textUnitTokenValueToKotlin(
+    dimension: AnyDimensionTokenValue,
+    allTokens: Map<string, Token>,
+    options: InternalOptions,
+    importCollector: ImportCollector,
+    useEmForPercent = false
+  ): string {
+    const reference = sureOptionalReference(
+      dimension.referencedTokenId,
+      allTokens,
+      options.allowReferences
+    )
+    if (reference) {
+      return options.tokenToVariableRef(reference)
+    }
+
+    const rounded = ColorHelper.roundToDecimals(dimension.measure, options.decimals)
+
+    if (dimension.unit === Unit.percent) {
+      const fraction = +rounded / 100
+      importCollector.use(useEmForPercent ? ImportFlag.Em : ImportFlag.Sp)
+      return `${fraction}${useEmForPercent ? ".em" : ".sp"}`
+    }
+
+    importCollector.use(ImportFlag.Sp)
+    return `${rounded}.sp`
+  }
+
+  /**
+   * Converts letter-spacing tokens to Compose TextUnit.
+   * Percentage values correspond to em units, hence the final `true` flag.
+   */
+  static letterSpacingTokenValueToKotlin(
+    dimension: AnyDimensionTokenValue,
+    allTokens: Map<string, Token>,
+    options: InternalOptions,
+    importCollector: ImportCollector
+  ): string {
+    return this.textUnitTokenValueToKotlin(
+      dimension,
+      allTokens,
+      options,
+      importCollector,
+      true
+    )
+  }
+
   /** Maps Supernova units to Kotlin / Compose extension suffixes */
   static unitToKotlin(unit: Unit, importCollector: ImportCollector): string {
     switch (unit) {
@@ -558,9 +629,10 @@ export class KotlinHelper {
     if (reference) {
       return options.tokenToVariableRef(reference)
     }
-
-    importCollector.use(ImportFlag.FontFamily)
-    return `FontFamily(\"${value.text}\")`
+    // Map font names to Android font resources using snake_case
+    importCollector.use(ImportFlag.FontFamily, ImportFlag.Font)
+    const resName = NamingHelper.codeSafeVariableName(value.text, StringCase.snakeCase)
+    return `FontFamily(Font(R.font.${resName}))`
   }
 
   static typographyTokenValueToKotlin(
@@ -614,13 +686,28 @@ export class KotlinHelper {
       ? "TextDecoration.None"
       : this.textDecorationToKotlin(typography.textDecoration.value as TextDecoration, importCollector)
 
-    const fontSizeLit = this.dimensionTokenValueToKotlin(typography.fontSize, allTokens, options, importCollector)
+    const fontSizeLit = this.textUnitTokenValueToKotlin(
+      typography.fontSize,
+      allTokens,
+      options,
+      importCollector
+    )
     const lineHeightLit = typography.lineHeight
-      ? this.dimensionTokenValueToKotlin(typography.lineHeight, allTokens, options, importCollector)
+      ? this.textUnitTokenValueToKotlin(
+          typography.lineHeight,
+          allTokens,
+          options,
+          importCollector
+        )
       : undefined
 
     const letterSpacingLit = typography.letterSpacing
-      ? this.dimensionTokenValueToKotlin(typography.letterSpacing, allTokens, options, importCollector)
+      ? this.letterSpacingTokenValueToKotlin(
+          typography.letterSpacing,
+          allTokens,
+          options,
+          importCollector
+        )
       : undefined
 
     // Assemble TextStyle literal

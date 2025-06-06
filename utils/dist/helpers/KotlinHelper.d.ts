@@ -4,17 +4,19 @@ export declare enum ImportFlag {
     Color = 0,
     Dp = 1,
     Sp = 2,
-    Offset = 3,
-    Brush = 4,
-    TileMode = 5,
-    Shadow = 6,
-    BorderStroke = 7,
-    Modifier = 8,
-    Blur = 9,
-    FontFamily = 10,
-    FontWeight = 11,
-    TextDecoration = 12,
-    TextStyle = 13
+    Em = 3,
+    Offset = 4,
+    Brush = 5,
+    TileMode = 6,
+    Shadow = 7,
+    BorderStroke = 8,
+    Modifier = 9,
+    Blur = 10,
+    Font = 11,
+    FontFamily = 12,
+    FontWeight = 13,
+    TextDecoration = 14,
+    TextStyle = 15
 }
 /** Collect flags while generating literals, turn into imports at the end */
 export declare class ImportCollector {
@@ -56,6 +58,13 @@ export declare class KotlinHelper {
     static shadowTokenValueToKotlin(shadows: Array<ShadowTokenValue>, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
     static shadowLayerToKotlin(value: ShadowTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
     static dimensionTokenValueToKotlin(dimension: AnyDimensionTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
+    /** Always output a Compose TextUnit value (sp or em) for typography tokens */
+    static textUnitTokenValueToKotlin(dimension: AnyDimensionTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector, useEmForPercent?: boolean): string;
+    /**
+     * Converts letter-spacing tokens to Compose TextUnit.
+     * Percentage values correspond to em units, hence the final `true` flag.
+     */
+    static letterSpacingTokenValueToKotlin(dimension: AnyDimensionTokenValue, allTokens: Map<string, Token>, options: InternalOptions, importCollector: ImportCollector): string;
     /** Maps Supernova units to Kotlin / Compose extension suffixes */
     static unitToKotlin(unit: Unit, importCollector: ImportCollector): string;
     static stringTokenValueToKotlin(value: AnyStringTokenValue, allTokens: Map<string, Token>, options: InternalOptions): string;

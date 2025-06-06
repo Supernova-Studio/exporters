@@ -5,6 +5,8 @@ const sdk_exporters_1 = require("@supernovaio/sdk-exporters");
 const ColorHelper_1 = require("./ColorHelper");
 const TokenHelper_1 = require("./TokenHelper");
 const GeneralHelper_1 = require("./GeneralHelper");
+const NamingHelper_1 = require("./NamingHelper");
+const StringCase_1 = require("../enums/StringCase");
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 // MARK: - Imports & flag enum
 var ImportFlag;
@@ -12,17 +14,19 @@ var ImportFlag;
     ImportFlag[ImportFlag["Color"] = 0] = "Color";
     ImportFlag[ImportFlag["Dp"] = 1] = "Dp";
     ImportFlag[ImportFlag["Sp"] = 2] = "Sp";
-    ImportFlag[ImportFlag["Offset"] = 3] = "Offset";
-    ImportFlag[ImportFlag["Brush"] = 4] = "Brush";
-    ImportFlag[ImportFlag["TileMode"] = 5] = "TileMode";
-    ImportFlag[ImportFlag["Shadow"] = 6] = "Shadow";
-    ImportFlag[ImportFlag["BorderStroke"] = 7] = "BorderStroke";
-    ImportFlag[ImportFlag["Modifier"] = 8] = "Modifier";
-    ImportFlag[ImportFlag["Blur"] = 9] = "Blur";
-    ImportFlag[ImportFlag["FontFamily"] = 10] = "FontFamily";
-    ImportFlag[ImportFlag["FontWeight"] = 11] = "FontWeight";
-    ImportFlag[ImportFlag["TextDecoration"] = 12] = "TextDecoration";
-    ImportFlag[ImportFlag["TextStyle"] = 13] = "TextStyle";
+    ImportFlag[ImportFlag["Em"] = 3] = "Em";
+    ImportFlag[ImportFlag["Offset"] = 4] = "Offset";
+    ImportFlag[ImportFlag["Brush"] = 5] = "Brush";
+    ImportFlag[ImportFlag["TileMode"] = 6] = "TileMode";
+    ImportFlag[ImportFlag["Shadow"] = 7] = "Shadow";
+    ImportFlag[ImportFlag["BorderStroke"] = 8] = "BorderStroke";
+    ImportFlag[ImportFlag["Modifier"] = 9] = "Modifier";
+    ImportFlag[ImportFlag["Blur"] = 10] = "Blur";
+    ImportFlag[ImportFlag["Font"] = 11] = "Font";
+    ImportFlag[ImportFlag["FontFamily"] = 12] = "FontFamily";
+    ImportFlag[ImportFlag["FontWeight"] = 13] = "FontWeight";
+    ImportFlag[ImportFlag["TextDecoration"] = 14] = "TextDecoration";
+    ImportFlag[ImportFlag["TextStyle"] = 15] = "TextStyle";
 })(ImportFlag || (exports.ImportFlag = ImportFlag = {}));
 /** Collect flags while generating literals, turn into imports at the end */
 class ImportCollector {
@@ -47,6 +51,8 @@ class ImportCollector {
             importList.push("import androidx.compose.ui.unit.dp");
         if (this.importFlags.has(ImportFlag.Sp))
             importList.push("import androidx.compose.ui.unit.sp");
+        if (this.importFlags.has(ImportFlag.Em))
+            importList.push("import androidx.compose.ui.unit.em");
         if (this.importFlags.has(ImportFlag.Offset))
             importList.push("import androidx.compose.ui.geometry.Offset");
         if (this.importFlags.has(ImportFlag.Brush))
@@ -64,6 +70,8 @@ class ImportCollector {
         }
         if (this.importFlags.has(ImportFlag.FontFamily))
             importList.push("import androidx.compose.ui.text.font.FontFamily");
+        if (this.importFlags.has(ImportFlag.Font))
+            importList.push("import androidx.compose.ui.text.font.Font");
         if (this.importFlags.has(ImportFlag.FontWeight))
             importList.push("import androidx.compose.ui.text.font.FontWeight");
         if (this.importFlags.has(ImportFlag.TextDecoration))
@@ -119,7 +127,15 @@ class KotlinHelper {
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                if (token.tokenType === sdk_exporters_1.TokenType.fontSize || token.tokenType === sdk_exporters_1.TokenType.lineHeight) {
+                    value = this.textUnitTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                }
+                else if (token.tokenType === sdk_exporters_1.TokenType.letterSpacing) {
+                    value = this.letterSpacingTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                }
+                else {
+                    value = this.dimensionTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                }
                 break;
             case sdk_exporters_1.TokenType.shadow:
                 value = this.shadowTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
@@ -251,6 +267,28 @@ class KotlinHelper {
         }
         return `${rounded}${this.unitToKotlin(dimension.unit, importCollector)}`;
     }
+    /** Always output a Compose TextUnit value (sp or em) for typography tokens */
+    static textUnitTokenValueToKotlin(dimension, allTokens, options, importCollector, useEmForPercent = false) {
+        const reference = (0, TokenHelper_1.sureOptionalReference)(dimension.referencedTokenId, allTokens, options.allowReferences);
+        if (reference) {
+            return options.tokenToVariableRef(reference);
+        }
+        const rounded = ColorHelper_1.ColorHelper.roundToDecimals(dimension.measure, options.decimals);
+        if (dimension.unit === sdk_exporters_1.Unit.percent) {
+            const fraction = +rounded / 100;
+            importCollector.use(useEmForPercent ? ImportFlag.Em : ImportFlag.Sp);
+            return `${fraction}${useEmForPercent ? ".em" : ".sp"}`;
+        }
+        importCollector.use(ImportFlag.Sp);
+        return `${rounded}.sp`;
+    }
+    /**
+     * Converts letter-spacing tokens to Compose TextUnit.
+     * Percentage values correspond to em units, hence the final `true` flag.
+     */
+    static letterSpacingTokenValueToKotlin(dimension, allTokens, options, importCollector) {
+        return this.textUnitTokenValueToKotlin(dimension, allTokens, options, importCollector, true);
+    }
     /** Maps Supernova units to Kotlin / Compose extension suffixes */
     static unitToKotlin(unit, importCollector) {
         switch (unit) {
@@ -372,8 +410,10 @@ class KotlinHelper {
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        importCollector.use(ImportFlag.FontFamily);
-        return `FontFamily(\"${value.text}\")`;
+        // Map font names to Android font resources using snake_case
+        importCollector.use(ImportFlag.FontFamily, ImportFlag.Font);
+        const resName = NamingHelper_1.NamingHelper.codeSafeVariableName(value.text, StringCase_1.StringCase.snakeCase);
+        return `FontFamily(Font(R.font.${resName}))`;
     }
     static typographyTokenValueToKotlin(typography, allTokens, options, importCollector) {
         // Reference full typography token if set
@@ -398,12 +438,12 @@ class KotlinHelper {
             : typography.textDecoration.value === sdk_exporters_1.TextDecoration.original
                 ? "TextDecoration.None"
                 : this.textDecorationToKotlin(typography.textDecoration.value, importCollector);
-        const fontSizeLit = this.dimensionTokenValueToKotlin(typography.fontSize, allTokens, options, importCollector);
+        const fontSizeLit = this.textUnitTokenValueToKotlin(typography.fontSize, allTokens, options, importCollector);
         const lineHeightLit = typography.lineHeight
-            ? this.dimensionTokenValueToKotlin(typography.lineHeight, allTokens, options, importCollector)
+            ? this.textUnitTokenValueToKotlin(typography.lineHeight, allTokens, options, importCollector)
             : undefined;
         const letterSpacingLit = typography.letterSpacing
-            ? this.dimensionTokenValueToKotlin(typography.letterSpacing, allTokens, options, importCollector)
+            ? this.letterSpacingTokenValueToKotlin(typography.letterSpacing, allTokens, options, importCollector)
             : undefined;
         // Assemble TextStyle literal
         const parts = [
