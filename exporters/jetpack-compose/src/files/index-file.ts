@@ -49,7 +49,7 @@ export function indexFiles(tokens: Array<Token>, themes: Array<TokenTheme> | und
     indexFiles.push(generateIndexFile(undefined, types))
   }
 
-  // Generate an index file per themed tokens
+  // Generate an index file per theme
   themes
     ?.map((theme) => {
       // Get token types for this theme
