@@ -45,6 +45,7 @@ export enum ImportFlag {
   BorderStroke,
   Modifier,
   Blur,
+  FontFamily,
   FontWeight,
   TextDecoration,
   TextStyle
@@ -88,6 +89,8 @@ export class ImportCollector {
       if (this.importFlags.has(ImportFlag.Blur)) importList.push("import androidx.compose.ui.draw.blur")
     }
 
+    if (this.importFlags.has(ImportFlag.FontFamily))
+      importList.push("import androidx.compose.ui.text.font.FontFamily")
     if (this.importFlags.has(ImportFlag.FontWeight))
       importList.push("import androidx.compose.ui.text.font.FontWeight")
     if (this.importFlags.has(ImportFlag.TextDecoration))
@@ -182,6 +185,13 @@ export class KotlinHelper {
         )
         break
       case TokenType.fontFamily:
+        value = this.fontFamilyTokenValueToKotlin(
+          (token as AnyStringToken).value,
+          allTokens,
+          actualOptions,
+          importCollector
+        )
+        break
       case TokenType.productCopy:
       case TokenType.string:
         value = this.stringTokenValueToKotlin((token as AnyStringToken).value, allTokens, actualOptions)
@@ -538,6 +548,21 @@ export class KotlinHelper {
     }
   }
 
+  static fontFamilyTokenValueToKotlin(
+    value: AnyStringTokenValue,
+    allTokens: Map<string, Token>,
+    options: InternalOptions,
+    importCollector: ImportCollector
+  ): string {
+    const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
+    if (reference) {
+      return options.tokenToVariableRef(reference)
+    }
+
+    importCollector.use(ImportFlag.FontFamily)
+    return `FontFamily(\"${value.text}\")`
+  }
+
   static typographyTokenValueToKotlin(
     typography: TypographyTokenValue,
     allTokens: Map<string, Token>,
@@ -570,7 +595,14 @@ export class KotlinHelper {
     )
 
     // Calculate literals
-    const fontFamilyLit = fontFamilyRef ? options.tokenToVariableRef(fontFamilyRef) : `"${typography.fontFamily.text}"`
+    const fontFamilyLit = fontFamilyRef
+      ? options.tokenToVariableRef(fontFamilyRef)
+      : this.fontFamilyTokenValueToKotlin(
+          typography.fontFamily,
+          allTokens,
+          options,
+          importCollector
+        )
 
     const fontWeightLit = fontWeightRef
       ? options.tokenToVariableRef(fontWeightRef)

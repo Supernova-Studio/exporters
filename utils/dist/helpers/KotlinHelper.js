@@ -19,9 +19,10 @@ var ImportFlag;
     ImportFlag[ImportFlag["BorderStroke"] = 7] = "BorderStroke";
     ImportFlag[ImportFlag["Modifier"] = 8] = "Modifier";
     ImportFlag[ImportFlag["Blur"] = 9] = "Blur";
-    ImportFlag[ImportFlag["FontWeight"] = 10] = "FontWeight";
-    ImportFlag[ImportFlag["TextDecoration"] = 11] = "TextDecoration";
-    ImportFlag[ImportFlag["TextStyle"] = 12] = "TextStyle";
+    ImportFlag[ImportFlag["FontFamily"] = 10] = "FontFamily";
+    ImportFlag[ImportFlag["FontWeight"] = 11] = "FontWeight";
+    ImportFlag[ImportFlag["TextDecoration"] = 12] = "TextDecoration";
+    ImportFlag[ImportFlag["TextStyle"] = 13] = "TextStyle";
 })(ImportFlag || (exports.ImportFlag = ImportFlag = {}));
 /** Collect flags while generating literals, turn into imports at the end */
 class ImportCollector {
@@ -61,6 +62,8 @@ class ImportCollector {
             if (this.importFlags.has(ImportFlag.Blur))
                 importList.push("import androidx.compose.ui.draw.blur");
         }
+        if (this.importFlags.has(ImportFlag.FontFamily))
+            importList.push("import androidx.compose.ui.text.font.FontFamily");
         if (this.importFlags.has(ImportFlag.FontWeight))
             importList.push("import androidx.compose.ui.text.font.FontWeight");
         if (this.importFlags.has(ImportFlag.TextDecoration))
@@ -125,6 +128,8 @@ class KotlinHelper {
                 value = this.fontWeightTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
                 break;
             case sdk_exporters_1.TokenType.fontFamily:
+                value = this.fontFamilyTokenValueToKotlin(token.value, allTokens, actualOptions, importCollector);
+                break;
             case sdk_exporters_1.TokenType.productCopy:
             case sdk_exporters_1.TokenType.string:
                 value = this.stringTokenValueToKotlin(token.value, allTokens, actualOptions);
@@ -362,6 +367,14 @@ class KotlinHelper {
                 return `FontWeight(${weight})`;
         }
     }
+    static fontFamilyTokenValueToKotlin(value, allTokens, options, importCollector) {
+        const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
+        if (reference) {
+            return options.tokenToVariableRef(reference);
+        }
+        importCollector.use(ImportFlag.FontFamily);
+        return `FontFamily(\"${value.text}\")`;
+    }
     static typographyTokenValueToKotlin(typography, allTokens, options, importCollector) {
         // Reference full typography token if set
         const reference = (0, TokenHelper_1.sureOptionalReference)(typography.referencedTokenId, allTokens, options.allowReferences);
@@ -374,7 +387,9 @@ class KotlinHelper {
         const fontWeightRef = (0, TokenHelper_1.sureOptionalReference)(typography.fontWeight.referencedTokenId, allTokens, options.allowReferences);
         const decorationRef = (0, TokenHelper_1.sureOptionalReference)(typography.textDecoration.referencedTokenId, allTokens, options.allowReferences);
         // Calculate literals
-        const fontFamilyLit = fontFamilyRef ? options.tokenToVariableRef(fontFamilyRef) : `"${typography.fontFamily.text}"`;
+        const fontFamilyLit = fontFamilyRef
+            ? options.tokenToVariableRef(fontFamilyRef)
+            : this.fontFamilyTokenValueToKotlin(typography.fontFamily, allTokens, options, importCollector);
         const fontWeightLit = fontWeightRef
             ? options.tokenToVariableRef(fontWeightRef)
             : this.fontWeightIntToKotlin((0, TokenHelper_1.normalizeTextWeight)(typography.fontWeight.text), importCollector);
