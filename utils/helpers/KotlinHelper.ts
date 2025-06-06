@@ -98,7 +98,7 @@ export class ImportCollector {
     if (this.importFlags.has(ImportFlag.Font)) importList.push("import androidx.compose.ui.text.font.Font")
     if (this.importFlags.has(ImportFlag.FontWeight)) importList.push("import androidx.compose.ui.text.font.FontWeight")
     if (this.importFlags.has(ImportFlag.TextDecoration))
-      importList.push("import androidx.compose.ui.text.TextDecoration")
+      importList.push("import androidx.compose.ui.text.style.TextDecoration")
     if (this.importFlags.has(ImportFlag.TextStyle)) importList.push("import androidx.compose.ui.text.TextStyle")
 
     return importList.sort()
