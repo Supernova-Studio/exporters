@@ -49,14 +49,14 @@
     "key": "generateIndexFile",
     "type": "boolean",
     "default": true,
-    "title": "Generate index file",
-    "description": "Generate a file with imports for all base and theme token files.",
+    "title": "Generate index files",
+    "description": "Generate files with imports for all base and theme token files.",
     "category": "Index file"
   },
   {
     "key": "indexFileName",
     "type": "string",
-    "default": "TODO.kt",
+    "default": "DesignTokens.kt",
     "title": "Index filename",
     "description": "The name of the index file that will be generated.",
     "category": "Index file",

@@ -3,18 +3,10 @@ import { ExporterConfiguration } from "../config"
 import { generateObjectFiles } from "./files/object-file"
 import { WriteTokenPropStore } from "@supernovaio/export-utils"
 import { tokenPropertyName } from "./content/token"
+import { indexFiles } from "./files/index-file"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
-
-/**
- * Filters out null values from an array of output files
- * @param files Array of output files that may contain null values
- * @returns Array of non-null output files
- */
-function sanitizeOutputFiles(files: Array<AnyOutputFile | null>): Array<AnyOutputFile> {
-  return files.filter((file): file is AnyOutputFile => file !== null)
-}
 
 /**
  * Main export function that generates Kotlin files from design tokens
@@ -80,22 +72,15 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       ? generateObjectFiles(tokens, tokenGroups, undefined, tokenCollections)
       : []
 
-    // todo index files
-    const separateFiles = [
-      ...baseFiles,
-      ...themeFiles
-      // indexOutputFile(tokens, themesToApply)
-    ]
-    outputFiles = sanitizeOutputFiles(separateFiles)
+    outputFiles = [...baseFiles, ...themeFiles, ...indexFiles(tokens, themesToApply)]
   } else {
     // Default case: Generate files without themes
-    const defaultFiles = [
+    outputFiles = [
       ...(exportConfiguration.exportBaseValues
         ? generateObjectFiles(tokens, tokenGroups, undefined, tokenCollections)
-        : [])
-      // indexOutputFile(tokens),
+        : []),
+      ...indexFiles(tokens, undefined)
     ]
-    outputFiles = sanitizeOutputFiles(defaultFiles)
   }
 
   // Write the property name of each token if it is enabled in the settings

@@ -1,34 +1,43 @@
-import { FileHelper, FileNameHelper, ThemeHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenTheme } from "@supernovaio/sdk-exporters"
+import {
+  FileHelper,
+  FileNameHelper,
+  GeneralHelper,
+  NamingHelper,
+  StringCase,
+  ThemeHelper
+} from "@supernovaio/export-utils"
+import { OutputTextFile, Token, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { getTokenTypeFileName } from "../utils/file-utils"
 import { FileStructure } from "../../config"
+import { getPackageName } from "../utils/package-utils"
+import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
 
-// TODO clean, polish
+// TODO clean, polish, doc comment
 
 /**
  * Generates an index CSS file that imports all token style files and theme variations.
  * This file serves as the main entry point for all token styles.
- * 
+ *
  * The function supports two file structure modes:
  * 1. Single File: All tokens are combined into one file per theme
  *    - tokens.css (base tokens)
  *    - tokens.dark.css (dark theme)
  *    - tokens.light.css (light theme)
- * 
+ *
  * 2. Separate by Type: Tokens are split into files by type for each theme
  *    - base/colors.css, base/typography.css (base tokens)
  *    - dark/colors.css, dark/typography.css (dark theme)
  *    - light/colors.css, light/typography.css (light theme)
- * 
+ *
  * @param tokens - Array of design tokens to process
  * @param themes - Array of token themes or theme names to include
- * @returns OutputTextFile containing the index file, or null if generation is disabled
+ * @returns OutputTextFile array with index files
  */
-export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
+export function indexFiles(tokens: Array<Token>, themes: Array<TokenTheme> | undefined): OutputTextFile[] {
   // Skip if index file generation is disabled in configuration
   if (!exportConfiguration.generateIndexFile) {
-    return null
+    return []
   }
 
   // =========================================
@@ -36,19 +45,19 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // =========================================
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
     // Generate import for base tokens file (tokens.css)
-    const baseImport = exportConfiguration.exportBaseValues 
-      ? `/* Base tokens */\n@import "./tokens.css";`
-      : ''
+    const baseImport = exportConfiguration.exportBaseValues ? `/* Base tokens */\n@import "./tokens.css";` : ""
 
     // Generate imports for theme files (tokens.{theme}.css)
-    const themeImports = themes.map((theme) => {
-      const themePath = ThemeHelper.getThemeIdentifier(theme)
-      const themeName = ThemeHelper.getThemeName(theme)
-      return `/* Theme: ${themeName} */\n@import "./tokens.${themePath}.css";`
-    }).join("\n\n")
+    const themeImports = themes
+      .map((theme) => {
+        const themePath = ThemeHelper.getThemeIdentifier(theme)
+        const themeName = ThemeHelper.getThemeName(theme)
+        return `/* Theme: ${themeName} */\n@import "./tokens.${themePath}.css";`
+      })
+      .join("\n\n")
 
     const separator = baseImport && themeImports ? "\n\n" : ""
-    const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, '.css')
+    const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, ".css")
 
     // todo
     // return FileHelper.createTextFile({
@@ -61,47 +70,64 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
   // =========================================
   // Separate by Type Mode
   // =========================================
-  
+
   // Get all unique token types (color, typography, etc.)
   const types = [...new Set(tokens.map((token) => token.tokenType))]
 
-  // Generate imports for base token files (./base/color.css, ./base/typography.css, etc.)
-  const imports = exportConfiguration.exportBaseValues 
-    ? `/* Base tokens */\n` + types
-        .map((type) => `@import "${exportConfiguration.nonThemedFilePath}/${getTokenTypeFileName(type)}";`)
-        .join("\n")
-    : ''
+  const indexFiles = Array<OutputTextFile>()
 
-  // Generate imports for themed token files
-  const themeImports = themes.map((theme) => {
-    const themePath = ThemeHelper.getThemeIdentifier(theme)
-    const themeName = ThemeHelper.getThemeName(theme)
-    
-    // Get token types for this theme
-    // If exportOnlyThemedTokens is true, only include types that have themed values
-    const themeTypes = exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string'
-      ? types.filter(type => ThemeHelper.hasThemedTokens(tokens, type, theme))
-      : types
+  // Generate the index file for the base tokens
+  if (exportConfiguration.exportBaseValues) {
+    indexFiles.push(generateIndexFile(undefined, types))
+  }
 
-    // Generate imports for each token type in this theme
-    return themeTypes
-      .map((type, index) => {
-        const themeComment = index === 0 ? `/* Theme: ${themeName} */\n` : ''
-        return `${themeComment}@import "./${themePath}/${getTokenTypeFileName(type)}";`
+  // Generate an index file per themed tokens
+  themes
+    ?.map((theme) => {
+      // Get token types for this theme
+      // If exportOnlyThemedTokens is true, only include types that have themed values
+      const themeTypes = exportConfiguration.exportOnlyThemedTokens
+        ? types.filter((type) => ThemeHelper.hasThemedTokens(tokens, type, theme))
+        : types
+
+      return generateIndexFile(theme, themeTypes)
+    })
+    .map((file) => indexFiles.push(file))
+
+  return indexFiles
+}
+
+function generateIndexFile(theme: TokenTheme | undefined, types: Array<TokenType>): OutputTextFile {
+  const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, ".kt")
+
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+
+  let content =
+    `package ${getPackageName(theme)}\n\n` +
+    "import androidx.compose.runtime.Immutable\n\n" +
+    `@Immutable\n` +
+    `object ${getObjectNameFromFileName(fileName)} {\n` +
+    types
+      .map((type) => {
+        const objectName = getObjectNameFromTokenType(type)
+        let propertyName = NamingHelper.codeSafeVariableName(objectName, StringCase.camelCase)
+
+        return `${indentString}val ${propertyName} = ${objectName}`
       })
-      .join("\n")
-  }).join("\n\n")
+      .join("\n") +
+    "\n}"
 
-  // Add spacing between base imports and theme imports if both sections exist
-  const separator = imports && themeImports ? "\n\n" : ""
+  const relativePath = theme
+    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)}`
+    : exportConfiguration.nonThemedFilePath
 
-  // Ensure the index file has the correct .css extension
-  const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.indexFileName, '.css')
+  if (exportConfiguration.showGeneratedFileDisclaimer) {
+    content = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, content)
+  }
 
-  // Create and return the index file with all imports
   return FileHelper.createTextFile({
-    relativePath: exportConfiguration.baseIndexFilePath,
+    relativePath: relativePath,
     fileName: fileName,
-    content: imports + separator + themeImports,
+    content: content
   })
 }

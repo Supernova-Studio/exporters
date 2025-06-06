@@ -16,6 +16,7 @@ import {
 } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
 import { getObjectNameFromFileName, getObjectNameFromTokenType } from "../utils/object-utils"
+import { getPackageName } from "../utils/package-utils"
 
 /**
  * Main entry point for generating Kotlin object files
@@ -95,7 +96,7 @@ function separateTokenTypeFile(
 
   // Build the output path, using the theme subfolder for themed files
   const relativePath = theme
-    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
+    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)}`
     : exportConfiguration.nonThemedFilePath
 
   const content = generateFileContent(tokensOfType, fileName, theme, tokens, tokenGroups, tokenCollections)
@@ -137,7 +138,7 @@ function generateCombinedFile(
   // For single file mode, all files are named identically but are placed in different folders
   const fileName = FileNameHelper.ensureFileExtension(exportConfiguration.singleFileName, "kt")
   const relativePath = theme
-    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)}`
+    ? `./${ThemeHelper.getThemeIdentifier(theme, StringCase.camelCase)}`
     : exportConfiguration.nonThemedFilePath
 
   const content = generateFileContent(filteredTokens, fileName, theme, tokens, tokenGroups, tokenCollections)
@@ -158,12 +159,8 @@ function generateFileContent(
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<DesignSystemCollection>
 ) {
-  // Every theme is located in a folder with the same name;
-  // However, the non-themed path can be nested and contain several segments
-  const packageNameSuffix = theme
-    ? ThemeHelper.getThemeIdentifier(theme, StringCase.snakeCase)
-    : NamingHelper.codeSafeVariableName(exportConfiguration.nonThemedFilePath, StringCase.dotCase)
-  const fullPackageName = [exportConfiguration.packagePrefixName, packageNameSuffix].filter(Boolean).join(".")
+
+  const fullPackageName = getPackageName(theme)
   const packageLiteral = `package ${fullPackageName}`
 
   const importCollector = new ImportCollector()

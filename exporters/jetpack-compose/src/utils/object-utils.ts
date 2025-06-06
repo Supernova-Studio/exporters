@@ -3,7 +3,7 @@ import { getTokenTypeFileName } from "./file-utils"
 
 /**
  * Returns the sanitized object name.
- * It is the same as file name, but without the extension.
+ * It is the same as the file name but without the extension.
  * @param fileName
  */
 export function getObjectNameFromFileName(fileName: string) {
