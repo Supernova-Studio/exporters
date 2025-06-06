@@ -41,16 +41,16 @@ export function resetTokenNameTracking(): void {
 }
 
 /**
- * Generates a code-safe variable name for a token based on its properties and configuration.
+ * Generates a code-safe property name for a token based on its properties and configuration.
  * Includes type-specific prefix and considers token hierarchy and collection.
  *
  * @param token - The token to generate a name for
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @param collections - Array of collections for resolving collection names
  * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
- * @returns Formatted variable name string
+ * @returns Formatted property name string
  */
-export function tokenName(
+export function tokenPropertyName(
   token: Token,
   tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection>,
@@ -89,8 +89,8 @@ export function convertedToken(
   collections: Array<DesignSystemCollection> = [],
   importCollector: ImportCollector
 ): string {
-  // Generate the variable name based on token properties and configuration
-  const name = tokenName(token, tokenGroups, collections)
+  // Generate the property name
+  const name = tokenPropertyName(token, tokenGroups, collections)
 
   const options = {
     colorFormat: ColorFormat.hex8,
@@ -98,7 +98,7 @@ export function convertedToken(
     decimals: 0,
     indent: exportConfiguration.indent,
     tokenToVariableRef: (refToken: Token) => {
-      const name = tokenName(refToken, tokenGroups, collections)
+      const name = tokenPropertyName(refToken, tokenGroups, collections)
 
       if (refToken.tokenType === token.tokenType || exportConfiguration.fileStructure === FileStructure.SingleFile) {
         // Both tokens in the same file - no need to do anything additionally

@@ -2,6 +2,7 @@ import { AnyOutputFile, PulsarContext, RemoteVersionIdentifier, Supernova } from
 import { ExporterConfiguration } from "../config"
 import { generateObjectFiles } from "./files/object-file"
 import { WriteTokenPropStore } from "@supernovaio/export-utils"
+import { tokenPropertyName } from "./content/token"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -101,7 +102,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   if (!context.isPreview && exportConfiguration.writeNameToProperty) {
     const writeStore = new WriteTokenPropStore(sdk, remoteVersionIdentifier)
     await writeStore.writeTokenProperties(exportConfiguration.propertyToWriteNameTo, tokens, (token) => {
-      return tokenName(token, tokenGroups, tokenCollections)
+      return tokenPropertyName(token, tokenGroups, tokenCollections)
     })
   }
 

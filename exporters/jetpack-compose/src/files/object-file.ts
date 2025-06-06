@@ -183,8 +183,8 @@ function generateFileContent(
     return aHasRef === bHasRef ? 0 : aHasRef ? 1 : -1
   })
 
-  // Convert tokens to Kotlin variable declarations
-  const tokenVariablesLiteral = sortedTokensToExport
+  // Convert tokens to Kotlin property declarations
+  const tokenPropertiesLiteral = sortedTokensToExport
     .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, importCollector))
     .join("\n")
 
@@ -192,8 +192,8 @@ function generateFileContent(
   let allImports = ["import androidx.compose.runtime.Immutable", ...dynamicImports].sort()
   const importsLiteral = allImports.join("\n")
 
-  // Construct the file content with an object with token variables
-  let content = `${packageLiteral}\n\n${importsLiteral}\n\n${objectLiteral} {\n${tokenVariablesLiteral}\n}`
+  // Construct the file content with an object with token properties
+  let content = `${packageLiteral}\n\n${importsLiteral}\n\n${objectLiteral} {\n${tokenPropertiesLiteral}\n}`
 
   // Optionally add a generated file disclaimer
   if (exportConfiguration.showGeneratedFileDisclaimer) {
