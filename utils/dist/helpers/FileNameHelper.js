@@ -1,13 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileNameHelper = void 0;
+const StringCase_1 = require("../enums/StringCase");
+const NamingHelper_1 = require("./NamingHelper");
 class FileNameHelper {
     /**
      * Ensures a filename has the correct extension
      */
     static ensureFileExtension(fileName, extension) {
         // Ensure extension starts with a dot
-        const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`;
+        const normalizedExtension = extension.startsWith(".") ? extension : `.${extension}`;
         if (!fileName.toLowerCase().endsWith(normalizedExtension.toLowerCase())) {
             return fileName + normalizedExtension;
         }
@@ -18,14 +20,14 @@ class FileNameHelper {
      */
     static replaceFileExtension(fileName, oldExt, newExt) {
         // Ensure extensions start with a dot
-        const normalizedOldExt = oldExt.startsWith('.') ? oldExt : `.${oldExt}`;
-        const normalizedNewExt = newExt.startsWith('.') ? newExt : `.${newExt}`;
+        const normalizedOldExt = oldExt.startsWith(".") ? oldExt : `.${oldExt}`;
+        const normalizedNewExt = newExt.startsWith(".") ? newExt : `.${newExt}`;
         return fileName.replace(new RegExp(`${normalizedOldExt}$`), normalizedNewExt);
     }
     /**
      * Gets the default style file name for a token type
      */
-    static getDefaultStyleFileName(type, extension = '.css') {
+    static getDefaultStyleFileName(type, extension = ".css", stringCase = StringCase_1.StringCase.kebabCase) {
         const baseNames = {
             Color: "color",
             Typography: "typography",
@@ -53,9 +55,9 @@ class FileNameHelper {
             Visibility: "visibility",
             Blur: "blur"
         };
-        // Ensure extension starts with a dot
-        const normalizedExtension = extension.startsWith('.') ? extension : `.${extension}`;
-        return baseNames[type] + normalizedExtension;
+        // Ensure the extension starts with a dot
+        const normalizedExtension = extension.startsWith(".") ? extension : `.${extension}`;
+        return NamingHelper_1.NamingHelper.codeSafeVariableName(baseNames[type], stringCase) + normalizedExtension;
     }
 }
 exports.FileNameHelper = FileNameHelper;
