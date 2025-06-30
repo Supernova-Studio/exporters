@@ -10,3 +10,6 @@ export * from "./enums/StringCase"
 export * from "./enums/ColorFormat"
 export * from "./helpers/TokenNameTracker"
 export * from "./helpers/WriteTokenPropStore"
+export * from "./helpers/KotlinHelper"
+
+export type { ColorFormatOptions } from "./helpers/ColorHelper"

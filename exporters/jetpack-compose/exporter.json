@@ -1,0 +1,20 @@
+{
+    "id": "supernovaio.exporter-jetpack-compose",
+    "name": "Jetpack Compose",
+    "description": "Export design tokens as Jetpack Compose configuration.",
+    "author": "Supernova.io",
+    "organization": "Supernova.io",
+    "homepage": "https://supernova.io",
+    "version": "0.0.1",
+    "usesBrands": true,
+    "usesThemes": true,
+    "executable": "/dist/build.js",
+    "engine": "latest",
+    "tags": [
+        "Jetpack Compose",
+        "Android",
+        "Tokens",
+        "New",
+        "Beta"
+    ]
+}

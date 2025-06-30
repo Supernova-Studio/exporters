@@ -1,6 +1,13 @@
-import { ColorTokenValue, Token } from '@supernovaio/sdk-exporters'
-import { ColorFormat } from '../enums/ColorFormat'
-import { sureOptionalReference } from './TokenHelper'
+import { ColorTokenValue, Token } from "@supernovaio/sdk-exporters"
+import { ColorFormat } from "../enums/ColorFormat"
+import { sureOptionalReference } from "./TokenHelper"
+
+export type ColorFormatOptions = {
+  allowReferences: boolean
+  colorFormat: ColorFormat
+  decimals: number
+  tokenToVariableRef: (token: Token) => string
+}
 
 /** A utility class to help with transformation of colors to various formats */
 export class ColorHelper {
@@ -15,12 +22,7 @@ export class ColorHelper {
   static formattedColorOrVariableName(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,
-    options: {
-      allowReferences: boolean
-      colorFormat: ColorFormat
-      decimals: number
-      tokenToVariableRef: (token: Token) => string
-    }
+    options: ColorFormatOptions
   ): string {
     let fullReferenceName: string | undefined = undefined
     let colorReferenceName: string | null = null
@@ -80,6 +82,7 @@ export class ColorHelper {
       case ColorFormat.hashHex8:
       case ColorFormat.smartHex:
       case ColorFormat.smartHashHex:
+      case ColorFormat.argbInt:
         return this.colorToHex(format, this.normalizedIntColor(color), color.opacity.measure)
       case ColorFormat.rgb:
       case ColorFormat.rgba:
@@ -131,8 +134,12 @@ export class ColorHelper {
       (format === ColorFormat.smartHex && alpha < 1) ||
       (format === ColorFormat.smartHashHex && alpha < 1)
     ) {
-      // Add alpha for 8-format
+      // Add alpha for 8-format to the end
       resultingHex += `${this.pHex(Math.round(alpha * 255))}`
+    }
+    if (format === ColorFormat.argbInt) {
+      // Format as ARGB int – e.g. Color(0x00FFFFFF)
+      resultingHex = `Color(0x${this.pHex(Math.round(alpha * 255))}${resultingHex})`
     }
     if (format === ColorFormat.hashHex6 || format === ColorFormat.hashHex8 || format === ColorFormat.smartHashHex) {
       // Add hash for hash-format
@@ -161,7 +168,7 @@ export class ColorHelper {
     } else {
       const delta = max - min
       s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min)
-      
+
       switch (max) {
         case color.r:
           h = (color.g - color.b) / delta + (color.g < color.b ? 6 : 0)
@@ -239,7 +246,7 @@ export class ColorHelper {
 
   // Return hex value with leading zero if hex is single digit
   private static pHex(value: number): string {
-    return value.toString(16).padStart(2, '0')
+    return value.toString(16).padStart(2, "0")
   }
 
   /**
@@ -257,13 +264,13 @@ export class ColorHelper {
   ): string {
     // Convert RGB to OKLCH
     const { l, c, h } = this.rgbToOklch(color.r, color.g, color.b)
-    
+
     // Format the output string based on format and alpha
     switch (format) {
       case ColorFormat.oklcha:
         return `oklch(${l}% ${c} ${h} / ${this.roundToDecimals(alpha * 100, decimals)}%)`
       case ColorFormat.smartOklch:
-        return alpha < 1 
+        return alpha < 1
           ? `oklch(${l}% ${c} ${h} / ${this.roundToDecimals(alpha * 100, decimals)}%)`
           : `oklch(${l}% ${c} ${h})`
       case ColorFormat.oklch:
@@ -284,13 +291,13 @@ export class ColorHelper {
 
     // Convert to XYZ using D65 illuminant
     const x = 0.4124564 * lr + 0.3575761 * lg + 0.1804375 * lb
-    const y = 0.2126729 * lr + 0.7151522 * lg + 0.0721750 * lb
-    const z = 0.0193339 * lr + 0.1191920 * lg + 0.9503041 * lb
+    const y = 0.2126729 * lr + 0.7151522 * lg + 0.072175 * lb
+    const z = 0.0193339 * lr + 0.119192 * lg + 0.9503041 * lb
 
     // Convert to LMS
     const lms_l = 0.8189330101 * x + 0.3618667424 * y - 0.1288597137 * z
     const lms_m = 0.0329845436 * x + 0.9293118715 * y + 0.0361456387 * z
-    const lms_s = 0.0482003018 * x + 0.2643662691 * y + 0.6338517070 * z
+    const lms_s = 0.0482003018 * x + 0.2643662691 * y + 0.633851707 * z
 
     // Non-linear compression
     const lp = Math.cbrt(lms_l)
@@ -298,13 +305,13 @@ export class ColorHelper {
     const sp = Math.cbrt(lms_s)
 
     // Convert to Lab'
-    const L = 0.2104542553 * lp + 0.7936177850 * mp - 0.0040720468 * sp
-    const lab_a = 1.9779984951 * lp - 2.4285922050 * mp + 0.4505937099 * sp
-    const lab_b = 0.0259040371 * lp + 0.7827717662 * mp - 0.8086757660 * sp
+    const L = 0.2104542553 * lp + 0.793617785 * mp - 0.0040720468 * sp
+    const lab_a = 1.9779984951 * lp - 2.428592205 * mp + 0.4505937099 * sp
+    const lab_b = 0.0259040371 * lp + 0.7827717662 * mp - 0.808675766 * sp
 
     // Convert to LCH
     const C = Math.sqrt(lab_a * lab_a + lab_b * lab_b)
-    let h = Math.atan2(lab_b, lab_a) * 180 / Math.PI
+    let h = (Math.atan2(lab_b, lab_a) * 180) / Math.PI
 
     // Normalize hue to 0-360
     if (h < 0) {
@@ -323,8 +330,6 @@ export class ColorHelper {
    * Convert sRGB to linear RGB
    */
   private static sRGBtoLinear(x: number): number {
-    return x <= 0.04045
-      ? x / 12.92
-      : Math.pow((x + 0.055) / 1.055, 2.4)
+    return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
   }
 }

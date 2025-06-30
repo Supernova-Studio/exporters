@@ -13,6 +13,8 @@ var ColorFormat;
     ColorFormat["hex6"] = "hex6";
     /** HEXA - ffffff00 */
     ColorFormat["hex8"] = "hex8";
+    /** Android/Compose ARGB int – e.g. Color(0x00FFFFFF) */
+    ColorFormat["argbInt"] = "argbInt";
     /** Example: #ff0000 */
     ColorFormat["hashHex6"] = "hashHex6";
     /** Example: #ff0000ff */
