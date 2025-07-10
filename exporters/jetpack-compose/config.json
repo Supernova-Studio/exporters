@@ -1,0 +1,321 @@
+[
+    {
+    "key": "packageNamePrefix",
+    "type": "string",
+    "default": "io.supernova.tokens",
+    "title": "Package name prefix",
+    "description": "Base package name used for all generated files.",
+    "category": "Packages"
+  },
+  {
+    "key": "rPackageName",
+    "type": "string",
+    "default": "",
+    "title": "Resources package name",
+    "description": "Package name used for resource (R) imports. Leave empty to reuse the package name prefix.",
+    "category": "Packages"
+  },
+  {
+    "key": "useReferences",
+    "type": "boolean",
+    "default": true,
+    "title": "Use token references",
+    "description": "Values will use references to other tokens (where applicable).",
+    "category": "Token values"
+  },
+  {
+    "key": "exportOnlyThemedTokens",
+    "type": "boolean",
+    "default": false,
+    "title": "Export only themed tokens",
+    "description": "Theme files will only include tokens that have different values from the base value.",
+    "category": "Themes"
+  },
+  {
+    "key": "exportBaseValues",
+    "type": "boolean",
+    "default": true,
+    "title": "Export base values",
+    "description": "Base token values will be exported along with themes.",
+    "category": "Themes"
+  },
+  {
+    "key": "generateIndexFile",
+    "type": "boolean",
+    "default": true,
+    "title": "Generate index object",
+    "description": "Create a Kotlin object that references all token files.",
+    "category": "Index"
+  },
+  {
+    "key": "indexFileName",
+    "type": "string",
+    "default": "DesignTokens.kt",
+    "title": "Index file name",
+    "description": "File name of the generated index object.",
+    "category": "Index",
+    "dependsOn": {
+      "generateIndexFile": true
+    }
+  },
+  {
+    "key": "fileStructure",
+    "type": "enum",
+    "default": "separateByType",
+    "title": "Token file structure",
+    "description": "Choose how generated token files are organized",
+    "category": "Files",
+    "options": {
+      "separateByType": {
+        "label": "Separate files by type",
+        "description": "Generate separate files for each token type"
+      },
+      "singleFile": {
+        "label": "Single combined file",
+        "description": "Generate one file containing all token types"
+      }
+    }
+  },
+  {
+    "key": "singleFileName",
+    "type": "string",
+    "default": "DesignTokens.kt",
+    "title": "Single file name",
+    "description": "Name for the base Kotlin file and object containing all tokens.",
+    "category": "Files"
+  },
+  {
+    "key": "nonThemedFilePath",
+    "type": "string",
+    "default": "./base",
+    "title": "Path for base tokens",
+    "description": "Directory for files without applied themes, relative to the export root.",
+    "category": "Files"
+  },
+  {
+    "key": "customizeSeparatedByTypeFileNames",
+    "type": "boolean",
+    "default": false,
+    "title": "Use custom file names",
+    "description": "Enable to override default file names for each token type.",
+    "category": "Files"
+  },
+  {
+    "key": "separatedByTypeFileNames",
+    "type": "object",
+    "title": "Custom file names",
+    "description": "Specify file name for each token type.",
+    "category": "Files",
+    "dependsOn": {
+      "customizeSeparatedByTypeFileNames": true
+    },
+    "default": {
+      "Blur": "BlurTokens.kt",
+      "Border": "BorderTokens.kt",
+      "BorderRadius": "BorderRadiusTokens.kt",
+      "BorderWidth": "BorderWidthTokens.kt",
+      "Color": "ColorTokens.kt",
+      "Dimension": "DimensionTokens.kt",
+      "Duration": "DurationTokens.kt",
+      "FontFamily": "FontFamilyTokens.kt",
+      "FontSize": "FontSizeTokens.kt",
+      "FontWeight": "FontWeightTokens.kt",
+      "Gradient": "GradientTokens.kt",
+      "LetterSpacing": "LetterSpacingTokens.kt",
+      "LineHeight": "LineHeightTokens.kt",
+      "Opacity": "OpacityTokens.kt",
+      "ParagraphSpacing": "ParagraphSpacingTokens.kt",
+      "ProductCopy": "ProductCopyTokens.kt",
+      "Shadow": "ShadowTokens.kt",
+      "Size": "SizeTokens.kt",
+      "Space": "SpaceTokens.kt",
+      "String": "StringTokens.kt",
+      "TextCase": "TextCaseTokens.kt",
+      "TextDecoration": "TextDecorationTokens.kt",
+      "Typography": "TypographyTokens.kt",
+      "Visibility": "VisibilityTokens.kt",
+      "ZIndex": "ZIndexTokens.kt"
+    },
+    "allowedKeys": {
+      "options": [
+        "Color",
+        "Typography",
+        "Dimension",
+        "Size",
+        "Space",
+        "Opacity",
+        "FontSize",
+        "LineHeight",
+        "LetterSpacing",
+        "ParagraphSpacing",
+        "BorderWidth",
+        "BorderRadius",
+        "Duration",
+        "ZIndex",
+        "Shadow",
+        "Border",
+        "Gradient",
+        "String",
+        "ProductCopy",
+        "FontFamily",
+        "FontWeight",
+        "TextCase",
+        "TextDecoration",
+        "Visibility",
+        "Blur"
+      ],
+      "type": "string"
+    },
+    "allowedValues": {
+      "type": "string"
+    }
+  },
+  {
+    "key": "generateEmptyFiles",
+    "type": "boolean",
+    "default": false,
+    "title": "Generate empty files",
+    "description": "Create empty token files instead of skipping them.",
+    "category": "Files"
+  },
+  {
+    "key": "globalNamePrefix",
+    "type": "string",
+    "default": "",
+    "title": "Global prefix",
+    "description": "Prefix added to every generated property name.",
+    "category": "Token names"
+  },
+  {
+    "key": "customizeTokenPrefixes",
+    "type": "boolean",
+    "default": false,
+    "title": "Customize type prefixes",
+    "description": "Customize the prefixes for each design token type.",
+    "category": "Token names"
+  },
+  {
+    "key": "tokenPrefixes",
+    "type": "object",
+    "title": "Token prefixes",
+    "description": "Each token of a specific type is prefixed with the following identifier.",
+    "category": "Token names",
+    "dependsOn": {
+      "customizeTokenPrefixes": true
+    },
+    "default": {
+      "Blur": "blur",
+      "Border": "border",
+      "BorderRadius": "borderRadius",
+      "BorderWidth": "borderWidth",
+      "Color": "color",
+      "Dimension": "dimension",
+      "Duration": "duration",
+      "FontFamily": "fontFamily",
+      "FontSize": "fontSize",
+      "FontWeight": "fontWeight",
+      "Gradient": "gradient",
+      "LetterSpacing": "letterSpacing",
+      "LineHeight": "lineHeight",
+      "Opacity": "opacity",
+      "ParagraphSpacing": "paragraphSpacing",
+      "ProductCopy": "productCopy",
+      "Shadow": "shadow",
+      "Size": "size",
+      "Space": "space",
+      "String": "string",
+      "TextCase": "textCase",
+      "TextDecoration": "textDecoration",
+      "Typography": "typography",
+      "Visibility": "visibility",
+      "ZIndex": "zIndex"
+    },
+    "allowedKeys": {
+      "options": [
+        "Color",
+        "Typography",
+        "Dimension",
+        "Size",
+        "Space",
+        "Opacity",
+        "FontSize",
+        "LineHeight",
+        "LetterSpacing",
+        "ParagraphSpacing",
+        "BorderWidth",
+        "BorderRadius",
+        "Duration",
+        "ZIndex",
+        "Shadow",
+        "Border",
+        "Gradient",
+        "String",
+        "ProductCopy",
+        "FontFamily",
+        "FontWeight",
+        "TextCase",
+        "TextDecoration",
+        "Visibility",
+        "Blur"
+      ],
+      "type": "string"
+    },
+    "allowedValues": {
+      "type": "string"
+    }
+  },
+  {
+    "key": "showDescriptions",
+    "type": "boolean",
+    "default": true,
+    "title": "Show token descriptions",
+    "description": "Show the token description as a code comment for every exported token.",
+    "category": "Other"
+  },
+  {
+    "key": "showGeneratedFileDisclaimer",
+    "type": "boolean",
+    "default": true,
+    "title": "Show file disclaimer",
+    "description": "A message explaining that the file was automatically generated will appear in all token files.",
+    "category": "Other"
+  },
+  {
+    "key": "disclaimer",
+    "type": "string",
+    "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
+    "title": "Disclaimer message",
+    "description": "A message explaining that the file was automatically generated will appear in all token files.",
+    "category": "Other",
+    "dependsOn": {
+      "showGeneratedFileDisclaimer": true
+    }
+  },
+  {
+    "key": "indent",
+    "type": "number",
+    "default": 4,
+    "title": "Indentation",
+    "description": "Number of spaces used in generated Kotlin files.",
+    "category": "Other"
+  },
+  {
+    "key": "writeNameToProperty",
+    "type": "boolean",
+    "default": false,
+    "title": "Write generated variable names",
+    "description": "Save generated variable names back to tokens as custom properties.",
+    "category": "Automatic write-back"
+  },
+  {
+    "key": "propertyToWriteNameTo",
+    "type": "string",
+    "default": "Jetpack Compose",
+    "title": "Custom property name",
+    "description": "Name of the custom property where generated variable names will be saved.",
+    "category": "Automatic write-back",
+    "dependsOn": {
+      "writeNameToProperty": true
+    }
+  }
+]
