@@ -1,6 +1,14 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
+## 2.5.0 - 2025-01-XX
+
+### ✨ Added
+- Added support for color opacity in composite tokens:
+  - Color tokens referenced in shadows, borders, and gradients now support custom opacity values
+  - Automatically generates RGB utility values for color tokens when needed
+  - Improves compatibility with design systems that use opacity variations
+
 ## 2.4.0 - 2025-03-12
 
 ### ✨ Added

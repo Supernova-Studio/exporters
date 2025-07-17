@@ -75,6 +75,48 @@ export function analyzeTokensForRgbUtilities(
 }
 
 /**
+ * Converts a token to its raw CSS value without following references.
+ * This is used to generate fallback values for references.
+ * 
+ * @param token - The token to convert to raw CSS value
+ * @param mappedTokens - Map of all tokens (needed for CSSHelper)
+ * @returns Raw CSS value string
+ */
+export function getTokenRawValue(
+  token: Token,
+  mappedTokens: Map<string, Token>
+): string {
+  return CSSHelper.tokenToCSS(token, mappedTokens, {
+    allowReferences: false, // Don't follow references to avoid infinite loops
+    decimals: exportConfiguration.colorPrecision,
+    colorFormat: exportConfiguration.colorFormat,
+    forceRemUnit: exportConfiguration.forceRemUnit,
+    remBase: exportConfiguration.remBase,
+    tokenToVariableRef: () => "", // Stub function that never gets called since allowReferences is false
+  })
+}
+
+/**
+ * Converts a color token to its raw RGB values without following references.
+ * This is used to generate fallback values for RGB utility variables.
+ * 
+ * @param token - The color token to convert to RGB values
+ * @returns RGB values string (e.g., "16, 79, 198")
+ */
+export function getColorTokenRgbValue(token: Token): string {
+  if (token.tokenType !== TokenType.color) {
+    throw new Error(`Expected color token, got ${token.tokenType}`)
+  }
+  
+  const colorValue = (token as any).value
+  const r = Math.round(colorValue.color.r)
+  const g = Math.round(colorValue.color.g)
+  const b = Math.round(colorValue.color.b)
+  
+  return `${r}, ${g}, ${b}`
+}
+
+/**
  * Generates an RGB utility variable for a color token.
  * This creates a CSS variable containing only the RGB values (no alpha) for use with custom opacity.
  * 
@@ -137,10 +179,21 @@ export function convertedToken(
     remBase: exportConfiguration.remBase,
     // Custom handler for token references - converts them to CSS var() syntax
     // When context.needsRgb is true, returns RGB utility variable for color tokens
+    // When useFallbackValues is enabled, includes raw token value as fallback
     tokenToVariableRef: (t, context) => {
       const variableName = tokenVariableName(t, tokenGroups, collections)
+      
       if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingRgb?.has(t.id)) {
+        if (exportConfiguration.useFallbackValues) {
+          const rgbValue = getColorTokenRgbValue(t)
+          return `var(--rgb-${variableName}, ${rgbValue})`
+        }
         return `var(--rgb-${variableName})`
+      }
+      
+      if (exportConfiguration.useFallbackValues) {
+        const rawValue = getTokenRawValue(t, mappedTokens)
+        return `var(--${variableName}, ${rawValue})`
       }
       return `var(--${variableName})`
     },
