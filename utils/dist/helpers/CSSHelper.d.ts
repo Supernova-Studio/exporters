@@ -22,7 +22,7 @@ export type TokenToCSSOptions = {
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 export declare class CSSHelper {
     /**
-     * Helper function to handle color with custom opacity, using RGB utilities when available
+     * Helper function to handle color with custom opacity, using channel-based utilities when available
      */
     private static handleColorWithCustomOpacity;
     static tokenToCSS(token: Token, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;

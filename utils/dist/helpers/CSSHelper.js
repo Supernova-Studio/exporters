@@ -2,20 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CSSHelper = void 0;
 const sdk_exporters_1 = require("@supernovaio/sdk-exporters");
+const ColorFormat_1 = require("../enums/ColorFormat");
 const TokenHelper_1 = require("./TokenHelper");
 const ColorHelper_1 = require("./ColorHelper");
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 class CSSHelper {
     /**
-     * Helper function to handle color with custom opacity, using RGB utilities when available
+     * Helper function to handle color with custom opacity, using channel-based utilities when available
      */
     static handleColorWithCustomOpacity(color, customOpacity, allTokens, options) {
         if (customOpacity && color.referencedTokenId) {
-            // If we have custom opacity and reference a color token, try to use RGB utility
+            // If we have custom opacity and reference a color token, try to use channel-based utility
             const referencedColorToken = allTokens.get(color.referencedTokenId);
             if (referencedColorToken && referencedColorToken.tokenType === sdk_exporters_1.TokenType.color) {
-                const rgbVariableName = options.tokenToVariableRef(referencedColorToken, { needsRgb: true });
-                return `rgba(${rgbVariableName}, ${ColorHelper_1.ColorHelper.roundToDecimals(customOpacity.measure, options.decimals)})`;
+                const channelVariableName = options.tokenToVariableRef(referencedColorToken, { needsRgb: true });
+                const alphaValue = ColorHelper_1.ColorHelper.roundToDecimals(customOpacity.measure, options.decimals);
+                // Use the appropriate function based on color format
+                if (options.colorFormat === ColorFormat_1.ColorFormat.oklch ||
+                    options.colorFormat === ColorFormat_1.ColorFormat.oklcha ||
+                    options.colorFormat === ColorFormat_1.ColorFormat.smartOklch) {
+                    return `oklch(${channelVariableName} / ${alphaValue})`;
+                }
+                else {
+                    // Default to rgba for other formats (rgb, rgba, smartRgba, etc.)
+                    return `rgba(${channelVariableName}, ${alphaValue})`;
+                }
             }
         }
         // Fallback to normal color processing

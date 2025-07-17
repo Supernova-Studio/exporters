@@ -7,7 +7,7 @@ import { FileHelper, ThemeHelper, GeneralHelper } from "@supernovaio/export-util
 import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FileStructure } from "../../config"
-import { convertedToken, isAllowedTokenType } from "../content/token"
+import { convertedToken, isAllowedTokenType, analyzeTokensForOklchUtilities, generateOklchUtilityVariable } from "../content/token"
 import { generateTypographyClass } from "../content/typography"
 import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
 
@@ -180,6 +180,7 @@ function generateTypographyContent(tokens: Array<Token>, tokenGroups: Array<Toke
  * @param tokens - Array of tokens to process
  * @param mappedTokens - Map of tokens by ID for reference resolution
  * @param tokenGroups - Array of token groups
+ * @param colorTokensNeedingOklch - Set of token IDs that need OKLCH utility variables
  * @param type - Specific token type (if applicable)
  * @returns CSS variable declarations as a string
  */
@@ -187,6 +188,7 @@ function generateCSSVariables(
     tokens: Array<Token>, 
     mappedTokens: Map<string, Token>, 
     tokenGroups: Array<TokenGroup>,
+    colorTokensNeedingOklch?: Set<string>,
     type?: TokenType
 ): string {
     const indentString = GeneralHelper.indent(exportConfiguration.indent)
@@ -218,7 +220,7 @@ function generateCSSVariables(
         
         // Convert tokens to CSS variable declarations
         const cssDeclarations = tokensOfType
-            .map((token) => convertedToken(token, mappedTokens, tokenGroups))
+            .map((token) => convertedToken(token, mappedTokens, tokenGroups, colorTokensNeedingOklch))
             .filter((declaration): declaration is string => declaration !== null) // Filter out null returns
             .join("\n")
         
@@ -269,6 +271,23 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         return null
     }
 
+    // Analyze tokens for OKLCH utility needs
+    const colorTokensNeedingOklch = analyzeTokensForOklchUtilities(processedTokens, tokenGroups)
+    // Generate OKLCH utility variables
+    let oklchUtilityVariables = ''
+    if (colorTokensNeedingOklch.size > 0) {
+        oklchUtilityVariables = Array.from(colorTokensNeedingOklch)
+            .map(id => {
+                const token = mappedTokens.get(id)
+                if (token) {
+                    return generateOklchUtilityVariable(token, tokenGroups)
+                }
+                return ''
+            })
+            .filter(Boolean)
+            .join('\n') + '\n'
+    }
+
     // Start with Tailwind import with prefix if configured, but only for base file
     let content = ''
     if (!themePath) {
@@ -291,13 +310,13 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
     // Generate CSS variables
     let cssVariables = ''
-    
     // Include reset rules in the main file if not using separate per type structure
     if (exportConfiguration.fileStructure !== FileStructure.SeparateByType) {
         cssVariables += generateResetRules(selector)
     }
-    
-    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups)
+    // Prepend OKLCH utility variables
+    cssVariables += oklchUtilityVariables
+    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, colorTokensNeedingOklch)
 
     // Check if any tokens use references and if references are enabled
     const hasReferences = exportConfiguration.useReferences && processedTokens.some(token => 
@@ -392,7 +411,7 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
 
         // Generate CSS variables
         let cssVariables = ''
-        cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, type)
+        cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, undefined, type)
 
         // Add the CSS variables to the content
         content += `${themeDirective} {\n${cssVariables}}\n`

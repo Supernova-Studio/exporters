@@ -55,7 +55,7 @@ import {
   /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 export class CSSHelper {
   /**
-   * Helper function to handle color with custom opacity, using RGB utilities when available
+   * Helper function to handle color with custom opacity, using channel-based utilities when available
    */
   private static handleColorWithCustomOpacity(
     color: ColorTokenValue,
@@ -64,11 +64,21 @@ export class CSSHelper {
     options: TokenToCSSOptions
   ): string {
     if (customOpacity && color.referencedTokenId) {
-      // If we have custom opacity and reference a color token, try to use RGB utility
+      // If we have custom opacity and reference a color token, try to use channel-based utility
       const referencedColorToken = allTokens.get(color.referencedTokenId)
       if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-        const rgbVariableName = options.tokenToVariableRef(referencedColorToken, { needsRgb: true })
-        return `rgba(${rgbVariableName}, ${ColorHelper.roundToDecimals(customOpacity.measure, options.decimals)})`
+        const channelVariableName = options.tokenToVariableRef(referencedColorToken, { needsRgb: true })
+        const alphaValue = ColorHelper.roundToDecimals(customOpacity.measure, options.decimals)
+        
+        // Use the appropriate function based on color format
+        if (options.colorFormat === ColorFormat.oklch || 
+            options.colorFormat === ColorFormat.oklcha || 
+            options.colorFormat === ColorFormat.smartOklch) {
+          return `oklch(${channelVariableName} / ${alphaValue})`
+        } else {
+          // Default to rgba for other formats (rgb, rgba, smartRgba, etc.)
+          return `rgba(${channelVariableName}, ${alphaValue})`
+        }
       }
     }
     
