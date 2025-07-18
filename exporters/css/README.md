@@ -66,6 +66,20 @@ The exporter would produce:
 }
 ```
 
+With `useFallbackValues: true`, the output would include fallback values:
+
+```css
+/* This file was automatically generated. Do not modify manually. */
+
+:root {
+  /* The reddest of reds */
+  --color-red: #ff0000;
+  --color-blue: #0000ff;
+  /* The main color used throughout the application. */
+  --color-primary: var(--color-red, #ff0000);
+}
+```
+
 ## Configuration options
 
 Here is a list of all the configuration options this exporter provides:
@@ -106,6 +120,8 @@ Here is a list of all the configuration options this exporter provides:
 - **remBase:** Base pixel value for REM conversion (default: 16, requires forceRemUnit: true).
 
 - **useReferences:** Values will use references to other tokens where applicable.
+
+- **useFallbackValues:** When enabled, references will include fallback values as raw token values to handle cases when referenced variables are not loaded in the browser.
 
 - **colorPrecision:** Maximum number of decimals in colors.
 

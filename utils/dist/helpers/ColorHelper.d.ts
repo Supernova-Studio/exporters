@@ -43,6 +43,7 @@ export declare class ColorHelper {
     }, alpha: number, decimals?: number): string;
     private static normalizedIntColor;
     private static normalizedFractionalColor;
+    private static normalizedFractionalColorHighPrecision;
     static roundToDecimals(value: number, decimals: number, forceTrailingZero?: boolean): number;
     private static pHex;
     /**

@@ -1,6 +1,15 @@
 ### CSS exporter release notes
 All the updates to this exporter are documented in this file.
 
+## 3.3.0 - 2025-01-XX
+
+### ✨ Added
+- Added fallback value support for token references:
+  - New `useFallbackValues` configuration option to enable/disable fallback values
+  - When enabled, references include raw token values as fallback in CSS `var()` function
+  - Provides graceful degradation when referenced variables are not loaded in the browser
+  - Format: `var(--token-name, fallback-value)` instead of just `var(--token-name)`
+
 ## 3.2.0 - 2025-03-12
 
 ### ✨ Added

@@ -91,7 +91,7 @@ export class ColorHelper {
       case ColorFormat.hsl:
       case ColorFormat.hsla:
       case ColorFormat.smartHsla:
-        return this.colorToHsl(format, this.normalizedFractionalColor(color), color.opacity.measure, decimals)
+        return this.colorToHsl(format, this.normalizedFractionalColorHighPrecision(color), color.opacity.measure, decimals)
       case ColorFormat.smartUIColor:
         return this.colorToUIColor(this.normalizedIntColor(color), color.opacity.measure, decimals)
       case ColorFormat.oklch:
@@ -156,9 +156,14 @@ export class ColorHelper {
     alpha: number,
     decimals: number
   ): string {
+    // Color values are already in 0-1 range from normalizedFractionalColor
+    const r = color.r
+    const g = color.g
+    const b = color.b
+
     // Calculate HSL values
-    const max = Math.max(color.r, color.g, color.b)
-    const min = Math.min(color.r, color.g, color.b)
+    const max = Math.max(r, g, b)
+    const min = Math.min(r, g, b)
     let h = 0
     let s = 0
     let l = (max + min) / 2
@@ -170,14 +175,14 @@ export class ColorHelper {
       s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min)
 
       switch (max) {
-        case color.r:
-          h = (color.g - color.b) / delta + (color.g < color.b ? 6 : 0)
+        case r:
+          h = (g - b) / delta + (g < b ? 6 : 0)
           break
-        case color.g:
-          h = (color.b - color.r) / delta + 2
+        case g:
+          h = (b - r) / delta + 2
           break
-        case color.b:
-          h = (color.r - color.g) / delta + 4
+        case b:
+          h = (r - g) / delta + 4
           break
       }
       h /= 6
@@ -227,6 +232,17 @@ export class ColorHelper {
       r: this.roundToDecimals(color.color.r / 255, decimals),
       g: ColorHelper.roundToDecimals(color.color.g / 255, decimals),
       b: ColorHelper.roundToDecimals(color.color.b / 255, decimals)
+    }
+  }
+
+  // Convert color to normalized 0-1 format with high precision for HSL calculations
+  private static normalizedFractionalColorHighPrecision(
+    color: ColorTokenValue
+  ): { r: number; g: number; b: number } {
+    return {
+      r: color.color.r / 255,
+      g: color.color.g / 255,
+      b: color.color.b / 255
     }
   }
 
