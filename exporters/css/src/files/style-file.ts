@@ -1,7 +1,7 @@
 import { FileHelper, ThemeHelper, FileNameHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken } from "../content/token"
+import { convertedToken, analyzeTokensForRgbUtilities } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
@@ -82,8 +82,12 @@ export function styleOutputFile(
 
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
+  
+  // Analyze tokens to identify which color tokens need RGB utilities
+  const colorTokensNeedingRgb = analyzeTokensForRgbUtilities(tokens, tokenGroups, tokenCollections)
+  
   // Convert tokens to CSS variable declarations
-  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections)).join("\n")
+  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb)).join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
   const selector = themePath 
@@ -151,9 +155,12 @@ function generateCombinedStyleFile(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
+  // Analyze tokens to identify which color tokens need RGB utilities
+  const colorTokensNeedingRgb = analyzeTokensForRgbUtilities(tokens, tokenGroups, tokenCollections)
+  
   // Convert all tokens to CSS variable declarations
   const cssVariables = processedTokens
-    .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections))
+    .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb))
     .join("\n")
 
   // Determine the CSS selector based on whether this is a theme file

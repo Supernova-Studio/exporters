@@ -9,7 +9,9 @@ export type TokenToCSSOptions = {
     /** Color format */
     colorFormat: ColorFormat;
     /** Function to convert token to variable reference. Only used when allowReferences is true and reference is detected */
-    tokenToVariableRef: (token: Token) => string;
+    tokenToVariableRef: (token: Token, context?: {
+        needsRgb?: boolean;
+    }) => string;
     /** Force conversion of pixel values to rem */
     forceRemUnit?: boolean;
     /** Base value for rem conversion (default: 16) */
@@ -19,6 +21,10 @@ export type TokenToCSSOptions = {
 };
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 export declare class CSSHelper {
+    /**
+     * Helper function to handle color with custom opacity, using channel-based utilities when available
+     */
+    private static handleColorWithCustomOpacity;
     static tokenToCSS(token: Token, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static colorTokenValueToCSS(color: ColorTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static borderTokenValueToCSS(border: BorderTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;

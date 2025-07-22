@@ -498,5 +498,16 @@
         "dependsOn": {
             "writeNameToProperty": true
         }
+    },
+    {
+        "key": "useFallbackValues",
+        "type": "boolean",
+        "default": false,
+        "title": "Use fallback values",
+        "description": "When enabled, CSS variables will include raw token values as fallbacks when there are references.",
+        "category": "Token values",
+        "dependsOn": {
+            "useReferences": true
+        }
     }
 ]
