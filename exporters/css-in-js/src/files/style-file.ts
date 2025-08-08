@@ -165,7 +165,7 @@ function generateTokenObject(tokens: Array<Token>, tokenGroups: Array<TokenGroup
   // Generate the object properties, including descriptions as JSDoc comments
   return sortedTokens.map(token => {
     const name = tokenObjectKeyName(token, tokenGroups, true)
-    if (token.description) {
+    if (exportConfiguration.showDescriptions && token.description) {
       return `${indentString}/** ${token.description.trim()} */\n${indentString}${name},`
     }
     return `${indentString}${name},`

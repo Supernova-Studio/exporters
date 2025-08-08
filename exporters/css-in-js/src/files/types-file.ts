@@ -31,7 +31,7 @@ export function typesOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
   const interfaces = Array.from(tokensByType.entries()).map(([type, typeTokens]) => {
     const properties = typeTokens.map(token => {
       const name = tokenObjectKeyName(token, tokenGroups)
-      if (token.description) {
+      if (exportConfiguration.showDescriptions && token.description) {
         return `${indentString}/** ${token.description.trim()} */\n${indentString}${name}: string;`
       }
       return `${indentString}${name}: string;`
@@ -43,7 +43,7 @@ export function typesOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
   // Generate a flat type that includes all token properties
   const allProperties = tokens.map(token => {
     const name = tokenObjectKeyName(token, tokenGroups)
-    if (token.description) {
+    if (exportConfiguration.showDescriptions && token.description) {
       return `${indentString}/** ${token.description.trim()} */\n${indentString}${name}: string;`
     }
     return `${indentString}${name}: string;`
