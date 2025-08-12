@@ -68,7 +68,7 @@
         "category": "Component generation",
         "key": "componentTemplate",
         "type": "code",
-        "default": "",
+        "default": "import * as React from \"react\"\nimport { SVGProps } from \"react\"\n\nexport const ${name} = (props: SVGProps<SVGSVGElement>) => (\n  ${svg}\n)",
         "language": "typescript",
         "title": "Component template",
         "description": "Template for generated components.",
