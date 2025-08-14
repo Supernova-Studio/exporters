@@ -1,47 +1,51 @@
 [
     {
-        "category": "Svg export settings",
+        "category": "Export settings",
         "key": "svgScale",
         "type": "enum",
-        "options": [
-            "x1",
-            "x2",
-            "x3",
-            "x4"
-        ],
+        "options": {
+            "x1": {
+                "label": "1x (Original)",
+                "description": "Export at original size"
+            },
+            "x2": {
+                "label": "2x (Retina)",
+                "description": "Export at 2x resolution"
+            },
+            "x3": {
+                "label": "3x (High-DPI)",
+                "description": "Export at 3x resolution"
+            },
+            "x4": {
+                "label": "4x (Ultra-HD)",
+                "description": "Export at 4x resolution"
+            }
+        },
         "default": "x1",
         "title": "Svg scale",
         "description": "Scale of the exported SVG. Default is x1 (original size)."
     },
     {
-        "category": "Svg export settings",
-        "key": "optimize",
-        "type": "boolean",
-        "default": true,
-        "title": "Optimize svg",
-        "description": "Optimize SVG using SVGO plugin to reduce file size."
-    },
-    {
-        "category": "File organization",
+        "category": "Export settings",
         "key": "keepOriginalSvgs",
         "type": "boolean",
         "default": true,
-        "title": "Keep original svgs",
+        "title": "Keep original SVGs",
         "description": "Generate and store original SVGs alongside components."
     },
     {
-        "category": "File organization",
+        "category": "Export settings",
         "key": "originalSvgFolder",
         "type": "string",
-        "default": "src",
-        "title": "Original svgs folder",
+        "default": "svgs",
+        "title": "Original SVGs folder",
         "description": "Folder for original SVGs. Ignored when original SVGs are not generated.",
         "dependsOn": {
             "keepOriginalSvgs": true
         }
     },
     {
-        "category": "File organization",
+        "category": "Export settings",
         "key": "componentFolder",
         "type": "string",
         "default": "dist",
@@ -49,7 +53,7 @@
         "description": "Folder to write the components to."
     },
     {
-        "category": "Component generation",
+        "category": "Export settings",
         "key": "typescript",
         "type": "boolean",
         "default": true,
@@ -57,7 +61,227 @@
         "description": "Generate TypeScript-compatible definitions instead of JavaScript."
     },
     {
-        "category": "Component generation",
+        "category": "Export settings",
+        "key": "exportStyle",
+        "type": "enum",
+        "options": {
+            "default": {
+                "label": "Default exports",
+                "description": "export default Component → export { default as Component }"
+            },
+            "named": {
+                "label": "Named exports",
+                "description": "const Component = ... → export { Component as IconComponent }"
+            },
+            "direct": {
+                "label": "Direct exports",
+                "description": "export const IconComponent = ... → export * from './Component'"
+            }
+        },
+        "default": "direct",
+        "title": "Export style",
+        "description": "How components should be exported and re-exported in the index file."
+    },
+    {
+        "category": "Export settings",
+        "key": "namedExportName",
+        "type": "string",
+        "default": "Icon{componentName}",
+        "title": "Named export pattern",
+        "description": "Pattern for named or direct exports. Use {componentName} as placeholder."
+    },
+    {
+        "category": "Export settings",
+        "key": "generateIndex",
+        "type": "boolean",
+        "default": true,
+        "title": "Generate index file",
+        "description": "Generate index file for components."
+    },
+
+    {
+        "category": "SVG attributes",
+        "key": "optimize",
+        "type": "boolean",
+        "default": true,
+        "title": "Optimize SVG",
+        "description": "Optimize SVG using SVGO plugin to reduce file size."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "includeDimensions",
+        "type": "boolean",
+        "default": true,
+        "title": "Include dimensions",
+        "description": "Include width and height attributes in the SVG."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "includeViewBox",
+        "type": "boolean",
+        "default": true,
+        "title": "Include viewBox",
+        "description": "Include viewBox attribute in the SVG."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "includeDescription",
+        "type": "boolean",
+        "default": true,
+        "title": "Include description",
+        "description": "Include aria-label for accessibility."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "isDecorativeImage",
+        "type": "boolean",
+        "default": false,
+        "title": "Mark icons as decorative",
+        "description": "Mark SVG as decorative (aria-hidden=\"true\") for accessibility."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "propsPosition",
+        "type": "enum",
+        "options": {
+            "start": {
+                "label": "At start",
+                "description": "<svg {...props} width={16} height={16}>"
+            },
+            "end": {
+                "label": "At end",
+                "description": "<svg width={16} height={16} {...props}>"
+            },
+            "none": {
+                "label": "No props",
+                "description": "<svg width={16} height={16}> (no props spreading)"
+            }
+        },
+        "default": "none",
+        "title": "Props position",
+        "description": "Where to place {...props} in the SVG element (start, end, or none to omit)."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "replaceAttributeValues",
+        "type": "object",
+        "default": {
+            "#000001-": "var(--color-foreground-neutral)",
+            "#606162-": "var(--color-foreground-neutral-faded)"
+        },
+        "title": "Replace attribute values",
+        "description": "Replace SVG attribute values. Common use: replace colors with CSS variables."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "addClassesToSVGElement",
+        "type": "boolean",
+        "default": false,
+        "title": "Add CSS classes to SVG",
+        "description": "Add CSS classes to the SVG element for styling purposes."
+    },
+    {
+        "category": "SVG attributes",
+        "key": "svgClasses",
+        "type": "string",
+        "default": "icon",
+        "title": "SVG CSS classes",
+        "description": "Space-separated CSS class names to add to the SVG element.",
+        "dependsOn": {
+            "addClassesToSVGElement": true
+        }
+    },
+    {
+        "category": "Code formatting",
+        "key": "prettier",
+        "type": "boolean",
+        "default": true,
+        "title": "Use Prettier",
+        "description": "Format the generated React component code with Prettier."
+    },
+    {
+        "category": "Code formatting",
+        "key": "singleQuote",
+        "type": "boolean",
+        "default": false,
+        "title": "Single quotes",
+        "description": "Use single quotes instead of double quotes.",
+        "dependsOn": {
+            "prettier": true
+        }
+    },
+    {
+        "category": "Code formatting",
+        "key": "semi",
+        "type": "boolean",
+        "default": false,
+        "title": "Semicolons",
+        "description": "Add semicolons at the end of statements.",
+        "dependsOn": {
+            "prettier": true
+        }
+    },
+    {
+        "category": "Code formatting",
+        "key": "trailingComma",
+        "type": "enum",
+        "options": {
+            "none": {
+                "label": "No trailing commas",
+                "description": "{ a: 1, b: 2 } and function(a, b)"
+            },
+            "es5": {
+                "label": "ES5 trailing commas",
+                "description": "{ a: 1, b: 2, } and [1, 2,] but not in functions"
+            },
+            "all": {
+                "label": "All trailing commas",
+                "description": "{ a: 1, b: 2, } and function(a, b,) everywhere valid"
+            }
+        },
+        "default": "none",
+        "title": "Trailing commas",
+        "description": "Add trailing commas where valid in ES5 (objects, arrays, etc.), ES2015 (functions), or none.",
+        "dependsOn": {
+            "prettier": true
+        }
+    },
+    {
+        "category": "Code formatting",
+        "key": "printWidth",
+        "type": "number",
+        "default": 80,
+        "title": "Print width",
+        "description": "Maximum line length that Prettier will wrap on.",
+        "dependsOn": {
+            "prettier": true
+        }
+    },
+    {
+        "category": "Code formatting",
+        "key": "tabs",
+        "type": "boolean",
+        "default": false,
+        "title": "Use tabs",
+        "description": "Use tabs instead of spaces for indentation.",
+        "dependsOn": {
+            "prettier": true
+        }
+    },
+    {
+        "category": "Code formatting",
+        "key": "prettierTabWidth",
+        "type": "number",
+        "default": 2,
+        "title": "Tab width",
+        "description": "Number of spaces per indentation level (or tab size if using tabs).",
+        "dependsOn": {
+            "prettier": true
+        }
+    },
+
+    {
+        "category": "Advanced",
         "key": "customComponentTemplate",
         "type": "boolean",
         "default": false,
@@ -65,27 +289,19 @@
         "description": "Use custom template instead of default ones."
     },
     {
-        "category": "Component generation",
+        "category": "Advanced",
         "key": "componentTemplate",
         "type": "code",
-        "default": "import * as React from \"react\"\nimport { SVGProps } from \"react\"\n\nexport const ${name} = (props: SVGProps<SVGSVGElement>) => (\n  ${svg}\n)",
+        "default": "// Custom component: ${name}\n${imports}\n\nconst ${name} = (props) => (\n  ${svg}\n)\n\nexport default ${name}",
         "language": "typescript",
         "title": "Component template",
-        "description": "Template for generated components.",
+        "description": "Template for generated components. Available placeholders: ${name}, ${svg}, ${imports}",
         "dependsOn": {
             "customComponentTemplate": true
         }
     },
     {
-        "category": "Index file settings",
-        "key": "generateIndex",
-        "type": "boolean",
-        "default": true,
-        "title": "Generate index file",
-        "description": "Generate index file for components."
-    },
-    {
-        "category": "Index file settings",
+        "category": "Advanced",
         "key": "customIndexTemplate",
         "type": "boolean",
         "default": false,
@@ -96,32 +312,16 @@
         }
     },
     {
-        "category": "Index file settings",
+        "category": "Advanced",
         "key": "indexTemplate",
         "type": "code",
         "language": "typescript",
-        "default": "",
+        "default": "// Icon index file\n\n{{exports}}",
         "title": "Index template",
-        "description": "Template for the generated index file.",
+        "description": "Template for the generated index file. Available placeholders: {{exports}}, {{components}}",
         "dependsOn": {
             "customIndexTemplate": true
         }
-    },
-    {
-        "category": "Content replacement",
-        "key": "replaceValues",
-        "type": "object",
-        "default": {},
-        "title": "Replace values",
-        "description": "Key-value pairs for content replacement."
-    },
-    {
-        "category": "SVGO configuration",
-        "key": "svgoOptions",
-        "type": "object",
-        "default": {},
-        "title": "Svgo options",
-        "description": "Configuration options for SVGO. See https://github.com/svg/svgo for details."
     },
     {
         "category": "Other",
@@ -140,7 +340,7 @@
         "type": "boolean",
         "default": true,
         "title": "Show file disclaimer",
-        "description": "Show auto-generation message in all style files.",
+        "description": "A message explaining that the file was automatically generated will appear in all style files.",
         "category": "Other"
     },
     {
@@ -149,7 +349,7 @@
         "isMultiline": true,
         "default": "This file was generated automatically by Supernova.io and should not be changed manually. To modify the format or content of this file, please contact your design system team.",
         "title": "Disclaimer message",
-        "description": "Custom message for auto-generated files.",
+        "description": "A message explaining that the file was automatically generated will appear in all style files.",
         "category": "Other",
         "dependsOn": {
             "showGeneratedFileDisclaimer": true

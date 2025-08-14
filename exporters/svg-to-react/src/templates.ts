@@ -1,61 +1,43 @@
 import { exportConfiguration } from "."
 
-export function applicableComponentTemplate(svg: string, name: string): string {
-  if (exportConfiguration.customComponentTemplate) {
-    return componentCustomTemplate(exportConfiguration.componentTemplate, svg, name)
-  } else {
-    return exportConfiguration.typescript ? componentTSTemplate(svg, name) : componentJSTemplate(svg, name)
+export function applyCustomComponentTemplate(componentCode: string, componentName: string, jsx: string): string {
+  if (!exportConfiguration.customComponentTemplate || !exportConfiguration.componentTemplate) {
+    return componentCode
   }
+  
+  // Extract imports from the default component code
+  const importMatch = componentCode.match(/(import[\s\S]*?)(?=\n\nconst|\n\nexport)/);
+  const imports = importMatch ? importMatch[1].trim() : ''
+  
+  // Replace placeholders in custom template
+  let customCode = exportConfiguration.componentTemplate
+    .replace(/\$\{name\}/g, componentName)
+    .replace(/\$\{svg\}/g, jsx)
+    .replace(/\$\{imports\}/g, imports)
+  
+  return customCode
 }
 
-export function applicableIndexTemplate(path: string, name: string): string {
-  if (exportConfiguration.customIndexTemplate) {
-    return indexCustomTemplate(exportConfiguration.indexTemplate, path, name)
-  } else {
-    return indexTemplate(path, name)
+export function applyCustomIndexTemplate(indexContent: string, filePaths: Array<{ path: string; componentName: string }>): string {
+  if (!exportConfiguration.customIndexTemplate || !exportConfiguration.indexTemplate) {
+    return indexContent
   }
-}
-
-/** Component template used for generation when typescript is enabled */
-export function componentTSTemplate(svg: string, name: string): string {
-  return `
-import * as React from "react"
-import { SVGProps } from "react"
-
-export const ${name} = (props: SVGProps<SVGSVGElement>) => (
-  ${svg}
-)
-`
-}
-
-/** Component template used for generation when javascript is enabled */
-export function componentJSTemplate(svg: string, name: string): string {
-  return `
-import * as React from "react"
-
-export const ${name} = (props) => (
-  ${svg}
-)
-`
-}
-
-/** Component template. Must contain {{svg}} and {{name}} tags */
-export function componentCustomTemplate(template: string, svg: string, name: string): string {
-  if (!template.includes("{{svg}}")) throw new Error("Template must contain {{svg}} tag")
-  if (!template.includes("{{name}}")) throw new Error("Template must contain {{name}} tag")
-
-  return template.replace("{{svg}}", svg).replace("{{name}}", name)
-}
-
-/** Index template used for generation when either typescript or javascript is enabled */
-export function indexTemplate(path: string, name: string): string {
-  return `export * from "./${path}/${name}"`
-}
-
-/** Index template. Must contain {{path}} and {{name}} tags */
-export function indexCustomTemplate(template: string, path: string, name: string): string {
-  if (!template.includes("{{path}}")) throw new Error("Template must contain {{path}} tag")
-  if (!template.includes("{{name}}")) throw new Error("Template must contain {{name}} tag")
-
-  return template.replace("{{path}}", path).replace("{{name}}", name)
+  
+  // Replace placeholders in custom template
+  let customIndex = exportConfiguration.indexTemplate
+  
+  // Replace {{exports}} with the export statements
+  customIndex = customIndex.replace(/\{\{exports\}\}/g, indexContent)
+  
+  // Replace {{components}} with comma-separated component names
+  const componentNames = filePaths.map(fp => fp.componentName).join(', ')
+  customIndex = customIndex.replace(/\{\{components\}\}/g, componentNames)
+  
+  // Replace individual {{path}} and {{name}} if used in a loop context
+  filePaths.forEach((fp, index) => {
+    customIndex = customIndex.replace(new RegExp(`\{\{path\[${index}\]\}\}`, 'g'), fp.path)
+    customIndex = customIndex.replace(new RegExp(`\{\{name\[${index}\]\}\}`, 'g'), fp.componentName)
+  })
+  
+  return customIndex
 }

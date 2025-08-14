@@ -1,9 +1,8 @@
-import { NetworkHelper, FileHelper } from "@supernovaio/export-helpers"
+import { FileHelper, GeneralHelper } from "@supernovaio/export-utils"
 import { AnyOutputFile, OutputTextFile, RenderedAsset, Supernova } from "@supernovaio/sdk-exporters"
 import { ExporterConfiguration } from "../config"
 import { exportReactDefinitionDestination, exportAssetDestination } from "./paths"
-import { optimizeSVG } from "./svg"
-import { applicableComponentTemplate } from "./templates"
+import { convertSvgToReactComponent } from "./svg"
 
 export async function convertRenderedAssetToComponent(
   asset: RenderedAsset,
@@ -11,10 +10,22 @@ export async function convertRenderedAssetToComponent(
   exportConfiguration: ExporterConfiguration
 ): Promise<AnyOutputFile> {
   const destination = exportReactDefinitionDestination(asset, exportConfiguration.componentFolder)
-  let svg = await NetworkHelper.fetchAsText(sdk, asset.sourceUrl)
-  svg = optimizeSVG(svg)
+  
+  // Fetch SVG content from the source URL
+  const response = await sdk.network.fetch(asset.sourceUrl)
+  const svg = await response.text()
+  
+  // Convert SVG to React component
+  const componentCode = await convertSvgToReactComponent(svg, destination.className)
+  
+  // Add disclaimer if enabled
+  let finalContent = componentCode
+  if (exportConfiguration.showGeneratedFileDisclaimer) {
+    finalContent = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, componentCode)
+  }
+  
   const component = FileHelper.createTextFile({
-    content: applicableComponentTemplate(svg, destination.className),
+    content: finalContent,
     relativePath: destination.path,
     fileName: destination.name,
   })
@@ -58,15 +69,33 @@ export async function convertRenderedAssetsToIndexFile(
   renderedAssets: Array<RenderedAsset>,
   exportConfiguration: ExporterConfiguration
 ): Promise<OutputTextFile> {
+  // Prepare file paths for index generation
+  const filePaths = renderedAssets.map((asset) => {
+    const destination = exportReactDefinitionDestination(asset, exportConfiguration.componentFolder)
+    return {
+      path: destination.path,
+      componentName: destination.className
+    }
+  })
+  
+  // Generate index content
+  const { generateIndexFile } = await import("./svg")
+  const { applyCustomIndexTemplate } = await import("./templates")
+  const indexContent = generateIndexFile(filePaths)
+  
+  // Apply custom template if configured
+  const customizedContent = applyCustomIndexTemplate(indexContent, filePaths)
+  
+  // Add disclaimer if enabled
+  let finalContent = customizedContent
+  if (exportConfiguration.showGeneratedFileDisclaimer) {
+    finalContent = GeneralHelper.addDisclaimer(exportConfiguration.disclaimer, customizedContent)
+  }
+
   const indexFile = FileHelper.createTextFile({
-    content: renderedAssets
-      .map((a) => {
-        const destination = exportReactDefinitionDestination(a, exportConfiguration.componentFolder)
-        return `export * from "./${destination.path}/${destination.className}"`
-      })
-      .join("\n"),
+    content: finalContent,
     relativePath: "./",
-    fileName: "index.ts",
+    fileName: exportConfiguration.typescript ? "index.ts" : "index.js",
   })
 
   return indexFile

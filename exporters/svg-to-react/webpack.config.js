@@ -10,7 +10,9 @@ module.exports = (env, argv) => ({
     },
     stats: { warnings: false },
     module: {
-        rules: [{ test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/ }],
+        rules: [
+            { test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/ },
+        ],
     },
     resolve: {
         extensions: [".tsx", ".ts", ".jsx", ".js"],
@@ -31,6 +33,8 @@ module.exports = (env, argv) => ({
             "crypto-browserify": false,
         },
     },
+
+
 
     output: {
         filename: "build.js",

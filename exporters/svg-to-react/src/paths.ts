@@ -1,4 +1,4 @@
-import { NamingHelper, StringCase } from "@supernovaio/export-helpers"
+import { NamingHelper, StringCase } from "@supernovaio/export-utils"
 import { RenderedAsset } from "@supernovaio/sdk-exporters"
 
 export function exportAssetDestination(

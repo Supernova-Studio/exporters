@@ -9,3 +9,4 @@ export * from "./helpers/GeneralHelper";
 export * from "./enums/StringCase";
 export * from "./enums/ColorFormat";
 export * from "./helpers/TokenNameTracker";
+export * from "./helpers/NetworkHelper";
