@@ -104,8 +104,9 @@ class CSSHelper {
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
-        // Handle color with custom opacity using helper function
-        const colorValue = this.handleColorWithCustomOpacity(border.color, border.color.opacity, allTokens, options);
+        // Handle color normally - border tokens don't have custom opacity like shadows do
+        // The opacity is already part of the color token itself
+        const colorValue = this.colorTokenValueToCSS(border.color, allTokens, options);
         const data = {
             width: this.dimensionTokenValueToCSS(border.width, allTokens, options),
             style: this.borderStyleToCSS(border.style),
