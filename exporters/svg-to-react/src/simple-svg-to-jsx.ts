@@ -1,6 +1,33 @@
-// Simple SVG to JSX converter that works in sandboxed environments
-// No timers, no complex async operations
+/**
+ * Simple SVG to JSX Converter
+ * 
+ * This module provides a lightweight, dependency-free SVG to JSX conversion utility
+ * that works reliably in sandboxed environments like Supernova's export runtime.
+ * 
+ * Key features:
+ * - No external dependencies beyond basic JavaScript
+ * - No async operations or timers (safe for sandboxed execution)
+ * - Comprehensive SVG attribute mapping to React props
+ * - Style attribute conversion from CSS strings to React objects
+ * - Self-closing tag normalization
+ * 
+ * This is specifically designed for environments where full-featured libraries
+ * like react-svg-parser or similar might not be available or reliable.
+ */
 
+/**
+ * SVG Attribute to React Prop Mapping
+ * 
+ * This comprehensive mapping handles the conversion from SVG/HTML attributes
+ * to their corresponding React prop names. React uses camelCase for props
+ * where HTML/SVG uses kebab-case or other naming conventions.
+ * 
+ * Key conversions include:
+ * - kebab-case to camelCase (e.g., 'stroke-width' → 'strokeWidth')
+ * - Special React props (e.g., 'class' → 'className')
+ * - SVG-specific attributes (e.g., 'viewBox', XML namespaces)
+ * - Accessibility attributes (e.g., 'aria-*' attributes)
+ */
 const attributeMap: Record<string, string> = {
   'accent-height': 'accentHeight',
   'accumulate': 'accumulate',
@@ -244,31 +271,58 @@ const attributeMap: Record<string, string> = {
   'zoomandpan': 'zoomAndPan'
 }
 
+/**
+ * Convert SVG Markup to JSX Format
+ * 
+ * This function performs the core transformation from SVG markup to JSX-compatible
+ * markup that can be used in React components. It handles the key differences
+ * between HTML/SVG and JSX syntax requirements.
+ * 
+ * Transformations performed:
+ * 1. Attribute name conversion using the comprehensive mapping table
+ * 2. Style attribute transformation from CSS string to React style object
+ * 3. Self-closing tag formatting for JSX compliance
+ * 
+ * @param svg - Raw SVG markup string
+ * @returns JSX-compatible markup string ready for use in React components
+ * 
+ * @example
+ * Input:  '<svg class="icon" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+ * Output: '<svg className="icon" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>'
+ */
 export function simpleSvgToJsx(svg: string): string {
   let jsx = svg
   
-  // Replace attributes
+  // STEP 1: Convert all SVG attributes to their React prop equivalents
   Object.entries(attributeMap).forEach(([svgAttr, jsxAttr]) => {
-    // Use a regex that matches the attribute in the context of an SVG tag
+    // Use regex to match attributes in the context of SVG elements
+    // This ensures we only replace actual attributes, not content that might contain similar text
     const regex = new RegExp(`(\\s)${svgAttr}(=)`, 'gi')
     jsx = jsx.replace(regex, `$1${jsxAttr}$2`)
   })
   
-  // Convert style attribute from string to object
+  // STEP 2: Convert style attribute from CSS string format to React style object
+  // React requires style to be an object, not a string like in HTML/SVG
   jsx = jsx.replace(/style="([^"]*)"/g, (match, styles) => {
     const styleObj: Record<string, string> = {}
+    
+    // Parse CSS declarations and convert to camelCase object properties
     styles.split(';').forEach((style: string) => {
       const [key, value] = style.split(':').map((s: string) => s.trim())
       if (key && value) {
-        // Convert kebab-case to camelCase
+        // Convert CSS property names from kebab-case to camelCase
+        // e.g., 'background-color' → 'backgroundColor'
         const camelKey = key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
         styleObj[camelKey] = value
       }
     })
+    
+    // Return the style object in JSX format
     return `style={${JSON.stringify(styleObj)}}`
   })
   
-  // Self-closing tags
+  // STEP 3: Ensure all self-closing tags have proper JSX spacing
+  // JSX requires a space before the closing /> for self-closing elements
   jsx = jsx.replace(/<([^>]+)\/>/g, '<$1 />')
   
   return jsx
