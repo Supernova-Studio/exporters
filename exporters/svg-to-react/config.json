@@ -127,7 +127,7 @@
         "category": "SVG attributes",
         "key": "includeDescription",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "title": "Include description",
         "description": "Include aria-label for accessibility."
     },
@@ -157,7 +157,7 @@
                 "description": "<svg width={16} height={16}> (no props spreading)"
             }
         },
-        "default": "none",
+        "default": "end",
         "title": "Props position",
         "description": "Where to place {...props} in the SVG element (start, end, or none to omit)."
     },
@@ -165,10 +165,7 @@
         "category": "SVG attributes",
         "key": "replaceAttributeValues",
         "type": "object",
-        "default": {
-            "#000001-": "var(--color-foreground-neutral)",
-            "#606162-": "var(--color-foreground-neutral-faded)"
-        },
+        "default": {},
         "title": "Replace attribute values",
         "description": "Replace SVG attribute values. Common use: replace colors with CSS variables."
     },
