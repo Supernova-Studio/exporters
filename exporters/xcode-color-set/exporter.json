@@ -1,0 +1,20 @@
+{
+  "id": "supernovaio.exporter-xcode-color-set",
+  "name": "Xcode Color Set (PoC)",
+  "description": "Export color tokens into Xcode .xcassets color sets, per-token arrays.",
+  "author": "Supernova.io",
+  "organization": "Supernova.io",
+  "homepage": "https://supernova.io",
+  "version": "0.1.0",
+  "usesBrands": true,
+  "usesThemes": true,
+  "executable": "/dist/build.js",
+  "engine": "latest",
+  "tags": [
+    "iOS",
+    "Xcode",
+    "Colors",
+    "Tokens"
+  ]
+}
+
