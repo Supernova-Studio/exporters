@@ -4,7 +4,7 @@ export const TAILWIND_TOKEN_PREFIXES: Record<TokenType, string> = {
   Color: "color",
   Typography: "text",
   Dimension: "spacing",
-  Size: "size",
+  Size: "spacing",
   Space: "spacing",
   Opacity: "opacity",
   FontSize: "text",
