@@ -1,9 +1,6 @@
 import { OutputTextFile, Token, TokenGroup, TokenType, ColorToken } from "@supernovaio/sdk-exporters"
 import { FileHelper, NamingHelper, StringCase, TokenNameTracker } from "@supernovaio/export-utils"
 
-// Tracks token names to generate stable and unique file names across the export
-const fileNameTracker = new TokenNameTracker()
-
 /**
  * Convert a 0..255 channel value to the Xcode-required string format "0xHH"
  * (uppercase hex with 2 digits, prefixed with 0x)
@@ -23,13 +20,13 @@ function toAlphaString(alpha: number): string {
 }
 
 /**
- * Creates the mandatory root file for an Xcode asset catalog.
- * For this PoC, we only include the minimal info block.
+ * Creates the mandatory root file for an Xcode asset catalog when requested.
+ * If rootPath is empty, this function should not be called.
  */
 export function createCatalogRootFile(rootPath: string): OutputTextFile {
   const content = JSON.stringify({ info: { version: 1, author: "xcode" } }, null, 2)
   return FileHelper.createTextFile({
-    relativePath: `./${rootPath}`,
+    relativePath: rootPath ? `./${rootPath}` : `./`,
     fileName: "Contents.json",
     content
   })
@@ -55,22 +52,6 @@ function extractRgbaFromToken(token: Token): { r: number; g: number; b: number; 
 /**
  * Creates one Xcode color set file (Contents.json) for a given color token.
  *
- * Output format (array per token):
- * [
- *   {
- *     "idiom": "universal",
- *     "color": {
- *       "color-space": "srgb",
- *       "components": { "red": "0xRR", "green": "0xGG", "blue": "0xBB", "alpha": "0.000" }
- *     }
- *   },
- *   {
- *     "appearances": [{ "appearance": "luminosity", "value": "dark" }],
- *     "idiom": "universal",
- *     "color": { ...themed components... }
- *   }
- * ]
- *
  * - The second entry is included only if a themed variant is provided.
  * - We generate a stable, unique file name per token to avoid path collisions.
  */
@@ -78,7 +59,9 @@ export function createPerTokenFile(
   token: Token,
   tokenGroups: Array<TokenGroup>,
   rootPath: string,
-  themedVariants: Array<Token>
+  themedVariants: Array<Token>,
+  tracker: TokenNameTracker,
+  nameStyle: StringCase
 ): OutputTextFile | null {
   if (token.tokenType !== TokenType.color) {
     return null
@@ -124,14 +107,14 @@ export function createPerTokenFile(
     })
   }
 
-  // Generate a unique, stable file name based on token name + hierarchy
-  const baseName = fileNameTracker.getTokenName(token, tokenGroups, StringCase.kebabCase, null, false)
-  const fileSafeName = NamingHelper.codeSafeVariableName(baseName, StringCase.kebabCase)
+  // Generate a unique, stable file name based on token name + hierarchy using the configured style
+  const baseName = tracker.getTokenName(token, tokenGroups, nameStyle, null, false)
+  const fileSafeName = NamingHelper.codeSafeVariableName(baseName, nameStyle)
 
   // Write token-specific color set file
   const content = JSON.stringify(entries, null, 2)
   return FileHelper.createTextFile({
-    relativePath: `./${rootPath}/${fileSafeName}.colorset`,
+    relativePath: rootPath ? `./${rootPath}/${fileSafeName}.colorset` : `./${fileSafeName}.colorset`,
     fileName: "Contents.json",
     content
   })
