@@ -79,6 +79,17 @@ Defined in `config.json` (Pulsar exporter schema). Key options:
 
 These are available in the Supernova exporter UI and can be overridden in pipelines.
 
+## Write-back (keeps docs and Portal in sync)
+When `writeNameToProperty` is enabled, the exporter saves the generated folder name for each color token
+into a custom property (default: "iOS variable"). This makes the value visible in Supernova token management section and available in documentation/Portal as custom properties — always reflecting the latest exported naming used in code.
+
+![Tokens write-back](../css-in-js/resources/tokens-write-back.png)
+
+How it works:
+- During export (non-preview), the exporter computes the final folder name using the configured `folderNameStyle`.
+- It writes that value back to the token as a custom propertiy via `WriteTokenPropStore`, under `propertyToWriteNameTo`.
+- These values are great to surface in docs or the Portal so designers/devs see the exact, current identifier used by code.
+
 ## Local dependencies
 - `@supernovaio/export-utils` — local monorepo dependency (linked via `file:../../utils`)
 
