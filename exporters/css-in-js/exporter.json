@@ -5,7 +5,7 @@
     "author": "Supernova.io",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "usesBrands": true,
     "usesThemes": true,
     "executable": "/dist/build.js",
