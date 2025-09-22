@@ -359,6 +359,48 @@ import {
     }
     expect(CSSHelper.borderTokenValueToCSS(border, tokens, testOptions)).toBe('var(--dimensionRef) solid var(--colorRef)')
   })
+
+  test('toCSS_colorToken_border_4_opacity_fix', () => {
+    // Test for the specific issue: border token with referenced color that has opacity
+    // This should NOT generate rgba(var(--colorRef), 1) which would be invalid
+    // Instead it should use var(--colorRef) directly since the opacity is part of the color token
+    let border = {
+      ...testBorder,
+      color: { 
+        ...testBorder.color, 
+        referencedTokenId: 'colorRef',
+        opacity: { measure: 1, referencedTokenId: null, unit: Unit.raw }
+      }
+    }
+    expect(CSSHelper.borderTokenValueToCSS(border, tokens, testOptions)).toBe('1px solid var(--colorRef)')
+  })
+
+  test('toCSS_colorToken_border_5_linear_issue_scenario', () => {
+    // Test for the exact Linear issue scenario RCT-5926:
+    // Border token with referenced color should use var(--colorRef) directly
+    // NOT rgba(var(--colorRef), opacity) which creates invalid CSS like:
+    // rgba(rgb(49, 92, 253), 1) <- INVALID
+    
+    // Create border token that references the existing colorRef token
+    const borderWithReferencedColor: BorderTokenValue = {
+      color: {
+        ...testColor,
+        referencedTokenId: 'colorRef'
+      },
+      width: { measure: 1, unit: Unit.pixels, referencedTokenId: null },
+      style: BorderStyle.solid,
+      position: BorderPosition.outside,
+      referencedTokenId: null
+    }
+    
+    // The result should be: 1px solid var(--colorRef)
+    // NOT: 1px solid rgba(var(--colorRef), 1)
+    const result = CSSHelper.borderTokenValueToCSS(borderWithReferencedColor, tokens, testOptions)
+    expect(result).toBe('1px solid var(--colorRef)')
+    
+    // Verify it doesn't contain the problematic rgba() nesting
+    expect(result).not.toContain('rgba(var(--colorRef)')
+  })
   
   test('toCSS_gradientToken_1', () => {
     let gradient = {
