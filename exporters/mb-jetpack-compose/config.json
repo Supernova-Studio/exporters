@@ -35,9 +35,9 @@
     "key": "enableThemeSupport",
     "type": "boolean",
     "default": false,
-    "title": "Enable theme support",
+    "title": "Enable theme template support",
     "description": "Generate interface + themed implementations for semantic tokens. When enabled, primitives become objects and semantics become interface + themed implementations.",
-    "category": "Theme TemplateSupport"
+    "category": "Theme template upport"
   },
   {
     "key": "primitiveCollections",
@@ -54,15 +54,6 @@
     "default": ["semantic"],
     "title": "Semantic collections",
     "description": "Collections that will be generated as interface + themed implementations.",
-    "category": "Theme Support",
-    "dependsOn": { "enableThemeSupport": true }
-  },
-  {
-    "key": "interfaceFolderName",
-    "type": "string",
-    "default": "mbdesigntheme",
-    "title": "Interface folder name",
-    "description": "Folder name where the interface file will be generated.",
     "category": "Theme Support",
     "dependsOn": { "enableThemeSupport": true }
   },
@@ -94,11 +85,11 @@
     "dependsOn": { "enableThemeSupport": true }
   },
   {
-    "key": "themeImplementationFolder",
+    "key": "themeFolderName",
     "type": "string",
-    "default": "mbdesigntheme/color",
-    "title": "Theme implementation folder",
-    "description": "Folder path where themed implementations will be generated.",
+    "default": "mbdesigntheme",
+    "title": "Theme folder name",
+    "description": "Folder name where interface and themed implementations will be generated.",
     "category": "Theme Support",
     "dependsOn": { "enableThemeSupport": true }
   },

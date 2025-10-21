@@ -254,7 +254,7 @@ export function createInterfaceFile(
  * - theme: Theme object for reference
  * - interfaceName: Name of the interface being implemented
  * - fileName: Name of the .kt file (without extension)
- * - folderPath: Path where the themed implementation will be generated
+ * - themeFolderName: Folder name where themed implementations will be generated
  * - themeIdentifier: Theme identifier for folder naming
  * - tokenGroups: All groups from the design system, used for hierarchical naming
  * - tokenCollections: All token collections for reference resolution
@@ -276,7 +276,7 @@ export function createThemedImplementationFile(
   theme: TokenTheme,
   interfaceName: string,
   fileName: string,
-  folderPath: string,
+  themeFolderName: string,
   themeIdentifier: string,
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<any>,
@@ -315,7 +315,7 @@ export function createThemedImplementationFile(
   ].join('\n')
 
   return FileHelper.createTextFile({
-    relativePath: `./${folderPath}/${themeIdentifier}`,
+    relativePath: `./${themeFolderName}/${themeIdentifier}`,
     fileName: `${fileName}.kt`,
     content
   })
