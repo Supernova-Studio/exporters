@@ -5,7 +5,7 @@
     "default": ["primitive"],
     "title": "Token collections to export",
     "description": "List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.",
-    "category": "Collections"
+    "category": "Color primitives"
   },
   {
     "key": "outputFolderName",
@@ -13,7 +13,7 @@
     "default": "color",
     "title": "Folder name",
     "description": "Name of the folder where .kt files will be generated.",
-    "category": "Naming"
+    "category": "Color primitives"
   },
   {
     "key": "fileNames",
@@ -21,7 +21,7 @@
     "default": {"primitive": "Primitive"},
     "title": "File names mapping",
     "description": "Mapping of collection names to .kt file names (without extension).",
-    "category": "Naming"
+    "category": "Color primitives"
   },
   {
     "key": "objectNames",
@@ -29,7 +29,7 @@
     "default": {"primitive": "PrimitiveColors"},
     "title": "Object names mapping",
     "description": "Mapping of collection names to Kotlin object names.",
-    "category": "Naming"
+    "category": "Color primitives"
   },
   {
     "key": "enableThemeSupport",
@@ -37,7 +37,7 @@
     "default": false,
     "title": "Enable theme template support",
     "description": "Generate interface + themed implementations for semantic tokens. When enabled, primitives become objects and semantics become interface + themed implementations.",
-    "category": "Theme template upport"
+    "category": "Theme-based color tokens"
   },
   {
     "key": "interfaceFileName",
@@ -45,7 +45,7 @@
     "default": "MBBaseColorScheme",
     "title": "Interface file name",
     "description": "Name of the interface file (without .kt extension).",
-    "category": "Theme Support",
+    "category": "Theme-based color tokens",
     "dependsOn": { "enableThemeSupport": true }
   },
   {
@@ -54,7 +54,7 @@
     "default": "MBBaseColorScheme",
     "title": "Interface name",
     "description": "Name of the Kotlin interface.",
-    "category": "Theme Support",
+    "category": "Theme-based color tokens",
     "dependsOn": { "enableThemeSupport": true }
   },
   {
@@ -63,25 +63,7 @@
     "default": "@DesignPropertyV2",
     "title": "Property annotation",
     "description": "Annotation to add to interface properties (e.g., @DesignPropertyV2).",
-    "category": "Theme Support",
-    "dependsOn": { "enableThemeSupport": true }
-  },
-  {
-    "key": "exportOnlyThemedTokens",
-    "type": "boolean",
-    "default": false,
-    "title": "Export only themed tokens",
-    "description": "Only include tokens that have different values in themes.",
-    "category": "Theme Support",
-    "dependsOn": { "enableThemeSupport": true }
-  },
-  {
-    "key": "exportBaseValues",
-    "type": "boolean",
-    "default": true,
-    "title": "Export base values",
-    "description": "Generate non-themed base files alongside themed implementations.",
-    "category": "Theme Support",
+    "category": "Theme-based color tokens",
     "dependsOn": { "enableThemeSupport": true }
   },
   {

@@ -94,8 +94,6 @@ Defined in `config.json` (Pulsar exporter schema). Key options:
 - `interfaceFileName` (string, default `"MBBaseColorScheme"`): Name of the interface file (without .kt extension).
 - `interfaceName` (string, default `"MBBaseColorScheme"`): Name of the Kotlin interface.
 - `interfacePropertyAnnotation` (string, default `"@DesignPropertyV2"`): Annotation to add to interface properties.
-- `exportOnlyThemedTokens` (boolean, default false): Only include tokens that have different values in themes.
-- `exportBaseValues` (boolean, default true): Generate non-themed base files alongside themed implementations.
 
 ### Automatic write-back
 - `writeNameToProperty` (boolean, default false): Enable write-back of property names to tokens.
