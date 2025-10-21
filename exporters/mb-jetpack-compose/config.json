@@ -1,0 +1,51 @@
+[
+  {
+    "key": "collectionNames",
+    "type": "array",
+    "default": ["primitive"],
+    "title": "Token collections to export",
+    "description": "List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.",
+    "category": "Collections"
+  },
+  {
+    "key": "outputFolderName",
+    "type": "string",
+    "default": "color",
+    "title": "Output folder name",
+    "description": "Name of the folder where .kt files will be generated.",
+    "category": "Output"
+  },
+  {
+    "key": "fileNames",
+    "type": "object",
+    "default": {"primitive": "Primitive"},
+    "title": "File names mapping",
+    "description": "Mapping of collection names to .kt file names (without extension).",
+    "category": "Naming"
+  },
+  {
+    "key": "objectNames",
+    "type": "object",
+    "default": {"primitive": "PrimitiveColors"},
+    "title": "Object names mapping",
+    "description": "Mapping of collection names to Kotlin object names.",
+    "category": "Naming"
+  },
+  {
+    "key": "writeNameToProperty",
+    "type": "boolean",
+    "default": false,
+    "title": "Write back property names",
+    "description": "Save generated property names back to tokens as a custom property.",
+    "category": "Automatic write-back"
+  },
+  {
+    "key": "propertyToWriteNameTo",
+    "type": "string",
+    "default": "Android variable",
+    "title": "Custom property name",
+    "description": "Name of the custom property where generated property names will be saved.",
+    "category": "Automatic write-back",
+    "dependsOn": { "writeNameToProperty": true }
+  }
+]

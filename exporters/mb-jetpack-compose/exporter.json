@@ -1,0 +1,21 @@
+{
+  "id": "supernovaio.exporter-jetpack-compose-colors",
+  "name": "Jetpack Compose Colors",
+  "description": "Export color tokens into Android Jetpack Compose Kotlin files with @Immutable color objects.",
+  "author": "Supernova.io",
+  "organization": "Supernova.io",
+  "homepage": "https://supernova.io",
+  "version": "0.1.0",
+  "usesBrands": true,
+  "usesThemes": false,
+  "executable": "/dist/build.js",
+  "engine": "latest",
+  "tags": [
+    "Android",
+    "Jetpack Compose",
+    "Kotlin",
+    "Colors",
+    "Tokens"
+  ]
+}
+
