@@ -1,19 +1,19 @@
 [
   {
-    "key": "collectionNames",
+    "key": "collectionNameFilters",
     "type": "array",
     "default": ["primitive"],
-    "title": "Token collections to export",
-    "description": "List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.",
-    "category": "Collections"
+    "title": "Token collections names to filter",
+    "description": "List of token collection names to filter (e.g., primitive, semantic). Each collection will generate a separate .kt file of immutable objects.",
+    "category": "Collection filtering"
   },
   {
     "key": "outputFolderName",
     "type": "string",
     "default": "color",
-    "title": "Output folder name",
+    "title": "Folder name",
     "description": "Name of the folder where .kt files will be generated.",
-    "category": "Output"
+    "category": "Naming"
   },
   {
     "key": "fileNames",
@@ -32,29 +32,12 @@
     "category": "Naming"
   },
   {
-    "key": "writeNameToProperty",
-    "type": "boolean",
-    "default": false,
-    "title": "Write back property names",
-    "description": "Save generated property names back to tokens as a custom property.",
-    "category": "Automatic write-back"
-  },
-  {
-    "key": "propertyToWriteNameTo",
-    "type": "string",
-    "default": "Android variable",
-    "title": "Custom property name",
-    "description": "Name of the custom property where generated property names will be saved.",
-    "category": "Automatic write-back",
-    "dependsOn": { "writeNameToProperty": true }
-  },
-  {
     "key": "enableThemeSupport",
     "type": "boolean",
     "default": false,
     "title": "Enable theme support",
     "description": "Generate interface + themed implementations for semantic tokens. When enabled, primitives become objects and semantics become interface + themed implementations.",
-    "category": "Theme Support"
+    "category": "Theme TemplateSupport"
   },
   {
     "key": "primitiveCollections",
@@ -136,5 +119,22 @@
     "description": "Generate non-themed base files alongside themed implementations.",
     "category": "Theme Support",
     "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "writeNameToProperty",
+    "type": "boolean",
+    "default": false,
+    "title": "Write back property names",
+    "description": "Save generated property names back to tokens as a custom property.",
+    "category": "Automatic write-back"
+  },
+  {
+    "key": "propertyToWriteNameTo",
+    "type": "string",
+    "default": "Android variable",
+    "title": "Custom property name",
+    "description": "Name of the custom property where generated property names will be saved.",
+    "category": "Automatic write-back",
+    "dependsOn": { "writeNameToProperty": true }
   }
 ]

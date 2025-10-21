@@ -83,7 +83,7 @@ internal object MBBaseColorScheme {
 Defined in `config.json` (Pulsar exporter schema). Key options:
 
 ### Collections
-- `collectionNames` (array, default `["primitive"]`): List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.
+- `collectionNameFilters` (array, default `["primitive"]`): List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.
 
 ### Output
 - `outputFolderName` (string, default `"color"`): Name of the folder where .kt files will be generated.

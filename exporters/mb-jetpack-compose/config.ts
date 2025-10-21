@@ -1,6 +1,6 @@
 export type ExporterConfiguration = {
   /** List of token collection names to export (e.g., primitive, semantic) */
-  collectionNames: string[]
+  collectionNameFilters: string[]
   /** Name of the folder where .kt files will be generated */
   outputFolderName: string
   /** Mapping of collection names to .kt file names (without extension) */

@@ -108,8 +108,8 @@ function generateStandardExport(
   const files: Array<AnyOutputFile> = []
 
   // Filter tokens to only include those from configured collections
-  const configuredCollectionNames = new Set(
-    exportConfiguration.collectionNames.map(name => name.toLowerCase().trim())
+  const configuredcollectionNameFilters = new Set(
+    exportConfiguration.collectionNameFilters.map(name => name.toLowerCase().trim())
   )
 
   // Filter tokens based on their collectionId
@@ -118,7 +118,7 @@ function generateStandardExport(
     const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
     
     // Include if the collection name matches any configured collection (case-insensitive)
-    if (tokenCollection && configuredCollectionNames.has(tokenCollection.name.toLowerCase().trim())) {
+    if (tokenCollection && configuredcollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())) {
       return true // Include this token
     }
     
@@ -198,13 +198,13 @@ function generatePrimitiveFiles(
   const files: Array<AnyOutputFile> = []
   
   // Filter tokens from primitive collections
-  const primitiveCollectionNames = new Set(
+  const primitivecollectionNameFilters = new Set(
     exportConfiguration.primitiveCollections.map(name => name.toLowerCase().trim())
   )
   
   const primitiveTokens = colorTokens.filter((token) => {
     const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    return tokenCollection && primitiveCollectionNames.has(tokenCollection.name.toLowerCase().trim())
+    return tokenCollection && primitivecollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())
   })
   
   // Group by collection and generate files
@@ -253,13 +253,13 @@ function generateInterfaceFile(
   tracker: TokenNameTracker
 ): AnyOutputFile | null {
   // Filter tokens from semantic collections
-  const semanticCollectionNames = new Set(
+  const semanticcollectionNameFilters = new Set(
     exportConfiguration.semanticCollections.map(name => name.toLowerCase().trim())
   )
   
   const semanticTokens = colorTokens.filter((token) => {
     const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    return tokenCollection && semanticCollectionNames.has(tokenCollection.name.toLowerCase().trim())
+    return tokenCollection && semanticcollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())
   })
   
   if (semanticTokens.length === 0) {
@@ -288,13 +288,13 @@ function generateThemedImplementation(
   tracker: TokenNameTracker
 ): AnyOutputFile | null {
   // Filter tokens from semantic collections
-  const semanticCollectionNames = new Set(
+  const semanticcollectionNameFilters = new Set(
     exportConfiguration.semanticCollections.map(name => name.toLowerCase().trim())
   )
   
   const semanticTokens = themedColorTokens.filter((token) => {
     const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    return tokenCollection && semanticCollectionNames.has(tokenCollection.name.toLowerCase().trim())
+    return tokenCollection && semanticcollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())
   })
   
   if (semanticTokens.length === 0) {
