@@ -311,8 +311,8 @@ export function createThemedImplementationFile(
   ].join('\n')
 
   return FileHelper.createTextFile({
-    relativePath: `./color/${themeIdentifier}`,
-    fileName: `${fileName}.kt`,
+    relativePath: `./color`,
+    fileName: `${fileName}${themeIdentifier.charAt(0).toUpperCase() + themeIdentifier.slice(1).replace(/-/g, '')}.kt`,
     content
   })
 }
