@@ -2,7 +2,7 @@
   {
     "key": "collectionNames",
     "type": "array",
-    "default": ["semantic"],
+    "default": ["primitive"],
     "title": "Token collections to export",
     "description": "List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.",
     "category": "Collections"
@@ -47,5 +47,94 @@
     "description": "Name of the custom property where generated property names will be saved.",
     "category": "Automatic write-back",
     "dependsOn": { "writeNameToProperty": true }
+  },
+  {
+    "key": "enableThemeSupport",
+    "type": "boolean",
+    "default": false,
+    "title": "Enable theme support",
+    "description": "Generate interface + themed implementations for semantic tokens. When enabled, primitives become objects and semantics become interface + themed implementations.",
+    "category": "Theme Support"
+  },
+  {
+    "key": "primitiveCollections",
+    "type": "array",
+    "default": ["primitive"],
+    "title": "Primitive collections",
+    "description": "Collections that will be generated as @Immutable objects with concrete values.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "semanticCollections",
+    "type": "array",
+    "default": ["semantic"],
+    "title": "Semantic collections",
+    "description": "Collections that will be generated as interface + themed implementations.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "interfaceFolderName",
+    "type": "string",
+    "default": "mbdesigntheme",
+    "title": "Interface folder name",
+    "description": "Folder name where the interface file will be generated.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "interfaceFileName",
+    "type": "string",
+    "default": "MBBaseColorScheme",
+    "title": "Interface file name",
+    "description": "Name of the interface file (without .kt extension).",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "interfaceName",
+    "type": "string",
+    "default": "MBBaseColorScheme",
+    "title": "Interface name",
+    "description": "Name of the Kotlin interface.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "interfacePropertyAnnotation",
+    "type": "string",
+    "default": "@DesignPropertyV2",
+    "title": "Property annotation",
+    "description": "Annotation to add to interface properties (e.g., @DesignPropertyV2).",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "themeImplementationFolder",
+    "type": "string",
+    "default": "mbdesigntheme/color",
+    "title": "Theme implementation folder",
+    "description": "Folder path where themed implementations will be generated.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "exportOnlyThemedTokens",
+    "type": "boolean",
+    "default": false,
+    "title": "Export only themed tokens",
+    "description": "Only include tokens that have different values in themes.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "exportBaseValues",
+    "type": "boolean",
+    "default": true,
+    "title": "Export base values",
+    "description": "Generate non-themed base files alongside themed implementations.",
+    "category": "Theme Support",
+    "dependsOn": { "enableThemeSupport": true }
   }
 ]

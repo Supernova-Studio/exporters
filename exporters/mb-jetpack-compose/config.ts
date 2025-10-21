@@ -11,4 +11,26 @@ export type ExporterConfiguration = {
   writeNameToProperty: boolean
   /** Name of the custom property used for write-back */
   propertyToWriteNameTo: string
+  
+  // Theme Support
+  /** Enable theme support - generate interface + themed implementations */
+  enableThemeSupport: boolean
+  /** Collections that will be generated as @Immutable objects with concrete values */
+  primitiveCollections: string[]
+  /** Collections that will be generated as interface + themed implementations */
+  semanticCollections: string[]
+  /** Folder name where the interface file will be generated */
+  interfaceFolderName: string
+  /** Name of the interface file (without .kt extension) */
+  interfaceFileName: string
+  /** Name of the Kotlin interface */
+  interfaceName: string
+  /** Annotation to add to interface properties (e.g., @DesignPropertyV2) */
+  interfacePropertyAnnotation: string
+  /** Folder path where themed implementations will be generated */
+  themeImplementationFolder: string
+  /** Only include tokens that have different values in themes */
+  exportOnlyThemedTokens: boolean
+  /** Generate non-themed base files alongside themed implementations */
+  exportBaseValues: boolean
 }

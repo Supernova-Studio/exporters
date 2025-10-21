@@ -1,4 +1,4 @@
-import { OutputTextFile, Token, TokenGroup, TokenType, ColorToken } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenGroup, TokenType, ColorToken, TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileHelper, NamingHelper, StringCase, TokenNameTracker } from "@supernovaio/export-utils"
 
 /**
@@ -145,6 +145,177 @@ export function createComposeColorFile(
 
   return FileHelper.createTextFile({
     relativePath: `./${outputFolderName}`,
+    fileName: `${fileName}.kt`,
+    content
+  })
+}
+
+/**
+ * Resolves token value to either a direct color value or a reference to another token
+ */
+function resolveTokenValue(
+  token: Token,
+  allTokens: Array<Token>,
+  tracker: TokenNameTracker,
+  tokenGroups: Array<TokenGroup>
+): string {
+  // If token references another token
+  const tokenValue = (token as any).value
+  if (tokenValue?.referencedTokenId) {
+    const referencedToken = allTokens.find(t => t.id === tokenValue.referencedTokenId)
+    if (referencedToken) {
+      const refName = tracker.getTokenName(referencedToken, tokenGroups, StringCase.pascalCase, null, false)
+      return NamingHelper.codeSafeVariableName(refName, StringCase.pascalCase)
+    }
+  }
+  
+  // Otherwise return direct color value
+  const rgba = extractRgbaFromToken(token)
+  if (!rgba) {
+    return "Color(0xFF000000)" // Fallback color
+  }
+  
+  return toAndroidColorFormat(rgba.r, rgba.g, rgba.b, rgba.a)
+}
+
+/**
+ * Creates a Kotlin interface file for semantic tokens.
+ *
+ * Parameters
+ * - tokens: Array of semantic color tokens
+ * - interfaceName: Name of the Kotlin interface
+ * - fileName: Name of the .kt file (without extension)
+ * - folderName: Name of the folder where the interface will be generated
+ * - propertyAnnotation: Annotation to add to interface properties
+ * - tokenGroups: All groups from the design system, used for hierarchical naming
+ * - tracker: TokenNameTracker to produce stable, unique property names
+ *
+ * Returns
+ * - OutputTextFile describing where to write the .kt file, or null if no valid tokens
+ *
+ * File content structure:
+ * ```kotlin
+ * interface InterfaceName {
+ *     @DesignPropertyV2 val PropertyName1: Color
+ *     @DesignPropertyV2 val PropertyName2: Color
+ * }
+ * ```
+ */
+export function createInterfaceFile(
+  tokens: Array<Token>,
+  interfaceName: string,
+  fileName: string,
+  folderName: string,
+  propertyAnnotation: string,
+  tokenGroups: Array<TokenGroup>,
+  tracker: TokenNameTracker
+): OutputTextFile | null {
+  // Filter: this exporter handles ONLY color tokens
+  const colorTokens = tokens.filter((token) => token.tokenType === TokenType.color)
+  
+  if (colorTokens.length === 0) {
+    return null
+  }
+
+  const properties: string[] = []
+
+  // Generate property for each color token
+  for (const token of colorTokens) {
+    // Generate a unique, stable property name using the tracker
+    const baseName = tracker.getTokenName(token, tokenGroups, StringCase.pascalCase, null, false)
+    const propertyName = NamingHelper.codeSafeVariableName(baseName, StringCase.pascalCase)
+    
+    properties.push(`    ${propertyAnnotation} val ${propertyName}: Color`)
+  }
+
+  if (properties.length === 0) {
+    return null
+  }
+
+  // Generate Kotlin interface content
+  const content = [
+    `interface ${interfaceName} {`,
+    ...properties,
+    `}`
+  ].join('\n')
+
+  return FileHelper.createTextFile({
+    relativePath: `./${folderName}`,
+    fileName: `${fileName}.kt`,
+    content
+  })
+}
+
+/**
+ * Creates a Kotlin themed implementation file for semantic tokens.
+ *
+ * Parameters
+ * - tokens: Array of themed semantic color tokens
+ * - theme: Theme object for reference
+ * - interfaceName: Name of the interface being implemented
+ * - fileName: Name of the .kt file (without extension)
+ * - folderPath: Path where the themed implementation will be generated
+ * - themeIdentifier: Theme identifier for folder naming
+ * - tokenGroups: All groups from the design system, used for hierarchical naming
+ * - tokenCollections: All token collections for reference resolution
+ * - tracker: TokenNameTracker to produce stable, unique property names
+ *
+ * Returns
+ * - OutputTextFile describing where to write the .kt file, or null if no valid tokens
+ *
+ * File content structure:
+ * ```kotlin
+ * internal object InterfaceName {
+ *     override val PropertyName1: Color = ReferencedTokenName
+ *     override val PropertyName2: Color = Color(0xFFRRGGBB)
+ * }
+ * ```
+ */
+export function createThemedImplementationFile(
+  tokens: Array<Token>,
+  theme: TokenTheme,
+  interfaceName: string,
+  fileName: string,
+  folderPath: string,
+  themeIdentifier: string,
+  tokenGroups: Array<TokenGroup>,
+  tokenCollections: Array<any>,
+  tracker: TokenNameTracker
+): OutputTextFile | null {
+  // Filter: this exporter handles ONLY color tokens
+  const colorTokens = tokens.filter((token) => token.tokenType === TokenType.color)
+  
+  if (colorTokens.length === 0) {
+    return null
+  }
+
+  const properties: string[] = []
+
+  // Generate property for each color token
+  for (const token of colorTokens) {
+    // Generate a unique, stable property name using the tracker
+    const baseName = tracker.getTokenName(token, tokenGroups, StringCase.pascalCase, null, false)
+    const propertyName = NamingHelper.codeSafeVariableName(baseName, StringCase.pascalCase)
+    
+    // Resolve token value (either reference or direct color)
+    const tokenValue = resolveTokenValue(token, tokens, tracker, tokenGroups)
+    
+    properties.push(`    override val ${propertyName}: Color = ${tokenValue}`)
+  }
+
+  if (properties.length === 0) {
+    return null
+  }
+
+  // Generate Kotlin themed implementation content
+  const content = [
+    `internal object ${interfaceName} {`,
+    ...properties,
+    `}`
+  ].join('\n')
+
+  return FileHelper.createTextFile({
+    relativePath: `./${folderPath}/${themeIdentifier}`,
     fileName: `${fileName}.kt`,
     content
   })

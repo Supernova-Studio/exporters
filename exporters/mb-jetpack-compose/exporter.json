@@ -7,7 +7,7 @@
   "homepage": "https://supernova.io",
   "version": "0.1.0",
   "usesBrands": true,
-  "usesThemes": false,
+  "usesThemes": true,
   "executable": "/dist/build.js",
   "engine": "latest",
   "tags": [
