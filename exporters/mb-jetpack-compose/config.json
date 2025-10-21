@@ -2,7 +2,7 @@
   {
     "key": "collectionNames",
     "type": "array",
-    "default": ["primitive"],
+    "default": ["semantic"],
     "title": "Token collections to export",
     "description": "List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.",
     "category": "Collections"

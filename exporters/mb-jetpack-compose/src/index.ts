@@ -34,46 +34,52 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     versionId: context.versionId,
   }
 
-  // Fetch tokens and token groups from the selected design system version
-  const tokens = await sdk.tokens.getTokens(remoteVersionIdentifier)
-  const tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier)
+  const filter = {brandId: context.brandId ?? undefined}
+
+  // Fetch tokens, token groups, and token collections from the selected design system version
+  const tokens = await sdk.tokens.getTokens(remoteVersionIdentifier, filter)
+  const tokenGroups = await sdk.tokens.getTokenGroups(remoteVersionIdentifier, filter)
+  const tokenCollections = await sdk.tokens.getTokenCollections(remoteVersionIdentifier)
 
   // Only color tokens are relevant for Jetpack Compose colors
-  const colorTokens = tokens.filter((t) => t.tokenType === TokenType.color)
+  let colorTokens = tokens.filter((t) => t.tokenType === TokenType.color)
 
   // Prepare output files
   const files: Array<AnyOutputFile> = []
   const tracker = new TokenNameTracker()
 
-  // Group tokens by collection based on their group hierarchy
+  // Filter tokens to only include those from configured collections
+  const configuredCollectionNames = new Set(
+    exportConfiguration.collectionNames.map(name => name.toLowerCase().trim())
+  )
+
+  // Filter tokens based on their collectionId
+  colorTokens = colorTokens.filter((token) => {
+    // Find the collection this token belongs to
+    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
+    
+    // Include if the collection name matches any configured collection (case-insensitive)
+    if (tokenCollection && configuredCollectionNames.has(tokenCollection.name.toLowerCase().trim())) {
+      return true // Include this token
+    }
+    
+    return false // Exclude this token
+  })
+
+  // Group tokens by collection
   const tokensByCollection = new Map<string, Array<Token>>()
   
   for (const token of colorTokens) {
-    // Find the root group (collection) for this token
-    const rootGroup = findRootGroup(token, tokenGroups)
+    // Find the collection this token belongs to
+    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
     
-    if (rootGroup) {
-      const collectionName = rootGroup.name.toLowerCase()
+    if (tokenCollection) {
+      const collectionName = tokenCollection.name.toLowerCase().trim()
       
-      // Only include tokens from configured collections
-      if (exportConfiguration.collectionNames.includes(collectionName)) {
-        if (!tokensByCollection.has(collectionName)) {
-          tokensByCollection.set(collectionName, [])
-        }
-        tokensByCollection.get(collectionName)!.push(token)
+      if (!tokensByCollection.has(collectionName)) {
+        tokensByCollection.set(collectionName, [])
       }
-    } else {
-      // If no root group found, try to use the token's direct group
-      const directGroup = tokenGroups.find(g => g.id === (token as any).groupId)
-      if (directGroup) {
-        const collectionName = directGroup.name.toLowerCase()
-        if (exportConfiguration.collectionNames.includes(collectionName)) {
-          if (!tokensByCollection.has(collectionName)) {
-            tokensByCollection.set(collectionName, [])
-          }
-          tokensByCollection.get(collectionName)!.push(token)
-        }
-      }
+      tokensByCollection.get(collectionName)!.push(token)
     }
   }
 
@@ -132,29 +138,3 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   return files
 })
 
-/**
- * Helper function to find the root group (collection) for a token
- * by traversing up the group hierarchy
- */
-function findRootGroup(token: Token, tokenGroups: Array<any>): any | null {
-  // Get the group ID from the token's path or use a different approach
-  const tokenGroupId = (token as any).groupId || (token as any).parentGroupId
-  if (!tokenGroupId) {
-    return null
-  }
-  
-  const group = tokenGroups.find(g => g.id === tokenGroupId)
-  if (!group) {
-    return null
-  }
-  
-  // If this group has no parent, it's the root group
-  if (!group.parentId) {
-    return group
-  }
-  
-  // Recursively find the root group
-  const parentToken = { ...token } as any
-  parentToken.groupId = group.parentId
-  return findRootGroup(parentToken as Token, tokenGroups)
-}
