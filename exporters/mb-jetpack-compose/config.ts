@@ -1,6 +1,6 @@
 export type ExporterConfiguration = {
   /** List of token collection names to export (e.g., primitive, semantic) */
-  collectionNameFilters: string[]
+  collectionNames: string[]
   /** Name of the folder where .kt files will be generated */
   outputFolderName: string
   /** Mapping of collection names to .kt file names (without extension) */
@@ -15,10 +15,6 @@ export type ExporterConfiguration = {
   // Theme Support
   /** Enable theme support - generate interface + themed implementations */
   enableThemeSupport: boolean
-  /** Collections that will be generated as @Immutable objects with concrete values */
-  primitiveCollections: string[]
-  /** Collections that will be generated as interface + themed implementations */
-  semanticCollections: string[]
   /** Name of the interface file (without .kt extension) */
   interfaceFileName: string
   /** Name of the Kotlin interface */

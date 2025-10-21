@@ -91,8 +91,6 @@ Defined in `config.json` (Pulsar exporter schema). Key options:
 
 ### Theme Support
 - `enableThemeSupport` (boolean, default false): Enable theme support - generate interface + themed implementations.
-- `primitiveCollections` (array, default `["primitive"]`): Collections that will be generated as @Immutable objects with concrete values.
-- `semanticCollections` (array, default `["semantic"]`): Collections that will be generated as interface + themed implementations.
 - `interfaceFileName` (string, default `"MBBaseColorScheme"`): Name of the interface file (without .kt extension).
 - `interfaceName` (string, default `"MBBaseColorScheme"`): Name of the Kotlin interface.
 - `interfacePropertyAnnotation` (string, default `"@DesignPropertyV2"`): Annotation to add to interface properties.
@@ -111,8 +109,8 @@ When `enableThemeSupport` is enabled, the exporter follows Supernova's standard 
 
 1. **Theme Selection**: Themes are selected in the Supernova pipeline/UI and passed via `context.themeIds`
 2. **Collection Mapping**: 
-   - `primitiveCollections` → Generated as `@Immutable object` with concrete `Color(0xAARRGGBB)` values
-   - `semanticCollections` → Generated as interface + themed implementations
+   - All configured collections → Generated as `@Immutable object` with concrete `Color(0xAARRGGBB)` values
+   - First collection → Also generates interface + themed implementations
 3. **File Structure**:
    - Primitives: `<outputFolderName>/<fileName>.kt` (unchanged from standard mode)
    - Interface: `<interfaceFileName>.kt` (at root level)
@@ -120,7 +118,7 @@ When `enableThemeSupport` is enabled, the exporter follows Supernova's standard 
 
 ### Example Theme Workflow
 1. Enable `enableThemeSupport` in exporter configuration
-2. Configure `primitiveCollections: ["primitive"]` and `semanticCollections: ["semantic"]`
+2. Configure `collectionNames: ["primitive", "semantic"]` (same as standard mode)
 3. Select themes in Supernova pipeline (e.g., "Mercedes Light", "Mercedes Dark", "AMG Light")
 4. Export generates:
    - `color/Primitive.kt` (concrete values)

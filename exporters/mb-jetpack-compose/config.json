@@ -40,24 +40,6 @@
     "category": "Theme template upport"
   },
   {
-    "key": "primitiveCollections",
-    "type": "array",
-    "default": ["primitive"],
-    "title": "Primitive collections",
-    "description": "Collections that will be generated as @Immutable objects with concrete values.",
-    "category": "Theme Support",
-    "dependsOn": { "enableThemeSupport": true }
-  },
-  {
-    "key": "semanticCollections",
-    "type": "array",
-    "default": ["semantic"],
-    "title": "Semantic collections",
-    "description": "Collections that will be generated as interface + themed implementations.",
-    "category": "Theme Support",
-    "dependsOn": { "enableThemeSupport": true }
-  },
-  {
     "key": "interfaceFileName",
     "type": "string",
     "default": "MBBaseColorScheme",

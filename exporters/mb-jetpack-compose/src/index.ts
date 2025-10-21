@@ -54,13 +54,59 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // CASE 2: Theme support enabled
-  // Generate primitives (always concrete values)
-  files.push(...generatePrimitiveFiles(colorTokens, tokenGroups, tokenCollections, tracker))
+  // Generate files for each configured collection
+  const configuredCollectionNames = new Set(
+    exportConfiguration.collectionNames.map(name => name.toLowerCase().trim())
+  )
+
+  // Filter tokens based on their collectionId
+  const filteredTokens = colorTokens.filter((token) => {
+    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
+    return tokenCollection && configuredCollectionNames.has(tokenCollection.name.toLowerCase().trim())
+  })
+
+  // Group tokens by collection
+  const tokensByCollection = new Map<string, Array<Token>>()
   
-  // Generate interface from semantic collection
-  const interfaceFile = generateInterfaceFile(colorTokens, tokenGroups, tokenCollections, tracker)
-  if (interfaceFile) {
-    files.push(interfaceFile)
+  for (const token of filteredTokens) {
+    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
+    if (tokenCollection) {
+      const collectionName = tokenCollection.name.toLowerCase().trim()
+      if (!tokensByCollection.has(collectionName)) {
+        tokensByCollection.set(collectionName, [])
+      }
+      tokensByCollection.get(collectionName)!.push(token)
+    }
+  }
+
+  // Generate files for each collection
+  for (const [collectionName, collectionTokens] of tokensByCollection) {
+    const fileName = exportConfiguration.fileNames[collectionName] || collectionName
+    const objectName = exportConfiguration.objectNames[collectionName] || `${collectionName}Colors`
+    
+    // Generate primitive file (always @Immutable object)
+    const primitiveFile = createComposeColorFile(
+      collectionTokens,
+      collectionName,
+      objectName,
+      fileName,
+      exportConfiguration.outputFolderName,
+      tokenGroups,
+      tracker
+    )
+    
+    if (primitiveFile) {
+      files.push(primitiveFile)
+    }
+  }
+
+  // Generate interface from the first collection (assuming semantic collection)
+  const firstCollection = Array.from(tokensByCollection.values())[0]
+  if (firstCollection) {
+    const interfaceFile = generateInterfaceFile(firstCollection, tokenGroups, tracker)
+    if (interfaceFile) {
+      files.push(interfaceFile)
+    }
   }
   
   // Generate themed implementations
@@ -75,7 +121,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     for (const theme of themesToApply) {
       const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
       const themedColorTokens = themedTokens.filter((t) => t.tokenType === TokenType.color)
-      const themedFile = generateThemedImplementation(themedColorTokens, theme, tokenGroups, tokenCollections, tracker)
+      
+      // Filter themed tokens by the same collections
+      const filteredThemedTokens = themedColorTokens.filter((token) => {
+        const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
+        return tokenCollection && configuredCollectionNames.has(tokenCollection.name.toLowerCase().trim())
+      })
+      
+      const themedFile = generateThemedImplementation(filteredThemedTokens, theme, tokenGroups, tokenCollections, tracker)
       if (themedFile) {
         files.push(themedFile)
       }
@@ -108,8 +161,8 @@ function generateStandardExport(
   const files: Array<AnyOutputFile> = []
 
   // Filter tokens to only include those from configured collections
-  const configuredcollectionNameFilters = new Set(
-    exportConfiguration.collectionNameFilters.map(name => name.toLowerCase().trim())
+  const configuredCollectionNames = new Set(
+    exportConfiguration.collectionNames.map(name => name.toLowerCase().trim())
   )
 
   // Filter tokens based on their collectionId
@@ -118,7 +171,7 @@ function generateStandardExport(
     const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
     
     // Include if the collection name matches any configured collection (case-insensitive)
-    if (tokenCollection && configuredcollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())) {
+    if (tokenCollection && configuredCollectionNames.has(tokenCollection.name.toLowerCase().trim())) {
       return true // Include this token
     }
     
@@ -187,81 +240,13 @@ function generateStandardExport(
 }
 
 /**
- * Generate primitive files (concrete @Immutable objects)
- */
-function generatePrimitiveFiles(
-  colorTokens: Array<Token>,
-  tokenGroups: Array<any>,
-  tokenCollections: Array<any>,
-  tracker: TokenNameTracker
-): Array<AnyOutputFile> {
-  const files: Array<AnyOutputFile> = []
-  
-  // Filter tokens from primitive collections
-  const primitivecollectionNameFilters = new Set(
-    exportConfiguration.primitiveCollections.map(name => name.toLowerCase().trim())
-  )
-  
-  const primitiveTokens = colorTokens.filter((token) => {
-    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    return tokenCollection && primitivecollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())
-  })
-  
-  // Group by collection and generate files
-  const tokensByCollection = new Map<string, Array<Token>>()
-  
-  for (const token of primitiveTokens) {
-    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    if (tokenCollection) {
-      const collectionName = tokenCollection.name.toLowerCase().trim()
-      if (!tokensByCollection.has(collectionName)) {
-        tokensByCollection.set(collectionName, [])
-      }
-      tokensByCollection.get(collectionName)!.push(token)
-    }
-  }
-  
-  for (const [collectionName, collectionTokens] of tokensByCollection) {
-    const fileName = exportConfiguration.fileNames[collectionName] || collectionName
-    const objectName = exportConfiguration.objectNames[collectionName] || `${collectionName}Colors`
-    
-    const file = createComposeColorFile(
-      collectionTokens,
-      collectionName,
-      objectName,
-      fileName,
-      exportConfiguration.outputFolderName,
-      tokenGroups,
-      tracker
-    )
-    
-    if (file) {
-      files.push(file)
-    }
-  }
-  
-  return files
-}
-
-/**
  * Generate interface file from semantic collections
  */
 function generateInterfaceFile(
-  colorTokens: Array<Token>,
+  semanticTokens: Array<Token>,
   tokenGroups: Array<any>,
-  tokenCollections: Array<any>,
   tracker: TokenNameTracker
 ): AnyOutputFile | null {
-  // Filter tokens from semantic collections
-  const semanticcollectionNameFilters = new Set(
-    exportConfiguration.semanticCollections.map(name => name.toLowerCase().trim())
-  )
-  
-  const semanticTokens = colorTokens.filter((token) => {
-    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    return tokenCollection && semanticcollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())
-  })
-  
   if (semanticTokens.length === 0) {
     return null
   }
@@ -286,24 +271,14 @@ function generateThemedImplementation(
   tokenCollections: Array<any>,
   tracker: TokenNameTracker
 ): AnyOutputFile | null {
-  // Filter tokens from semantic collections
-  const semanticcollectionNameFilters = new Set(
-    exportConfiguration.semanticCollections.map(name => name.toLowerCase().trim())
-  )
-  
-  const semanticTokens = themedColorTokens.filter((token) => {
-    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-    return tokenCollection && semanticcollectionNameFilters.has(tokenCollection.name.toLowerCase().trim())
-  })
-  
-  if (semanticTokens.length === 0) {
+  if (themedColorTokens.length === 0) {
     return null
   }
   
   const themeIdentifier = ThemeHelper.getThemeIdentifier(theme, StringCase.kebabCase)
   
   return createThemedImplementationFile(
-    semanticTokens,
+    themedColorTokens,
     theme,
     exportConfiguration.interfaceName,
     exportConfiguration.interfaceFileName,
