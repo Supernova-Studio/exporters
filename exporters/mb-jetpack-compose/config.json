@@ -45,7 +45,7 @@
     "default": "MBBaseColorScheme",
     "title": "Interface file name",
     "description": "Name of the interface file (without .kt extension).",
-    "category": "Theme-based color tokens",
+    "category": "Theme-based color tokens - Interface scheme",
     "dependsOn": { "enableThemeSupport": true }
   },
   {
@@ -54,7 +54,7 @@
     "default": "MBBaseColorScheme",
     "title": "Interface name",
     "description": "Name of the Kotlin interface.",
-    "category": "Theme-based color tokens",
+    "category": "Theme-based color tokens - Interface scheme",
     "dependsOn": { "enableThemeSupport": true }
   },
   {
@@ -63,7 +63,43 @@
     "default": "@DesignPropertyV2",
     "title": "Property annotation",
     "description": "Annotation to add to interface properties (e.g., @DesignPropertyV2).",
-    "category": "Theme-based color tokens",
+    "category": "Theme-based color tokens - Interface scheme",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "interfaceCollections",
+    "type": "array",
+    "default": ["semantic"],
+    "title": "Interface collections filter",
+    "description": "Token collections to include in the interface file (e.g., semantic). All specified collections will be combined into one interface.",
+    "category": "Theme-based color tokens - Interface scheme",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "themeCollections",
+    "type": "array",
+    "default": ["semantic"],
+    "title": "Theme token collections filter",
+    "description": "Token collections to include in themed implementation files (e.g., semantic).",
+    "category": "Theme-based color tokens - Theme tokens",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "themeFileNames",
+    "type": "object",
+    "default": {"semantic": "MBBaseColorScheme"},
+    "title": "Theme file names mapping",
+    "description": "Mapping of collection names to base file names for themed implementations (theme name will be appended).",
+    "category": "Theme-based color tokens - Theme tokens",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "themeObjectNames",
+    "type": "object",
+    "default": {"semantic": "MBBaseColorScheme"},
+    "title": "Theme object names mapping",
+    "description": "Mapping of collection names to Kotlin object names for themed implementations.",
+    "category": "Theme-based color tokens - Theme tokens",
     "dependsOn": { "enableThemeSupport": true }
   },
   {

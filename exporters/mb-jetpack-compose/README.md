@@ -80,7 +80,7 @@ internal object MBBaseColorScheme {
 Defined in `config.json` (Pulsar exporter schema). Key options:
 
 ### Collections
-- `collectionNameFilters` (array, default `["primitive"]`): List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.
+- `collectionNames` (array, default `["primitive"]`): List of token collection names to export (e.g., primitive, semantic). Each collection will generate a separate .kt file.
 
 ### Output
 - `outputFolderName` (string, default `"color"`): Name of the folder where .kt files will be generated.
@@ -89,11 +89,17 @@ Defined in `config.json` (Pulsar exporter schema). Key options:
 - `fileNames` (object, default `{"primitive": "Primitive"}`): Mapping of collection names to .kt file names (without extension).
 - `objectNames` (object, default `{"primitive": "PrimitiveColors"}`): Mapping of collection names to Kotlin object names.
 
-### Theme Support
+### Theme Support - Interface Scheme
 - `enableThemeSupport` (boolean, default false): Enable theme support - generate interface + themed implementations.
+- `interfaceCollections` (array, default ["semantic"]): Collections to include in the interface file.
 - `interfaceFileName` (string, default `"MBBaseColorScheme"`): Name of the interface file (without .kt extension).
 - `interfaceName` (string, default `"MBBaseColorScheme"`): Name of the Kotlin interface.
 - `interfacePropertyAnnotation` (string, default `"@DesignPropertyV2"`): Annotation to add to interface properties.
+
+### Theme Support - Theme Tokens
+- `themeCollections` (array, default ["semantic"]): Collections to include in themed implementation files.
+- `themeFileNames` (object, default {"semantic": "MBBaseColorScheme"}): Mapping of collection names to base file names for themed implementations.
+- `themeObjectNames` (object, default {"semantic": "MBBaseColorScheme"}): Mapping of collection names to Kotlin object names for themed implementations.
 
 ### Automatic write-back
 - `writeNameToProperty` (boolean, default false): Enable write-back of property names to tokens.
@@ -116,14 +122,15 @@ When `enableThemeSupport` is enabled, the exporter follows Supernova's standard 
 
 ### Example Theme Workflow
 1. Enable `enableThemeSupport` in exporter configuration
-2. Configure `collectionNames: ["primitive", "semantic"]` (same as standard mode)
-3. Select themes in Supernova pipeline (e.g., "Mercedes Light", "Mercedes Dark", "AMG Light")
-4. Export generates:
-   - `color/Primitive.kt` (concrete values)
-   - `MBBaseColorScheme.kt` (interface at root)
-   - `color/MBBaseMercedesLightColor.kt` (Mercedes Light implementation)
-   - `color/MBBaseMercedesDarkColor.kt` (Mercedes Dark implementation)
-   - `color/MBBaseAMGLightColor.kt` (AMG Light implementation)
+2. Configure `collectionNames: ["primitive"]` for primitives
+3. Configure `interfaceCollections: ["semantic"]` for interface
+4. Configure `themeCollections: ["semantic"]` for themed implementations
+5. Select themes in Supernova pipeline (e.g., "Mercedes Light", "Mercedes Dark", "AMG Light")
+6. Export generates:
+   - `color/Primitive.kt` (from collectionNames: ["primitive"])
+   - `MBBaseColorScheme.kt` (interface from interfaceCollections: ["semantic"])
+   - `color/MBBaseMercedesLightColor.kt` (from themeCollections: ["semantic"])
+   - `color/MBBaseMercedesDarkColor.kt` (from themeCollections: ["semantic"])
 
 ## Write-back (keeps docs and Portal in sync)
 When `writeNameToProperty` is enabled, the exporter saves the generated property name for each color token

@@ -21,4 +21,16 @@ export type ExporterConfiguration = {
   interfaceName: string
   /** Annotation to add to interface properties (e.g., @DesignPropertyV2) */
   interfacePropertyAnnotation: string
+  
+  // Theme Support - Interface scheme
+  /** Collections to include in interface file */
+  interfaceCollections: string[]
+  
+  // Theme Support - Theme tokens
+  /** Collections to include in themed implementations */
+  themeCollections: string[]
+  /** Mapping of collection names to base file names for themed implementations */
+  themeFileNames: Record<string, string>
+  /** Mapping of collection names to Kotlin object names for themed implementations */
+  themeObjectNames: Record<string, string>
 }

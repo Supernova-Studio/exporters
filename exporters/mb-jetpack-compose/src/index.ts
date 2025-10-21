@@ -100,10 +100,20 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     }
   }
 
-  // Generate interface from the first collection (assuming semantic collection)
-  const firstCollection = Array.from(tokensByCollection.values())[0]
-  if (firstCollection) {
-    const interfaceFile = generateInterfaceFile(firstCollection, tokenGroups, tracker)
+  // Generate interface from specified interfaceCollections
+  const interfaceCollectionNames = new Set(
+    exportConfiguration.interfaceCollections.map(name => name.toLowerCase().trim())
+  )
+
+  const interfaceTokens: Array<Token> = []
+  for (const [collectionName, collectionTokens] of tokensByCollection) {
+    if (interfaceCollectionNames.has(collectionName)) {
+      interfaceTokens.push(...collectionTokens)
+    }
+  }
+
+  if (interfaceTokens.length > 0) {
+    const interfaceFile = generateInterfaceFile(interfaceTokens, tokenGroups, tracker)
     if (interfaceFile) {
       files.push(interfaceFile)
     }
@@ -118,19 +128,50 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       return theme
     })
     
+    const themeCollectionNames = new Set(
+      exportConfiguration.themeCollections.map(name => name.toLowerCase().trim())
+    )
+    
     for (const theme of themesToApply) {
       const themedTokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, [theme])
       const themedColorTokens = themedTokens.filter((t) => t.tokenType === TokenType.color)
       
-      // Filter themed tokens by the same collections
+      // Filter themed tokens by themeCollections
       const filteredThemedTokens = themedColorTokens.filter((token) => {
         const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
-        return tokenCollection && configuredCollectionNames.has(tokenCollection.name.toLowerCase().trim())
+        return tokenCollection && themeCollectionNames.has(tokenCollection.name.toLowerCase().trim())
       })
       
-      const themedFile = generateThemedImplementation(filteredThemedTokens, theme, tokenGroups, tokenCollections, tracker)
-      if (themedFile) {
-        files.push(themedFile)
+      // Group themed tokens by collection
+      const themedTokensByCollection = new Map<string, Array<Token>>()
+      for (const token of filteredThemedTokens) {
+        const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
+        if (tokenCollection) {
+          const collectionName = tokenCollection.name.toLowerCase().trim()
+          if (!themedTokensByCollection.has(collectionName)) {
+            themedTokensByCollection.set(collectionName, [])
+          }
+          themedTokensByCollection.get(collectionName)!.push(token)
+        }
+      }
+      
+      // Generate themed file for each collection
+      for (const [collectionName, collectionTokens] of themedTokensByCollection) {
+        const baseFileName = exportConfiguration.themeFileNames[collectionName] || exportConfiguration.interfaceFileName
+        const objectName = exportConfiguration.themeObjectNames[collectionName] || exportConfiguration.interfaceName
+        
+        const themedFile = generateThemedImplementation(
+          collectionTokens,
+          theme,
+          objectName,
+          baseFileName,
+          tokenGroups,
+          tokenCollections,
+          tracker
+        )
+        if (themedFile) {
+          files.push(themedFile)
+        }
       }
     }
   }
@@ -267,6 +308,8 @@ function generateInterfaceFile(
 function generateThemedImplementation(
   themedColorTokens: Array<Token>,
   theme: TokenTheme,
+  objectName: string,
+  baseFileName: string,
   tokenGroups: Array<any>,
   tokenCollections: Array<any>,
   tracker: TokenNameTracker
@@ -280,8 +323,8 @@ function generateThemedImplementation(
   return createThemedImplementationFile(
     themedColorTokens,
     theme,
-    exportConfiguration.interfaceName,
-    exportConfiguration.interfaceFileName,
+    objectName,
+    baseFileName,
     themeIdentifier,
     tokenGroups,
     tokenCollections,
