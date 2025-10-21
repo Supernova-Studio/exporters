@@ -270,7 +270,6 @@ function generateInterfaceFile(
     semanticTokens,
     exportConfiguration.interfaceName,
     exportConfiguration.interfaceFileName,
-    exportConfiguration.themeFolderName,
     exportConfiguration.interfacePropertyAnnotation,
     tokenGroups,
     tracker
@@ -308,7 +307,6 @@ function generateThemedImplementation(
     theme,
     exportConfiguration.interfaceName,
     exportConfiguration.interfaceFileName,
-    exportConfiguration.themeFolderName,
     themeIdentifier,
     tokenGroups,
     tokenCollections,

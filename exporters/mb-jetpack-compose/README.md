@@ -38,8 +38,9 @@ Notes:
 <outputFolderName>/                    # primitive collections as @Immutable objects
   <fileName>.kt
 
-<themeFolderName>/                     # theme folder (default: "mbdesigntheme")
-  <interfaceFileName>.kt              # interface with @DesignPropertyV2 properties
+<interfaceFileName>.kt                 # interface at root level
+
+color/                                 # themed implementations folder
   <themeIdentifier>/                  # theme folder (e.g., "mercedes-light")
     <interfaceFileName>.kt            # internal object implementing interface
   <themeIdentifier>/
@@ -61,7 +62,7 @@ object ObjectName {                   // configurable object name
 
 ### Theme Mode
 
-#### Interface file (`mbdesigntheme/MBBaseColorScheme.kt`):
+#### Interface file (`MBBaseColorScheme.kt`):
 ```kotlin
 interface MBBaseColorScheme {
     @DesignPropertyV2 val bgNavigation: Color
@@ -69,7 +70,7 @@ interface MBBaseColorScheme {
 }
 ```
 
-#### Themed implementation (`mbdesigntheme/mercedes-light/MBBaseColorScheme.kt`):
+#### Themed implementation (`color/mercedes-light/MBBaseColorScheme.kt`):
 ```kotlin
 internal object MBBaseColorScheme {
     override val bgNavigation: Color = WhiteAlpha1000  // Reference to primitive
@@ -97,7 +98,6 @@ Defined in `config.json` (Pulsar exporter schema). Key options:
 - `interfaceFileName` (string, default `"MBBaseColorScheme"`): Name of the interface file (without .kt extension).
 - `interfaceName` (string, default `"MBBaseColorScheme"`): Name of the Kotlin interface.
 - `interfacePropertyAnnotation` (string, default `"@DesignPropertyV2"`): Annotation to add to interface properties.
-- `themeFolderName` (string, default `"mbdesigntheme"`): Folder name where interface and themed implementations will be generated.
 - `exportOnlyThemedTokens` (boolean, default false): Only include tokens that have different values in themes.
 - `exportBaseValues` (boolean, default true): Generate non-themed base files alongside themed implementations.
 
@@ -117,8 +117,8 @@ When `enableThemeSupport` is enabled, the exporter follows Supernova's standard 
    - `semanticCollections` → Generated as interface + themed implementations
 3. **File Structure**:
    - Primitives: `<outputFolderName>/<fileName>.kt` (unchanged from standard mode)
-   - Interface: `<themeFolderName>/<interfaceFileName>.kt`
-   - Themed implementations: `<themeFolderName>/<themeIdentifier>/<interfaceFileName>.kt`
+   - Interface: `<interfaceFileName>.kt` (at root level)
+   - Themed implementations: `color/<themeIdentifier>/<interfaceFileName>.kt`
 
 ### Example Theme Workflow
 1. Enable `enableThemeSupport` in exporter configuration
@@ -126,10 +126,10 @@ When `enableThemeSupport` is enabled, the exporter follows Supernova's standard 
 3. Select themes in Supernova pipeline (e.g., "Mercedes Light", "Mercedes Dark", "AMG Light")
 4. Export generates:
    - `color/Primitive.kt` (concrete values)
-   - `mbdesigntheme/MBBaseColorScheme.kt` (interface)
-   - `mbdesigntheme/mercedes-light/MBBaseColorScheme.kt` (Mercedes Light implementation)
-   - `mbdesigntheme/mercedes-dark/MBBaseColorScheme.kt` (Mercedes Dark implementation)
-   - `mbdesigntheme/amg-light/MBBaseColorScheme.kt` (AMG Light implementation)
+   - `MBBaseColorScheme.kt` (interface at root)
+   - `color/mercedes-light/MBBaseColorScheme.kt` (Mercedes Light implementation)
+   - `color/mercedes-dark/MBBaseColorScheme.kt` (Mercedes Dark implementation)
+   - `color/amg-light/MBBaseColorScheme.kt` (AMG Light implementation)
 
 ## Write-back (keeps docs and Portal in sync)
 When `writeNameToProperty` is enabled, the exporter saves the generated property name for each color token

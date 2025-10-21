@@ -185,7 +185,6 @@ function resolveTokenValue(
  * - tokens: Array of semantic color tokens
  * - interfaceName: Name of the Kotlin interface
  * - fileName: Name of the .kt file (without extension)
- * - folderName: Name of the folder where the interface will be generated
  * - propertyAnnotation: Annotation to add to interface properties
  * - tokenGroups: All groups from the design system, used for hierarchical naming
  * - tracker: TokenNameTracker to produce stable, unique property names
@@ -205,7 +204,6 @@ export function createInterfaceFile(
   tokens: Array<Token>,
   interfaceName: string,
   fileName: string,
-  folderName: string,
   propertyAnnotation: string,
   tokenGroups: Array<TokenGroup>,
   tracker: TokenNameTracker
@@ -240,7 +238,7 @@ export function createInterfaceFile(
   ].join('\n')
 
   return FileHelper.createTextFile({
-    relativePath: `./${folderName}`,
+    relativePath: `./`,
     fileName: `${fileName}.kt`,
     content
   })
@@ -254,7 +252,6 @@ export function createInterfaceFile(
  * - theme: Theme object for reference
  * - interfaceName: Name of the interface being implemented
  * - fileName: Name of the .kt file (without extension)
- * - themeFolderName: Folder name where themed implementations will be generated
  * - themeIdentifier: Theme identifier for folder naming
  * - tokenGroups: All groups from the design system, used for hierarchical naming
  * - tokenCollections: All token collections for reference resolution
@@ -276,7 +273,6 @@ export function createThemedImplementationFile(
   theme: TokenTheme,
   interfaceName: string,
   fileName: string,
-  themeFolderName: string,
   themeIdentifier: string,
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<any>,
@@ -315,7 +311,7 @@ export function createThemedImplementationFile(
   ].join('\n')
 
   return FileHelper.createTextFile({
-    relativePath: `./${themeFolderName}/${themeIdentifier}`,
+    relativePath: `./color/${themeIdentifier}`,
     fileName: `${fileName}.kt`,
     content
   })

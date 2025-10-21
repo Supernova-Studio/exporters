@@ -85,15 +85,6 @@
     "dependsOn": { "enableThemeSupport": true }
   },
   {
-    "key": "themeFolderName",
-    "type": "string",
-    "default": "mbdesigntheme",
-    "title": "Theme folder name",
-    "description": "Folder name where interface and themed implementations will be generated.",
-    "category": "Theme Support",
-    "dependsOn": { "enableThemeSupport": true }
-  },
-  {
     "key": "exportOnlyThemedTokens",
     "type": "boolean",
     "default": false,

@@ -25,8 +25,6 @@ export type ExporterConfiguration = {
   interfaceName: string
   /** Annotation to add to interface properties (e.g., @DesignPropertyV2) */
   interfacePropertyAnnotation: string
-  /** Folder name where interface and themed implementations will be generated */
-  themeFolderName: string
   /** Only include tokens that have different values in themes */
   exportOnlyThemedTokens: boolean
   /** Generate non-themed base files alongside themed implementations */
