@@ -107,12 +107,12 @@ export function getColorTokenRgbValue(token: Token): string {
   if (token.tokenType !== TokenType.color) {
     throw new Error(`Expected color token, got ${token.tokenType}`)
   }
-  
+
   const colorValue = (token as any).value
   const r = Math.round(colorValue.color.r)
   const g = Math.round(colorValue.color.g)
   const b = Math.round(colorValue.color.b)
-  
+
   return `${r}, ${g}, ${b}`
 }
 
@@ -132,15 +132,15 @@ export function generateRgbUtilityVariable(
 ): string {
   const name = tokenVariableName(token, tokenGroups, collections)
   const rgbName = `rgb-${name}`
-  
+
   // Extract RGB values from the color token
   const colorValue = (token as any).value
   const r = Math.round(colorValue.color.r)
   const g = Math.round(colorValue.color.g)
   const b = Math.round(colorValue.color.b)
-  
+
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
-  
+
   // Add description comment if enabled and description exists
   if (exportConfiguration.showDescriptions && token.description) {
     return `${indentString}/* RGB utility for ${token.description.trim()} */\n${indentString}--${rgbName}: ${r}, ${g}, ${b};`
@@ -182,7 +182,7 @@ export function convertedToken(
     // When useFallbackValues is enabled, includes raw token value as fallback
     tokenToVariableRef: (t, context) => {
       const variableName = tokenVariableName(t, tokenGroups, collections)
-      
+
       if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingRgb?.has(t.id)) {
         if (exportConfiguration.useFallbackValues) {
           const rgbValue = getColorTokenRgbValue(t)
@@ -190,7 +190,7 @@ export function convertedToken(
         }
         return `var(--rgb-${variableName})`
       }
-      
+
       if (exportConfiguration.useFallbackValues) {
         const rawValue = getTokenRawValue(t, mappedTokens)
         return `var(--${variableName}, ${rawValue})`
@@ -201,20 +201,20 @@ export function convertedToken(
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   let output = ""
-  
+
   // Add description comment if enabled and description exists
   if (exportConfiguration.showDescriptions && token.description) {
     output += `${indentString}/* ${token.description.trim()} */\n`
   }
-  
+
   // Add the main token variable
   output += `${indentString}--${name}: ${value};`
-  
+
   // Generate RGB utility variable if this color token needs one
   if (token.tokenType === TokenType.color && colorTokensNeedingRgb?.has(token.id)) {
     output += `\n${generateRgbUtilityVariable(token, tokenGroups, collections)}`
   }
-  
+
   return output
 }
 
@@ -231,16 +231,27 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, 
   const prefix = getTokenPrefix(token.tokenType)
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
 
+  // Determine the token name structure to use for this token
+  let tokenNameStructure = exportConfiguration.tokenNameStructure
+
+  // Check if there's a specific override for this token type
+  if (exportConfiguration.customizeTokenNameStructureOverrides && exportConfiguration.tokenNameStructureOverrides) {
+    const override = exportConfiguration.tokenNameStructureOverrides[token.tokenType]
+    if (override) {
+      tokenNameStructure = override as TokenNameStructure
+    }
+  }
+
   // Find collection if needed and exists
   let collection: DesignSystemCollection | null = null
-  if (exportConfiguration.tokenNameStructure === TokenNameStructure.CollectionPathAndName && token.collectionId) {
+  if (tokenNameStructure === TokenNameStructure.CollectionPathAndName && token.collectionId) {
     collection = collections.find((c) => c.persistentId === token.collectionId) ?? ({ name: token.collectionId } as DesignSystemCollection)
   }
 
   return NamingHelper.codeSafeVariableNameForToken(
     token,
     exportConfiguration.tokenNameStyle,
-    exportConfiguration.tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
+    tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
     [exportConfiguration.globalNamePrefix, prefix, collection?.name].filter(Boolean).join('-')
   )
 }

@@ -76,6 +76,10 @@ export type ExporterConfiguration = {
   fileStructure: FileStructure
   /** Controls what parts are included in the token name */
   tokenNameStructure: TokenNameStructure
+  /** When enabled, allows customization of token name structure per token type */
+  customizeTokenNameStructureOverrides: boolean
+  /** Override token name structure for specific token types. Types not specified here will use the default tokenNameStructure */
+  tokenNameStructureOverrides: Partial<Record<TokenType, TokenNameStructure>>
   /** When enabled, generated variable names will be saved back to tokens as custom properties */
   writeNameToProperty: boolean
   /** Name of the custom property where generated variable names will be saved */
