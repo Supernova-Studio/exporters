@@ -33,4 +33,8 @@ export type ExporterConfiguration = {
   themeFileNames: Record<string, string>
   /** Mapping of collection names to Kotlin object names for themed implementations */
   themeObjectNames: Record<string, string>
+  /** Name of the folder where themed implementation files will be generated */
+  themeFolderName: string
+  /** Name of the interface/class that theme objects extend (e.g., ColorScheme) */
+  themeObjectExtends: string
 }

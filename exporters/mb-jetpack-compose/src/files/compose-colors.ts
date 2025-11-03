@@ -248,11 +248,14 @@ export function createInterfaceFile(
  * Creates a Kotlin themed implementation file for semantic tokens.
  *
  * Parameters
- * - tokens: Array of themed semantic color tokens
+ * - collectionTokens: Array of themed semantic color tokens for this collection
+ * - allThemedTokens: Array of all themed tokens (for reference resolution)
  * - theme: Theme object for reference
- * - interfaceName: Name of the interface being implemented
+ * - objectName: Name of the object being created
  * - fileName: Name of the .kt file (without extension)
  * - themeIdentifier: Theme identifier for folder naming
+ * - folderName: Name of the folder where the file will be generated
+ * - extendsName: Name of the interface/class that the object extends
  * - tokenGroups: All groups from the design system, used for hierarchical naming
  * - tokenCollections: All token collections for reference resolution
  * - tracker: TokenNameTracker to produce stable, unique property names
@@ -262,24 +265,27 @@ export function createInterfaceFile(
  *
  * File content structure:
  * ```kotlin
- * internal object InterfaceName {
+ * internal object ObjectName : ExtendsName {
  *     override val PropertyName1: Color = ReferencedTokenName
  *     override val PropertyName2: Color = Color(0xFFRRGGBB)
  * }
  * ```
  */
 export function createThemedImplementationFile(
-  tokens: Array<Token>,
+  collectionTokens: Array<Token>,
+  allThemedTokens: Array<Token>,
   theme: TokenTheme,
-  interfaceName: string,
+  objectName: string,
   fileName: string,
   themeIdentifier: string,
+  folderName: string,
+  extendsName: string,
   tokenGroups: Array<TokenGroup>,
   tokenCollections: Array<any>,
   tracker: TokenNameTracker
 ): OutputTextFile | null {
   // Filter: this exporter handles ONLY color tokens
-  const colorTokens = tokens.filter((token) => token.tokenType === TokenType.color)
+  const colorTokens = collectionTokens.filter((token) => token.tokenType === TokenType.color)
   
   if (colorTokens.length === 0) {
     return null
@@ -294,7 +300,8 @@ export function createThemedImplementationFile(
     const propertyName = NamingHelper.codeSafeVariableName(baseName, StringCase.pascalCase)
     
     // Resolve token value (either reference or direct color)
-    const tokenValue = resolveTokenValue(token, tokens, tracker, tokenGroups)
+    // Use allThemedTokens for reference resolution so we can resolve references to tokens in other collections
+    const tokenValue = resolveTokenValue(token, allThemedTokens, tracker, tokenGroups)
     
     properties.push(`    override val ${propertyName}: Color = ${tokenValue}`)
   }
@@ -305,14 +312,14 @@ export function createThemedImplementationFile(
 
   // Generate Kotlin themed implementation content
   const content = [
-    `internal object ${interfaceName} {`,
+    `internal object ${objectName} : ${extendsName} {`,
     ...properties,
     `}`
   ].join('\n')
 
   return FileHelper.createTextFile({
-    relativePath: `./color`,
-    fileName: `${fileName}${themeIdentifier.charAt(0).toUpperCase() + themeIdentifier.slice(1).replace(/-/g, '')}.kt`,
+    relativePath: `./${folderName}`,
+    fileName: `${fileName}.kt`,
     content
   })
 }

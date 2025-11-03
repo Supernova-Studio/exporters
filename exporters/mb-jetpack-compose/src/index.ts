@@ -157,14 +157,17 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       
       // Generate themed file for each collection
       for (const [collectionName, collectionTokens] of themedTokensByCollection) {
-        const baseFileName = exportConfiguration.themeFileNames[collectionName] || exportConfiguration.interfaceFileName
-        const objectName = exportConfiguration.themeObjectNames[collectionName] || exportConfiguration.interfaceName
+        const fileName = exportConfiguration.themeFileNames[collectionName] || "color"
+        const objectName = exportConfiguration.themeObjectNames[collectionName] || "ThemeColor"
         
         const themedFile = generateThemedImplementation(
           collectionTokens,
+          themedColorTokens,
           theme,
           objectName,
-          baseFileName,
+          fileName,
+          exportConfiguration.themeFolderName,
+          exportConfiguration.themeObjectExtends,
           tokenGroups,
           tokenCollections,
           tracker
@@ -306,26 +309,32 @@ function generateInterfaceFile(
  * Generate themed implementation file
  */
 function generateThemedImplementation(
-  themedColorTokens: Array<Token>,
+  collectionTokens: Array<Token>,
+  allThemedTokens: Array<Token>,
   theme: TokenTheme,
   objectName: string,
-  baseFileName: string,
+  fileName: string,
+  folderName: string,
+  extendsName: string,
   tokenGroups: Array<any>,
   tokenCollections: Array<any>,
   tracker: TokenNameTracker
 ): AnyOutputFile | null {
-  if (themedColorTokens.length === 0) {
+  if (collectionTokens.length === 0) {
     return null
   }
   
   const themeIdentifier = ThemeHelper.getThemeIdentifier(theme, StringCase.kebabCase)
   
   return createThemedImplementationFile(
-    themedColorTokens,
+    collectionTokens,
+    allThemedTokens,
     theme,
     objectName,
-    baseFileName,
+    fileName,
     themeIdentifier,
+    folderName,
+    extendsName,
     tokenGroups,
     tokenCollections,
     tracker

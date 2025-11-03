@@ -87,7 +87,7 @@
   {
     "key": "themeFileNames",
     "type": "object",
-    "default": {"semantic": "MBBaseColorScheme"},
+    "default": {"semantic": "color"},
     "title": "Theme file names mapping",
     "description": "Mapping of collection names to base file names for themed implementations (theme name will be appended).",
     "category": "Theme-based color tokens - Theme tokens",
@@ -96,9 +96,27 @@
   {
     "key": "themeObjectNames",
     "type": "object",
-    "default": {"semantic": "MBBaseColorScheme"},
+    "default": {"semantic": "ThemeColor"},
     "title": "Theme object names mapping",
     "description": "Mapping of collection names to Kotlin object names for themed implementations.",
+    "category": "Theme-based color tokens - Theme tokens",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "themeFolderName",
+    "type": "string",
+    "default": "theme",
+    "title": "Theme folder name",
+    "description": "Name of the folder where themed implementation files will be generated.",
+    "category": "Theme-based color tokens - Theme tokens",
+    "dependsOn": { "enableThemeSupport": true }
+  },
+  {
+    "key": "themeObjectExtends",
+    "type": "string",
+    "default": "ColorScheme",
+    "title": "Theme object extends",
+    "description": "Name of the interface/class that theme objects extend (e.g., ColorScheme).",
     "category": "Theme-based color tokens - Theme tokens",
     "dependsOn": { "enableThemeSupport": true }
   },
