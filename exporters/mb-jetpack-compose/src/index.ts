@@ -101,14 +101,17 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   }
 
   // Generate interface from specified interfaceCollections
+  // Note: interfaceCollections may include collections not in collectionNames,
+  // so we need to filter from ALL color tokens, not just tokensByCollection
   const interfaceCollectionNames = new Set(
     exportConfiguration.interfaceCollections.map(name => name.toLowerCase().trim())
   )
 
   const interfaceTokens: Array<Token> = []
-  for (const [collectionName, collectionTokens] of tokensByCollection) {
-    if (interfaceCollectionNames.has(collectionName)) {
-      interfaceTokens.push(...collectionTokens)
+  for (const token of colorTokens) {
+    const tokenCollection = tokenCollections.find(c => c.persistentId === token.collectionId)
+    if (tokenCollection && interfaceCollectionNames.has(tokenCollection.name.toLowerCase().trim())) {
+      interfaceTokens.push(token)
     }
   }
 
