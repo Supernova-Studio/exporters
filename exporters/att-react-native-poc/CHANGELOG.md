@@ -5,7 +5,14 @@ All the updates to this exporter are documented in this file.
 
 ### 🔧 Modified
 
-- Blur tokens now generate without `px` units (e.g., `blur(8)` instead of `blur(8px)`)
+- **Numeric token conversions for React Native compatibility:**
+  - Blur tokens: Extract numeric values from `blur()` functions (e.g., `blur(8px)` → `8`)
+  - Border radius tokens: Convert `px` strings to numbers (e.g., `'8px'` → `8`)
+  - Border width tokens: Convert `px` strings to numbers (e.g., `'1px'` → `1`)
+  - Duration tokens: Convert `ms` strings to numbers (e.g., `'100ms'` → `100`)
+  - Font size tokens: Convert `px` strings to numbers (e.g., `'16px'` → `16`)
+  - Opacity tokens: Convert string values to numbers (e.g., `'0.4'` → `0.4`)
+  - Space tokens: Convert `px` strings to numbers (e.g., `'8px'` → `8`)
 
 ## 2.1.0 - 2025-03-12
 

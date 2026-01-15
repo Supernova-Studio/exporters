@@ -96,10 +96,43 @@ export function styleOutputFile(
       },
     })
 
-    // Remove px units from blur() functions for Blur tokens
-    // Skip if value contains references (template literals with ${})
-    if (type === TokenType.blur && !value.includes('${')) {
-      value = value.replace(/blur\((\d+(?:\.\d+)?)px\)/g, 'blur($1)')
+    // Skip processing if value contains references (template literals with ${})
+    if (value.includes('${')) {
+      return `const ${name} = ${formatTokenValue(value)};`
+    }
+
+    // Special handling for blur tokens (has blur() function)
+    if (type === TokenType.blur) {
+      const blurMatch = value.match(/blur\((\d+(?:\.\d+)?)px?\)/)
+      if (blurMatch) {
+        return `const ${name} = ${blurMatch[1]};`
+      }
+    }
+
+    // Special handling for duration tokens (has 'ms' unit)
+    if (type === 'Duration') {
+      const durationMatch = value.match(/^(\d+(?:\.\d+)?)ms$/)
+      if (durationMatch) {
+        return `const ${name} = ${durationMatch[1]};`
+      }
+    }
+
+    // Token types that should export as numbers (excluding colors and complex types)
+    const NUMERIC_TOKEN_TYPES = [
+      'BorderRadius',
+      'BorderWidth',
+      'Opacity',
+      'FontSize',
+      'Space'
+    ]
+
+    // General numeric handler for simple number + px pattern, or just number
+    if (NUMERIC_TOKEN_TYPES.includes(String(type))) {
+      // Match: number with optional px, or just number (for opacity which has no unit)
+      const numericMatch = value.match(/^(\d+(?:\.\d+)?)px?$/)
+      if (numericMatch) {
+        return `const ${name} = ${numericMatch[1]};`
+      }
     }
 
     return `const ${name} = ${formatTokenValue(value)};`
