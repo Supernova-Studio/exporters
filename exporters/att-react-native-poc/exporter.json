@@ -1,0 +1,23 @@
+{
+    "id": "supernovaio.exporter-css-in-js",
+    "name": "ATT POC - React Native (Based on CSS in JS Exporter)",
+    "description": "Tokens CSS in JS variables and definitions based on CSS in JS Exporter for React Native.",
+    "author": "Supernova.io",
+    "organization": "Supernova.io",
+    "homepage": "https://supernova.io",
+    "version": "2.1.4-AAT_POC",
+    "usesBrands": true,
+    "usesThemes": true,
+    "executable": "/dist/build.js",
+    "engine": "latest",
+    "tags": [
+        "CSS",
+        "Tokens",
+        "CSS in JS",
+        "React",
+        "Vue",
+        "Styled Components",
+        "Emotion",
+        "New"
+    ]
+}
