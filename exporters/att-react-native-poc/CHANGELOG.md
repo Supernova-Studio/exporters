@@ -11,8 +11,10 @@ All the updates to this exporter are documented in this file.
   - Border width tokens: Convert `px` strings to numbers (e.g., `'1px'` → `1`)
   - Duration tokens: Convert `ms` strings to numbers (e.g., `'100ms'` → `100`)
   - Font size tokens: Convert `px` strings to numbers (e.g., `'16px'` → `16`)
-  - Opacity tokens: Convert string values to numbers (e.g., `'0.4'` → `0.4`)
+  - Opacity tokens: Convert string values to numbers, handling quoted values (e.g., `'0.4'` → `0.4`)
   - Space tokens: Convert `px` strings to numbers (e.g., `'8px'` → `8`)
+- **Font family token formatting:**
+  - Remove surrounding double quotes from font family values (e.g., `'"ATTAleckSans-Bold"'` → `'ATTAleckSans-Bold'`)
 
 ## 2.1.0 - 2025-03-12
 

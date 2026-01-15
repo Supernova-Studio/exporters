@@ -103,7 +103,10 @@ export function styleOutputFile(
 
     // Special handling for blur tokens (has blur() function)
     if (type === TokenType.blur) {
-      const blurMatch = value.match(/blur\((\d+(?:\.\d+)?)px?\)/)
+      // Remove any surrounding quotes first
+      const cleanValue = value.replace(/^['"]|['"]$/g, '')
+      // Match blur(8px), blur(8), or just the number if already processed
+      const blurMatch = cleanValue.match(/blur\((\d+(?:\.\d+)?)px?\)/) || cleanValue.match(/^(\d+(?:\.\d+)?)$/)
       if (blurMatch) {
         return `const ${name} = ${blurMatch[1]};`
       }
@@ -117,18 +120,34 @@ export function styleOutputFile(
       }
     }
 
+    // Special handling for font family tokens (remove surrounding double quotes)
+    if (type === 'FontFamily') {
+      // Remove surrounding double quotes if present
+      const cleanValue = value.replace(/^"|"$/g, '')
+      return `const ${name} = ${formatTokenValue(cleanValue)};`
+    }
+
+    // Special handling for opacity tokens (remove quotes and convert to number)
+    if (type === 'Opacity') {
+      // Remove surrounding quotes if present, then check if it's a number
+      const cleanValue = value.replace(/^['"]|['"]$/g, '')
+      const numericMatch = cleanValue.match(/^(\d+(?:\.\d+)?)$/)
+      if (numericMatch) {
+        return `const ${name} = ${numericMatch[1]};`
+      }
+    }
+
     // Token types that should export as numbers (excluding colors and complex types)
     const NUMERIC_TOKEN_TYPES = [
       'BorderRadius',
       'BorderWidth',
-      'Opacity',
       'FontSize',
       'Space'
     ]
 
     // General numeric handler for simple number + px pattern, or just number
     if (NUMERIC_TOKEN_TYPES.includes(String(type))) {
-      // Match: number with optional px, or just number (for opacity which has no unit)
+      // Match: number with optional px, or just number
       const numericMatch = value.match(/^(\d+(?:\.\d+)?)px?$/)
       if (numericMatch) {
         return `const ${name} = ${numericMatch[1]};`
