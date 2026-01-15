@@ -96,6 +96,29 @@ export function styleOutputFile(
       },
     })
 
+    // Special handling for font weight tokens (map named values to React Native format)
+    if (type === 'FontWeight') {
+      // Get the original value from token.value.text before CSS conversion
+      const originalValue = (token as any).value?.text
+      
+      // Mapping for React Native fontWeight named values
+      // React Native supports: 'normal', 'bold', and numeric values '100'-'900'
+      const fontWeightMap: Record<string, string> = {
+        'bold': 'bold',
+        'normal': 'normal',
+        // Add more mappings as needed for other named weights
+        // Example: 'light': '300', 'semibold': '600', etc.
+      }
+      
+      // If original value is a named React Native fontWeight, use the mapped value
+      if (originalValue && fontWeightMap[originalValue]) {
+        return `const ${name} = '${fontWeightMap[originalValue]}';`
+      }
+      
+      // Otherwise, use the CSS-converted numeric value (e.g., '400', '500', '700')
+      return `const ${name} = ${formatTokenValue(value)};`
+    }
+
     // Skip processing if value contains references (template literals with ${})
     if (value.includes('${')) {
       return `const ${name} = ${formatTokenValue(value)};`
