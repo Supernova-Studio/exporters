@@ -2,7 +2,7 @@ All the updates to this exporter are documented in this file.
 
 ### ATT React Native POC (based on CSS in JS Exporter) Release Notes
 
-## 2.1.9 - 2026-01-16
+## 2.2.0 - 2026-01-16
 
 ### 🚀 New
 
@@ -11,6 +11,16 @@ All the updates to this exporter are documented in this file.
   - Automatically parse shadow properties (offset, blur, spread, color with alpha)
   - Generate React Native-compatible shadow objects with `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`, and `elevation`
   - Example: `'0px 16px 24px 0px #00000014'` → React Native ViewStyle object
+
+  - **Gradient token conversion:**
+  - Convert CSS `linear-gradient()` strings to React Native gradient objects
+  - Automatically parse gradient properties (angle, color stops, locations)
+  - Support standard angles (0°, 90°, 180°, 270°) and custom angles using trigonometry
+  - Convert rgba colors to hex format
+  - Generate React Native-compatible gradient objects with `colors`, `locations`, `start`, and `end` properties
+  - Example: `linear-gradient(90deg, #0079b1 0%, #00c9ff 100%)` → React Native gradient object
+  - Note: Gradients with token references are preserved as CSS strings (references cannot be resolved during parsing)
+
 
 ### 🔧 Modified
 

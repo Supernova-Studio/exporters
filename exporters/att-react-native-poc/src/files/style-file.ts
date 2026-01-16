@@ -6,6 +6,7 @@ import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
 import { parseShadowString, shadowToReactNativeString } from "../utils/shadow-parser"
+import { parseGradientString, gradientToReactNativeString } from "../utils/gradient-parser"
 
 /**
  * Generates a TypeScript file for a specific token type (color.ts, typography.ts, etc.).
@@ -133,6 +134,19 @@ export function styleOutputFile(
         return `const ${name}: ViewStyle = ${shadowObject}`
       }
       // If parsing fails, fall back to default formatting
+    }
+
+    // Special handling for gradient tokens (convert CSS linear-gradient to React Native gradient object)
+    if (type === 'Gradient') {
+      // Skip if value contains token references (we can't resolve them during parsing)
+      if (!value.includes('${')) {
+        const parsedGradient = parseGradientString(value)
+        if (parsedGradient) {
+          const gradientObject = gradientToReactNativeString(parsedGradient)
+          return `const ${name} = ${gradientObject}`
+        }
+      }
+      // If parsing fails or contains references, fall back to default formatting
     }
 
     // Special handling for blur tokens (has blur() function)
