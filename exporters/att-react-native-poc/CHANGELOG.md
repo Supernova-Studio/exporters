@@ -2,7 +2,24 @@ All the updates to this exporter are documented in this file.
 
 ### ATT React Native POC (based on CSS in JS Exporter) Release Notes
 
-## 2.1.1 - 2026-01-15
+## 2.1.9 - 2026-01-16
+
+### 🚀 New
+
+- **Shadow token conversion:**
+  - Convert CSS `box-shadow` strings to React Native ViewStyle objects
+  - Automatically parse shadow properties (offset, blur, spread, color with alpha)
+  - Generate React Native-compatible shadow objects with `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`, and `elevation`
+  - Example: `'0px 16px 24px 0px #00000014'` → React Native ViewStyle object
+
+### 🔧 Modified
+
+- **Font weight token mapping:**
+  - Implement scalable mapping system for named fontWeight values
+  - Preserve `'bold'` as `'bold'` instead of converting to `'700'`
+  - Mapping can be extended in `src/files/style-file.ts` by adding entries to `fontWeightMap` object
+
+## 2.1.8 - 2026-01-15
 
 ### 🔧 Modified
 
