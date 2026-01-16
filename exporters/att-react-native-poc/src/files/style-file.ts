@@ -5,6 +5,7 @@ import { tokenObjectKeyName, resetTokenNameTracking } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { formatTokenValue } from "../utils/value-formatter"
+import { parseShadowString, shadowToReactNativeString } from "../utils/shadow-parser"
 
 /**
  * Generates a TypeScript file for a specific token type (color.ts, typography.ts, etc.).
@@ -124,6 +125,16 @@ export function styleOutputFile(
       return `const ${name} = ${formatTokenValue(value)};`
     }
 
+    // Special handling for shadow tokens (convert CSS box-shadow to React Native ViewStyle)
+    if (type === 'Shadow') {
+      const parsedShadow = parseShadowString(value)
+      if (parsedShadow) {
+        const shadowObject = shadowToReactNativeString(parsedShadow)
+        return `const ${name}: ViewStyle = ${shadowObject}`
+      }
+      // If parsing fails, fall back to default formatting
+    }
+
     // Special handling for blur tokens (has blur() function)
     if (type === TokenType.blur) {
       // Remove any surrounding quotes first
@@ -191,11 +202,16 @@ export function styleOutputFile(
     })
     .join('\n')
 
+  // Add ViewStyle import for Shadow tokens
+  const shadowImport = type === 'Shadow' ? "import type { ViewStyle } from 'react-native';\n" : ''
+
   // Generate the exported object
   const objectProperties = generateTokenObject(tokensOfType, tokenGroups)
 
-  let content = imports
-  if (imports) content += '\n\n'
+  let content = shadowImport
+  if (shadowImport && imports) content += '\n'
+  if (imports) content += imports
+  if (shadowImport || imports) content += '\n\n'
   content += constDeclarations
   content += `\n\nexport const ${type}Tokens = {\n${objectProperties}\n}`
 
