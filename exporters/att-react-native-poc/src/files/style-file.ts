@@ -121,7 +121,19 @@ export function styleOutputFile(
       return `const ${name} = ${formatTokenValue(value)};`
     }
 
+    // Special handling for gradient tokens (convert CSS linear-gradient to React Native gradient object)
+    // This must come BEFORE the skip check for token references, since gradients can contain them
+    if (type === 'Gradient') {
+      const parsedGradient = parseGradientString(value, mappedTokens, tokenGroups, type)
+      if (parsedGradient) {
+        const gradientObject = gradientToReactNativeString(parsedGradient)
+        return `const ${name} = ${gradientObject}`
+      }
+      // If parsing fails, fall back to default formatting
+    }
+
     // Skip processing if value contains references (template literals with ${})
+    // Note: Gradient tokens are handled above and can resolve token references
     if (value.includes('${')) {
       return `const ${name} = ${formatTokenValue(value)};`
     }
@@ -134,19 +146,6 @@ export function styleOutputFile(
         return `const ${name}: ViewStyle = ${shadowObject}`
       }
       // If parsing fails, fall back to default formatting
-    }
-
-    // Special handling for gradient tokens (convert CSS linear-gradient to React Native gradient object)
-    if (type === 'Gradient') {
-      // Skip if value contains token references (we can't resolve them during parsing)
-      if (!value.includes('${')) {
-        const parsedGradient = parseGradientString(value)
-        if (parsedGradient) {
-          const gradientObject = gradientToReactNativeString(parsedGradient)
-          return `const ${name} = ${gradientObject}`
-        }
-      }
-      // If parsing fails or contains references, fall back to default formatting
     }
 
     // Special handling for blur tokens (has blur() function)

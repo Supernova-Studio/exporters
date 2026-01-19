@@ -2,7 +2,7 @@ All the updates to this exporter are documented in this file.
 
 ### ATT React Native POC (based on CSS in JS Exporter) Release Notes
 
-## 2.2.0 - 2026-01-16
+## 2.1.10 - 2026-01-16
 
 ### 🚀 New
 
@@ -18,8 +18,8 @@ All the updates to this exporter are documented in this file.
   - Support standard angles (0°, 90°, 180°, 270°) and custom angles using trigonometry
   - Convert rgba colors to hex format
   - Generate React Native-compatible gradient objects with `colors`, `locations`, `start`, and `end` properties
-  - Example: `linear-gradient(90deg, #0079b1 0%, #00c9ff 100%)` → React Native gradient object
-  - Note: Gradients with token references are preserved as CSS strings (references cannot be resolved during parsing)
+  - Resolve token references in gradients (e.g., `rgba(${ColorTokens.colorFixedBrandBlue}, 1)`) to actual hex colors
+  - Example: `linear-gradient(90deg, #0079b1 0%, rgba(${ColorTokens.colorFixedBrandBlue}, 1) 50%, #00c9ff 100%)` → React Native gradient object with resolved colors
 
 
 ### 🔧 Modified

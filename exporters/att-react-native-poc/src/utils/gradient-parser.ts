@@ -13,6 +13,11 @@
  * }
  */
 
+import { CSSHelper } from "@supernovaio/export-utils"
+import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { exportConfiguration } from ".."
+import { tokenObjectKeyName } from "../content/token"
+
 export interface ParsedGradient {
   colors: string[]
   locations: number[]
@@ -41,17 +46,108 @@ function rgbaToHex(r: number, g: number, b: number): string {
 }
 
 /**
- * Parses a color stop string and extracts color and location
- * @param stopString - Color stop string (e.g., "#0079b1 0%" or "rgba(0, 121, 177, 1) 50%")
- * @returns Color stop object or null if parsing fails
+ * Converts various color formats to hex
+ * @param colorValue - Color value in any format (hex, rgb, rgba)
+ * @returns Hex color string (e.g., "#0079b1")
  */
-function parseColorStop(stopString: string): ColorStop | null {
-  const trimmed = stopString.trim()
+function colorToHex(colorValue: string): string {
+  const trimmed = colorValue.trim()
   
-  // Skip if contains token references (we can't resolve them)
-  if (trimmed.includes('${')) {
+  // Already hex format
+  if (trimmed.startsWith('#')) {
+    // Remove alpha channel if present (8-digit hex)
+    if (trimmed.length === 9) {
+      return trimmed.substring(0, 7)
+    }
+    return trimmed
+  }
+  
+  // RGB/RGBA format: rgb(0, 121, 177) or rgba(0, 121, 177, 1)
+  const rgbMatch = trimmed.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/)
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1], 10)
+    const g = parseInt(rgbMatch[2], 10)
+    const b = parseInt(rgbMatch[3], 10)
+    return rgbaToHex(r, g, b)
+  }
+  
+  // If we can't parse it, return as-is (shouldn't happen in practice)
+  return trimmed
+}
+
+/**
+ * Resolves a token reference (e.g., "ColorTokens.colorFixedBrandBlue") to a hex color
+ * @param tokenRef - Token reference string (e.g., "ColorTokens.colorFixedBrandBlue")
+ * @param mappedTokens - Map of all tokens by ID
+ * @param tokenGroups - Array of token groups for name generation
+ * @param currentType - Current token type being processed
+ * @returns Hex color string or null if token not found
+ */
+function resolveTokenReference(
+  tokenRef: string,
+  mappedTokens: Map<string, Token>,
+  tokenGroups: Array<TokenGroup>,
+  currentType: TokenType
+): string | null {
+  // Parse token reference format: "ColorTokens.colorFixedBrandBlue"
+  // Extract token type and name
+  const match = tokenRef.match(/^(\w+)Tokens\.(.+)$/)
+  if (!match) {
     return null
   }
+  
+  const tokenTypeName = match[1] // e.g., "Color"
+  const tokenName = match[2] // e.g., "colorFixedBrandBlue"
+  
+  // Find the token by searching through mappedTokens
+  // We need to match by token type and name
+  let foundToken: Token | null = null
+  
+  for (const token of mappedTokens.values()) {
+    // Check if token type matches
+    // TokenType is a string enum, so we can compare directly or convert to string
+    const tokenTypeStr = String(token.tokenType)
+    if (tokenTypeStr === tokenTypeName) {
+      // Check if token name matches
+      const tokenKeyName = tokenObjectKeyName(token, tokenGroups, false)
+      if (tokenKeyName === tokenName) {
+        foundToken = token
+        break
+      }
+    }
+  }
+  
+  if (!foundToken) {
+    return null
+  }
+  
+  // Resolve the token value to CSS color (without references)
+  const colorValue = CSSHelper.tokenToCSS(foundToken, mappedTokens, {
+    allowReferences: false, // Don't allow nested references
+    decimals: exportConfiguration.colorPrecision,
+    colorFormat: exportConfiguration.colorFormat,
+    forceRemUnit: exportConfiguration.forceRemUnit,
+    remBase: exportConfiguration.remBase,
+    tokenToVariableRef: () => '', // Not used when allowReferences is false
+  })
+  
+  // Convert to hex format
+  return colorToHex(colorValue)
+}
+
+/**
+ * Type for token reference resolver function
+ */
+type TokenReferenceResolver = (tokenRef: string) => string | null
+
+/**
+ * Parses a color stop string and extracts color and location
+ * @param stopString - Color stop string (e.g., "#0079b1 0%" or "rgba(0, 121, 177, 1) 50%" or "rgba(${ColorTokens.xxx}, 1) 50%")
+ * @param resolveTokenRef - Optional function to resolve token references to hex colors
+ * @returns Color stop object or null if parsing fails
+ */
+function parseColorStop(stopString: string, resolveTokenRef?: TokenReferenceResolver): ColorStop | null {
+  const trimmed = stopString.trim()
   
   // Match: color percentage (e.g., "#0079b1 0%" or "rgba(0, 121, 177, 1) 50%")
   // First try to match hex color with percentage
@@ -63,7 +159,27 @@ function parseColorStop(stopString: string): ColorStop | null {
     }
   }
   
-  // Try to match rgba color with percentage
+  // Try to match rgba with token reference: rgba(${ColorTokens.xxx}, 1) 50%
+  if (resolveTokenRef && trimmed.includes('${')) {
+    const rgbaTokenMatch = trimmed.match(/^rgba\(\$\{([^}]+)\},\s*[\d.]+\)\s+(\d+(?:\.\d+)?)%$/)
+    if (rgbaTokenMatch) {
+      const tokenRef = rgbaTokenMatch[1] // e.g., "ColorTokens.colorFixedBrandBlue"
+      const location = parseFloat(rgbaTokenMatch[2]) / 100
+      
+      // Resolve token reference to hex color
+      const resolvedColor = resolveTokenRef(tokenRef)
+      if (resolvedColor) {
+        return {
+          color: resolvedColor,
+          location: location
+        }
+      }
+      // If resolution fails, return null
+      return null
+    }
+  }
+  
+  // Try to match rgba color with percentage (without token references)
   const rgbaMatch = trimmed.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)\s+(\d+(?:\.\d+)?)%$/)
   if (rgbaMatch) {
     const r = parseInt(rgbaMatch[1], 10)
@@ -154,19 +270,22 @@ function angleToCoordinates(angleDegrees: number): { start: { x: number; y: numb
 /**
  * Parses a CSS linear-gradient string and converts it to React Native format
  * @param gradientString - CSS linear-gradient string
+ * @param mappedTokens - Map of all tokens by ID for resolving token references
+ * @param tokenGroups - Array of token groups for name generation
+ * @param currentType - Current token type being processed
  * @returns Parsed gradient object or null if parsing fails
  */
-export function parseGradientString(gradientString: string): ParsedGradient | null {
+export function parseGradientString(
+  gradientString: string,
+  mappedTokens?: Map<string, Token>,
+  tokenGroups?: Array<TokenGroup>,
+  currentType?: TokenType
+): ParsedGradient | null {
   // Remove surrounding quotes or backticks if present
   const cleanString = gradientString.replace(/^['"`]|['"`]$/g, '').trim()
   
-  // Skip if contains token references (we can't resolve them during parsing)
-  if (cleanString.includes('${')) {
-    return null
-  }
-  
   // Match: linear-gradient(angle, color1 stop1%, color2 stop2%, ...)
-  // Example: linear-gradient(90deg, #0079b1 0%, #00c9ff 100%)
+  // Example: linear-gradient(90deg, #0079b1 0%, rgba(${ColorTokens.xxx}, 1) 50%, #00c9ff 100%)
   const gradientRegex = /^linear-gradient\(([^,]+),\s*(.+)\)$/
   const match = cleanString.match(gradientRegex)
   
@@ -187,6 +306,12 @@ export function parseGradientString(gradientString: string): ParsedGradient | nu
   // Convert angle to coordinates
   const coordinates = angleToCoordinates(angleDegrees)
   
+  // Create token reference resolver if we have the necessary context
+  const resolveTokenRef: TokenReferenceResolver | undefined = 
+    mappedTokens && tokenGroups && currentType
+      ? (tokenRef: string) => resolveTokenReference(tokenRef, mappedTokens, tokenGroups, currentType)
+      : undefined
+  
   // Parse color stops
   // Split by comma, but be careful with rgba() which contains commas
   const stops: ColorStop[] = []
@@ -204,7 +329,7 @@ export function parseGradientString(gradientString: string): ParsedGradient | nu
       currentStop += char
     } else if (char === ',' && parenDepth === 0) {
       // This comma separates stops
-      const parsedStop = parseColorStop(currentStop.trim())
+      const parsedStop = parseColorStop(currentStop.trim(), resolveTokenRef)
       if (parsedStop) {
         stops.push(parsedStop)
       }
@@ -216,7 +341,7 @@ export function parseGradientString(gradientString: string): ParsedGradient | nu
   
   // Don't forget the last stop
   if (currentStop.trim()) {
-    const parsedStop = parseColorStop(currentStop.trim())
+    const parsedStop = parseColorStop(currentStop.trim(), resolveTokenRef)
     if (parsedStop) {
       stops.push(parsedStop)
     }
