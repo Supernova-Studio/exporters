@@ -15,6 +15,11 @@ export enum FileStructure {
     SingleFile = "singleFile"
 }
 
+export enum FindReplaceTiming {
+    BeforePrefix = "beforePrefix",
+    AfterPrefix = "afterPrefix"
+}
+
 export type ColorUtilityType = 
   | 'text' 
   | 'boxShadow' 
@@ -74,6 +79,8 @@ export type ExporterConfiguration = {
   colorUtilityPrefixes: ColorUtilityPrefixes
   /** Find and replace strings in token paths and names */
   findReplace: Record<string, string>
+  /** Controls when find/replace is applied: before or after token type prefixes are added */
+  findReplaceTiming: FindReplaceTiming
   /** When enabled, resets all animation token values to initial state before applying new values */
   disableAnimateDefaults: boolean
   /** When enabled, resets all blur token values to initial state before applying new values */
