@@ -1,6 +1,7 @@
 import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
+import { FindReplaceTiming } from "../../config"
 import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION } from "../constants/defaults"
 import { ColorHelper } from "@supernovaio/export-utils"
 import { ColorFormat } from "@supernovaio/export-utils"
@@ -231,6 +232,36 @@ function normalizeForTailwindConfig(name: string): string {
 }
 
 /**
+ * Applies find/replace patterns to a variable name. Used when find/replace timing is set to "afterPrefix".
+ * Supports patterns with or without leading "--" (e.g., both "--spacing" and "spacing" will work).
+ * @param name The variable name to apply replacements to (without leading --)
+ * @param findReplace Record of find/replace patterns
+ * @returns The name with all replacements applied
+ */
+function applyFindReplace(name: string, findReplace?: Record<string, string>): string {
+  if (!findReplace || Object.keys(findReplace).length === 0) return name;
+  
+  // Add -- prefix to match how CSS variables appear, so users can use patterns like "--spacing"
+  let result = `--${name}`;
+  
+  // Sort find patterns by length (longest first) to handle overlapping patterns
+  const sortedPatterns = Object.entries(findReplace)
+    .sort(([a], [b]) => b.length - a.length)
+  
+  for (const [find, replace] of sortedPatterns) {
+    result = result.split(find).join(replace)
+  }
+  
+  // Remove leading -- that we added (it will be added back when generating CSS)
+  result = result.replace(/^--/, '')
+  
+  // Clean up any double hyphens or leading/trailing hyphens that might result from replacements
+  result = result.replace(/-+/g, '-').replace(/^-|-$/g, '')
+  
+  return result;
+}
+
+/**
  * Checks if a token path matches a color utility pattern, considering both positive and negative patterns.
  * @param fullPath The full token path to check
  * @param patternString The pattern string containing comma-separated patterns, with optional ! prefix for negation
@@ -270,6 +301,11 @@ function matchColorUtilityPattern(fullPath: string, patternString: string): { ma
 export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
   let prefix = getTokenPrefix(token.tokenType)
   
+  // Determine if find/replace should be applied before prefix (passed to NamingHelper)
+  // or after prefix (applied manually to the final name)
+  const applyFindReplaceBeforePrefix = exportConfiguration.findReplaceTiming !== FindReplaceTiming.AfterPrefix
+  const findReplaceForNamingHelper = applyFindReplaceBeforePrefix ? exportConfiguration.findReplace : undefined
+  
   // Handle color utility prefixes if enabled and token is a color
   if (exportConfiguration.useColorUtilityPrefixes && token.tokenType === TokenType.color) {
     // Get the parent once and reuse it
@@ -299,21 +335,42 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
         // Construct the name as: utility-color-path-name
         // We also remove the utility name from the cleanName to avoid redundancy
-        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, exportConfiguration.findReplace, true)
+        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, findReplaceForNamingHelper, true)
 
-        return normalizeForTailwindConfig(name);
+        name = normalizeForTailwindConfig(name);
+        
+        // Apply find/replace after prefix if timing is set to afterPrefix
+        if (!applyFindReplaceBeforePrefix) {
+          name = applyFindReplace(name, exportConfiguration.findReplace)
+        }
+        
+        return name;
       }
     }
 
     // If no utility match, use standard naming
-    const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
-    return normalizeForTailwindConfig(name);
+    let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, findReplaceForNamingHelper)
+    name = normalizeForTailwindConfig(name);
+    
+    // Apply find/replace after prefix if timing is set to afterPrefix
+    if (!applyFindReplaceBeforePrefix) {
+      name = applyFindReplace(name, exportConfiguration.findReplace)
+    }
+    
+    return name;
   }
 
   // For non-color tokens or when color utility prefixes are disabled
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)
-  const name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, exportConfiguration.findReplace)
-  return normalizeForTailwindConfig(name);
+  let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, findReplaceForNamingHelper)
+  name = normalizeForTailwindConfig(name);
+  
+  // Apply find/replace after prefix if timing is set to afterPrefix
+  if (!applyFindReplaceBeforePrefix) {
+    name = applyFindReplace(name, exportConfiguration.findReplace)
+  }
+  
+  return name;
 }
 
 /**

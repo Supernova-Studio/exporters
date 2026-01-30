@@ -541,6 +541,24 @@
         "default": {}
     },
     {
+        "key": "findReplaceTiming",
+        "type": "enum",
+        "default": "beforePrefix",
+        "title": "Apply find/replace",
+        "description": "Control when find/replace is applied relative to token type prefixes.",
+        "category": "Find and replace",
+        "options": {
+            "beforePrefix": {
+                "label": "Before prefix is added",
+                "description": "Applied to token path and name only"
+            },
+            "afterPrefix": {
+                "label": "After prefix is added",
+                "description": "Applied to final variable name, can override prefixes (e.g. --spacing-breakpoints → --breakpoints)"
+            }
+        }
+    },
+    {
         "key": "showDescriptions",
         "type": "boolean",
         "default": true,
