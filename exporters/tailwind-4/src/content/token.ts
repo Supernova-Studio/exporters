@@ -232,25 +232,28 @@ function normalizeForTailwindConfig(name: string): string {
 }
 
 /**
- * Applies find/replace patterns to a string. Used when find/replace timing is set to "afterPrefix".
- * @param text The text to apply replacements to
+ * Applies find/replace patterns to a variable name. Used when find/replace timing is set to "afterPrefix".
+ * Supports patterns with or without leading "--" (e.g., both "--spacing" and "spacing" will work).
+ * @param name The variable name to apply replacements to (without leading --)
  * @param findReplace Record of find/replace patterns
- * @returns The text with all replacements applied
+ * @returns The name with all replacements applied
  */
-function applyFindReplace(text: string, findReplace?: Record<string, string>): string {
-  if (!findReplace || Object.keys(findReplace).length === 0) return text;
+function applyFindReplace(name: string, findReplace?: Record<string, string>): string {
+  if (!findReplace || Object.keys(findReplace).length === 0) return name;
+  
+  // Add -- prefix to match how CSS variables appear, so users can use patterns like "--spacing"
+  let result = `--${name}`;
   
   // Sort find patterns by length (longest first) to handle overlapping patterns
   const sortedPatterns = Object.entries(findReplace)
     .sort(([a], [b]) => b.length - a.length)
   
-  let result = text;
-  
   for (const [find, replace] of sortedPatterns) {
-    // For kebab-case variable names, we use simple string replacement
-    // This allows matching patterns like "spacing-breakpoints" directly
     result = result.split(find).join(replace)
   }
+  
+  // Remove leading -- that we added (it will be added back when generating CSS)
+  result = result.replace(/^--/, '')
   
   // Clean up any double hyphens or leading/trailing hyphens that might result from replacements
   result = result.replace(/-+/g, '-').replace(/^-|-$/g, '')
