@@ -59,4 +59,6 @@ export type ExporterConfiguration = {
   writeNameToProperty: boolean
   /** Name of the custom property where generated variable names will be saved. */
   propertyToWriteNameTo: string
+  /** Controls what parts are included in the token name */
+  tokenNameStructure: TokenNameStructure
 }
