@@ -78,15 +78,15 @@ test('formattedColor_smartRgba', () => {
 })
 
 test('formattedColor_hsl', () => {
-  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsl, testDecimals)).toBe('hsl(261%, 48%, 59%)')
+  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsl, testDecimals)).toBe('hsl(261, 48%, 59%)')
 })
 
 test('formattedColor_hsla', () => {
-  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsla, testDecimals)).toBe('hsla(261%, 48%, 59%, 0.5)')
+  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsla, testDecimals)).toBe('hsla(261, 48%, 59%, 0.5)')
 })
 
 test('formattedColor_smartHsla', () => {
-  expect(ColorHelper.formattedColor(testColor, ColorFormat.smartHsla, testDecimals)).toBe('hsla(261%, 48%, 59%, 0.5)')
+  expect(ColorHelper.formattedColor(testColor, ColorFormat.smartHsla, testDecimals)).toBe('hsla(261, 48%, 59%, 0.5)')
 })
 
 test('formattedColor_smartUIColor', () => {
@@ -200,7 +200,7 @@ test('formattedColor_hsl handles grayscale colors', () => {
     referencedTokenId: null
   }
 
-  expect(ColorHelper.formattedColor(grayColor, ColorFormat.hsl, testDecimals)).toBe('hsl(0%, 0%, 50%)')
+  expect(ColorHelper.formattedColor(grayColor, ColorFormat.hsl, testDecimals)).toBe('hsl(0, 0%, 50%)')
 })
 
 test('formattedColor_hsl handles various color cases', () => {
@@ -225,12 +225,12 @@ test('formattedColor_hsl handles various color cases', () => {
     referencedTokenId: null
   }
 
-  expect(ColorHelper.formattedColor(redMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+%, \d+%, \d+%\)$/)
-  expect(ColorHelper.formattedColor(greenMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+%, \d+%, \d+%\)$/)
-  expect(ColorHelper.formattedColor(blueMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+%, \d+%, \d+%\)$/)
+  expect(ColorHelper.formattedColor(redMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+, \d+%, \d+%\)$/)
+  expect(ColorHelper.formattedColor(greenMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+, \d+%, \d+%\)$/)
+  expect(ColorHelper.formattedColor(blueMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+, \d+%, \d+%\)$/)
 })
 
-test('formattedColor_hsl converts #6A6661 to hsl(33%, 4%, 40%)', () => {
+test('formattedColor_hsl converts #6A6661 to hsl(33, 4%, 40%)', () => {
   // #6A6661 = RGB(106, 102, 97)
   const testColor: ColorTokenValue = {
     color: {
@@ -247,7 +247,7 @@ test('formattedColor_hsl converts #6A6661 to hsl(33%, 4%, 40%)', () => {
     referencedTokenId: null
   }
 
-  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsl, testDecimals)).toBe('hsl(33%, 4%, 40%)')
+  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsl, testDecimals)).toBe('hsl(33, 4%, 40%)')
 })
 
 test('formattedColor handles fractional RGB values', () => {
