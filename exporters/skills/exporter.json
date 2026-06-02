@@ -1,0 +1,19 @@
+{
+    "id": "supernovaio.exporter-agentic-skills",
+    "name": "Agentic Skills",
+    "description": "Export Supernova-managed skills to be consumed by your agents.",
+    "author": "Jiri Trecak",
+    "organization": "Supernova.io",
+    "homepage": "https://supernova.io",
+    "version": "0.1.0",
+    "usesBrands": false,
+    "usesThemes": false,
+    "executable": "/dist/build.js",
+    "engine": "latest",
+    "tags": [
+        "AI",
+        "Agents",
+        "Skills",
+        "New"
+    ]
+}

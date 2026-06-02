@@ -1,0 +1,27 @@
+{
+  "name": "@supernovaio/exporter-agentic-skills",
+  "version": "0.1.0",
+  "description": "Export your design system data into agentic skill artifacts using the Supernova.io export engine",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx webpack --mode=development --watch",
+    "build": "npx webpack --mode=production"
+  },
+  "author": "Supernova.io",
+  "license": "MIT",
+  "peerDependencies": {
+    "@supernovaio/sdk-exporters": "2.4.4"
+  },
+  "devDependencies": {
+    "@supernovaio/sdk-exporters": "2.4.4",
+    "prettier": "3.0.3",
+    "terser-webpack-plugin": "5.4.0",
+    "ts-loader": "^7.0.5",
+    "typescript": "^5.2.2",
+    "webpack": "5.105.4",
+    "webpack-cli": "6.0.1"
+  },
+  "resolutions": {
+    "@supernovaio/sdk-exporters": "2.4.4"
+  }
+}
