@@ -1,5 +1,5 @@
 import { FileHelper, CSSHelper, GeneralHelper, ThemeHelper, FileNameHelper, StringCase } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenGroup, TokenType, TypographyToken } from "@supernovaio/sdk-exporters"
 import { DesignSystemCollection } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection'
 import { exportConfiguration } from ".."
 import { tokenObjectKeyName, resetTokenNameTracking, getTokenPrefix } from "../content/token"
@@ -7,17 +7,18 @@ import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 import { createHierarchicalStructure, deepMerge, processTokenName } from "../utils/token-hierarchy"
 import { NamingHelper } from "@supernovaio/export-utils"
-import { ThemeExportStyle, TokenNameStructure } from "../../config"
+import { ThemeExportStyle, TokenNameStructure, TypographyOutputFormat } from "../../config"
+import { typographyTokenValueToStyleDictionaryValue } from "../utils/typography"
 
 /**
  * Creates a value object for a token, either as a simple value or themed values
  */
 function createTokenValue(
-  value: string,
+  value: string | object,
   token: Token,
   theme?: TokenTheme
 ): any {
-  const baseValue = value.replace(/['"]/g, '')
+  const baseValue = typeof value === 'string' ? value.replace(/['"]/g, '') : value
   const description = token.description && exportConfiguration.showDescriptions 
     ? { description: token.description.trim() } 
     : {}
@@ -58,6 +59,75 @@ function createTokenValue(
     value: baseValue,
     type: tokenType,
     ...description
+  }
+}
+
+function tokenReferencePath(
+  token: Token,
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection> = []
+): string {
+  // Build the reference path based on token structure configuration
+  const prefix = getTokenPrefix(token.tokenType)
+  const pathSegments = (token.tokenPath || [])
+    .filter(segment => segment && segment.trim().length > 0)
+    .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
+
+  const tokenName = processTokenName(token, pathSegments)
+
+  // Build segments array based on configuration
+  let segments: string[] = []
+  if (prefix) {
+    segments.push(prefix)
+  }
+
+  // Handle different token name structure configurations
+  switch (exportConfiguration.tokenNameStructure) {
+    case TokenNameStructure.NameOnly:
+      segments.push(tokenName)
+      break
+
+    case TokenNameStructure.CollectionPathAndName:
+      // Include collection name in the path if available
+      if (token.collectionId) {
+        const collection = collections.find(c => c.persistentId === token.collectionId)
+        if (collection) {
+          const collectionSegment = NamingHelper.codeSafeVariableName(collection.name, exportConfiguration.tokenNameStyle)
+          segments.push(collectionSegment)
+        }
+      }
+      segments.push(...pathSegments, tokenName)
+      break
+
+    case TokenNameStructure.PathAndName:
+      segments.push(...pathSegments, tokenName)
+      break
+  }
+
+  // Add global prefix if configured
+  if (exportConfiguration.globalNamePrefix) {
+    segments.unshift(
+      NamingHelper.codeSafeVariableName(
+        exportConfiguration.globalNamePrefix,
+        exportConfiguration.tokenNameStyle
+      )
+    )
+  }
+
+  return `{${segments.join('.')}}`
+}
+
+function tokenCssOptions(
+  tokenGroups: Array<TokenGroup>,
+  collections: Array<DesignSystemCollection> = []
+) {
+  return {
+    allowReferences: exportConfiguration.useReferences,
+    decimals: exportConfiguration.colorPrecision,
+    colorFormat: exportConfiguration.colorFormat,
+    forceRemUnit: exportConfiguration.forceRemUnit,
+    remBase: exportConfiguration.remBase,
+    tokenToVariableRef: (token: Token) => tokenReferencePath(token, tokenGroups, collections)
   }
 }
 
@@ -125,64 +195,12 @@ function processTokensToObject(
     // Generate the token's object key name based on configuration
     const name = tokenObjectKeyName(token, tokenGroups, true, collections)
 
-    // Convert token to CSS-compatible value, handling references and formatting
-    const value = CSSHelper.tokenToCSS(token, mappedTokens, {
-      allowReferences: exportConfiguration.useReferences,
-      decimals: exportConfiguration.colorPrecision,
-      colorFormat: exportConfiguration.colorFormat,
-      forceRemUnit: exportConfiguration.forceRemUnit,
-      remBase: exportConfiguration.remBase,
-      tokenToVariableRef: (t) => {
-        // Build the reference path based on token structure configuration
-        const prefix = getTokenPrefix(t.tokenType)
-        const pathSegments = (t.tokenPath || [])
-          .filter(segment => segment && segment.trim().length > 0)
-          .map(segment => NamingHelper.codeSafeVariableName(segment, exportConfiguration.tokenNameStyle))
-
-        const tokenName = processTokenName(t, pathSegments)
-
-        // Build segments array based on configuration
-        let segments: string[] = []
-        if (prefix) {
-          segments.push(prefix)
-        }
-
-        // Handle different token name structure configurations
-        switch (exportConfiguration.tokenNameStructure) {
-          case TokenNameStructure.NameOnly:
-            segments.push(tokenName)
-            break
-            
-          case TokenNameStructure.CollectionPathAndName:
-            // Include collection name in the path if available
-            if (t.collectionId) {
-              const collection = collections.find(c => c.persistentId === t.collectionId)
-              if (collection) {
-                const collectionSegment = NamingHelper.codeSafeVariableName(collection.name, exportConfiguration.tokenNameStyle)
-                segments.push(collectionSegment)
-              }
-            }
-            segments.push(...pathSegments, tokenName)
-            break
-            
-          case TokenNameStructure.PathAndName:
-            segments.push(...pathSegments, tokenName)
-            break
-        }
-
-        // Add global prefix if configured
-        if (exportConfiguration.globalNamePrefix) {
-          segments.unshift(
-            NamingHelper.codeSafeVariableName(
-              exportConfiguration.globalNamePrefix, 
-              exportConfiguration.tokenNameStyle
-            )
-          )
-        }
-
-        return `{${segments.join('.')}}`
-      }
-    })
+    // Convert token to Style Dictionary value, handling references and formatting
+    const cssOptions = tokenCssOptions(tokenGroups, collections)
+    const value = token.tokenType === TokenType.typography &&
+      exportConfiguration.typographyOutputFormat === TypographyOutputFormat.Expanded
+      ? typographyTokenValueToStyleDictionaryValue((token as TypographyToken).value, token, mappedTokens, cssOptions)
+      : CSSHelper.tokenToCSS(token, mappedTokens, cssOptions)
 
     // Create the hierarchical object structure for this token
     const hierarchicalObject = createHierarchicalStructure(

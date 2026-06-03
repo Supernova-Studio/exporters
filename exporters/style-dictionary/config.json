@@ -141,6 +141,24 @@
         "category": "Token values"
     },
     {
+        "key": "typographyOutputFormat",
+        "type": "enum",
+        "default": "shorthand",
+        "title": "Typography output format",
+        "description": "Export typography tokens as the current CSS font shorthand or as expanded composite values.",
+        "category": "Token values",
+        "options": {
+            "shorthand": {
+                "label": "CSS shorthand",
+                "description": "Export typography values as CSS font shorthand strings."
+            },
+            "expanded": {
+                "label": "Expanded values",
+                "description": "Export typography values as separate fontFamily, fontWeight, fontSize, lineHeight, paragraphSpacing, textCase, letterSpacing, paragraphIndent, and textDecoration fields."
+            }
+        }
+    },
+    {
         "key": "colorPrecision",
         "type": "number",
         "default": 3,
