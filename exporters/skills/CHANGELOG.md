@@ -6,4 +6,4 @@ All updates to this exporter are documented in this file.
 
 ### Added
 
-- Added the initial barebones Agentic Skills exporter.
+- Added the initial Agentic Skills exporter.
