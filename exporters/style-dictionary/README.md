@@ -93,7 +93,7 @@ Here is a list of all the configuration options this exporter provides:
 - **forceRemUnit:** Convert all pixel values to REM units.
 - **remBase:** Base pixel value for REM conversion (when forceRemUnit is enabled).
 - **useReferences:** Use references to other tokens instead of direct values where possible.
-- **typographyOutputFormat:** Export typography token values as CSS font shorthand (`shorthand`, default) or as expanded composite values (`expanded`) with `fontFamily`, `fontWeight`, `fontSize`, `lineHeight`, `paragraphSpacing`, `textCase`, `letterSpacing`, `paragraphIndent`, and `textDecoration`. Expanded dimension values are exported as `{ "value": number, "unit": string }`, while `lineHeight` is exported directly when unitless.
+- **typographyOutputFormat:** Export typography token values as CSS font shorthand (`shorthand`, default) or as expanded composite values (`expanded`) with `fontFamily`, `fontWeight`, `fontSize`, `lineHeight`, `paragraphSpacing`, `textCase`, `letterSpacing`, `paragraphIndent`, and `textDecoration`. Expanded dimension values are exported as `{ "value": number, "unit": string }`, while unitless dimensions are exported directly as numbers.
 - **colorPrecision:** Maximum number of decimals in colors.
 
 ### Themes

@@ -78,13 +78,17 @@ function unitToDtcgUnit(unit: Unit): string {
 function normalizedDimensionValue(
   dimension: AnyDimensionTokenValue,
   options: TokenToCSSOptions
-): DtcgDimensionValue {
+): number | DtcgDimensionValue {
   if (options.forceRemUnit && dimension.unit === Unit.pixels) {
     const remBase = options.remBase || 16
     return {
       value: ColorHelper.roundToDecimals(dimension.measure / remBase, options.decimals),
       unit: "rem"
     }
+  }
+
+  if (dimension.unit === Unit.raw) {
+    return ColorHelper.roundToDecimals(dimension.measure, options.decimals)
   }
 
   return {
@@ -97,25 +101,8 @@ function dimensionPropertyValue(
   dimension: AnyDimensionTokenValue,
   allTokens: Map<string, Token>,
   options: TokenToCSSOptions
-): string | DtcgDimensionValue {
+): string | number | DtcgDimensionValue {
   return referencedValue(dimension, allTokens, options) ?? normalizedDimensionValue(dimension, options)
-}
-
-function lineHeightPropertyValue(
-  lineHeight: AnyDimensionTokenValue,
-  allTokens: Map<string, Token>,
-  options: TokenToCSSOptions
-): string | number {
-  const reference = referencedValue(lineHeight, allTokens, options)
-  if (reference) {
-    return reference
-  }
-
-  if (lineHeight.unit === Unit.raw) {
-    return ColorHelper.roundToDecimals(lineHeight.measure, options.decimals)
-  }
-
-  return CSSHelper.dimensionTokenValueToCSS(lineHeight, allTokens, options)
 }
 
 function fontFamilyPropertyValue(
@@ -158,9 +145,8 @@ function typographyPropertyValue(
     case "letterSpacing":
     case "paragraphSpacing":
     case "paragraphIndent":
-      return dimensionPropertyValue(value as AnyDimensionTokenValue, allTokens, options)
     case "lineHeight":
-      return lineHeightPropertyValue(value as AnyDimensionTokenValue, allTokens, options)
+      return dimensionPropertyValue(value as AnyDimensionTokenValue, allTokens, options)
     case "textCase":
     case "textDecoration":
       return optionPropertyValue(value as AnyOptionTokenValue, TYPOGRAPHY_PROPERTY_TOKEN_TYPES[property], allTokens, options)
