@@ -199,7 +199,7 @@ function processTokensToObject(
     const cssOptions = tokenCssOptions(tokenGroups, collections)
     const value = token.tokenType === TokenType.typography &&
       exportConfiguration.typographyOutputFormat === TypographyOutputFormat.Expanded
-      ? typographyTokenValueToStyleDictionaryValue((token as TypographyToken).value, token, mappedTokens, cssOptions)
+      ? typographyTokenValueToStyleDictionaryValue((token as TypographyToken).value, mappedTokens, cssOptions)
       : CSSHelper.tokenToCSS(token, mappedTokens, cssOptions)
 
     // Create the hierarchical object structure for this token
