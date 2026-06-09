@@ -8,12 +8,14 @@
     "version": "0.1.0",
     "usesBrands": false,
     "usesThemes": false,
+    "usesContexts": true,
     "executable": "/dist/build.js",
     "engine": "latest",
     "tags": [
         "AI",
         "Agents",
         "Skills",
-        "New"
+        "New",
+        "Contexts"
     ]
 }
