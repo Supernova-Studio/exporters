@@ -1,15 +1,14 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
 import { type ExporterConfiguration } from "../config"
 import { getContextArea, listWorkspaceSkills } from "./utils/context-api"
+import { warnExport } from "./utils/export-log"
 import { normalizeSkill, writeSkills } from "./utils/skill-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides. */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
-const EXPORTER_LOG_PREFIX = "[Agentic Skills exporter]"
-
 function skipExport(reason: string): Array<AnyOutputFile> {
-  console.warn(`${EXPORTER_LOG_PREFIX} ${reason}`)
+  warnExport(reason)
   return []
 }
 
