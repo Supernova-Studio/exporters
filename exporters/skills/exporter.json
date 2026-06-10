@@ -8,7 +8,7 @@
     "version": "0.1.1",
     "usesBrands": false,
     "usesThemes": false,
-    "useContext": true,
+    "usesContext": true,
     "executable": "/dist/build.js",
     "engine": "latest",
     "tags": [
