@@ -1,19 +1,10 @@
-import { OutputFileType, type OutputCopyRemoteURLFile } from "@supernovaio/sdk-exporters"
+import { OutputFileType, type OutputTextFile } from "@supernovaio/sdk-exporters"
 import { exportTargets, type ExportTarget, type ExporterConfiguration } from "../../config"
-
-type SkillFile = {
-  url?: string
-  downloadUrl?: string
-  sourceUrl?: string
-  name?: string
-  fileName?: string
-  path?: string
-}
 
 export type ExportableSkill = {
   id: string
   path: string
-  file: SkillFile | null
+  content: string
 }
 
 const TARGET_PATHS: Record<ExportTarget, Array<string>> = {
@@ -36,20 +27,10 @@ function fileNameFromPath(path: string | undefined): string | null {
   return lastSegment && /\.[a-z0-9]+$/i.test(lastSegment) ? lastSegment : null
 }
 
-function skillFileUrl(skill: ExportableSkill): string {
-  const url = skill.file?.url ?? skill.file?.downloadUrl ?? skill.file?.sourceUrl
-
-  if (!url) {
-    throw new Error(`Skill ${skill.path || skill.id} does not have a downloadable file URL.`)
-  }
-
-  return url
-}
-
 function skillDestination(skill: ExportableSkill): { relativePath: string; fileName: string } {
   const segments = pathSegments(skill.path)
   const pathFileName = fileNameFromPath(skill.path)
-  const fileName = skill.file?.fileName ?? skill.file?.name ?? fileNameFromPath(skill.file?.path) ?? pathFileName ?? "SKILL.md"
+  const fileName = pathFileName ?? "SKILL.md"
   const directorySegments = pathFileName ? segments.slice(0, -1) : segments
 
   return {
@@ -61,20 +42,24 @@ function skillDestination(skill: ExportableSkill): { relativePath: string; fileN
 export function writeSkills(
   skills: Array<ExportableSkill>,
   exportConfiguration: ExporterConfiguration
-): Array<OutputCopyRemoteURLFile> {
+): Array<OutputTextFile> {
   const targetPaths = [...new Set(exportTargets(exportConfiguration).flatMap((target) => TARGET_PATHS[target]))]
-  const outputFiles = new Map<string, OutputCopyRemoteURLFile>()
+  const outputFiles = new Map<string, OutputTextFile>()
 
   for (const skill of skills) {
+    if (!skill.content?.trim()) {
+      console.warn(`[Agentic Skills exporter] Skipping skill ${skill.path || skill.id}: no content.`)
+      continue
+    }
+
     const { relativePath, fileName } = skillDestination(skill)
-    const url = skillFileUrl(skill)
 
     for (const targetPath of targetPaths) {
-      const outputFile: OutputCopyRemoteURLFile = {
-        type: OutputFileType.copyRemoteUrl,
+      const outputFile: OutputTextFile = {
+        type: OutputFileType.text,
         path: `${targetPath}/${relativePath}`,
         name: fileName,
-        url
+        content: skill.content
       }
 
       outputFiles.set(`${outputFile.path}/${outputFile.name}`, outputFile)
