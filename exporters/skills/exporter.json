@@ -5,10 +5,10 @@
     "author": "Jiri Trecak",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "usesBrands": false,
     "usesThemes": false,
-    "usesContexts": true,
+    "useContext": true,
     "executable": "/dist/build.js",
     "engine": "latest",
     "tags": [
