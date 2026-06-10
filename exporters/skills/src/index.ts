@@ -1,6 +1,7 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
 import { type ExporterConfiguration } from "../config"
-import { type ExportableSkill, writeSkills } from "./utils/skill-utils"
+import { getContextArea, listWorkspaceSkills } from "./utils/context-api"
+import { normalizeSkill, writeSkills } from "./utils/skill-utils"
 
 /** Exporter configuration from the resolved default configuration and user overrides. */
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
@@ -12,11 +13,19 @@ function skipExport(reason: string): Array<AnyOutputFile> {
   return []
 }
 
+type DatasetWithSkillFilter = {
+  filteredSkills: <TSkill extends { id: string }>(
+    allSkills: readonly TSkill[],
+    inheritedDataset?: DatasetWithSkillFilter
+  ) => Array<{ item: TSkill }>
+}
+
 /**
  * Export entrypoint.
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  if (!sdk.context) {
+  const contextArea = getContextArea(sdk)
+  if (!contextArea) {
     return skipExport("Context API is not available in this export runtime.")
   }
 
@@ -28,25 +37,28 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     return skipExport("No context IDs provided.")
   }
 
-  const dataSet = await sdk.context.getResolvedDatasetForContext(context.wsId, context.contextIds[0])
-  if (!dataSet) {
+  const dataSet = (await contextArea.getResolvedDatasetForContext(
+    context.wsId,
+    context.contextIds[0]
+  )) as DatasetWithSkillFilter | null
+
+  if (!dataSet || typeof dataSet.filteredSkills !== "function") {
     return skipExport(`No dataset found for context ${context.contextIds[0]}.`)
   }
 
-  const skills = await sdk.context.listKnowledgeSkills(context.wsId)
-  const filteredSkills = dataSet.filteredSkills(skills, dataSet)
+  const skills = await listWorkspaceSkills(contextArea, context.wsId)
+  if (skills.length === 0) {
+    return skipExport("No skills found in workspace.")
+  }
+
+  const filteredSkills = dataSet.filteredSkills(skills as Array<{ id: string }>, dataSet)
   if (filteredSkills.length === 0) {
     return skipExport("No skills match the selected context.")
   }
 
-  const exportableSkills: Array<ExportableSkill> = filteredSkills.map((result) => {
-    const skill = result.item as ExportableSkill
-    return {
-      id: skill.id,
-      path: skill.path,
-      content: skill.content
-    }
-  })
+  const exportableSkills = filteredSkills
+    .map((result) => normalizeSkill(result.item))
+    .filter((skill): skill is NonNullable<typeof skill> => skill !== null)
 
   const outputFiles = writeSkills(exportableSkills, exportConfiguration)
   if (outputFiles.length === 0) {
