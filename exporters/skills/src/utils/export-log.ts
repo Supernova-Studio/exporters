@@ -1,4 +1,11 @@
-import { OutputFileType, type AnyOutputFile, type OutputTextFile } from "@supernovaio/sdk-exporters"
+import {
+  OutputFileType,
+  type AnyOutputFile,
+  type OutputTextFile,
+  type PulsarContext,
+  type Supernova
+} from "@supernovaio/sdk-exporters"
+import { createPulsarContextFile } from "./pulsar-context-dump"
 
 const EXPORTER_LOG_PREFIX = "[Agentic Skills exporter]"
 const WARNINGS_LOG_NAME = "warnings.log"
@@ -38,12 +45,17 @@ export function createWarningsLogFile(): OutputTextFile | null {
   }
 }
 
-export function withWarningsLog(outputFiles: Array<AnyOutputFile>): Array<AnyOutputFile> {
+export function withExporterDiagnostics(
+  outputFiles: Array<AnyOutputFile>,
+  context: PulsarContext,
+  sdk: Supernova
+): Array<AnyOutputFile> {
+  const diagnostics: Array<AnyOutputFile> = [createPulsarContextFile(context, sdk)]
   const warningsLog = createWarningsLogFile()
 
-  if (!warningsLog) {
-    return outputFiles
+  if (warningsLog) {
+    diagnostics.push(warningsLog)
   }
 
-  return [...outputFiles, warningsLog]
+  return [...outputFiles, ...diagnostics]
 }
