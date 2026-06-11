@@ -1,6 +1,6 @@
 {
   "name": "@supernovaio/exporter-agentic-skills",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Export your design system data into agentic skill artifacts using the Supernova.io export engine",
   "main": "index.js",
   "scripts": {

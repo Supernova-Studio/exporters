@@ -1,70 +1,68 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
-import { type ExporterConfiguration } from "../config"
-import { getContextArea, listWorkspaceSkills } from "./utils/context-api"
-import { clearExportWarnings, warnExport, withExporterDiagnostics } from "./utils/export-log"
-import { normalizeSkill, writeSkills } from "./utils/skill-utils"
-
-/** Exporter configuration from the resolved default configuration and user overrides. */
-export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
-
-function skipExport(reason: string, context: PulsarContext, sdk: Supernova): Array<AnyOutputFile> {
-  warnExport(reason)
-  return withExporterDiagnostics([], context, sdk)
-}
+import { getContextArea, getSkillsListMethod, listWorkspaceSkills } from "./utils/context-api"
+import { createPulsarContextFile } from "./utils/pulsar-context-dump"
+import { createSdkDebugFiles } from "./utils/sdk-debug-dump"
 
 type DatasetWithSkillFilter = {
   filteredSkills: <TSkill extends { id: string }>(
     allSkills: readonly TSkill[],
     inheritedDataset?: DatasetWithSkillFilter
-  ) => Array<{ item: TSkill }>
+  ) => Array<{ item: TSkill; source?: unknown }>
+}
+
+function requireWorkspaceId(wsId: string | undefined): string {
+  if (!wsId) {
+    throw new Error("No workspace ID provided.")
+  }
+
+  return wsId
+}
+
+function requireContextIds(contextIds: string[] | null | undefined): Array<string> {
+  if (!contextIds || contextIds.length === 0) {
+    throw new Error("No context IDs provided.")
+  }
+
+  return contextIds
 }
 
 /**
  * Export entrypoint.
+ *
+ * Debug mode: dumps raw SDK responses to ./_debug/*.txt plus ./PulsarContext.txt.
+ * Throws on missing runtime prerequisites or empty SDK results.
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
-  clearExportWarnings()
-
   const contextArea = getContextArea(sdk)
-  if (!contextArea) {
-    return skipExport("Context API is not available in this export runtime.", context, sdk)
-  }
+  const wsId = requireWorkspaceId(context.wsId)
+  const contextIds = requireContextIds(context.contextIds)
+  const skillsListMethod = getSkillsListMethod(contextArea)
 
-  if (!context.wsId) {
-    return skipExport("No workspace ID provided.", context, sdk)
-  }
-
-  if (!context.contextIds || context.contextIds.length === 0) {
-    return skipExport("No context IDs provided.", context, sdk)
-  }
-
-  const dataSet = (await contextArea.getResolvedDatasetForContext(
-    context.wsId,
-    context.contextIds[0]
-  )) as DatasetWithSkillFilter | null
+  const dataSet = (await contextArea.getResolvedDatasetForContext(wsId, contextIds[0])) as DatasetWithSkillFilter | null
 
   if (!dataSet || typeof dataSet.filteredSkills !== "function") {
-    return skipExport(`No dataset found for context ${context.contextIds[0]}.`, context, sdk)
+    throw new Error(`No dataset found for context ${contextIds[0]}.`)
   }
 
-  const skills = await listWorkspaceSkills(contextArea, context.wsId)
+  const skills = await listWorkspaceSkills(contextArea, wsId)
+
   if (skills.length === 0) {
-    return skipExport("No skills found in workspace.", context, sdk)
+    throw new Error("No skills found in workspace.")
   }
 
   const filteredSkills = dataSet.filteredSkills(skills as Array<{ id: string }>, dataSet)
+
   if (filteredSkills.length === 0) {
-    return skipExport("No skills match the selected context.", context, sdk)
+    throw new Error("No skills match the selected context.")
   }
 
-  const exportableSkills = filteredSkills
-    .map((result) => normalizeSkill(result.item))
-    .filter((skill): skill is NonNullable<typeof skill> => skill !== null)
-
-  const outputFiles = writeSkills(exportableSkills, exportConfiguration)
-  if (outputFiles.length === 0) {
-    return skipExport("No skills with exportable content matched the selected context.", context, sdk)
-  }
-
-  return withExporterDiagnostics(outputFiles, context, sdk)
+  return [
+    createPulsarContextFile(context, sdk),
+    ...createSdkDebugFiles({
+      skillsListMethod,
+      dataset: dataSet,
+      skills,
+      filteredSkills
+    })
+  ]
 })

@@ -5,7 +5,6 @@ import {
   type OutputTextFile
 } from "@supernovaio/sdk-exporters"
 import { exportTargets, type ExportTarget, type ExporterConfiguration } from "../../config"
-import { warnExport } from "./export-log"
 
 type SkillFile = {
   url?: string
@@ -94,8 +93,7 @@ export function writeSkills(
     const url = skillFileUrl(skill)
 
     if (!content && !url) {
-      warnExport(`Skipping skill ${skill.path || skill.id}: no content or file URL.`)
-      continue
+      throw new Error(`Skill ${skill.path || skill.id} has no content or file URL.`)
     }
 
     for (const targetPath of targetPaths) {

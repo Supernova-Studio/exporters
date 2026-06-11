@@ -6,24 +6,29 @@ type ContextArea = {
   listSkills?: (workspaceId: string) => Promise<Array<unknown>>
 }
 
-export function getContextArea(sdk: Supernova): ContextArea | null {
+export function getContextArea(sdk: Supernova): ContextArea {
   const context = (sdk as Supernova & { context?: ContextArea }).context
 
   if (!context || typeof context.getResolvedDatasetForContext !== "function") {
-    return null
+    throw new Error("Context API is not available in this export runtime.")
   }
 
   return context
 }
 
-export async function listWorkspaceSkills(contextArea: ContextArea, workspaceId: string): Promise<Array<unknown>> {
+export function getSkillsListMethod(contextArea: ContextArea): "listKnowledgeSkills" | "listSkills" {
   if (typeof contextArea.listKnowledgeSkills === "function") {
-    return contextArea.listKnowledgeSkills(workspaceId)
+    return "listKnowledgeSkills"
   }
 
   if (typeof contextArea.listSkills === "function") {
-    return contextArea.listSkills(workspaceId)
+    return "listSkills"
   }
 
-  return []
+  throw new Error("Neither listKnowledgeSkills nor listSkills is available on sdk.context.")
+}
+
+export async function listWorkspaceSkills(contextArea: ContextArea, workspaceId: string): Promise<Array<unknown>> {
+  const method = getSkillsListMethod(contextArea)
+  return contextArea[method]!(workspaceId)
 }
