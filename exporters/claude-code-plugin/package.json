@@ -1,7 +1,7 @@
 {
   "name": "@supernovaio/exporter-claude-code-plugin",
-  "version": "0.1.2",
-  "description": "Export a Supernova context as a Claude Code plugin",
+  "version": "1.0.0",
+  "description": "Package a Supernova Context into a ready-to-install Claude Code plugin",
   "main": "index.js",
   "scripts": {
     "dev": "npx webpack --mode=development --watch",

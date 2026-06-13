@@ -1,8 +1,12 @@
-# Claude Code Plugin Exporter
+# Claude Code plugin exporter
 
-The Claude Code Plugin exporter generates a publishable Claude Code plugin from the currently selected Supernova Context.
+Turn a Supernova Context into a ready-to-install Claude Code plugin.
 
-## Output
+This exporter packages the setup your team would otherwise wire by hand: a context-scoped Supernova MCP connection, selected context skills, optional feedback capture, MCP usage guidance, and Claude Code plugin metadata. Export it to a repository, push it to GitHub, and your team can install the same Supernova-aware Claude Code setup.
+
+Design-system content such as tokens, documentation pages, components, assets, and Storybook data is not written into the plugin. That data stays live in Supernova and is retrieved through the context-scoped MCP server, so Claude Code gets fresh context without committing snapshots to the repository.
+
+## What it packages
 
 The exported plugin uses the standard Claude Code plugin layout:
 
@@ -21,7 +25,16 @@ skills/
 README.md                # optional, enabled by default
 ```
 
-The exporter does not write design-system content such as tokens, documentation pages, components, assets, or Storybook data into the plugin. Those are returned live by the context-scoped Supernova MCP server.
+- `.claude-plugin/plugin.json` for Claude Code plugin metadata.
+- `.mcp.json` with the Supernova MCP scoped to the selected Context.
+- `skills/` with Supernova skills selected by the Context.
+- `using-supernova-mcp/SKILL.md` with guidance for using Supernova MCP tools.
+- `capture-feedback/SKILL.md` when feedback collection is enabled for the Context and in exporter config.
+- Optional `.claude-plugin/marketplace.json` and `README.md` for publishing and installing from a repository.
+
+## Why design-system data is not exported
+
+The plugin is an installable setup, not a snapshot of your design system. Tokens, documentation, components, assets, and Storybook data change over time, so Claude Code should retrieve them through the Supernova MCP when needed.
 
 ## Context scope
 

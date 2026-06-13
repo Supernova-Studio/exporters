@@ -37,7 +37,7 @@ export function createReadmeFile(
     "",
     metadata.description,
     "",
-    "## What's Inside",
+    "## What's inside",
     "",
     "- Claude Code plugin manifest in `.claude-plugin/plugin.json`.",
     includeMcpServer
@@ -65,7 +65,7 @@ export function createReadmeFile(
     "",
     "For local development, load this directory as a local Claude Code plugin.",
     "",
-    "## Skills Shipped",
+    "## Skills shipped",
     "",
     ...skillLines(skills),
     "",
