@@ -1,53 +1,27 @@
 [
   {
-    "key": "exportForCursor",
+    "key": "exportToAgentsFolder",
     "type": "boolean",
     "default": true,
-    "title": "Export for Cursor",
-    "description": "Export skills to Cursor's discovery location. In standard layout this is the shared .agents/skills/ folder.",
+    "title": "Export to .agents/skills",
+    "description": "Export skills to the shared .agents/skills folder used by Cursor, OpenAI Codex, GitHub Copilot, and other agents that support the open Agent Skills location.",
     "category": "Export targets"
   },
   {
-    "key": "exportForClaude",
+    "key": "exportToClaudeFolder",
     "type": "boolean",
     "default": true,
-    "title": "Export for Claude",
-    "description": "Export skills to Claude Code's discovery location. In standard layout this is .claude/skills/ because Claude does not yet read .agents/skills/.",
+    "title": "Export to .claude/skills",
+    "description": "Export skills to Claude Code's project skill discovery folder.",
     "category": "Export targets"
   },
   {
-    "key": "exportForCodex",
+    "key": "exportToPipelineRoot",
     "type": "boolean",
-    "default": true,
-    "title": "Export for OpenAI Codex",
-    "description": "Export skills to OpenAI Codex's discovery location. In standard layout this is the shared .agents/skills/ folder.",
+    "default": false,
+    "title": "Export to pipeline destination",
+    "description": "Export skill folders directly into the selected pipeline destination, without adding a .agents/skills or .claude/skills prefix.",
     "category": "Export targets"
-  },
-  {
-    "key": "exportForGitHubCopilot",
-    "type": "boolean",
-    "default": true,
-    "title": "Export for GitHub Copilot",
-    "description": "Export skills to GitHub Copilot's discovery location. In standard layout this is the shared .agents/skills/ folder.",
-    "category": "Export targets"
-  },
-  {
-    "key": "outputLayout",
-    "type": "enum",
-    "default": "standard",
-    "title": "Output layout",
-    "description": "Control whether the exporter writes agent discovery folders or emits skills directly into the pipeline destination.",
-    "category": "Output structure",
-    "options": {
-      "standard": {
-        "label": "Standard",
-        "description": "Export to agent skill folders based on the selected targets."
-      },
-      "bare": {
-        "label": "Bare",
-        "description": "Export skill folders directly, without a .agents/skills or .claude/skills prefix."
-      }
-    }
   },
   {
     "key": "preserveFolderHierarchy",
@@ -62,7 +36,7 @@
     "type": "boolean",
     "default": true,
     "title": "Add Supernova metadata",
-    "description": "Add Supernova skill ID and update timestamp to the SKILL.md frontmatter metadata field.",
+    "description": "Add Supernova update timestamp and provenance information to the SKILL.md frontmatter metadata field.",
     "category": "Output structure"
   },
   {

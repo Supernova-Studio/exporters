@@ -1,5 +1,5 @@
 import { OutputFileType, type AnyOutputFile, type OutputTextFile } from "@supernovaio/sdk-exporters"
-import { exportTargets, type ExportTarget, type ExporterConfiguration } from "../../config"
+import type { ExporterConfiguration } from "../../config"
 import { addSupernovaMetadata, upsertSkillName } from "./frontmatter"
 
 const SKILL_FILE_NAME = "SKILL.md"
@@ -9,13 +9,6 @@ export type ExportableSkill = {
   path: string
   content: string
   updatedAt: string
-}
-
-const TARGET_PATHS: Record<ExportTarget, string> = {
-  cursor: ".agents/skills",
-  claude: ".claude/skills",
-  codex: ".agents/skills",
-  githubCopilot: ".agents/skills"
 }
 
 function sanitizePathSegment(segment: string): string {
@@ -53,11 +46,21 @@ function lastSegment(segments: Array<string>): string {
 }
 
 function targetPaths(exportConfiguration: ExporterConfiguration): Array<string> {
-  if (exportConfiguration.outputLayout === "bare") {
-    return [""]
+  const paths: Array<string> = []
+
+  if (exportConfiguration.exportToAgentsFolder) {
+    paths.push(".agents/skills")
   }
 
-  return [...new Set(exportTargets(exportConfiguration).map((target) => TARGET_PATHS[target]))]
+  if (exportConfiguration.exportToClaudeFolder) {
+    paths.push(".claude/skills")
+  }
+
+  if (exportConfiguration.exportToPipelineRoot) {
+    paths.push("")
+  }
+
+  return [...new Set(paths)]
 }
 
 function skillContent(skill: ExportableSkill, skillName: string, exportConfiguration: ExporterConfiguration): string {
@@ -69,7 +72,6 @@ function skillContent(skill: ExportableSkill, skillName: string, exportConfigura
   }
 
   return addSupernovaMetadata(content, {
-    skillId: skill.id,
     updatedAt: skill.updatedAt
   })
 }

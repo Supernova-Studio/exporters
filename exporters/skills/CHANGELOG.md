@@ -2,6 +2,13 @@
 
 All updates to this exporter are documented in this file.
 
+## 0.2.2 - 2026-06-13
+
+### Changed
+
+- Replace agent-specific export toggles with folder-based output options.
+- Store Supernova generated-file provenance in frontmatter metadata without internal skill IDs.
+
 ## 0.2.1 - 2026-06-13
 
 ### Fixed
