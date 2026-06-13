@@ -2,6 +2,12 @@
 
 All updates to this exporter are documented in this file.
 
+## 0.2.1 - 2026-06-13
+
+### Fixed
+
+- Normalize SDK skill model instances before generating output files.
+
 ## 0.2.0 - 2026-06-12
 
 ### Added
