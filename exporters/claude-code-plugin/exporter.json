@@ -1,7 +1,7 @@
 {
   "id": "supernovaio.exporter-claude-code-plugin",
   "name": "Claude Code plugin",
-  "description": "Export a Supernova Context as a Claude Code plugin.",
+  "description": "Package a Supernova Context into a Claude Code plugin.",
   "author": "Supernova.io",
   "organization": "Supernova.io",
   "homepage": "https://supernova.io",
