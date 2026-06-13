@@ -1,18 +1,48 @@
 # Agentic Skills Exporter
 
-The Agentic Skills exporter is the starting point for generating Supernova agentic skill artifacts.
-
-This exporter is intentionally barebones right now. It registers with the Supernova export engine and returns no output files until the skill generation format is implemented.
+The Agentic Skills exporter generates `SKILL.md` files from Supernova skills selected by the current context.
 
 ## Output
 
-No files are generated yet.
+Each exported skill is written as a folder containing a `SKILL.md` file:
+
+```text
+.agents/skills/
++-- skill-name/
+    +-- SKILL.md
+```
+
+When folder hierarchy is preserved, Supernova skill folders are emitted as category folders:
+
+```text
+.agents/skills/
++-- frontend/
+    +-- skill-name/
+        +-- SKILL.md
+```
+
+In standard layout, selected targets map to canonical skill folders:
+
+| Target         | Output folder     |
+| -------------- | ----------------- |
+| Cursor         | `.agents/skills/` |
+| Claude         | `.claude/skills/` |
+| OpenAI Codex   | `.agents/skills/` |
+| GitHub Copilot | `.agents/skills/` |
+
+The exporter deduplicates shared target folders, so selecting Cursor, Codex, and GitHub Copilot emits one `.agents/skills/` copy. Empty workspaces or contexts with no matching skills export zero files without failing.
 
 ## Configuration
 
 ### Export targets
 
-- **exportForCursor:** Generate skills for Cursor. Project-level targets are `.cursor/skills/` or `.agents/skills/`. Global targets are `~/.cursor/skills/` or `~/.agents/skills/`. Cursor also loads compatible Claude and Codex skill folders.
-- **exportForClaude:** Generate skills for Claude Code and Claude Desktop. Project-level target is `.claude/skills/`. Global target is `~/.claude/skills/`.
-- **exportForCodex:** Generate skills for OpenAI Codex. Project-level targets are `.codex/skills/` and `.agents/skills/`. Global targets are `~/.codex/skills/` and `~/.agents/skills/`.
-- **exportForGitHubCopilot:** Generate skills for GitHub Copilot. Project-level targets are `.github/skills/` or `.agents/skills/`. Global targets are `~/.copilot/skills/` or `~/.agents/skills/`.
+- **exportForCursor:** Include Cursor-compatible skills in `.agents/skills/`.
+- **exportForClaude:** Include Claude Code-compatible skills in `.claude/skills/`.
+- **exportForCodex:** Include OpenAI Codex-compatible skills in `.agents/skills/`.
+- **exportForGitHubCopilot:** Include GitHub Copilot-compatible skills in `.agents/skills/`.
+
+### Output structure
+
+- **outputLayout:** Use `standard` to emit agent skill folders, or `bare` to emit skill folders directly into the pipeline destination.
+- **preserveFolderHierarchy:** Keep Supernova folder paths in the exported output. When disabled, skills are flattened and duplicate names receive deterministic numeric suffixes such as `skill-name-2`.
+- **addSupernovaMetadata:** Add `supernova-skill-id` and `supernova-updated-at` to the `metadata` frontmatter field.

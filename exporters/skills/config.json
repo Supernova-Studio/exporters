@@ -1,34 +1,68 @@
 [
-    {
-        "key": "exportForCursor",
-        "type": "boolean",
-        "default": true,
-        "title": "Export for Cursor",
-        "description": "Generate skills for Cursor. Project-level targets are .cursor/skills/ or .agents/skills/. Global targets are ~/.cursor/skills/ or ~/.agents/skills/. Cursor also loads compatible Claude and Codex skill folders.",
-        "category": "Export targets"
-    },
-    {
-        "key": "exportForClaude",
-        "type": "boolean",
-        "default": true,
-        "title": "Export for Claude",
-        "description": "Generate skills for Claude Code and Claude Desktop. Project-level target is .claude/skills/. Global target is ~/.claude/skills/.",
-        "category": "Export targets"
-    },
-    {
-        "key": "exportForCodex",
-        "type": "boolean",
-        "default": true,
-        "title": "Export for OpenAI Codex",
-        "description": "Generate skills for OpenAI Codex. Project-level targets are .codex/skills/ and .agents/skills/. Global targets are ~/.codex/skills/ and ~/.agents/skills/.",
-        "category": "Export targets"
-    },
-    {
-        "key": "exportForGitHubCopilot",
-        "type": "boolean",
-        "default": true,
-        "title": "Export for GitHub Copilot",
-        "description": "Generate skills for GitHub Copilot. Project-level targets are .github/skills/ or .agents/skills/. Global targets are ~/.copilot/skills/ or ~/.agents/skills/.",
-        "category": "Export targets"
+  {
+    "key": "exportForCursor",
+    "type": "boolean",
+    "default": true,
+    "title": "Export for Cursor",
+    "description": "Include Cursor-compatible skills. In standard layout these are exported to the shared .agents/skills/ folder.",
+    "category": "Export targets"
+  },
+  {
+    "key": "exportForClaude",
+    "type": "boolean",
+    "default": true,
+    "title": "Export for Claude",
+    "description": "Include Claude Code-compatible skills. In standard layout these are exported to .claude/skills/ because Claude does not yet read .agents/skills/.",
+    "category": "Export targets"
+  },
+  {
+    "key": "exportForCodex",
+    "type": "boolean",
+    "default": true,
+    "title": "Export for OpenAI Codex",
+    "description": "Include OpenAI Codex-compatible skills. In standard layout these are exported to the shared .agents/skills/ folder.",
+    "category": "Export targets"
+  },
+  {
+    "key": "exportForGitHubCopilot",
+    "type": "boolean",
+    "default": true,
+    "title": "Export for GitHub Copilot",
+    "description": "Include GitHub Copilot-compatible skills. In standard layout these are exported to the shared .agents/skills/ folder.",
+    "category": "Export targets"
+  },
+  {
+    "key": "outputLayout",
+    "type": "enum",
+    "default": "standard",
+    "title": "Output layout",
+    "description": "Control whether the exporter writes agent-specific folders or emits skills directly into the pipeline destination.",
+    "category": "Output structure",
+    "options": {
+      "standard": {
+        "label": "Standard",
+        "description": "Export to agent skill folders based on the selected targets."
+      },
+      "bare": {
+        "label": "Bare",
+        "description": "Export skill folders directly, without a .agents/skills or .claude/skills prefix."
+      }
     }
+  },
+  {
+    "key": "preserveFolderHierarchy",
+    "type": "boolean",
+    "default": true,
+    "title": "Preserve folder hierarchy",
+    "description": "Keep Supernova skill folders as category folders in the exported output. When disabled, skills are flattened and duplicate names receive numeric suffixes.",
+    "category": "Output structure"
+  },
+  {
+    "key": "addSupernovaMetadata",
+    "type": "boolean",
+    "default": true,
+    "title": "Add Supernova metadata",
+    "description": "Add Supernova skill ID and update timestamp to the SKILL.md frontmatter metadata field.",
+    "category": "Output structure"
+  }
 ]

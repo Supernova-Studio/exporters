@@ -1,4 +1,5 @@
 export type ExportTarget = "cursor" | "claude" | "codex" | "githubCopilot"
+export type OutputLayout = "standard" | "bare"
 
 /**
  * Main configuration of the exporter.
@@ -13,6 +14,12 @@ export type ExporterConfiguration = {
   exportForCodex: boolean
   /** Generate GitHub Copilot-compatible skills. */
   exportForGitHubCopilot: boolean
+  /** Choose whether target folders are generated or omitted. */
+  outputLayout: OutputLayout
+  /** Preserve Supernova folder hierarchy in generated skill paths. */
+  preserveFolderHierarchy: boolean
+  /** Add Supernova provenance to SKILL.md frontmatter metadata. */
+  addSupernovaMetadata: boolean
 }
 
 export function exportTargets(configuration: ExporterConfiguration): Array<ExportTarget> {

@@ -1,0 +1,109 @@
+type FrontmatterBlock = {
+  frontmatterBody: string
+  contentAfter: string
+}
+
+type SupernovaMetadata = {
+  skillId: string
+  updatedAt: string
+}
+
+const SUPERNOVA_METADATA_KEYS = ["supernova-skill-id", "supernova-updated-at"]
+
+function matchFrontmatterBlock(text: string): FrontmatterBlock | null {
+  const withoutBom = text.replace(/^\uFEFF/, "")
+  const frontmatterMatch = withoutBom.match(/^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/)
+  const fullMatch = frontmatterMatch?.[0]
+  const frontmatterBody = frontmatterMatch?.[1]
+
+  if (frontmatterBody === undefined || fullMatch === undefined) {
+    return null
+  }
+
+  return {
+    frontmatterBody: frontmatterBody.replace(/\r\n/g, "\n"),
+    contentAfter: withoutBom.slice(fullMatch.length)
+  }
+}
+
+function isCommentLine(line: string): boolean {
+  return /^\s*#/.test(line)
+}
+
+function findNextTopLevelKeyOffset(lines: Array<string>): number {
+  return lines.findIndex((line) => !isCommentLine(line) && /^\S[^:]*:/.test(line))
+}
+
+function renderFrontmatter(frontmatterBody: string, contentAfter: string): string {
+  const body = contentAfter.replace(/^\uFEFF/, "").replace(/^\r?\n+/, "")
+
+  return `---\n${frontmatterBody}\n---${body ? `\n${body}` : ""}`
+}
+
+function renderField(fieldName: string, value: string): Array<string> {
+  return [`${fieldName}: ${value}`]
+}
+
+function upsertTopLevelField(frontmatterBody: string, fieldName: string, value: string): string {
+  const lines = frontmatterBody ? frontmatterBody.split("\n") : []
+  const rendered = renderField(fieldName, value)
+  const keyPattern = new RegExp(`^${fieldName}:`, "i")
+  const startIndex = lines.findIndex((line) => keyPattern.test(line))
+
+  if (startIndex === -1) {
+    return [...lines, ...rendered].join("\n")
+  }
+
+  const followingLines = lines.slice(startIndex + 1)
+  const nextKeyOffset = findNextTopLevelKeyOffset(followingLines)
+  const endIndex = nextKeyOffset === -1 ? lines.length : startIndex + 1 + nextKeyOffset
+
+  return [...lines.slice(0, startIndex), ...rendered, ...lines.slice(endIndex)].join("\n")
+}
+
+function renderMetadataLines(metadata: SupernovaMetadata): Array<string> {
+  return ["metadata:", `  supernova-skill-id: ${metadata.skillId}`, `  supernova-updated-at: ${metadata.updatedAt}`]
+}
+
+function metadataKey(line: string): string | null {
+  return line.match(/^\s+([^:#]+):/)?.[1]?.trim() ?? null
+}
+
+function upsertMetadata(frontmatterBody: string, metadata: SupernovaMetadata): string {
+  const lines = frontmatterBody ? frontmatterBody.split("\n") : []
+  const startIndex = lines.findIndex((line) => /^metadata:\s*$/i.test(line))
+
+  if (startIndex === -1) {
+    return [...lines, ...renderMetadataLines(metadata)].join("\n")
+  }
+
+  const followingLines = lines.slice(startIndex + 1)
+  const nextKeyOffset = findNextTopLevelKeyOffset(followingLines)
+  const endIndex = nextKeyOffset === -1 ? lines.length : startIndex + 1 + nextKeyOffset
+  const existingMetadataLines = lines.slice(startIndex + 1, endIndex).filter((line) => {
+    const key = metadataKey(line)
+    return key ? !SUPERNOVA_METADATA_KEYS.includes(key) : true
+  })
+
+  return [
+    ...lines.slice(0, startIndex),
+    "metadata:",
+    ...existingMetadataLines,
+    ...renderMetadataLines(metadata).slice(1),
+    ...lines.slice(endIndex)
+  ].join("\n")
+}
+
+export function upsertSkillName(text: string, name: string): string {
+  const block = matchFrontmatterBlock(text)
+  const frontmatterBody = upsertTopLevelField(block?.frontmatterBody ?? "", "name", name)
+
+  return renderFrontmatter(frontmatterBody, block?.contentAfter ?? text)
+}
+
+export function addSupernovaMetadata(text: string, metadata: SupernovaMetadata): string {
+  const block = matchFrontmatterBlock(text)
+  const frontmatterBody = upsertMetadata(block?.frontmatterBody ?? "", metadata)
+
+  return renderFrontmatter(frontmatterBody, block?.contentAfter ?? text)
+}

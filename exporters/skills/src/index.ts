@@ -1,7 +1,9 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
-import { getContextArea, getSkillsListMethod, listWorkspaceSkills } from "./utils/context-api"
-import { createPulsarContextFile } from "./utils/pulsar-context-dump"
-import { createSdkDebugFiles } from "./utils/sdk-debug-dump"
+import type { ExporterConfiguration } from "../config"
+import { normalizeSkill, writeSkills, type ExportableSkill } from "./utils/skill-utils"
+import { getContextArea, listWorkspaceSkills } from "./utils/context-api"
+
+export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
 type DatasetWithSkillFilter = {
   filteredSkills: <TSkill extends { id: string }>(
@@ -29,14 +31,12 @@ function requireContextIds(contextIds: string[] | null | undefined): Array<strin
 /**
  * Export entrypoint.
  *
- * Debug mode: dumps raw SDK responses to ./_debug/*.txt plus ./PulsarContext.txt.
- * Throws on missing runtime prerequisites or empty SDK results.
+ * Export agentic skills selected by the current context.
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
   const contextArea = getContextArea(sdk)
   const wsId = requireWorkspaceId(context.wsId)
   const contextIds = requireContextIds(context.contextIds)
-  const skillsListMethod = getSkillsListMethod(contextArea)
 
   const dataSet = (await contextArea.getResolvedDatasetForContext(wsId, contextIds[0])) as DatasetWithSkillFilter | null
 
@@ -47,22 +47,17 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   const skills = await listWorkspaceSkills(contextArea, wsId)
 
   if (skills.length === 0) {
-    throw new Error("No skills found in workspace.")
+    return []
   }
 
-  const filteredSkills = dataSet.filteredSkills(skills as Array<{ id: string }>, dataSet)
+  const filteredSkills = dataSet
+    .filteredSkills(skills as Array<{ id: string }>, dataSet)
+    .map(({ item }) => normalizeSkill(item))
+    .filter((skill): skill is ExportableSkill => skill !== null)
 
   if (filteredSkills.length === 0) {
-    throw new Error("No skills match the selected context.")
+    return []
   }
 
-  return [
-    createPulsarContextFile(context, sdk),
-    ...createSdkDebugFiles({
-      skillsListMethod,
-      dataset: dataSet,
-      skills,
-      filteredSkills
-    })
-  ]
+  return writeSkills(filteredSkills, exportConfiguration)
 })

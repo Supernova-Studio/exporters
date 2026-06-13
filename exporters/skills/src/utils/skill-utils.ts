@@ -1,32 +1,21 @@
-import {
-  OutputFileType,
-  type AnyOutputFile,
-  type OutputCopyRemoteURLFile,
-  type OutputTextFile
-} from "@supernovaio/sdk-exporters"
+import { OutputFileType, type AnyOutputFile, type OutputTextFile } from "@supernovaio/sdk-exporters"
 import { exportTargets, type ExportTarget, type ExporterConfiguration } from "../../config"
+import { addSupernovaMetadata, upsertSkillName } from "./frontmatter"
 
-type SkillFile = {
-  url?: string
-  downloadUrl?: string
-  sourceUrl?: string
-  name?: string
-  fileName?: string
-  path?: string
-}
+const SKILL_FILE_NAME = "SKILL.md"
 
 export type ExportableSkill = {
   id: string
   path: string
-  content?: string
-  file?: SkillFile | null
+  content: string
+  updatedAt: Date | string
 }
 
-const TARGET_PATHS: Record<ExportTarget, Array<string>> = {
-  cursor: [".cursor/skills", ".agents/skills"],
-  claude: [".claude/skills"],
-  codex: [".codex/skills", ".agents/skills"],
-  githubCopilot: [".github/skills", ".agents/skills"]
+const TARGET_PATHS: Record<ExportTarget, string> = {
+  cursor: ".agents/skills",
+  claude: ".claude/skills",
+  codex: ".agents/skills",
+  githubCopilot: ".agents/skills"
 }
 
 function sanitizePathSegment(segment: string): string {
@@ -37,26 +26,56 @@ function pathSegments(path: string): Array<string> {
   return path.split("/").map(sanitizePathSegment).filter(Boolean)
 }
 
-function fileNameFromPath(path: string | undefined): string | null {
-  const lastSegment = pathSegments(path ?? "").pop()
-  return lastSegment && /\.[a-z0-9]+$/i.test(lastSegment) ? lastSegment : null
-}
-
-function skillFileUrl(skill: ExportableSkill): string | null {
-  return skill.file?.url ?? skill.file?.downloadUrl ?? skill.file?.sourceUrl ?? null
-}
-
-function skillDestination(skill: ExportableSkill): { relativePath: string; fileName: string } {
+function skillPathSegments(skill: ExportableSkill, preserveFolderHierarchy: boolean): Array<string> {
   const segments = pathSegments(skill.path)
-  const pathFileName = fileNameFromPath(skill.path)
-  const fileName =
-    skill.file?.fileName ?? skill.file?.name ?? fileNameFromPath(skill.file?.path) ?? pathFileName ?? "SKILL.md"
-  const directorySegments = pathFileName ? segments.slice(0, -1) : segments
+  const fallbackName = sanitizePathSegment(skill.id)
 
-  return {
-    relativePath: directorySegments.length > 0 ? directorySegments.join("/") : sanitizePathSegment(skill.id),
-    fileName: sanitizePathSegment(fileName)
+  if (segments.length === 0) {
+    return [fallbackName]
   }
+
+  return preserveFolderHierarchy ? segments : [segments[segments.length - 1]]
+}
+
+function suffixLastSegment(segments: Array<string>, index: number): Array<string> {
+  const suffix = index === 1 ? "" : `-${index}`
+  const lastSegment = segments[segments.length - 1]
+
+  return [...segments.slice(0, -1), `${lastSegment}${suffix}`]
+}
+
+function relativePath(segments: Array<string>): string {
+  return segments.join("/")
+}
+
+function lastSegment(segments: Array<string>): string {
+  return segments[segments.length - 1]
+}
+
+function targetPaths(exportConfiguration: ExporterConfiguration): Array<string> {
+  if (exportConfiguration.outputLayout === "bare") {
+    return [""]
+  }
+
+  return [...new Set(exportTargets(exportConfiguration).map((target) => TARGET_PATHS[target]))]
+}
+
+function updatedAtIsoString(updatedAt: Date | string): string {
+  return updatedAt instanceof Date ? updatedAt.toISOString() : updatedAt
+}
+
+function skillContent(skill: ExportableSkill, skillName: string, exportConfiguration: ExporterConfiguration): string {
+  const content =
+    skillName === lastSegment(pathSegments(skill.path)) ? skill.content : upsertSkillName(skill.content, skillName)
+
+  if (!exportConfiguration.addSupernovaMetadata) {
+    return content
+  }
+
+  return addSupernovaMetadata(content, {
+    skillId: skill.id,
+    updatedAt: updatedAtIsoString(skill.updatedAt)
+  })
 }
 
 export function normalizeSkill(skill: unknown): ExportableSkill | null {
@@ -67,16 +86,18 @@ export function normalizeSkill(skill: unknown): ExportableSkill | null {
   const value = skill as Record<string, unknown>
   const id = typeof value.id === "string" ? value.id : null
   const path = typeof value.path === "string" ? value.path : null
+  const content = typeof value.content === "string" ? value.content : null
+  const updatedAt = value.updatedAt instanceof Date || typeof value.updatedAt === "string" ? value.updatedAt : null
 
-  if (!id || !path) {
+  if (!id || !path || content === null || !updatedAt) {
     return null
   }
 
   return {
     id,
     path,
-    content: typeof value.content === "string" ? value.content : undefined,
-    file: (value.file as SkillFile | null | undefined) ?? null
+    content,
+    updatedAt
   }
 }
 
@@ -84,35 +105,32 @@ export function writeSkills(
   skills: Array<ExportableSkill>,
   exportConfiguration: ExporterConfiguration
 ): Array<AnyOutputFile> {
-  const targetPaths = [...new Set(exportTargets(exportConfiguration).flatMap((target) => TARGET_PATHS[target]))]
+  const paths = targetPaths(exportConfiguration)
   const outputFiles = new Map<string, AnyOutputFile>()
+  const destinationCounts = new Map<string, number>()
+  const orderedSkills = [...skills].sort((a, b) => a.path.localeCompare(b.path) || a.id.localeCompare(b.id))
 
-  for (const skill of skills) {
-    const { relativePath, fileName } = skillDestination(skill)
-    const content = skill.content?.trim()
-    const url = skillFileUrl(skill)
+  for (const skill of orderedSkills) {
+    const baseSegments = skillPathSegments(skill, exportConfiguration.preserveFolderHierarchy)
+    const basePath = relativePath(baseSegments)
+    const destinationIndex = (destinationCounts.get(basePath) ?? 0) + 1
+    const destinationSegments = suffixLastSegment(baseSegments, destinationIndex)
+    const destinationPath = relativePath(destinationSegments)
+    const skillName = lastSegment(destinationSegments)
+    const content = skillContent(skill, skillName, exportConfiguration)
 
-    if (!content && !url) {
-      throw new Error(`Skill ${skill.path || skill.id} has no content or file URL.`)
-    }
+    destinationCounts.set(basePath, destinationIndex)
 
-    for (const targetPath of targetPaths) {
-      const outputPath = `${targetPath}/${relativePath}`
-      const outputKey = `${outputPath}/${fileName}`
+    for (const targetPath of paths) {
+      const outputPath = [targetPath, destinationPath].filter(Boolean).join("/")
+      const outputKey = `${outputPath}/${SKILL_FILE_NAME}`
 
-      const outputFile: OutputTextFile | OutputCopyRemoteURLFile = content
-        ? {
-            type: OutputFileType.text,
-            path: outputPath,
-            name: fileName,
-            content
-          }
-        : {
-            type: OutputFileType.copyRemoteUrl,
-            path: outputPath,
-            name: fileName,
-            url: url!
-          }
+      const outputFile: OutputTextFile = {
+        type: OutputFileType.text,
+        path: outputPath,
+        name: SKILL_FILE_NAME,
+        content
+      }
 
       outputFiles.set(outputKey, outputFile)
     }
