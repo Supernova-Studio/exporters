@@ -126,13 +126,13 @@ export function createPluginManifestFile(metadata: ResolvedPluginMetadata): Outp
   })
 }
 
-export function createMarketplaceFile(metadata: ResolvedPluginMetadata): OutputTextFile {
+export function createMarketplaceFile(metadata: ResolvedPluginMetadata, workspaceName: string): OutputTextFile {
   const author = optionalAuthor(metadata)
 
   return jsonFile(".claude-plugin", "marketplace.json", {
     name: metadata.name,
     owner: author ?? {
-      name: "Supernova"
+      name: workspaceName
     },
     plugins: [
       {

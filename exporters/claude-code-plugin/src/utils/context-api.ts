@@ -10,6 +10,10 @@ type ProjectsArea = {
   getProjectContext: (contextId: string) => Promise<unknown>
 }
 
+type WorkspacesArea = {
+  workspace: (workspaceId: string) => Promise<unknown>
+}
+
 export type ProjectContextMetadata = {
   id: string
   name: string
@@ -17,6 +21,11 @@ export type ProjectContextMetadata = {
   mcpUrlSlug?: string
   isFeedbackCollectionEnabled: boolean
   isFeedbackCollectionAnonymous: boolean
+}
+
+export type WorkspaceMetadata = {
+  id: string
+  name: string
 }
 
 function remoteValue(value: unknown): Record<string, unknown> | null {
@@ -48,6 +57,16 @@ function getProjectsArea(sdk: Supernova): ProjectsArea {
   }
 
   return projects
+}
+
+function getWorkspacesArea(sdk: Supernova): WorkspacesArea {
+  const workspaces = (sdk as Supernova & { workspaces?: WorkspacesArea }).workspaces
+
+  if (!workspaces || typeof workspaces.workspace !== "function") {
+    throw new Error("Workspaces API is not available in this export runtime.")
+  }
+
+  return workspaces
 }
 
 export function getSkillsListMethod(contextArea: ContextArea): "listKnowledgeSkills" | "listSkills" {
@@ -86,5 +105,19 @@ export async function getProjectContextMetadata(sdk: Supernova, contextId: strin
     mcpUrlSlug,
     isFeedbackCollectionEnabled: context.isFeedbackCollectionEnabled === true,
     isFeedbackCollectionAnonymous: context.isFeedbackCollectionAnonymous === true
+  }
+}
+
+export async function getWorkspaceMetadata(sdk: Supernova, workspaceId: string): Promise<WorkspaceMetadata> {
+  const workspace = remoteValue(await getWorkspacesArea(sdk).workspace(workspaceId))
+  const profile = remoteValue(workspace?.profile)
+
+  if (!workspace) {
+    throw new Error(`No workspace metadata found for workspace ${workspaceId}.`)
+  }
+
+  return {
+    id: typeof workspace.id === "string" ? workspace.id : workspaceId,
+    name: typeof profile?.name === "string" && profile.name.trim() ? profile.name : workspaceId
   }
 }

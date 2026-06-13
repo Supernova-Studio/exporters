@@ -1,7 +1,12 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
 import type { ExporterConfiguration } from "../config"
 import { createBundledSkills } from "./utils/bundled-skills"
-import { getContextArea, getProjectContextMetadata, listWorkspaceSkills } from "./utils/context-api"
+import {
+  getContextArea,
+  getProjectContextMetadata,
+  getWorkspaceMetadata,
+  listWorkspaceSkills
+} from "./utils/context-api"
 import {
   createMarketplaceFile,
   createMcpConfigFile,
@@ -9,7 +14,12 @@ import {
   resolvePluginMetadata
 } from "./utils/plugin-files"
 import { createReadmeFile } from "./utils/readme"
-import { normalizeSkill, writeContextSkills, type ExportableSkill, type ExportedSkillSummary } from "./utils/skill-utils"
+import {
+  normalizeSkill,
+  writeContextSkills,
+  type ExportableSkill,
+  type ExportedSkillSummary
+} from "./utils/skill-utils"
 
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
@@ -49,6 +59,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   const wsId = requireWorkspaceId(context.wsId)
   const contextId = requireContextId(context.contextIds)
   const contextMetadata = await getProjectContextMetadata(sdk, contextId)
+  const workspaceMetadata = await getWorkspaceMetadata(sdk, wsId)
   const pluginMetadata = resolvePluginMetadata(exportConfiguration, contextMetadata)
   const outputFiles = new Map<string, AnyOutputFile>()
   const skillSummaries: Array<ExportedSkillSummary> = []
@@ -92,7 +103,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   skillSummaries.push(...bundledSkills.summaries)
 
   if (exportConfiguration.includeMarketplaceManifest) {
-    const marketplaceFile = createMarketplaceFile(pluginMetadata)
+    const marketplaceFile = createMarketplaceFile(pluginMetadata, workspaceMetadata.name)
     outputFiles.set(outputKey(marketplaceFile), marketplaceFile)
   }
 
