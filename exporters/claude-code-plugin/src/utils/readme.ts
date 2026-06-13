@@ -30,6 +30,7 @@ export function createReadmeFile(
     linkLine("Repository", metadata.repositoryUrl),
     "- Supernova: https://supernova.io"
   ].filter((line): line is string => line !== null)
+  const marketplaceRepositoryUrl = metadata.repositoryUrl ?? "<repository-url>"
 
   const content = [
     `# ${metadata.name}`,
@@ -58,7 +59,7 @@ export function createReadmeFile(
     "From a marketplace, add the repository and install the plugin:",
     "",
     "```text",
-    "/plugin marketplace add <repository-url>",
+    `/plugin marketplace add ${marketplaceRepositoryUrl}`,
     `/plugin install ${metadata.name}`,
     "```",
     "",

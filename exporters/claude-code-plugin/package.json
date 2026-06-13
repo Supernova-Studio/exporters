@@ -1,6 +1,6 @@
 {
   "name": "@supernovaio/exporter-claude-code-plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Export a Supernova context as a Claude Code plugin",
   "main": "index.js",
   "scripts": {

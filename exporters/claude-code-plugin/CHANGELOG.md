@@ -2,6 +2,12 @@
 
 All updates to this exporter are documented in this file.
 
+## 0.1.2 - 2026-06-13
+
+### Changed
+
+- Use the configured repository URL in the generated README marketplace install command.
+
 ## 0.1.1 - 2026-06-13
 
 ### Changed
