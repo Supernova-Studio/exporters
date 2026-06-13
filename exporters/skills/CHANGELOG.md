@@ -2,6 +2,13 @@
 
 All updates to this exporter are documented in this file.
 
+## 0.2.3 - 2026-06-13
+
+### Changed
+
+- Group agent folder and skill path settings under folder hierarchy.
+- Add separate frontmatter metadata toggles for update timestamp, generator name, and generated-file disclaimer.
+
 ## 0.2.2 - 2026-06-13
 
 ### Changed

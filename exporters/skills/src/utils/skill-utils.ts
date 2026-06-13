@@ -1,6 +1,11 @@
 import { OutputFileType, type AnyOutputFile, type OutputTextFile } from "@supernovaio/sdk-exporters"
 import type { ExporterConfiguration } from "../../config"
-import { addSupernovaMetadata, upsertSkillName } from "./frontmatter"
+import {
+  DEFAULT_SUPERNOVA_DISCLAIMER,
+  DEFAULT_SUPERNOVA_GENERATED_BY,
+  addSupernovaMetadata,
+  upsertSkillName
+} from "./frontmatter"
 
 const SKILL_FILE_NAME = "SKILL.md"
 
@@ -46,6 +51,10 @@ function lastSegment(segments: Array<string>): string {
 }
 
 function targetPaths(exportConfiguration: ExporterConfiguration): Array<string> {
+  if (!exportConfiguration.createAgentFolders) {
+    return [""]
+  }
+
   const paths: Array<string> = []
 
   if (exportConfiguration.exportToAgentsFolder) {
@@ -56,10 +65,6 @@ function targetPaths(exportConfiguration: ExporterConfiguration): Array<string> 
     paths.push(".claude/skills")
   }
 
-  if (exportConfiguration.exportToPipelineRoot) {
-    paths.push("")
-  }
-
   return [...new Set(paths)]
 }
 
@@ -67,13 +72,19 @@ function skillContent(skill: ExportableSkill, skillName: string, exportConfigura
   const content =
     skillName === lastSegment(pathSegments(skill.path)) ? skill.content : upsertSkillName(skill.content, skillName)
 
-  if (!exportConfiguration.addSupernovaMetadata) {
+  if (!exportConfiguration.includeSupernovaMetadata) {
     return content
   }
 
-  return addSupernovaMetadata(content, {
-    updatedAt: skill.updatedAt
-  })
+  const metadata = {
+    updatedAt: exportConfiguration.includeSupernovaUpdatedAt ? skill.updatedAt : undefined,
+    generatedBy: exportConfiguration.includeSupernovaGeneratedBy ? DEFAULT_SUPERNOVA_GENERATED_BY : undefined,
+    disclaimer: exportConfiguration.includeSupernovaDisclaimer ? DEFAULT_SUPERNOVA_DISCLAIMER : undefined
+  }
+
+  return metadata.updatedAt || metadata.generatedBy || metadata.disclaimer
+    ? addSupernovaMetadata(content, metadata)
+    : content
 }
 
 function remoteValue(value: unknown): Record<string, unknown> | null {

@@ -1,27 +1,33 @@
 [
   {
+    "key": "createAgentFolders",
+    "type": "boolean",
+    "default": true,
+    "title": "Create agent folders",
+    "description": "Create agent discovery folders in the export destination. When disabled, skill folders are written directly to the export destination.",
+    "category": "Folder hierarchy"
+  },
+  {
     "key": "exportToAgentsFolder",
     "type": "boolean",
     "default": true,
-    "title": "Export to .agents/skills",
-    "description": "Export skills to the shared .agents/skills folder used by Cursor, OpenAI Codex, GitHub Copilot, and other agents that support the open Agent Skills location.",
-    "category": "Export targets"
+    "title": "Create .agents/skills",
+    "description": "Create the shared .agents/skills folder used by Cursor, OpenAI Codex, GitHub Copilot, and other agents that support the open Agent Skills location.",
+    "category": "Folder hierarchy",
+    "dependsOn": {
+      "createAgentFolders": true
+    }
   },
   {
     "key": "exportToClaudeFolder",
     "type": "boolean",
     "default": true,
-    "title": "Export to .claude/skills",
-    "description": "Export skills to Claude Code's project skill discovery folder.",
-    "category": "Export targets"
-  },
-  {
-    "key": "exportToPipelineRoot",
-    "type": "boolean",
-    "default": false,
-    "title": "Export to pipeline destination",
-    "description": "Export skill folders directly into the selected pipeline destination, without adding a .agents/skills or .claude/skills prefix.",
-    "category": "Export targets"
+    "title": "Create .claude/skills",
+    "description": "Create Claude Code's project skill discovery folder.",
+    "category": "Folder hierarchy",
+    "dependsOn": {
+      "createAgentFolders": true
+    }
   },
   {
     "key": "preserveFolderHierarchy",
@@ -29,15 +35,48 @@
     "default": true,
     "title": "Preserve folder hierarchy",
     "description": "Keep Supernova skill folders as category folders in the exported output. When disabled, skills are flattened and duplicate names receive numeric suffixes.",
-    "category": "Output structure"
+    "category": "Folder hierarchy"
   },
   {
-    "key": "addSupernovaMetadata",
+    "key": "includeSupernovaMetadata",
     "type": "boolean",
     "default": true,
-    "title": "Add Supernova metadata",
-    "description": "Add Supernova update timestamp and provenance information to the SKILL.md frontmatter metadata field.",
-    "category": "Output structure"
+    "title": "Include Supernova metadata",
+    "description": "Add Supernova metadata to the SKILL.md frontmatter.",
+    "category": "Frontmatter metadata"
+  },
+  {
+    "key": "includeSupernovaUpdatedAt",
+    "type": "boolean",
+    "default": true,
+    "title": "Include updated timestamp",
+    "description": "Add the Supernova skill update timestamp to frontmatter metadata.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeSupernovaMetadata": true
+    }
+  },
+  {
+    "key": "includeSupernovaGeneratedBy",
+    "type": "boolean",
+    "default": true,
+    "title": "Include generator name",
+    "description": "Add the Supernova generator name to frontmatter metadata.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeSupernovaMetadata": true
+    }
+  },
+  {
+    "key": "includeSupernovaDisclaimer",
+    "type": "boolean",
+    "default": true,
+    "title": "Include generated file disclaimer",
+    "description": "Add a generated-file disclaimer to frontmatter metadata.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeSupernovaMetadata": true
+    }
   },
   {
     "key": "generateDebugFiles",

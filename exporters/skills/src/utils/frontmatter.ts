@@ -4,7 +4,9 @@ type FrontmatterBlock = {
 }
 
 type SupernovaMetadata = {
-  updatedAt: string
+  updatedAt?: string
+  generatedBy?: string
+  disclaimer?: string
 }
 
 const SUPERNOVA_METADATA_KEYS = ["supernova-updated-at", "supernova-generated-by", "supernova-disclaimer"]
@@ -63,12 +65,21 @@ function upsertTopLevelField(frontmatterBody: string, fieldName: string, value: 
 }
 
 function renderMetadataLines(metadata: SupernovaMetadata): Array<string> {
-  return [
-    "metadata:",
-    `  supernova-updated-at: ${metadata.updatedAt}`,
-    `  supernova-generated-by: ${SUPERNOVA_GENERATED_BY}`,
-    `  supernova-disclaimer: ${SUPERNOVA_DISCLAIMER}`
-  ]
+  const lines = ["metadata:"]
+
+  if (metadata.updatedAt) {
+    lines.push(`  supernova-updated-at: ${metadata.updatedAt}`)
+  }
+
+  if (metadata.generatedBy) {
+    lines.push(`  supernova-generated-by: ${metadata.generatedBy}`)
+  }
+
+  if (metadata.disclaimer) {
+    lines.push(`  supernova-disclaimer: ${metadata.disclaimer}`)
+  }
+
+  return lines
 }
 
 function metadataKey(line: string): string | null {
@@ -78,9 +89,10 @@ function metadataKey(line: string): string | null {
 function upsertMetadata(frontmatterBody: string, metadata: SupernovaMetadata): string {
   const lines = frontmatterBody ? frontmatterBody.split("\n") : []
   const startIndex = lines.findIndex((line) => /^metadata:\s*$/i.test(line))
+  const renderedMetadata = renderMetadataLines(metadata)
 
   if (startIndex === -1) {
-    return [...lines, ...renderMetadataLines(metadata)].join("\n")
+    return renderedMetadata.length === 1 ? frontmatterBody : [...lines, ...renderedMetadata].join("\n")
   }
 
   const followingLines = lines.slice(startIndex + 1)
@@ -95,7 +107,7 @@ function upsertMetadata(frontmatterBody: string, metadata: SupernovaMetadata): s
     ...lines.slice(0, startIndex),
     "metadata:",
     ...existingMetadataLines,
-    ...renderMetadataLines(metadata).slice(1),
+    ...renderedMetadata.slice(1),
     ...lines.slice(endIndex)
   ].join("\n")
 }
@@ -113,3 +125,6 @@ export function addSupernovaMetadata(text: string, metadata: SupernovaMetadata):
 
   return renderFrontmatter(frontmatterBody, block?.contentAfter ?? text)
 }
+
+export const DEFAULT_SUPERNOVA_GENERATED_BY = SUPERNOVA_GENERATED_BY
+export const DEFAULT_SUPERNOVA_DISCLAIMER = SUPERNOVA_DISCLAIMER
