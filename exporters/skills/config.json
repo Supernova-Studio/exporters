@@ -4,7 +4,7 @@
     "type": "boolean",
     "default": true,
     "title": "Export for Cursor",
-    "description": "Include Cursor-compatible skills. In standard layout these are exported to the shared .agents/skills/ folder.",
+    "description": "Export skills to Cursor's discovery location. In standard layout this is the shared .agents/skills/ folder.",
     "category": "Export targets"
   },
   {
@@ -12,7 +12,7 @@
     "type": "boolean",
     "default": true,
     "title": "Export for Claude",
-    "description": "Include Claude Code-compatible skills. In standard layout these are exported to .claude/skills/ because Claude does not yet read .agents/skills/.",
+    "description": "Export skills to Claude Code's discovery location. In standard layout this is .claude/skills/ because Claude does not yet read .agents/skills/.",
     "category": "Export targets"
   },
   {
@@ -20,7 +20,7 @@
     "type": "boolean",
     "default": true,
     "title": "Export for OpenAI Codex",
-    "description": "Include OpenAI Codex-compatible skills. In standard layout these are exported to the shared .agents/skills/ folder.",
+    "description": "Export skills to OpenAI Codex's discovery location. In standard layout this is the shared .agents/skills/ folder.",
     "category": "Export targets"
   },
   {
@@ -28,7 +28,7 @@
     "type": "boolean",
     "default": true,
     "title": "Export for GitHub Copilot",
-    "description": "Include GitHub Copilot-compatible skills. In standard layout these are exported to the shared .agents/skills/ folder.",
+    "description": "Export skills to GitHub Copilot's discovery location. In standard layout this is the shared .agents/skills/ folder.",
     "category": "Export targets"
   },
   {
@@ -36,7 +36,7 @@
     "type": "enum",
     "default": "standard",
     "title": "Output layout",
-    "description": "Control whether the exporter writes agent-specific folders or emits skills directly into the pipeline destination.",
+    "description": "Control whether the exporter writes agent discovery folders or emits skills directly into the pipeline destination.",
     "category": "Output structure",
     "options": {
       "standard": {
@@ -64,5 +64,13 @@
     "title": "Add Supernova metadata",
     "description": "Add Supernova skill ID and update timestamp to the SKILL.md frontmatter metadata field.",
     "category": "Output structure"
+  },
+  {
+    "key": "generateDebugFiles",
+    "type": "boolean",
+    "default": false,
+    "title": "Generate debug files",
+    "description": "Export _debug files with raw SDK responses and generated output metadata for troubleshooting.",
+    "category": "Debugging"
   }
 ]

@@ -6,13 +6,13 @@ export type OutputLayout = "standard" | "bare"
  * Default values are defined in config.json and can be overridden in pipelines.
  */
 export type ExporterConfiguration = {
-  /** Generate Cursor-compatible skills. */
+  /** Export skills to Cursor's discovery location. */
   exportForCursor: boolean
-  /** Generate Claude Code / Claude Desktop-compatible skills. */
+  /** Export skills to Claude Code's discovery location. */
   exportForClaude: boolean
-  /** Generate OpenAI Codex-compatible skills. */
+  /** Export skills to OpenAI Codex's discovery location. */
   exportForCodex: boolean
-  /** Generate GitHub Copilot-compatible skills. */
+  /** Export skills to GitHub Copilot's discovery location. */
   exportForGitHubCopilot: boolean
   /** Choose whether target folders are generated or omitted. */
   outputLayout: OutputLayout
@@ -20,6 +20,8 @@ export type ExporterConfiguration = {
   preserveFolderHierarchy: boolean
   /** Add Supernova provenance to SKILL.md frontmatter metadata. */
   addSupernovaMetadata: boolean
+  /** Add raw SDK response files to the generated output for troubleshooting. */
+  generateDebugFiles: boolean
 }
 
 export function exportTargets(configuration: ExporterConfiguration): Array<ExportTarget> {

@@ -1,7 +1,8 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
 import type { ExporterConfiguration } from "../config"
 import { normalizeSkill, writeSkills, type ExportableSkill } from "./utils/skill-utils"
-import { getContextArea, listWorkspaceSkills } from "./utils/context-api"
+import { getContextArea, getSkillsListMethod, listWorkspaceSkills } from "./utils/context-api"
+import { createDebugFiles } from "./utils/debug-output"
 
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
@@ -37,6 +38,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   const contextArea = getContextArea(sdk)
   const wsId = requireWorkspaceId(context.wsId)
   const contextIds = requireContextIds(context.contextIds)
+  const skillsListMethod = getSkillsListMethod(contextArea)
 
   const dataSet = (await contextArea.getResolvedDatasetForContext(wsId, contextIds[0])) as DatasetWithSkillFilter | null
 
@@ -46,18 +48,28 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
   const skills = await listWorkspaceSkills(contextArea, wsId)
 
-  if (skills.length === 0) {
-    return []
-  }
-
-  const filteredSkills = dataSet
-    .filteredSkills(skills as Array<{ id: string }>, dataSet)
+  const filteredSkillResults =
+    skills.length === 0 ? [] : dataSet.filteredSkills(skills as Array<{ id: string }>, dataSet)
+  const normalizedSkills = filteredSkillResults
     .map(({ item }) => normalizeSkill(item))
     .filter((skill): skill is ExportableSkill => skill !== null)
+  const outputFiles = normalizedSkills.length === 0 ? [] : writeSkills(normalizedSkills, exportConfiguration)
 
-  if (filteredSkills.length === 0) {
-    return []
+  if (!exportConfiguration.generateDebugFiles) {
+    return outputFiles
   }
 
-  return writeSkills(filteredSkills, exportConfiguration)
+  return [
+    ...outputFiles,
+    ...createDebugFiles({
+      context,
+      sdk,
+      skillsListMethod,
+      dataset: dataSet,
+      skills,
+      filteredSkills: filteredSkillResults,
+      normalizedSkills,
+      outputFiles
+    })
+  ]
 })

@@ -36,13 +36,14 @@ The exporter deduplicates shared target folders, so selecting Cursor, Codex, and
 
 ### Export targets
 
-- **exportForCursor:** Include Cursor-compatible skills in `.agents/skills/`.
-- **exportForClaude:** Include Claude Code-compatible skills in `.claude/skills/`.
-- **exportForCodex:** Include OpenAI Codex-compatible skills in `.agents/skills/`.
-- **exportForGitHubCopilot:** Include GitHub Copilot-compatible skills in `.agents/skills/`.
+- **exportForCursor:** Export skills to Cursor's discovery location (`.agents/skills/`).
+- **exportForClaude:** Export skills to Claude Code's discovery location (`.claude/skills/`).
+- **exportForCodex:** Export skills to OpenAI Codex's discovery location (`.agents/skills/`).
+- **exportForGitHubCopilot:** Export skills to GitHub Copilot's discovery location (`.agents/skills/`).
 
 ### Output structure
 
-- **outputLayout:** Use `standard` to emit agent skill folders, or `bare` to emit skill folders directly into the pipeline destination.
+- **outputLayout:** Use `standard` to emit agent discovery folders, or `bare` to emit skill folders directly into the pipeline destination.
 - **preserveFolderHierarchy:** Keep Supernova folder paths in the exported output. When disabled, skills are flattened and duplicate names receive deterministic numeric suffixes such as `skill-name-2`.
 - **addSupernovaMetadata:** Add `supernova-skill-id` and `supernova-updated-at` to the `metadata` frontmatter field.
+- **generateDebugFiles:** Emit `_debug` files with raw SDK responses, filtered skill results, normalized skills, and generated output metadata.
