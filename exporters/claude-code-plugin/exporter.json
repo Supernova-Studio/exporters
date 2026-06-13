@@ -1,0 +1,15 @@
+{
+  "id": "supernovaio.exporter-claude-code-plugin",
+  "name": "Claude Code Plugin",
+  "description": "Export a Supernova context as a publishable Claude Code plugin.",
+  "author": "Jiri Trecak",
+  "organization": "Supernova.io",
+  "homepage": "https://supernova.io",
+  "version": "0.1.0",
+  "usesBrands": false,
+  "usesThemes": false,
+  "usesContext": true,
+  "executable": "/dist/build.js",
+  "engine": "latest",
+  "tags": ["AI", "Agents", "Claude Code", "MCP", "Contexts"]
+}
