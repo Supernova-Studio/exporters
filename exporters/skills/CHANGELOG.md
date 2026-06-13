@@ -2,6 +2,19 @@
 
 All updates to this exporter are documented in this file.
 
+## 0.2.5 - 2026-06-13
+
+### Removed
+
+- Remove debug file generation from the exporter configuration and output.
+
+## 0.2.4 - 2026-06-13
+
+### Changed
+
+- Rename the Claude folder option for clearer configuration wording.
+- Add configurable generated-file disclaimer text for Supernova metadata.
+
 ## 0.2.3 - 2026-06-13
 
 ### Changed

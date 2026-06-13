@@ -1,8 +1,7 @@
 import { Pulsar, type AnyOutputFile, type PulsarContext, type Supernova } from "@supernovaio/sdk-exporters"
 import type { ExporterConfiguration } from "../config"
 import { normalizeSkill, writeSkills, type ExportableSkill } from "./utils/skill-utils"
-import { getContextArea, getSkillsListMethod, listWorkspaceSkills } from "./utils/context-api"
-import { createDebugFiles } from "./utils/debug-output"
+import { getContextArea, listWorkspaceSkills } from "./utils/context-api"
 
 export const exportConfiguration = Pulsar.exportConfig<ExporterConfiguration>()
 
@@ -38,7 +37,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   const contextArea = getContextArea(sdk)
   const wsId = requireWorkspaceId(context.wsId)
   const contextIds = requireContextIds(context.contextIds)
-  const skillsListMethod = getSkillsListMethod(contextArea)
 
   const dataSet = (await contextArea.getResolvedDatasetForContext(wsId, contextIds[0])) as DatasetWithSkillFilter | null
 
@@ -53,23 +51,6 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   const normalizedSkills = filteredSkillResults
     .map(({ item }) => normalizeSkill(item))
     .filter((skill): skill is ExportableSkill => skill !== null)
-  const outputFiles = normalizedSkills.length === 0 ? [] : writeSkills(normalizedSkills, exportConfiguration)
 
-  if (!exportConfiguration.generateDebugFiles) {
-    return outputFiles
-  }
-
-  return [
-    ...outputFiles,
-    ...createDebugFiles({
-      context,
-      sdk,
-      skillsListMethod,
-      dataset: dataSet,
-      skills,
-      filteredSkills: filteredSkillResults,
-      normalizedSkills,
-      outputFiles
-    })
-  ]
+  return normalizedSkills.length === 0 ? [] : writeSkills(normalizedSkills, exportConfiguration)
 })

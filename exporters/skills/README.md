@@ -38,7 +38,7 @@ Empty workspaces or contexts with no matching skills export zero files without f
 
 - **createAgentFolders:** Create agent discovery folders in the export destination. When disabled, skill folders are written directly to the export destination.
 - **exportToAgentsFolder:** Create `.agents/skills/`, the shared discovery folder used by Cursor, OpenAI Codex, GitHub Copilot, and other agents that support the open Agent Skills location.
-- **exportToClaudeFolder:** Create `.claude/skills/`, Claude Code's current project skill discovery folder.
+- **exportToClaudeFolder:** Create `.claude/skills/` for Claude Code.
 - **preserveFolderHierarchy:** Keep Supernova folder paths in the exported output. When disabled, skills are flattened and duplicate names receive deterministic numeric suffixes such as `skill-name-2`.
 
 ### Frontmatter metadata
@@ -47,7 +47,4 @@ Empty workspaces or contexts with no matching skills export zero files without f
 - **includeSupernovaUpdatedAt:** Add the Supernova skill update timestamp to frontmatter metadata.
 - **includeSupernovaGeneratedBy:** Add the Supernova generator name to frontmatter metadata.
 - **includeSupernovaDisclaimer:** Add a generated-file disclaimer to frontmatter metadata.
-
-### Debugging
-
-- **generateDebugFiles:** Emit `_debug` files with raw SDK responses, filtered skill results, normalized skills, and generated output metadata.
+- **supernovaDisclaimer:** Customize the generated-file disclaimer text.

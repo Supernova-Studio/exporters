@@ -19,6 +19,6 @@ export type ExporterConfiguration = {
   includeSupernovaGeneratedBy: boolean
   /** Add a generated-file disclaimer to frontmatter metadata. */
   includeSupernovaDisclaimer: boolean
-  /** Add raw SDK response files to the generated output for troubleshooting. */
-  generateDebugFiles: boolean
+  /** Generated-file disclaimer text written to frontmatter metadata. */
+  supernovaDisclaimer: string
 }

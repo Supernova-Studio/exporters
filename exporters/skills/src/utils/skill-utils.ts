@@ -1,11 +1,6 @@
 import { OutputFileType, type AnyOutputFile, type OutputTextFile } from "@supernovaio/sdk-exporters"
 import type { ExporterConfiguration } from "../../config"
-import {
-  DEFAULT_SUPERNOVA_DISCLAIMER,
-  DEFAULT_SUPERNOVA_GENERATED_BY,
-  addSupernovaMetadata,
-  upsertSkillName
-} from "./frontmatter"
+import { DEFAULT_SUPERNOVA_GENERATED_BY, addSupernovaMetadata, upsertSkillName } from "./frontmatter"
 
 const SKILL_FILE_NAME = "SKILL.md"
 
@@ -79,7 +74,7 @@ function skillContent(skill: ExportableSkill, skillName: string, exportConfigura
   const metadata = {
     updatedAt: exportConfiguration.includeSupernovaUpdatedAt ? skill.updatedAt : undefined,
     generatedBy: exportConfiguration.includeSupernovaGeneratedBy ? DEFAULT_SUPERNOVA_GENERATED_BY : undefined,
-    disclaimer: exportConfiguration.includeSupernovaDisclaimer ? DEFAULT_SUPERNOVA_DISCLAIMER : undefined
+    disclaimer: exportConfiguration.includeSupernovaDisclaimer ? exportConfiguration.supernovaDisclaimer : undefined
   }
 
   return metadata.updatedAt || metadata.generatedBy || metadata.disclaimer
