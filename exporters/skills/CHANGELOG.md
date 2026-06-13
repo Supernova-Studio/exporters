@@ -2,6 +2,13 @@
 
 All updates to this exporter are documented in this file.
 
+## 0.2.6 - 2026-06-13
+
+### Changed
+
+- Render the Supernova disclaimer as a multiline configuration field.
+- Write multiline frontmatter metadata values as YAML block scalars.
+
 ## 0.2.5 - 2026-06-13
 
 ### Removed

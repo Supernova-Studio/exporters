@@ -67,18 +67,28 @@ function renderMetadataLines(metadata: SupernovaMetadata): Array<string> {
   const lines = ["metadata:"]
 
   if (metadata.updatedAt) {
-    lines.push(`  supernova-updated-at: ${metadata.updatedAt}`)
+    lines.push(...renderMetadataField("supernova-updated-at", metadata.updatedAt))
   }
 
   if (metadata.generatedBy) {
-    lines.push(`  supernova-generated-by: ${metadata.generatedBy}`)
+    lines.push(...renderMetadataField("supernova-generated-by", metadata.generatedBy))
   }
 
   if (metadata.disclaimer) {
-    lines.push(`  supernova-disclaimer: ${metadata.disclaimer}`)
+    lines.push(...renderMetadataField("supernova-disclaimer", metadata.disclaimer))
   }
 
   return lines
+}
+
+function renderMetadataField(fieldName: string, value: string): Array<string> {
+  if (!value.includes("\n")) {
+    return [`  ${fieldName}: ${value}`]
+  }
+
+  const indentedLines = value.split("\n").map((line) => (line ? `    ${line}` : line))
+
+  return [`  ${fieldName}: |`, ...indentedLines]
 }
 
 function metadataKey(line: string): string | null {
