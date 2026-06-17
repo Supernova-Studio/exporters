@@ -11,5 +11,5 @@
   "usesContext": true,
   "executable": "/dist/build.js",
   "engine": "latest",
-  "tags": ["AI", "Agents", "Claude Code", "MCP", "Contexts"]
+  "tags": ["AI", "Agents", "Claude Code", "MCP", "Contexts", "New"]
 }
