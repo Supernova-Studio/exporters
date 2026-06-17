@@ -75,7 +75,7 @@ export function resolvePluginMetadata(
 
   return {
     name: slugify(configuredName ?? contextMetadata.name),
-    version: trimToUndefined(exportConfiguration.pluginVersion) ?? "0.1.0",
+    version: trimToUndefined(exportConfiguration.pluginVersion) ?? "1.0.0",
     description:
       configuredDescription ??
       contextMetadata.description ??

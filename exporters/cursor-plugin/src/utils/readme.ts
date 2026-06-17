@@ -19,11 +19,45 @@ function skillLines(skills: Array<ExportedSkillSummary>): Array<string> {
   })
 }
 
+function installSection(metadata: ResolvedPluginMetadata, includeMarketplaceManifest: boolean): Array<string> {
+  if (includeMarketplaceManifest) {
+    const marketplaceRepositoryUrl = metadata.repositoryUrl ?? "<repository-url>"
+
+    return [
+      "Publish this plugin from a Git repository that contains `.cursor-plugin/marketplace.json`.",
+      "",
+      "In Cursor, add the repository in the plugin marketplace panel and install the plugin:",
+      "",
+      `- Repository: ${marketplaceRepositoryUrl}`,
+      `- Plugin: ${metadata.name}`,
+      "",
+      "For local development, copy or symlink this directory to Cursor's local plugin folder:",
+      "",
+      "```bash",
+      `ln -s <path-to-this-plugin> ~/.cursor/plugins/local/${metadata.name}`,
+      "```",
+      "",
+      "Restart Cursor or run `Developer: Reload Window`, then verify the plugin's skills and MCP server are available in Cursor settings."
+    ]
+  }
+
+  return [
+    "Copy or symlink this directory to Cursor's local plugin folder:",
+    "",
+    "```bash",
+    `ln -s <path-to-this-plugin> ~/.cursor/plugins/local/${metadata.name}`,
+    "```",
+    "",
+    "Restart Cursor or run `Developer: Reload Window`, then verify the plugin's skills and MCP server are available in Cursor settings."
+  ]
+}
+
 export function createReadmeFile(
   metadata: ResolvedPluginMetadata,
   contextMetadata: ProjectContextMetadata,
   skills: Array<ExportedSkillSummary>,
-  includeMcpServer: boolean
+  includeMcpServer: boolean,
+  includeMarketplaceManifest: boolean
 ): OutputTextFile {
   const links = [
     linkLine("Homepage", metadata.homepage ?? metadata.authorUrl),
@@ -40,6 +74,7 @@ export function createReadmeFile(
     "## What's inside",
     "",
     "- Cursor plugin manifest in `.cursor-plugin/plugin.json`.",
+    ...(includeMarketplaceManifest ? ["- Cursor marketplace manifest in `.cursor-plugin/marketplace.json`."] : []),
     includeMcpServer
       ? `- Context-scoped Supernova MCP configuration in \`mcp.json\` (${contextMcpUrl(contextMetadata)}).`
       : "- No MCP configuration was generated for this export.",
@@ -56,15 +91,7 @@ export function createReadmeFile(
     "",
     "## Install",
     "",
-    "From a marketplace, install this plugin through Cursor's marketplace panel.",
-    "",
-    "For local development, copy or symlink this directory to Cursor's local plugin folder:",
-    "",
-    "```bash",
-    `ln -s <path-to-this-plugin> ~/.cursor/plugins/local/${metadata.name}`,
-    "```",
-    "",
-    "Restart Cursor or run `Developer: Reload Window`, then verify the plugin's skills and MCP server are available in Cursor settings.",
+    ...installSection(metadata, includeMarketplaceManifest),
     "",
     "## Skills shipped",
     "",

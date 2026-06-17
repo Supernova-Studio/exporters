@@ -19,18 +19,41 @@ function skillLines(skills: Array<ExportedSkillSummary>): Array<string> {
   })
 }
 
+function installSection(metadata: ResolvedPluginMetadata, includeMarketplaceManifest: boolean): Array<string> {
+  if (includeMarketplaceManifest) {
+    const marketplaceRepositoryUrl = metadata.repositoryUrl ?? "<repository-url>"
+
+    return [
+      "From a marketplace, add the repository and install the plugin:",
+      "",
+      "```text",
+      `/plugin marketplace add ${marketplaceRepositoryUrl}`,
+      `/plugin install ${metadata.name}`,
+      "```",
+      "",
+      "For local development, load this directory as a local Claude Code plugin:",
+      "",
+      "```text",
+      `claude --plugin-dir .`,
+      "```"
+    ]
+  }
+
+  return ["Load this directory as a local Claude Code plugin:", "", "```text", `claude --plugin-dir .`, "```"]
+}
+
 export function createReadmeFile(
   metadata: ResolvedPluginMetadata,
   contextMetadata: ProjectContextMetadata,
   skills: Array<ExportedSkillSummary>,
-  includeMcpServer: boolean
+  includeMcpServer: boolean,
+  includeMarketplaceManifest: boolean
 ): OutputTextFile {
   const links = [
     linkLine("Homepage", metadata.homepage),
     linkLine("Repository", metadata.repositoryUrl),
     "- Supernova: https://supernova.io"
   ].filter((line): line is string => line !== null)
-  const marketplaceRepositoryUrl = metadata.repositoryUrl ?? "<repository-url>"
 
   const content = [
     `# ${metadata.name}`,
@@ -40,6 +63,7 @@ export function createReadmeFile(
     "## What's inside",
     "",
     "- Claude Code plugin manifest in `.claude-plugin/plugin.json`.",
+    ...(includeMarketplaceManifest ? ["- Claude Code marketplace manifest in `.claude-plugin/marketplace.json`."] : []),
     includeMcpServer
       ? `- Context-scoped Supernova MCP configuration in \`.mcp.json\` (${contextMcpUrl(contextMetadata)}).`
       : "- No MCP configuration was generated for this export.",
@@ -56,14 +80,7 @@ export function createReadmeFile(
     "",
     "## Install",
     "",
-    "From a marketplace, add the repository and install the plugin:",
-    "",
-    "```text",
-    `/plugin marketplace add ${marketplaceRepositoryUrl}`,
-    `/plugin install ${metadata.name}`,
-    "```",
-    "",
-    "For local development, load this directory as a local Claude Code plugin.",
+    ...installSection(metadata, includeMarketplaceManifest),
     "",
     "## Skills shipped",
     "",

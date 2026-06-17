@@ -1,4 +1,4 @@
-### Agentic Skills exporter release notes
+### Agent skills exporter release notes
 
 All updates to this exporter are documented in this file.
 
@@ -55,4 +55,4 @@ All updates to this exporter are documented in this file.
 
 ### Added
 
-- Added the initial Agentic Skills exporter.
+- Added the initial Agent skills exporter.

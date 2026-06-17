@@ -43,7 +43,7 @@ export type ExporterConfiguration = {
   supernovaDisclaimer: string
   /** Generate the feedback capture skill when context feedback collection is also enabled. */
   includeFeedbackSkill: boolean
-  /** Generate .cursor-plugin/marketplace.json. */
+  /** Generate a marketplace manifest for single-plugin repository install. */
   includeMarketplaceManifest: boolean
   /** Generate README.md. */
   includeReadme: boolean

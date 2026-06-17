@@ -1,5 +1,48 @@
 [
   {
+    "key": "includeMarketplaceManifest",
+    "type": "boolean",
+    "default": true,
+    "title": "Include marketplace manifest",
+    "description": "Generate a marketplace manifest so this plugin can be installed from a Git repository. Disable when adding this export to a repository that already has a shared marketplace listing multiple plugins.",
+    "category": "Marketplace & installation"
+  },
+  {
+    "key": "includeReadme",
+    "type": "boolean",
+    "default": true,
+    "title": "Include README",
+    "description": "Generate README.md with plugin contents and installation guidance.",
+    "category": "Marketplace & installation"
+  },
+  {
+    "key": "pluginRepositoryUrl",
+    "type": "string",
+    "default": "",
+    "title": "Repository URL",
+    "description": "Optional repository URL written to plugin.json, marketplace.json, and README.md.",
+    "category": "Marketplace & installation"
+  },
+  {
+    "key": "includeMcpServer",
+    "type": "boolean",
+    "default": true,
+    "title": "Include MCP server",
+    "description": "Generate mcp.json with the Supernova MCP pre-scoped to this context.",
+    "category": "MCP"
+  },
+  {
+    "key": "includeMcpUsageSkill",
+    "type": "boolean",
+    "default": true,
+    "title": "Include MCP usage skill",
+    "description": "Generate a using-supernova-mcp skill that explains when and how to call the Supernova MCP tools.",
+    "category": "MCP",
+    "dependsOn": {
+      "includeMcpServer": true
+    }
+  },
+  {
     "key": "pluginName",
     "type": "string",
     "default": "",
@@ -10,7 +53,7 @@
   {
     "key": "pluginVersion",
     "type": "string",
-    "default": "0.1.0",
+    "default": "1.0.0",
     "title": "Plugin version",
     "description": "Version written to .cursor-plugin/plugin.json.",
     "category": "Plugin manifest"
@@ -56,14 +99,6 @@
     "category": "Plugin manifest"
   },
   {
-    "key": "pluginRepositoryUrl",
-    "type": "string",
-    "default": "",
-    "title": "Repository URL",
-    "description": "Optional repository URL written to plugin.json, marketplace.json, and README.md.",
-    "category": "Plugin manifest"
-  },
-  {
     "key": "pluginLicense",
     "type": "string",
     "default": "MIT",
@@ -80,31 +115,12 @@
     "category": "Plugin manifest"
   },
   {
-    "key": "includeMcpServer",
-    "type": "boolean",
-    "default": true,
-    "title": "Include MCP server",
-    "description": "Generate mcp.json with the Supernova MCP pre-scoped to this context.",
-    "category": "MCP"
-  },
-  {
-    "key": "includeMcpUsageSkill",
-    "type": "boolean",
-    "default": true,
-    "title": "Include MCP usage skill",
-    "description": "Generate a using-supernova-mcp skill that explains when and how to call the Supernova MCP tools.",
-    "category": "MCP",
-    "dependsOn": {
-      "includeMcpServer": true
-    }
-  },
-  {
     "key": "includeContextSkills",
     "type": "boolean",
     "default": true,
     "title": "Include context skills",
     "description": "Export Supernova skills selected by the current context into the plugin's skills folder.",
-    "category": "Context skills"
+    "category": "Skills"
   },
   {
     "key": "preserveFolderHierarchy",
@@ -112,7 +128,7 @@
     "default": true,
     "title": "Preserve folder hierarchy",
     "description": "Keep Supernova skill folders as category folders in the generated plugin. When disabled, skills are flattened and duplicate names receive numeric suffixes.",
-    "category": "Context skills",
+    "category": "Skills",
     "dependsOn": {
       "includeContextSkills": true
     }
@@ -184,22 +200,6 @@
     "default": true,
     "title": "Include feedback skill",
     "description": "Generate the feedback capture skill only when this is enabled and feedback collection is also enabled for the context.",
-    "category": "Feedback"
-  },
-  {
-    "key": "includeMarketplaceManifest",
-    "type": "boolean",
-    "default": false,
-    "title": "Include marketplace manifest",
-    "description": "Generate .cursor-plugin/marketplace.json for publishing this plugin from a repository.",
-    "category": "Publishing"
-  },
-  {
-    "key": "includeReadme",
-    "type": "boolean",
-    "default": true,
-    "title": "Include README",
-    "description": "Generate README.md with plugin contents and installation guidance.",
-    "category": "Publishing"
+    "category": "Skills"
   }
 ]

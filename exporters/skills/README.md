@@ -1,6 +1,6 @@
-# Agentic Skills Exporter
+# Agent skills exporter
 
-The Agentic Skills exporter generates `SKILL.md` files from Supernova skills selected by the current context.
+The Agent skills exporter generates `SKILL.md` files from Supernova skills selected by the current context.
 
 ## Output
 

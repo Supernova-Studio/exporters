@@ -31,7 +31,7 @@ function requireContextIds(contextIds: string[] | null | undefined): Array<strin
 /**
  * Export entrypoint.
  *
- * Export agentic skills selected by the current context.
+ * Export agent skills selected by the current context.
  */
 Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyOutputFile>> => {
   const contextArea = getContextArea(sdk)

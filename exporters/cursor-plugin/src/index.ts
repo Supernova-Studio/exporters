@@ -112,7 +112,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
       pluginMetadata,
       contextMetadata,
       skillSummaries,
-      exportConfiguration.includeMcpServer
+      exportConfiguration.includeMcpServer,
+      exportConfiguration.includeMarketplaceManifest
     )
     outputFiles.set(outputKey(readmeFile), readmeFile)
   }

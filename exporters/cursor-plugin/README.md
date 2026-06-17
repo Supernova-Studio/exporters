@@ -1,4 +1,4 @@
-# Cursor Plugin exporter
+# Cursor plugin exporter
 
 Turn a Supernova Context into a ready-to-install Cursor plugin.
 
@@ -13,7 +13,7 @@ The exported plugin uses the standard Cursor plugin layout:
 ```text
 .cursor-plugin/
 +-- plugin.json
-+-- marketplace.json     # optional
++-- marketplace.json     # enabled by default
 mcp.json                 # optional, enabled by default
 skills/
 +-- using-supernova-mcp/
@@ -30,7 +30,7 @@ README.md                # optional, enabled by default
 - `skills/` with Supernova skills selected by the Context.
 - `using-supernova-mcp/SKILL.md` with guidance for using Supernova MCP tools.
 - `capture-feedback/SKILL.md` when feedback collection is enabled for the Context and in exporter config.
-- Optional `.cursor-plugin/marketplace.json` and `README.md` for publishing and installing from a repository.
+- `.cursor-plugin/marketplace.json` and `README.md` for publishing and installing from a repository (enabled by default).
 
 ## Why design-system data is not exported
 
@@ -62,27 +62,33 @@ The MCP server name, base URL, and scope are intentionally not user-configurable
 
 ## Configuration
 
-### Plugin manifest
+### Marketplace & installation
 
-- **pluginName:** Cursor plugin identifier. Leave empty to use a slug of the context name.
-- **pluginVersion:** Version written to `.cursor-plugin/plugin.json`.
-- **pluginDescription:** Description written to `plugin.json` and generated `README.md`. Leave empty to use the context description when available.
-- **pluginAuthorName**, **pluginAuthorEmail:** Optional author metadata.
-- **pluginAuthorUrl:** Optional author URL used as a homepage fallback when **pluginHomepage** is empty.
-- **pluginHomepage:** Optional homepage URL.
-- **pluginRepositoryUrl:** Optional repository URL. Used by `plugin.json`, generated `README.md`, and optional marketplace metadata.
-- **pluginLicense:** License identifier.
-- **pluginKeywords:** Open array of keyword strings written to `plugin.json`.
+- **includeMarketplaceManifest:** Generate a marketplace manifest so this plugin can be installed from a Git repository. Disable when adding this export to a repository that already has a shared marketplace listing multiple plugins. Enabled by default.
+- **includeReadme:** Generate the plugin's root `README.md`.
+- **pluginRepositoryUrl:** Optional repository URL. Used by `plugin.json`, `marketplace.json`, and generated `README.md`.
 
 ### MCP
 
 - **includeMcpServer:** Generate `mcp.json` with the Supernova MCP pre-scoped to the context.
 - **includeMcpUsageSkill:** Generate the `using-supernova-mcp` skill.
 
-### Context skills
+### Plugin manifest
+
+- **pluginName:** Cursor plugin identifier. Leave empty to use a slug of the context name.
+- **pluginVersion:** Version written to `.cursor-plugin/plugin.json`. Defaults to `1.0.0`.
+- **pluginDescription:** Description written to `plugin.json` and generated `README.md`. Leave empty to use the context description when available.
+- **pluginAuthorName**, **pluginAuthorEmail:** Optional author metadata.
+- **pluginAuthorUrl:** Optional author URL used as a homepage fallback when **pluginHomepage** is empty.
+- **pluginHomepage:** Optional homepage URL.
+- **pluginLicense:** License identifier.
+- **pluginKeywords:** Open array of keyword strings written to `plugin.json`.
+
+### Skills
 
 - **includeContextSkills:** Export Supernova skills selected by the current context.
 - **preserveFolderHierarchy:** Preserve Supernova skill folder hierarchy under `skills/`.
+- **includeFeedbackSkill:** Generate the feedback capture skill only when feedback collection is also enabled on the context.
 
 ### Frontmatter metadata
 
@@ -91,12 +97,3 @@ The MCP server name, base URL, and scope are intentionally not user-configurable
 - **includeSupernovaGeneratedBy:** Add the generator name.
 - **includeSupernovaDisclaimer:** Add a generated-file disclaimer.
 - **supernovaDisclaimer:** Customize the generated-file disclaimer.
-
-### Feedback
-
-- **includeFeedbackSkill:** Generate the feedback capture skill only when feedback collection is also enabled on the context.
-
-### Publishing
-
-- **includeMarketplaceManifest:** Generate `.cursor-plugin/marketplace.json`.
-- **includeReadme:** Generate the plugin's root `README.md`.

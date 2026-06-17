@@ -1,6 +1,6 @@
 {
   "id": "supernovaio.exporter-cursor-plugin",
-  "name": "Cursor Plugin",
+  "name": "Cursor plugin",
   "description": "Package a context into a ready-to-install Cursor plugin with MCP scoped to selected data and skills.",
   "author": "Supernova.io",
   "organization": "Supernova.io",
