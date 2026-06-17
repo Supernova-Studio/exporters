@@ -1,0 +1,15 @@
+{
+  "id": "supernovaio.exporter-codex-plugin",
+  "name": "Codex plugin",
+  "description": "Package a context into a ready-to-install Codex plugin with MCP scoped to selected data and skills.",
+  "author": "Supernova.io",
+  "organization": "Supernova.io",
+  "homepage": "https://supernova.io",
+  "version": "1.0.0",
+  "usesBrands": false,
+  "usesThemes": false,
+  "usesContext": true,
+  "executable": "/dist/build.js",
+  "engine": "latest",
+  "tags": ["AI", "Agents", "Codex", "MCP", "Contexts"]
+}
