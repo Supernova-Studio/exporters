@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.3.0] - 2026-08-10
 
 ### Changed
+- Forked as a TeamViewer custom exporter: `id` is now `teamviewer.exporter-tailwind-4`
+  so it installs alongside the official Tailwind exporter instead of colliding with it.
 - Rem conversion is now decided per token type instead of globally. Space, Size, Dimension
   and FontSize tokens are emitted in `rem`; BorderRadius, Blur, BorderWidth and Shadow keep
   their authored pixel values.
