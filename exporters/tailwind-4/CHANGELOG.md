@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- Rem conversion is now decided per token type instead of globally. Space, Size, Dimension
+  and FontSize tokens are emitted in `rem`; BorderRadius, Blur, BorderWidth and Shadow keep
+  their authored pixel values.
+- `forceRemUnit` still converts every pixel value, so existing pipelines that enable it are
+  unaffected.
+
 ## [1.1.1] - 2025-09-10
 - Fix spacing token output: generate `--spacing-*` instead of `--size-*` for sizing. Thanks @mickaelnijean for contribution!
 

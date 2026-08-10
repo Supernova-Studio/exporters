@@ -145,8 +145,35 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Typography
 - **generateTypographyClasses:** When enabled, generates typography classes in @layer components using typography tokens.
-- **forceRemUnit:** When enabled, converts pixel values to rem units.
+- **forceRemUnit:** When enabled, converts **all** pixel values to rem units.
 - **remBase:** Base pixel value for rem conversion (default: 16).
+
+### Unit handling per namespace
+
+Rem conversion is decided per token type rather than globally. With `forceRemUnit` **off**
+(the default), pixel values are converted only where the value should scale with the
+user's browser font size:
+
+| Namespace | Token types | Unit |
+| --- | --- | --- |
+| `--spacing-*` | Space, Size, Dimension | `rem` |
+| `--text-*` | FontSize | `rem` |
+| `--radius-*` | BorderRadius | `px` |
+| `--blur-*` | Blur | `px` |
+| `--border-*` | BorderWidth | `px` |
+| `--shadow-*` | Shadow | `px` |
+
+`--text-*` is in rem because a hardcoded `--text-sm: 14px` ignores the reader's browser
+font-size setting, which is an accessibility regression (WCAG 1.4.4). Radius stays in px
+deliberately: rem-scaled corner radii look wrong at large text sizes. This is a departure
+from the Tailwind v4 defaults, and an intentional one.
+
+Values authored in non-pixel units are never converted, so durations in `ms`, unitless
+values, and percentages always pass through untouched. Enabling `forceRemUnit` converts
+every pixel value as before, overriding the table above.
+
+To change which namespaces use rem, edit `REM_TOKEN_TYPES` in
+[`src/constants/defaults.ts`](./src/constants/defaults.ts).
 
 ### Token Properties
 - **writeClassnameToProperty:** When enabled, generated Tailwind classnames will be saved back to tokens as custom properties.

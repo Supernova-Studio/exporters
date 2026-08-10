@@ -1,7 +1,7 @@
 import { NamingHelper, StringCase, CSSHelper } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType, TypographyTokenValue, FontFamilyTokenValue, TextDecorationTokenValue, TextCaseTokenValue, ParagraphSpacingTokenValue } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { tokenVariableName } from "./token"
+import { tokenVariableName, shouldForceRem } from "./token"
 
 /**
  * Generates a CSS class for a typography token
@@ -53,13 +53,14 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
   // Create empty token map since we're not using references here
   const emptyTokenMap = new Map<string, Token>()
 
-  // Create CSS options
+  // Create CSS options. The only dimension values rendered from these options are the
+  // paragraph indent and spacing below, so the rem rule is resolved for that token type.
   const cssOptions = {
     allowReferences: false,
     decimals: exportConfiguration.colorPrecision,
     colorFormat: exportConfiguration.colorFormat,
     tokenToVariableRef: () => "",
-    forceRemUnit: exportConfiguration.forceRemUnit,
+    forceRemUnit: shouldForceRem(TokenType.paragraphSpacing),
     remBase: exportConfiguration.remBase
   }
 

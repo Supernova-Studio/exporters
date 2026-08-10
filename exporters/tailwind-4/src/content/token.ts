@@ -2,7 +2,7 @@ import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio
 import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FindReplaceTiming } from "../../config"
-import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION } from "../constants/defaults"
+import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION, REM_TOKEN_TYPES } from "../constants/defaults"
 import { ColorHelper } from "@supernovaio/export-utils"
 import { ColorFormat } from "@supernovaio/export-utils"
 
@@ -23,6 +23,21 @@ export function getTokenPrefix(tokenType: TokenType): string {
  */
 export function isAllowedTokenType(tokenType: TokenType): boolean {
   return TAILWIND_ALLOWED_CUSTOMIZATION.includes(tokenType)
+}
+
+/**
+ * Decides whether a given token type should have its pixel values converted to rem.
+ *
+ * Conversion is decided per token type, so spacing and font sizes can be emitted in
+ * rem while radius, blur and border widths keep their authored pixel values. The
+ * global `forceRemUnit` setting still acts as a master override that converts
+ * everything, preserving the previous behaviour for anyone who relies on it.
+ *
+ * @param tokenType - The type of token being converted
+ * @returns True if pixel values of this token type should become rem
+ */
+export function shouldForceRem(tokenType: TokenType): boolean {
+  return exportConfiguration.forceRemUnit || REM_TOKEN_TYPES.has(tokenType)
 }
 
 /**
@@ -103,7 +118,9 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
         allowReferences: exportConfiguration.useReferences,
         decimals: exportConfiguration.colorPrecision,
         colorFormat: exportConfiguration.colorFormat,
-        forceRemUnit: exportConfiguration.forceRemUnit,
+        // Decided per sub-property, so font size becomes rem while line height and
+        // letter spacing keep the unit they were authored in
+        forceRemUnit: shouldForceRem(tokenTypeMap[property]),
         remBase: exportConfiguration.remBase,
         tokenToVariableRef: (t) => `var(--${tokenVariableName(t, tokenGroups)})`
       })};\n`
@@ -147,7 +164,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     allowReferences: exportConfiguration.useReferences,
     decimals: exportConfiguration.colorPrecision,
     colorFormat: exportConfiguration.colorFormat,
-    forceRemUnit: exportConfiguration.forceRemUnit,
+    forceRemUnit: shouldForceRem(token.tokenType),
     remBase: exportConfiguration.remBase,
     // Custom handler for token references - converts them to CSS var() syntax
     tokenToVariableRef: (t, context) => {
@@ -158,7 +175,8 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
           allowReferences: false, // Don't follow nested references
           decimals: exportConfiguration.colorPrecision,
           colorFormat: exportConfiguration.colorFormat,
-          forceRemUnit: exportConfiguration.forceRemUnit,
+          // Inlined value follows the rule for the referenced token's own type
+          forceRemUnit: shouldForceRem(t.tokenType),
           remBase: exportConfiguration.remBase,
           tokenToVariableRef: () => "", // Stub function that never gets called since allowReferences is false
           valueTransformer: undefined

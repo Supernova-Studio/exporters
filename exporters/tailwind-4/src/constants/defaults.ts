@@ -29,6 +29,31 @@ export const TAILWIND_TOKEN_PREFIXES: Record<TokenType, string> = {
 } 
 
 /**
+ * Token types whose pixel values are always converted to rem, regardless of the
+ * global `forceRemUnit` setting.
+ *
+ * These are the namespaces where rem is the correct unit because the value should
+ * scale with the user's browser font size (WCAG 1.4.4). Everything not listed here
+ * keeps its authored unit, so px passes through untouched - no value is ever
+ * converted to rem and then converted back.
+ *
+ * Deliberately excluded:
+ * - radius: rem-scaled corner radii look wrong at large text sizes. This is a
+ *   departure from the Tailwind v4 defaults, and an intentional one.
+ * - blur, borderWidth, shadow: optical values that should not scale with text.
+ *
+ * Note that conversion only ever applies to values authored in pixels, so token
+ * types measured in ms (duration) or raw numbers (zIndex, opacity) are unaffected
+ * even if they are listed.
+ */
+export const REM_TOKEN_TYPES: ReadonlySet<TokenType> = new Set([
+  TokenType.space,
+  TokenType.size,
+  TokenType.dimension,
+  TokenType.fontSize
+])
+
+/**
  * List of token types that can be customized in Tailwind 4
  * These are the token types supported by Tailwind CSS configuration
  * 

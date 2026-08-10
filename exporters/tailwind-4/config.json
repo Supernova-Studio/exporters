@@ -122,7 +122,7 @@
         "type": "boolean",
         "default": false,
         "title": "Force REM units",
-        "description": "Convert all pixel values to REM units.",
+        "description": "Convert ALL pixel values to REM units. When off, only spacing, size and font size tokens are converted, and radius, blur and border width keep their pixel values.",
         "category": "Token values"
     },
     {
