@@ -1,5 +1,5 @@
 import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
-import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
+import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken, Unit } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FindReplaceTiming } from "../../config"
 import {
@@ -222,11 +222,84 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
 
   // Create CSS variables for each typography property
   createTypographyProperty('fontSize') // Base font size
-  createTypographyProperty('lineHeight', '--line-height')
+
+  // Line height is emitted as a unitless ratio where it can be, matching how Tailwind
+  // pairs a line height to a font size in its own default theme:
+  //   --text-sm: 0.875rem;
+  //   --text-sm--line-height: calc(1.25 / 0.875);
+  // A ratio scales with the font size, so a reader raising their browser font size or
+  // applying a text-spacing override keeps proportional line boxes rather than fixed
+  // ones that the text eventually overflows.
+  const lineHeightRatio = typographyLineHeightRatio(typographyValue)
+
+  if (lineHeightRatio !== undefined) {
+    output += `${indentString}--${baseName}--line-height: ${lineHeightRatio};\n`
+  } else {
+    createTypographyProperty('lineHeight', '--line-height')
+  }
+
   createTypographyProperty('letterSpacing', '--letter-spacing')
   createTypographyProperty('fontWeight', '--font-weight')
 
   return output
+}
+
+/**
+ * Computes a typography token's line height as a unitless ratio of its font size.
+ *
+ * Only the composite can do this: a standalone line height token carries no font size
+ * to divide by, which is why `reference/line-height/*` tokens keep their authored
+ * pixels while these do not.
+ *
+ * Returns undefined when a ratio would be wrong or meaningless, in which case the
+ * caller falls back to emitting the authored value:
+ * - no line height or no font size to pair it with
+ * - a font size of zero
+ * - a line height and font size measured in different units, since the ratio of two
+ *   different units is not a ratio
+ *
+ * A line height authored as a percentage is converted directly, as a percentage of the
+ * font size is already a ratio.
+ *
+ * @param typographyValue - The composite value of a typography token
+ * @returns The ratio as a string, or undefined to fall back to the authored value
+ */
+function typographyLineHeightRatio(typographyValue: TypographyTokenValue): string | undefined {
+  const lineHeight = typographyValue.lineHeight as AnyDimensionTokenValue | null
+  const fontSize = typographyValue.fontSize as AnyDimensionTokenValue | null
+
+  if (!lineHeight || typeof lineHeight.measure !== "number") {
+    return undefined
+  }
+
+  // A percentage line height is already expressed relative to the font size
+  if (lineHeight.unit === Unit.percent) {
+    return formatRatio(lineHeight.measure / 100)
+  }
+
+  if (!fontSize || typeof fontSize.measure !== "number" || fontSize.measure === 0) {
+    return undefined
+  }
+
+  if (lineHeight.unit !== fontSize.unit) {
+    return undefined
+  }
+
+  return formatRatio(lineHeight.measure / fontSize.measure)
+}
+
+/**
+ * Rounds a line height ratio to four decimals and trims trailing zeros, so a ratio of
+ * exactly 1.5 is emitted as `1.5` rather than `1.5000`.
+ *
+ * Four decimals keeps the rendered line box within a hundredth of a pixel of the
+ * authored value at any realistic font size, while staying readable.
+ *
+ * @param ratio - The computed ratio
+ * @returns The ratio formatted for CSS
+ */
+function formatRatio(ratio: number): string {
+  return String(parseFloat(ratio.toFixed(4)))
 }
 
 /**

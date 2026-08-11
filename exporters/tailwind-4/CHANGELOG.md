@@ -16,6 +16,14 @@ All notable changes to this project will be documented in this file.
   `font-weight` has its unit stripped.
 - `remBase` is no longer gated behind `forceRemUnit`, since path rules perform rem
   conversion with `forceRemUnit` off.
+- Typography line heights are emitted as unitless ratios of their font size, matching
+  Tailwind's own `--text-sm--line-height: calc(1.25 / 0.875)` pairing. A composite
+  authored as `14px / 20px` now emits `1.4286` rather than `20px`, so line boxes stay
+  proportional when a reader scales text or applies a text-spacing override
+  (WCAG 1.4.12). The authored value is still used where a ratio would be meaningless -
+  no font size, a zero font size, or mismatched units - and a percentage line height is
+  converted directly. Standalone `--leading-*` tokens keep their pixels, having no font
+  size to form a ratio with.
 
 ### Fixed
 - Font weights are no longer emitted as `--spacing-reference-font-weight-600: 37.5rem`.
