@@ -1,7 +1,7 @@
 import { NamingHelper, StringCase, CSSHelper } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType, TypographyTokenValue, FontFamilyTokenValue, TextDecorationTokenValue, TextCaseTokenValue, ParagraphSpacingTokenValue } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { tokenVariableName, shouldForceRem } from "./token"
+import { tokenVariableName, shouldForceRemForTypographyProperty } from "./token"
 
 /**
  * Generates a CSS class for a typography token
@@ -60,7 +60,7 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
     decimals: exportConfiguration.colorPrecision,
     colorFormat: exportConfiguration.colorFormat,
     tokenToVariableRef: () => "",
-    forceRemUnit: shouldForceRem(TokenType.paragraphSpacing),
+    forceRemUnit: shouldForceRemForTypographyProperty(TokenType.paragraphSpacing),
     remBase: exportConfiguration.remBase
   }
 

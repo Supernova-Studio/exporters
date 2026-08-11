@@ -65,10 +65,23 @@ export type ExporterConfiguration = {
   exportOnlyThemedTokens: boolean
   /** When enabled, base token values will be exported along with themes */
   exportBaseValues: boolean
-  /** When enabled, converts pixel values to rem units */
+  /** When enabled, converts every pixel value to rem, overriding `tokenPathUnits` */
   forceRemUnit: boolean
   /** Base pixel value for rem conversion (default: 16) */
   remBase: number
+  /**
+   * Unit treatment per token path prefix, e.g. `{ "reference/spacing": "rem" }`.
+   * Longest matching prefix wins; unmatched tokens keep their authored value.
+   * Dispatching on path rather than token type matters because design systems
+   * imported from Figma often type every scalar as a generic dimension.
+   */
+  tokenPathUnits: Record<string, "rem" | "px" | "unitless">
+  /**
+   * Tailwind namespace overrides per token path prefix, e.g.
+   * `{ "reference/font-weight": "font-weight" }`. Matched tokens are named
+   * `<namespace>-<token name>`, dropping intermediate path segments.
+   */
+  tokenPathPrefixes: Record<string, string>
   /** When enabled, allows customization of style file names */
   customizeStyleFileNames: boolean
   /** Prefix for Tailwind classes and CSS variables */

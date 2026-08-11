@@ -2,7 +2,14 @@ import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio
 import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FindReplaceTiming } from "../../config"
-import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION, REM_TOKEN_TYPES } from "../constants/defaults"
+import {
+  TAILWIND_TOKEN_PREFIXES,
+  TAILWIND_ALLOWED_CUSTOMIZATION,
+  REM_TYPOGRAPHY_PROPERTY_TYPES,
+  DEFAULT_TOKEN_PATH_UNITS,
+  DEFAULT_TOKEN_PATH_PREFIXES,
+  UnitTreatment
+} from "../constants/defaults"
 import { ColorHelper } from "@supernovaio/export-utils"
 import { ColorFormat } from "@supernovaio/export-utils"
 
@@ -26,18 +33,104 @@ export function isAllowedTokenType(tokenType: TokenType): boolean {
 }
 
 /**
- * Decides whether a given token type should have its pixel values converted to rem.
+ * Builds the full slash-separated path of a token, including its own name.
+ * Lowercased so path rules can be written without worrying about casing.
  *
- * Conversion is decided per token type, so spacing and font sizes can be emitted in
- * rem while radius, blur and border widths keep their authored pixel values. The
- * global `forceRemUnit` setting still acts as a master override that converts
+ * @param token - The token to build a path for
+ * @returns The full token path, e.g. "reference/font-weight/600"
+ */
+function fullTokenPath(token: Token): string {
+  return [...(token.tokenPath || []), token.name].join("/").toLowerCase()
+}
+
+/**
+ * Finds the longest path prefix in `rules` that the token's path starts with.
+ * Longest wins so a specific path can override a broader one.
+ *
+ * @param token - The token to match
+ * @param rules - Map of path prefix to value
+ * @returns The value for the longest matching prefix, or undefined if none match
+ */
+function matchByTokenPath<T>(token: Token, rules: Record<string, T>): T | undefined {
+  const path = fullTokenPath(token)
+
+  const matched = Object.keys(rules)
+    .filter((prefix) => path.startsWith(prefix.toLowerCase()))
+    .sort((a, b) => b.length - a.length)[0]
+
+  return matched === undefined ? undefined : rules[matched]
+}
+
+/**
+ * Resolves how a token's unit should be treated, based on its path.
+ *
+ * Falls back to `px` - the authored value - when no rule matches, so an
+ * unrecognised token is passed through rather than silently converted.
+ *
+ * @param token - The token being converted
+ * @returns The unit treatment to apply
+ */
+export function resolveUnitTreatment(token: Token): UnitTreatment {
+  const rules = exportConfiguration.tokenPathUnits ?? DEFAULT_TOKEN_PATH_UNITS
+  return matchByTokenPath(token, rules) ?? "px"
+}
+
+/**
+ * Decides whether a token's pixel value should be converted to rem.
+ *
+ * The global `forceRemUnit` setting still acts as a master override that converts
  * everything, preserving the previous behaviour for anyone who relies on it.
  *
- * @param tokenType - The type of token being converted
- * @returns True if pixel values of this token type should become rem
+ * @param token - The token being converted
+ * @returns True if the pixel value should become rem
  */
-export function shouldForceRem(tokenType: TokenType): boolean {
-  return exportConfiguration.forceRemUnit || REM_TOKEN_TYPES.has(tokenType)
+export function shouldForceRem(token: Token): boolean {
+  return exportConfiguration.forceRemUnit || resolveUnitTreatment(token) === "rem"
+}
+
+/**
+ * Decides whether a typography sub-property should be converted to rem.
+ *
+ * Typography tokens are composites whose sub-values carry no path, so they are
+ * dispatched on type rather than on path.
+ *
+ * @param tokenType - The type the sub-property maps to
+ * @returns True if the pixel value should become rem
+ */
+export function shouldForceRemForTypographyProperty(tokenType: TokenType): boolean {
+  return exportConfiguration.forceRemUnit || REM_TYPOGRAPHY_PROPERTY_TYPES.has(tokenType)
+}
+
+/**
+ * Strips the unit from a numeric CSS value, leaving the bare number.
+ *
+ * Only a plain number followed by a unit is touched, so `var(--x)` references and
+ * multi-part values such as shadows are returned unchanged.
+ *
+ * @param value - The CSS value to strip
+ * @returns The value without its unit, or the original value if it does not match
+ */
+function stripUnit(value: string): string {
+  const match = value.match(/^(-?\d*\.?\d+)(px|rem|em|%)$/)
+  return match ? match[1] : value
+}
+
+/**
+ * Applies the `unitless` treatment to a token value where the token's path calls
+ * for it. Returns undefined when no transformation applies, which is the contract
+ * `CSSHelper`'s valueTransformer expects.
+ *
+ * @param value - The CSS value produced for the token
+ * @param token - The token being converted
+ * @returns The stripped value, or undefined to leave it alone
+ */
+function transformUnitlessValue(value: string, token: Token): string | undefined {
+  if (resolveUnitTreatment(token) !== "unitless") {
+    return undefined
+  }
+
+  const stripped = stripUnit(value)
+  return stripped === value ? undefined : stripped
 }
 
 /**
@@ -120,7 +213,7 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
         colorFormat: exportConfiguration.colorFormat,
         // Decided per sub-property, so font size becomes rem while line height and
         // letter spacing keep the unit they were authored in
-        forceRemUnit: shouldForceRem(tokenTypeMap[property]),
+        forceRemUnit: shouldForceRemForTypographyProperty(tokenTypeMap[property]),
         remBase: exportConfiguration.remBase,
         tokenToVariableRef: (t) => `var(--${tokenVariableName(t, tokenGroups)})`
       })};\n`
@@ -164,7 +257,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     allowReferences: exportConfiguration.useReferences,
     decimals: exportConfiguration.colorPrecision,
     colorFormat: exportConfiguration.colorFormat,
-    forceRemUnit: shouldForceRem(token.tokenType),
+    forceRemUnit: shouldForceRem(token),
     remBase: exportConfiguration.remBase,
     // Custom handler for token references - converts them to CSS var() syntax
     tokenToVariableRef: (t, context) => {
@@ -175,11 +268,12 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
           allowReferences: false, // Don't follow nested references
           decimals: exportConfiguration.colorPrecision,
           colorFormat: exportConfiguration.colorFormat,
-          // Inlined value follows the rule for the referenced token's own type
-          forceRemUnit: shouldForceRem(t.tokenType),
+          // Inlined value follows the rule for the referenced token's own path
+          forceRemUnit: shouldForceRem(t),
           remBase: exportConfiguration.remBase,
           tokenToVariableRef: () => "", // Stub function that never gets called since allowReferences is false
-          valueTransformer: undefined
+          // An inlined value still needs its unit stripped where the path calls for it
+          valueTransformer: transformUnitlessValue
         });
       }
       // If context requests a channel-based color variable (needsRgb), use the oklch utility variable in this exporter
@@ -199,7 +293,8 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
         // For direct values (background blur) just return as is
         return value
       }
-      return undefined
+      // Strip the unit where the token's path calls for a bare number
+      return transformUnitlessValue(value, t)
     }
   })
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
@@ -318,12 +413,38 @@ function matchColorUtilityPattern(fullPath: string, patternString: string): { ma
  */
 export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
   let prefix = getTokenPrefix(token.tokenType)
-  
+
   // Determine if find/replace should be applied before prefix (passed to NamingHelper)
   // or after prefix (applied manually to the final name)
   const applyFindReplaceBeforePrefix = exportConfiguration.findReplaceTiming !== FindReplaceTiming.AfterPrefix
   const findReplaceForNamingHelper = applyFindReplaceBeforePrefix ? exportConfiguration.findReplace : undefined
-  
+
+  // A path-based namespace override replaces the type-derived prefix entirely, and
+  // drops the intermediate path segments with it - the type-derived prefix is wrong
+  // precisely because the token type is not what the token represents. Naming from
+  // the override plus the token's own name keeps the result usable as a Tailwind
+  // namespace: reference/font-weight/600 becomes --font-weight-600, not
+  // --font-weight-reference-font-weight-600.
+  const prefixOverride = matchByTokenPath(
+    token,
+    exportConfiguration.tokenPathPrefixes ?? DEFAULT_TOKEN_PATH_PREFIXES
+  )
+
+  if (prefixOverride !== undefined) {
+    let name = NamingHelper.codeSafeVariableName(
+      `${prefixOverride}-${token.name}`,
+      StringCase.kebabCase,
+      findReplaceForNamingHelper,
+      true
+    )
+
+    if (!applyFindReplaceBeforePrefix) {
+      name = applyFindReplace(name, exportConfiguration.findReplace)
+    }
+
+    return name
+  }
+
   // Handle color utility prefixes if enabled and token is a color
   if (exportConfiguration.useColorUtilityPrefixes && token.tokenType === TokenType.color) {
     // Get the parent once and reuse it

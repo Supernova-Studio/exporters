@@ -145,34 +145,63 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Typography
 - **generateTypographyClasses:** When enabled, generates typography classes in @layer components using typography tokens.
-- **forceRemUnit:** When enabled, converts **all** pixel values to rem units.
+- **forceRemUnit:** When enabled, converts **all** pixel values to rem units, overriding the per-path rules below.
 - **remBase:** Base pixel value for rem conversion (default: 16).
+- **tokenPathUnits:** Unit to emit per token path prefix (`rem`, `px` or `unitless`). See below.
+- **tokenPathPrefixes:** Tailwind namespace to emit per token path prefix. See below.
 
-### Unit handling per namespace
+### Unit and namespace handling by token path
 
-Rem conversion is decided per token type rather than globally. With `forceRemUnit` **off**
-(the default), pixel values are converted only where the value should scale with the
-user's browser font size:
+Units and namespaces are resolved from the **token path**, not the token type.
 
-| Namespace | Token types | Unit |
+This matters because a design system imported from Figma commonly types every scalar as
+a generic `Dimension`. When that happens `token.tokenType` carries no semantic signal at
+all - font sizes, radii, line heights and font weights all arrive as `Dimension` - so a
+type-based rule can only convert all of them or none of them, and every token collapses
+into the single `--spacing-*` namespace. Two settings resolve this by path:
+
+- **tokenPathUnits:** maps a path prefix to `rem`, `px` or `unitless`
+- **tokenPathPrefixes:** maps a path prefix to the Tailwind namespace to emit it under
+
+The longest matching prefix wins, so a specific path overrides a broader one. Paths that
+match nothing keep their authored value and their type-derived namespace.
+
+Defaults:
+
+| Token path | Variable | Unit |
 | --- | --- | --- |
-| `--spacing-*` | Space, Size, Dimension | `rem` |
-| `--text-*` | FontSize | `rem` |
-| `--radius-*` | BorderRadius | `px` |
-| `--blur-*` | Blur | `px` |
-| `--border-*` | BorderWidth | `px` |
-| `--shadow-*` | Shadow | `px` |
+| `reference/spacing/*` | `--spacing-*` | `rem` |
+| `reference/font-size/*` | `--text-*` | `rem` |
+| `reference/radius/*` | `--radius-*` | `px` |
+| `reference/line-height/*` | `--leading-*` | `px` |
+| `reference/letter-spacing/*` | `--tracking-*` | `px` |
+| `reference/font-weight/*` | `--font-weight-*` | `unitless` |
 
-`--text-*` is in rem because a hardcoded `--text-sm: 14px` ignores the reader's browser
-font-size setting, which is an accessibility regression (WCAG 1.4.4). Radius stays in px
-deliberately: rem-scaled corner radii look wrong at large text sizes. This is a departure
-from the Tailwind v4 defaults, and an intentional one.
+So `reference/font-weight/600` is emitted as `--font-weight-600: 600`, not
+`--spacing-reference-font-weight-600: 600px`. Tailwind v4's own font weight keys are
+named rather than numeric (`--font-weight-semibold`), so numeric weights are additive
+and overwrite none of them.
+
+Why these choices:
+
+- `--text-*` is rem because a hardcoded `--text-sm: 14px` ignores the reader's browser
+  font-size setting.
+- `--radius-*` stays px deliberately: rem-scaled corner radii look wrong at large text
+  sizes. This departs from the Tailwind v4 defaults, knowingly.
+- `--leading-*` and `--tracking-*` stay px because they were authored in px against
+  specific text styles. Converting them needs a base font size the token does not carry,
+  so it would be a design change rather than a unit fix. Unitless line heights are the
+  more scalable option, but the ratios vary per text style (1.0 to 1.45 across the
+  typography tokens), so that means re-authoring per style, not dividing here.
+- `--font-weight-*` is unitless because a weight is a bare number. Figma stores it as a
+  dimension, which forces a unit onto it, and `600px` is meaningless.
 
 Values authored in non-pixel units are never converted, so durations in `ms`, unitless
 values, and percentages always pass through untouched. Enabling `forceRemUnit` converts
-every pixel value as before, overriding the table above.
+every pixel value, overriding `tokenPathUnits` entirely.
 
-To change which namespaces use rem, edit `REM_TOKEN_TYPES` in
+Both maps are exposed in `config.json`, so the mapping can be changed per pipeline
+without a rebuild. The defaults live in
 [`src/constants/defaults.ts`](./src/constants/defaults.ts).
 
 ### Token Properties
