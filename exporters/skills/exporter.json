@@ -1,0 +1,15 @@
+{
+  "id": "supernovaio.exporter-agentic-skills",
+  "name": "Agent skills",
+  "description": "Export context-selected skills as SKILL.md files for agent discovery folders.",
+  "author": "Jiri Trecak",
+  "organization": "Supernova.io",
+  "homepage": "https://supernova.io",
+  "version": "1.0.0",
+  "usesBrands": false,
+  "usesThemes": false,
+  "usesContext": true,
+  "executable": "/dist/build.js",
+  "engine": "latest",
+  "tags": ["AI", "Agents", "Skills", "New", "Contexts"]
+}
