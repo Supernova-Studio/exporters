@@ -27,6 +27,11 @@ export enum TokenNameStructure {
   CollectionPathAndName = "collectionPathAndName"
 }
 
+export enum TypographyOutputFormat {
+  Shorthand = "shorthand",
+  Expanded = "expanded"
+}
+
 export type ExporterConfiguration = {
   /** When enabled, a disclaimer showing the fact that the file was generated automatically and should not be changed manually will appear in all style styles */
   showGeneratedFileDisclaimer: boolean
@@ -76,4 +81,6 @@ export type ExporterConfiguration = {
   useTokenTypePrefixes: boolean
   /** Control how token styles are organized in files */
   fileStructure: FileStructure
+  /** Controls whether typography values are exported as CSS shorthand or expanded composite values */
+  typographyOutputFormat: TypographyOutputFormat
 }

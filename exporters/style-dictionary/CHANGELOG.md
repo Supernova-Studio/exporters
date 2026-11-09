@@ -8,6 +8,12 @@ All the updates to this exporter are documented in this file.
   - Color tokens referenced in shadows, borders, and gradients now support custom opacity values
   - Automatically generates RGB utility values for color tokens when needed
   - Improves compatibility with design systems that use opacity variations
+- New `typographyOutputFormat` configuration option that controls how typography token values are exported:
+  - `shorthand`: CSS font shorthand string, same as previous versions (default)
+  - `expanded`: Composite object with separate `fontFamily`, `fontWeight`, `fontSize`, `lineHeight`, `letterSpacing`, `paragraphSpacing`, `paragraphIndent`, `textCase`, and `textDecoration` values, keeping references where possible
+
+### 🐞 Fixed
+- Letter spacing (and other typography properties not supported by the CSS font shorthand) can now be exported by setting `typographyOutputFormat` to `expanded`
 
 ## 2.4.0 - 2025-03-12
 
