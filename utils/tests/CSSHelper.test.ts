@@ -42,7 +42,7 @@ import {
   } from '@supernovaio/sdk-exporters/build/sdk-typescript/src/model/tokens/SDKTokenValue'
   import { ColorFormat } from '../enums/ColorFormat'
   import { CSSHelper } from '../helpers/CSSHelper'
-  import { test, expect } from '@jest/globals'
+  import { describe, test, expect } from '@jest/globals'
   
   /** Base formattable color - no refs */
   const testColor: ColorTokenValue = {
@@ -724,3 +724,77 @@ import {
     expect(CSSHelper.optionTokenValueToCSS(visibilityOption, tokens, testOptions, TokenType.visibility)).toBe('visible')
   })
   
+  describe('referenced colors in border, gradient and shadow tokens', () => {
+    const colorValue = (r: number, g: number, b: number): ColorTokenValue => ({
+      color: { r, g, b, referencedTokenId: null },
+      opacity: { measure: 1, referencedTokenId: null, unit: Unit.raw },
+      referencedTokenId: null
+    })
+    const colorToken = (id: string, value: ColorTokenValue) =>
+      ({ id, name: id, tokenType: TokenType.color, value } as ColorToken)
+    const referenceTo = (token: ColorToken): ColorTokenValue => ({ ...token.value, referencedTokenId: token.id })
+
+    const brand = colorToken('brand', colorValue(49, 92, 253))
+    const stopA = colorToken('a', colorValue(255, 0, 0))
+    const stopB = colorToken('b', colorValue(0, 0, 255))
+    const shadowColor = colorToken('shadowColor', colorValue(0, 0, 0))
+
+    const border: BorderTokenValue = { ...testBorder, color: referenceTo(brand) }
+    const gradient: GradientTokenValue = {
+      ...testGradient,
+      stops: [
+        { position: 0, color: referenceTo(stopA) },
+        { position: 1, color: referenceTo(stopB) }
+      ]
+    }
+    const shadow: ShadowTokenValue = {
+      ...testShadow,
+      color: referenceTo(shadowColor),
+      opacity: { measure: 0.08, referencedTokenId: null, unit: Unit.raw }
+    }
+
+    const allTokens = new Map<string, Token>([brand, stopA, stopB, shadowColor].map((token) => [token.id, token]))
+    const options = {
+      ...testOptions,
+      tokenToVariableRef: (token: Token, context?: { needsRgb?: boolean }) =>
+        context?.needsRgb ? `var(--rgb-${token.name})` : `var(--${token.name})`
+    }
+
+    test('border uses the referenced color variable', () => {
+      expect(CSSHelper.borderTokenValueToCSS(border, allTokens, options)).toBe('1px solid var(--brand)')
+    })
+
+    test('border uses the referenced color variable in an OKLCH format', () => {
+      expect(
+        CSSHelper.borderTokenValueToCSS(border, allTokens, { ...options, colorFormat: ColorFormat.smartOklch })
+      ).toBe('1px solid var(--brand)')
+    })
+
+    test('border uses the raw color when references are off', () => {
+      expect(CSSHelper.borderTokenValueToCSS(border, allTokens, { ...options, allowReferences: false })).toBe(
+        '1px solid #315cfd'
+      )
+    })
+
+    test('gradient stops use the referenced color variables', () => {
+      expect(CSSHelper.gradientTokenValueToCSS([gradient], allTokens, options)).toBe(
+        'linear-gradient(135deg, var(--a) 0%, var(--b) 100%)'
+      )
+    })
+
+    test('shadow with its own opacity uses the color channels', () => {
+      expect(CSSHelper.shadowTokenValueToCSS([shadow], allTokens, options)).toBe(
+        '3px 4px 5px 6px rgba(var(--rgb-shadowColor), 0.08)'
+      )
+    })
+
+    test('only colors of shadows with their own opacity need channels', () => {
+      const tokenList: Array<Token> = [
+        ...allTokens.values(),
+        { id: 'border', name: 'border', tokenType: TokenType.border, value: border } as BorderToken,
+        { id: 'gradient', name: 'gradient', tokenType: TokenType.gradient, value: [gradient] } as GradientToken,
+        { id: 'shadow', name: 'shadow', tokenType: TokenType.shadow, value: [shadow] } as ShadowToken
+      ]
+      expect(CSSHelper.shadowColorTokenIdsNeedingChannels(tokenList)).toEqual(new Set(['shadowColor']))
+    })
+  })

@@ -3,11 +3,11 @@
  * It handles the creation of style files, reset files, and index files based on the export configuration.
  */
 
-import { FileHelper, ThemeHelper, GeneralHelper } from "@supernovaio/export-utils"
+import { FileHelper, ThemeHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FileStructure } from "../../config"
-import { convertedToken, isAllowedTokenType, analyzeTokensForOklchUtilities, generateOklchUtilityVariable } from "../content/token"
+import { convertedToken, isAllowedTokenType, generateOklchUtilityVariable } from "../content/token"
 import { generateTypographyClass } from "../content/typography"
 import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
 
@@ -272,7 +272,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     }
 
     // Analyze tokens for OKLCH utility needs
-    const colorTokensNeedingOklch = analyzeTokensForOklchUtilities(processedTokens, tokenGroups)
+    const colorTokensNeedingOklch = CSSHelper.shadowColorTokenIdsNeedingChannels(processedTokens)
     // Generate OKLCH utility variables
     let oklchUtilityVariables = ''
     if (colorTokensNeedingOklch.size > 0) {

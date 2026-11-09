@@ -16,65 +16,6 @@ export function getTokenPrefix(tokenType: TokenType): string {
 }
 
 /**
- * Analyzes tokens to identify which color tokens need RGB utility versions.
- * A color token needs an RGB utility if it's referenced by shadow, border, or gradient tokens
- * that have custom opacity values.
- * 
- * @param tokens - Array of all tokens
- * @param tokenGroups - Array of token groups for determining token hierarchy
- * @param collections - Array of collections for resolving collection names
- * @returns Set of color token IDs that need RGB utility versions
- */
-export function analyzeTokensForRgbUtilities(
-  tokens: Array<Token>,
-  tokenGroups: Array<TokenGroup>,
-  collections: Array<DesignSystemCollection> = []
-): Set<string> {
-  const colorTokensNeedingRgb = new Set<string>()
-  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
-
-  // Analyze shadow, border, and gradient tokens
-  tokens.forEach((token) => {
-    if (token.tokenType === TokenType.shadow) {
-      const shadowToken = token as any
-      shadowToken.value.forEach((shadowLayer: any) => {
-        // Check if shadow has custom opacity and references a color token
-        if (shadowLayer.opacity && shadowLayer.color.referencedTokenId) {
-          const referencedColorToken = mappedTokens.get(shadowLayer.color.referencedTokenId)
-          if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-            colorTokensNeedingRgb.add(referencedColorToken.id)
-          }
-        }
-      })
-    } else if (token.tokenType === TokenType.border) {
-      const borderToken = token as any
-      // Check if border has custom opacity and references a color token
-      if (borderToken.value.opacity && borderToken.value.color.referencedTokenId) {
-        const referencedColorToken = mappedTokens.get(borderToken.value.color.referencedTokenId)
-        if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-          colorTokensNeedingRgb.add(referencedColorToken.id)
-        }
-      }
-    } else if (token.tokenType === TokenType.gradient) {
-      const gradientToken = token as any
-      gradientToken.value.forEach((gradientLayer: any) => {
-        gradientLayer.stops.forEach((stop: any) => {
-          // Check if gradient stop has custom opacity and references a color token
-          if (stop.opacity && stop.color.referencedTokenId) {
-            const referencedColorToken = mappedTokens.get(stop.color.referencedTokenId)
-            if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-              colorTokensNeedingRgb.add(referencedColorToken.id)
-            }
-          }
-        })
-      })
-    }
-  })
-
-  return colorTokensNeedingRgb
-}
-
-/**
  * Converts a token to its raw CSS value without following references.
  * This is used to generate fallback values for references.
  * 
