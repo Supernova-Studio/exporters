@@ -64,7 +64,6 @@ function createTokenValue(
 
 function tokenReferencePath(
   token: Token,
-  tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection> = []
 ): string {
   // Build the reference path based on token structure configuration
@@ -118,7 +117,6 @@ function tokenReferencePath(
 }
 
 function tokenCssOptions(
-  tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection> = []
 ) {
   return {
@@ -127,7 +125,7 @@ function tokenCssOptions(
     colorFormat: exportConfiguration.colorFormat,
     forceRemUnit: exportConfiguration.forceRemUnit,
     remBase: exportConfiguration.remBase,
-    tokenToVariableRef: (token: Token) => tokenReferencePath(token, tokenGroups, collections)
+    tokenToVariableRef: (token: Token) => tokenReferencePath(token, collections)
   }
 }
 
@@ -190,13 +188,15 @@ function processTokensToObject(
     tokenObject._comment = exportConfiguration.disclaimer
   }
   
+  // Value conversion options are the same for every token in this file
+  const cssOptions = tokenCssOptions(collections)
+
   // Process each token and build the hierarchical structure
   sortedTokens.forEach(token => {
     // Generate the token's object key name based on configuration
     const name = tokenObjectKeyName(token, tokenGroups, true, collections)
 
     // Convert token to Style Dictionary value, handling references and formatting
-    const cssOptions = tokenCssOptions(tokenGroups, collections)
     const value = token.tokenType === TokenType.typography &&
       exportConfiguration.typographyOutputFormat === TypographyOutputFormat.Expanded
       ? typographyTokenValueToStyleDictionaryValue((token as TypographyToken).value, mappedTokens, cssOptions)

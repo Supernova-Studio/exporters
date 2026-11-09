@@ -33,18 +33,6 @@ const TYPOGRAPHY_PROPERTY_ORDER: TypographyPropertyName[] = [
   "textDecoration"
 ]
 
-const TYPOGRAPHY_PROPERTY_TOKEN_TYPES: Record<TypographyPropertyName, TokenType> = {
-  fontFamily: TokenType.fontFamily,
-  fontWeight: TokenType.fontWeight,
-  fontSize: TokenType.fontSize,
-  lineHeight: TokenType.lineHeight,
-  paragraphSpacing: TokenType.paragraphSpacing,
-  textCase: TokenType.textCase,
-  letterSpacing: TokenType.letterSpacing,
-  paragraphIndent: TokenType.paragraphSpacing,
-  textDecoration: TokenType.textDecoration
-}
-
 function withoutWrappingQuotes(value: string): string {
   return value.replace(/^(['"])(.*)\1$/, "$2")
 }
@@ -56,23 +44,6 @@ function referencedValue(
 ): string | null {
   const reference = sureOptionalReference(value.referencedTokenId, allTokens, options.allowReferences)
   return reference ? options.tokenToVariableRef(reference) : null
-}
-
-function unitToDtcgUnit(unit: Unit): string {
-  switch (unit) {
-    case Unit.percent:
-      return "%"
-    case Unit.pixels:
-      return "px"
-    case Unit.rem:
-      return "rem"
-    case Unit.ms:
-      return "ms"
-    case Unit.raw:
-      return ""
-    default:
-      return "px"
-  }
 }
 
 function normalizedDimensionValue(
@@ -93,7 +64,7 @@ function normalizedDimensionValue(
 
   return {
     value: ColorHelper.roundToDecimals(dimension.measure, options.decimals),
-    unit: unitToDtcgUnit(dimension.unit)
+    unit: CSSHelper.unitToCSS(dimension.unit)
   }
 }
 
@@ -121,15 +92,6 @@ function fontWeightPropertyValue(
   return referencedValue(fontWeight, allTokens, options) ?? normalizeTextWeight(fontWeight.text)
 }
 
-function optionPropertyValue(
-  option: AnyOptionTokenValue,
-  tokenType: TokenType,
-  allTokens: Map<string, Token>,
-  options: TokenToCSSOptions
-): string {
-  return referencedValue(option, allTokens, options) ?? CSSHelper.optionTokenValueToCSS(option, allTokens, options, tokenType)
-}
-
 function typographyPropertyValue(
   property: TypographyPropertyName,
   value: TypographyTokenValue[TypographyPropertyName],
@@ -147,9 +109,11 @@ function typographyPropertyValue(
     case "paragraphIndent":
     case "lineHeight":
       return dimensionPropertyValue(value as AnyDimensionTokenValue, allTokens, options)
+    // optionTokenValueToCSS resolves references itself
     case "textCase":
+      return CSSHelper.optionTokenValueToCSS(value as AnyOptionTokenValue, allTokens, options, TokenType.textCase)
     case "textDecoration":
-      return optionPropertyValue(value as AnyOptionTokenValue, TYPOGRAPHY_PROPERTY_TOKEN_TYPES[property], allTokens, options)
+      return CSSHelper.optionTokenValueToCSS(value as AnyOptionTokenValue, allTokens, options, TokenType.textDecoration)
   }
 }
 
