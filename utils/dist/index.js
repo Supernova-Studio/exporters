@@ -26,3 +26,4 @@ __exportStar(require("./enums/StringCase"), exports);
 __exportStar(require("./enums/ColorFormat"), exports);
 __exportStar(require("./helpers/TokenNameTracker"), exports);
 __exportStar(require("./helpers/WriteTokenPropStore"), exports);
+__exportStar(require("./helpers/KotlinHelper"), exports);

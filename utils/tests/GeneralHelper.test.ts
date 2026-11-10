@@ -1,4 +1,4 @@
-import { GeneralHelper } from './GeneralHelper'
+import { GeneralHelper } from '../helpers/GeneralHelper'
 
 describe('GeneralHelper', () => {
   describe('indent', () => {

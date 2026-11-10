@@ -1,0 +1,205 @@
+[
+  {
+    "key": "includeMarketplaceManifest",
+    "type": "boolean",
+    "default": true,
+    "title": "Include marketplace manifest",
+    "description": "Generate a marketplace manifest so this plugin can be installed from a Git repository. Disable when adding this export to a repository that already has a shared marketplace listing multiple plugins.",
+    "category": "Marketplace & installation"
+  },
+  {
+    "key": "includeReadme",
+    "type": "boolean",
+    "default": true,
+    "title": "Include README",
+    "description": "Generate README.md with plugin contents and installation guidance.",
+    "category": "Marketplace & installation"
+  },
+  {
+    "key": "pluginRepositoryUrl",
+    "type": "string",
+    "default": "",
+    "title": "Repository URL",
+    "description": "Optional repository URL written to plugin.json, marketplace.json, and README.md.",
+    "category": "Marketplace & installation"
+  },
+  {
+    "key": "includeMcpServer",
+    "type": "boolean",
+    "default": true,
+    "title": "Include MCP server",
+    "description": "Generate mcp.json with the Supernova MCP pre-scoped to this context.",
+    "category": "MCP"
+  },
+  {
+    "key": "includeMcpUsageSkill",
+    "type": "boolean",
+    "default": true,
+    "title": "Include MCP usage skill",
+    "description": "Generate a using-supernova-mcp skill that explains when and how to call the Supernova MCP tools.",
+    "category": "MCP",
+    "dependsOn": {
+      "includeMcpServer": true
+    }
+  },
+  {
+    "key": "pluginName",
+    "type": "string",
+    "default": "",
+    "title": "Plugin name",
+    "description": "Cursor plugin identifier. Leave empty to use a slug of the context name.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginVersion",
+    "type": "string",
+    "default": "1.0.0",
+    "title": "Plugin version",
+    "description": "Version written to .cursor-plugin/plugin.json.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginDescription",
+    "type": "string",
+    "default": "",
+    "title": "Plugin description",
+    "description": "Description written to plugin.json and README.md. Leave empty to use the context description when available.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginAuthorName",
+    "type": "string",
+    "default": "",
+    "title": "Author name",
+    "description": "Author name written to plugin.json and marketplace.json.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginAuthorEmail",
+    "type": "string",
+    "default": "",
+    "title": "Author email",
+    "description": "Optional author email written to plugin.json and marketplace.json.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginAuthorUrl",
+    "type": "string",
+    "default": "",
+    "title": "Author URL",
+    "description": "Optional author URL used as a homepage fallback when Homepage is empty.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginHomepage",
+    "type": "string",
+    "default": "",
+    "title": "Homepage",
+    "description": "Optional homepage URL written to plugin.json and README.md.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginLicense",
+    "type": "string",
+    "default": "MIT",
+    "title": "License",
+    "description": "License identifier written to plugin.json.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "pluginKeywords",
+    "type": "array",
+    "default": ["supernova", "design-system", "mcp"],
+    "title": "Keywords",
+    "description": "Keywords written to plugin.json.",
+    "category": "Plugin manifest"
+  },
+  {
+    "key": "includeContextSkills",
+    "type": "boolean",
+    "default": true,
+    "title": "Include context skills",
+    "description": "Export Supernova skills selected by the current context into the plugin's skills folder.",
+    "category": "Skills"
+  },
+  {
+    "key": "preserveFolderHierarchy",
+    "type": "boolean",
+    "default": true,
+    "title": "Preserve folder hierarchy",
+    "description": "Keep Supernova skill folders as category folders in the generated plugin. When disabled, skills are flattened and duplicate names receive numeric suffixes.",
+    "category": "Skills",
+    "dependsOn": {
+      "includeContextSkills": true
+    }
+  },
+  {
+    "key": "includeSupernovaMetadata",
+    "type": "boolean",
+    "default": true,
+    "title": "Include Supernova metadata",
+    "description": "Add Supernova metadata to exported context skill frontmatter.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeContextSkills": true
+    }
+  },
+  {
+    "key": "includeSupernovaUpdatedAt",
+    "type": "boolean",
+    "default": true,
+    "title": "Include updated timestamp",
+    "description": "Add the Supernova skill update timestamp to frontmatter metadata.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeContextSkills": true,
+      "includeSupernovaMetadata": true
+    }
+  },
+  {
+    "key": "includeSupernovaGeneratedBy",
+    "type": "boolean",
+    "default": true,
+    "title": "Include generator name",
+    "description": "Add the Supernova generator name to frontmatter metadata.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeContextSkills": true,
+      "includeSupernovaMetadata": true
+    }
+  },
+  {
+    "key": "includeSupernovaDisclaimer",
+    "type": "boolean",
+    "default": true,
+    "title": "Include generated file disclaimer",
+    "description": "Add a generated-file disclaimer to frontmatter metadata.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeContextSkills": true,
+      "includeSupernovaMetadata": true
+    }
+  },
+  {
+    "key": "supernovaDisclaimer",
+    "type": "string",
+    "isMultiline": true,
+    "default": "This file was generated by Supernova.io and should not be changed manually.",
+    "title": "Disclaimer message",
+    "description": "Disclaimer text written to the supernova-disclaimer frontmatter metadata field.",
+    "category": "Frontmatter metadata",
+    "dependsOn": {
+      "includeContextSkills": true,
+      "includeSupernovaMetadata": true,
+      "includeSupernovaDisclaimer": true
+    }
+  },
+  {
+    "key": "includeFeedbackSkill",
+    "type": "boolean",
+    "default": true,
+    "title": "Include feedback skill",
+    "description": "Generate the feedback capture skill only when this is enabled and feedback collection is also enabled for the context.",
+    "category": "Skills"
+  }
+]

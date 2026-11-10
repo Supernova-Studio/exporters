@@ -1,5 +1,6 @@
-import { FileNameHelper } from './FileNameHelper'
+import { FileNameHelper } from '../helpers/FileNameHelper'
 import { TokenType } from "@supernovaio/sdk-exporters"
+import { test, expect } from '@jest/globals'
 
 describe('FileNameHelper', () => {
   describe('ensureFileExtension', () => {
@@ -26,6 +27,33 @@ describe('FileNameHelper', () => {
     })
   })
 
+  describe('posixRelativeDir', () => {
+    it('returns sibling path with one parent hop', () => {
+      expect(FileNameHelper.posixRelativeDir('darkMode', 'base')).toBe('../base')
+    })
+
+    it('handles a multi-segment target dir', () => {
+      expect(FileNameHelper.posixRelativeDir('darkMode', 'tokens/base')).toBe('../tokens/base')
+    })
+
+    it('collapses common path prefixes', () => {
+      expect(FileNameHelper.posixRelativeDir('tokens/dark', 'tokens/base')).toBe('../base')
+    })
+
+    it('strips leading "./" and trailing "/" from inputs', () => {
+      expect(FileNameHelper.posixRelativeDir('./darkMode/', './base/')).toBe('../base')
+    })
+
+    it('returns "." when both paths point at the same dir', () => {
+      expect(FileNameHelper.posixRelativeDir('.', '.')).toBe('.')
+      expect(FileNameHelper.posixRelativeDir('a', 'a')).toBe('.')
+    })
+
+    it('handles deeper from-paths', () => {
+      expect(FileNameHelper.posixRelativeDir('a/b/c', 'd')).toBe('../../../d')
+    })
+  })
+
   describe('getDefaultStyleFileName', () => {
     it('should return correct filename for Color type with default extension', () => {
       expect(FileNameHelper.getDefaultStyleFileName(TokenType.color)).toBe('color.css')
@@ -48,4 +76,30 @@ describe('FileNameHelper', () => {
       expect(FileNameHelper.getDefaultStyleFileName(TokenType.color, 'scss')).toBe('color.scss')
     })
   })
+})
+
+test('ensureFileExtension_with_dot', () => {
+  expect(FileNameHelper.ensureFileExtension('test', '.css')).toBe('test.css')
+  expect(FileNameHelper.ensureFileExtension('test.css', '.css')).toBe('test.css')
+})
+
+test('ensureFileExtension_without_dot', () => {
+  expect(FileNameHelper.ensureFileExtension('test', 'css')).toBe('test.css')
+  expect(FileNameHelper.ensureFileExtension('test.css', 'css')).toBe('test.css')
+})
+
+test('replaceFileExtension_with_dot', () => {
+  expect(FileNameHelper.replaceFileExtension('test.css', '.css', '.scss')).toBe('test.scss')
+})
+
+test('replaceFileExtension_without_dot', () => {
+  expect(FileNameHelper.replaceFileExtension('test.css', 'css', 'scss')).toBe('test.scss')
+})
+
+test('getDefaultStyleFileName_with_dot', () => {
+  expect(FileNameHelper.getDefaultStyleFileName(TokenType.color, '.css')).toBe('color.css')
+})
+
+test('getDefaultStyleFileName_without_dot', () => {
+  expect(FileNameHelper.getDefaultStyleFileName(TokenType.typography, 'css')).toBe('typography.css')
 }) 

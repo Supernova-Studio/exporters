@@ -2,19 +2,52 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CSSHelper = void 0;
 const sdk_exporters_1 = require("@supernovaio/sdk-exporters");
+const ColorFormat_1 = require("../enums/ColorFormat");
 const TokenHelper_1 = require("./TokenHelper");
 const ColorHelper_1 = require("./ColorHelper");
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 class CSSHelper {
+    /**
+     * Helper function to handle color with custom opacity, using channel-based utilities when available
+     */
+    static handleColorWithCustomOpacity(color, customOpacity, allTokens, options) {
+        if (customOpacity && color.referencedTokenId) {
+            // If we have custom opacity and reference a color token, try to use channel-based utility
+            const referencedColorToken = allTokens.get(color.referencedTokenId);
+            if (referencedColorToken && referencedColorToken.tokenType === sdk_exporters_1.TokenType.color) {
+                const channelVariableName = options.tokenToVariableRef(referencedColorToken, { needsRgb: true });
+                const alphaValue = ColorHelper_1.ColorHelper.roundToDecimals(customOpacity.measure, options.decimals);
+                // Use the appropriate function based on color format
+                if (options.colorFormat === ColorFormat_1.ColorFormat.oklch ||
+                    options.colorFormat === ColorFormat_1.ColorFormat.oklcha ||
+                    options.colorFormat === ColorFormat_1.ColorFormat.smartOklch) {
+                    return `oklch(${channelVariableName} / ${alphaValue})`;
+                }
+                else {
+                    // Default to rgba for other formats (rgb, rgba, smartRgba, etc.)
+                    return `rgba(${channelVariableName}, ${alphaValue})`;
+                }
+            }
+        }
+        // Fallback to normal color processing
+        return this.colorTokenValueToCSS({
+            ...color,
+            ...(customOpacity && { opacity: customOpacity })
+        }, allTokens, options);
+    }
     static tokenToCSS(token, allTokens, options) {
         /** Use subroutines to convert specific token types to different css representations. Many tokens are of the same type */
+        let cssValue;
         switch (token.tokenType) {
             case sdk_exporters_1.TokenType.color:
-                return this.colorTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.colorTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.border:
-                return this.borderTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.borderTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.gradient:
-                return this.gradientTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.gradientTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.dimension:
             case sdk_exporters_1.TokenType.size:
             case sdk_exporters_1.TokenType.space:
@@ -27,26 +60,41 @@ class CSSHelper {
             case sdk_exporters_1.TokenType.radius:
             case sdk_exporters_1.TokenType.duration:
             case sdk_exporters_1.TokenType.zIndex:
-                return this.dimensionTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.dimensionTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.shadow:
-                return this.shadowTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.shadowTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.fontWeight:
-                return this.fontWeightTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.fontWeightTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.fontFamily:
             case sdk_exporters_1.TokenType.productCopy:
             case sdk_exporters_1.TokenType.string:
-                return this.stringTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.stringTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.textCase:
             case sdk_exporters_1.TokenType.textDecoration:
             case sdk_exporters_1.TokenType.visibility:
-                return this.optionTokenValueToCSS(token.value, allTokens, options, token.tokenType);
+                cssValue = this.optionTokenValueToCSS(token.value, allTokens, options, token.tokenType);
+                break;
             case sdk_exporters_1.TokenType.blur:
-                return this.blurTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.blurTokenValueToCSS(token.value, allTokens, options);
+                break;
             case sdk_exporters_1.TokenType.typography:
-                return this.typographyTokenValueToCSS(token.value, allTokens, options);
+                cssValue = this.typographyTokenValueToCSS(token.value, allTokens, options);
+                break;
             default:
                 throw new sdk_exporters_1.UnreachableCaseError(token.tokenType, 'Unsupported token type for transformation to CSS:');
         }
+        // Allow value transformation if transformer exists
+        if (options.valueTransformer) {
+            const transformedValue = options.valueTransformer(cssValue, token);
+            if (transformedValue !== undefined) {
+                return transformedValue;
+            }
+        }
+        return cssValue;
     }
     static colorTokenValueToCSS(color, allTokens, options) {
         return ColorHelper_1.ColorHelper.formattedColorOrVariableName(color, allTokens, options);
@@ -56,10 +104,12 @@ class CSSHelper {
         if (reference) {
             return options.tokenToVariableRef(reference);
         }
+        // Handle color with custom opacity using helper function
+        const colorValue = this.handleColorWithCustomOpacity(border.color, border.color.opacity, allTokens, options);
         const data = {
             width: this.dimensionTokenValueToCSS(border.width, allTokens, options),
             style: this.borderStyleToCSS(border.style),
-            color: this.colorTokenValueToCSS(border.color, allTokens, options),
+            color: colorValue,
             position: this.borderPositionToCSS(border.position) // Not used for now
         };
         return `${data.width} ${data.style} ${data.color}`;
@@ -114,7 +164,9 @@ class CSSHelper {
         // Example: radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%);
         const stops = value.stops
             .map((stop) => {
-            return `${this.colorTokenValueToCSS(stop.color, allTokens, options)} ${ColorHelper_1.ColorHelper.roundToDecimals(stop.position * 100, options.decimals)}%`;
+            // Handle color with custom opacity using helper function
+            const colorValue = this.handleColorWithCustomOpacity(stop.color, stop.color.opacity, allTokens, options);
+            return `${colorValue} ${ColorHelper_1.ColorHelper.roundToDecimals(stop.position * 100, options.decimals)}%`;
         })
             .join(', ');
         return `${gradientType}${stops})`;
@@ -149,10 +201,9 @@ class CSSHelper {
             }
             return `${px}px`;
         };
-        return `${value.type === sdk_exporters_1.ShadowType.inner ? 'inset ' : ''}${convertToRem(value.x)} ${convertToRem(value.y)} ${convertToRem(value.radius)} ${convertToRem(value.spread)} ${this.colorTokenValueToCSS({
-            ...value.color,
-            ...(value.opacity && { opacity: value.opacity })
-        }, allTokens, options)}`;
+        // Handle color with custom opacity using helper function
+        const colorValue = this.handleColorWithCustomOpacity(value.color, value.opacity, allTokens, options);
+        return `${value.type === sdk_exporters_1.ShadowType.inner ? 'inset ' : ''}${convertToRem(value.x)} ${convertToRem(value.y)} ${convertToRem(value.radius)} ${convertToRem(value.spread)} ${colorValue}`;
     }
     static fontWeightTokenValueToCSS(value, allTokens, options) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
@@ -160,55 +211,8 @@ class CSSHelper {
             return options.tokenToVariableRef(reference);
         }
         // Convert text weights to numerical values
-        const normalizedWeight = this.normalizeTextWeight(value.text);
+        const normalizedWeight = (0, TokenHelper_1.normalizeTextWeight)(value.text);
         return `${normalizedWeight}`;
-    }
-    static normalizeTextWeight(weight) {
-        // Convert to lowercase for case-insensitive comparison
-        const normalizedText = weight.toLowerCase().trim();
-        // First check if it's already a valid number
-        const numericWeight = parseInt(normalizedText);
-        if (!isNaN(numericWeight)) {
-            return numericWeight;
-        }
-        // Map common weight names to their numeric values
-        switch (normalizedText) {
-            case 'thin':
-                return 100;
-            case 'hairline':
-                return 100;
-            case 'extra light':
-            case 'extralight':
-            case 'ultra light':
-            case 'ultralight':
-                return 200;
-            case 'light':
-                return 300;
-            case 'normal':
-            case 'regular':
-            case 'book':
-                return 400;
-            case 'medium':
-                return 500;
-            case 'semi bold':
-            case 'semibold':
-            case 'demi bold':
-            case 'demibold':
-                return 600;
-            case 'bold':
-                return 700;
-            case 'extra bold':
-            case 'extrabold':
-            case 'ultra bold':
-            case 'ultrabold':
-                return 800;
-            case 'black':
-            case 'heavy':
-                return 900;
-            default:
-                // Default to normal weight (400) if the value is not recognized
-                return 400;
-        }
     }
     static stringTokenValueToCSS(value, allTokens, options) {
         const reference = (0, TokenHelper_1.sureOptionalReference)(value.referencedTokenId, allTokens, options.allowReferences);
@@ -253,7 +257,7 @@ class CSSHelper {
             fontFamily: fontFamilyReference ? options.tokenToVariableRef(fontFamilyReference) : typography.fontFamily.text,
             fontWeight: fontWeightReference
                 ? options.tokenToVariableRef(fontWeightReference)
-                : this.normalizeTextWeight(typography.fontWeight.text),
+                : (0, TokenHelper_1.normalizeTextWeight)(typography.fontWeight.text),
             textDecoration: decorationReference
                 ? options.tokenToVariableRef(decorationReference)
                 : typography.textDecoration.value === sdk_exporters_1.TextDecoration.original

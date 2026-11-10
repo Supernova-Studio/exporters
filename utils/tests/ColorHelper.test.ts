@@ -230,6 +230,26 @@ test('formattedColor_hsl handles various color cases', () => {
   expect(ColorHelper.formattedColor(blueMaxColor, ColorFormat.hsl, testDecimals)).toMatch(/^hsl\(\d+%, \d+%, \d+%\)$/)
 })
 
+test('formattedColor_hsl converts #6A6661 to hsl(33%, 4%, 40%)', () => {
+  // #6A6661 = RGB(106, 102, 97)
+  const testColor: ColorTokenValue = {
+    color: {
+      r: 106,
+      g: 102,
+      b: 97,
+      referencedTokenId: null
+    },
+    opacity: {
+      measure: 1,
+      referencedTokenId: null,
+      unit: Unit.raw
+    },
+    referencedTokenId: null
+  }
+
+  expect(ColorHelper.formattedColor(testColor, ColorFormat.hsl, testDecimals)).toBe('hsl(33%, 4%, 40%)')
+})
+
 test('formattedColor handles fractional RGB values', () => {
   const fractionalColor: ColorTokenValue = {
     color: {

@@ -15,3 +15,53 @@ export function sureOptionalReference(
   }
   return token
 }
+
+export function normalizeTextWeight(weight: string): number {
+    // Convert to lowercase for case-insensitive comparison
+    const normalizedText = weight.toLowerCase().trim()
+
+    // First, check if it's already a valid number
+    const numericWeight = parseInt(normalizedText)
+    if (!isNaN(numericWeight)) {
+      return numericWeight
+    }
+
+    // Map common weight names to their numeric values
+    switch (normalizedText) {
+      case "thin":
+        return 100
+      case "hairline":
+        return 100
+      case "extra light":
+      case "extralight":
+      case "ultra light":
+      case "ultralight":
+        return 200
+      case "light":
+        return 300
+      case "normal":
+      case "regular":
+      case "book":
+        return 400
+      case "medium":
+        return 500
+      case "semi bold":
+      case "semibold":
+      case "demi bold":
+      case "demibold":
+        return 600
+      case "bold":
+        return 700
+      case "extra bold":
+      case "extrabold":
+      case "ultra bold":
+      case "ultrabold":
+        return 800
+      case "black":
+      case "heavy":
+        return 900
+      default:
+        // Default to normal weight (400) if the value is not recognized
+        return 400
+    }
+  }

@@ -5,7 +5,7 @@
     "author": "Supernova.io",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
-    "version": "2.1.1",
+    "version": "2.1.4",
     "usesBrands": true,
     "usesThemes": true,
     "executable": "/dist/build.js",
@@ -17,7 +17,6 @@
         "React",
         "Vue",
         "Styled Components",
-        "Emotion",
-        "New"
+        "Emotion"
     ]
 }

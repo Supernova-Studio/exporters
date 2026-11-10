@@ -79,7 +79,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
           // Generate folder index files independently of root index file
           if (exportConfiguration.generateFolderIndexFiles) {
-            files.push(folderIndexOutputFile(themedTokens, themePath))
+            files.push(folderIndexOutputFile(themedTokens, themePath, theme))
           }
 
           return files

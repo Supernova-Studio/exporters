@@ -42,9 +42,7 @@ export function tokenObjectKeyName(
     token,
     exportConfiguration.tokenNameStyle,
     parentGroup ?? null,
-    prefix,
-    collectionName,
-    exportConfiguration.globalNamePrefix
+    [exportConfiguration.globalNamePrefix, prefix, collectionName].filter(Boolean).join('-')
   )
 }
 

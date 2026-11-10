@@ -82,4 +82,6 @@ export type ExporterConfiguration = {
   propertyToWriteNameTo: string
   /** If enabled, the resulting written properties will be encapsulated in var() syntax for easier copying */
   propertyToWriteNameToIncludesVar: boolean
+  /** When enabled, references will include fallback values as raw token values to handle cases when referenced variables are not loaded */
+  useFallbackValues: boolean
 }

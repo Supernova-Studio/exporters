@@ -1,5 +1,5 @@
 import { FileHelper, GeneralHelper, ThemeHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenType } from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
 
@@ -20,7 +20,11 @@ import { DEFAULT_STYLE_FILE_NAMES } from "../constants/defaults"
  * @param themePath - Path where the index file should be generated
  * @returns OutputTextFile with the generated index content
  */
-export function folderIndexOutputFile(tokens: Array<Token>, themePath: string): OutputTextFile {
+export function folderIndexOutputFile(
+  tokens: Array<Token>,
+  themePath: string,
+  theme?: TokenTheme,
+): OutputTextFile {
   // Group all tokens by their type (Color, Typography, etc.) for efficient processing
   // This creates a map where each type points to an array of its tokens
   const tokensByType = tokens.reduce((acc, token) => {
@@ -37,10 +41,20 @@ export function folderIndexOutputFile(tokens: Array<Token>, themePath: string): 
   const imports: string[] = []
   const exports: string[] = []
 
+  // When generating a themed folder index AND only-themed-tokens is enabled, peer
+  // themed files only exist for types with overrides. Skip imports for types whose
+  // peer file won't be generated — otherwise the index references non-existent paths.
+  const isOverrideOnlyThemedFolder = !!theme && exportConfiguration.exportOnlyThemedTokens
+
   // Process each token type that has tokens
   Object.entries(tokensByType).forEach(([type, typeTokens]) => {
     // Skip empty token types to keep the generated file clean
     if (typeTokens.length === 0) return
+
+    // Skip types with no peer themed file generated for this theme
+    if (isOverrideOnlyThemedFolder && !ThemeHelper.hasThemedTokens(tokens, type as TokenType, theme!)) {
+      return
+    }
 
     // Get the correct filename for this token type, respecting custom file names if configured
     const fileName = exportConfiguration.customizeStyleFileNames

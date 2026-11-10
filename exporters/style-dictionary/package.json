@@ -1,7 +1,7 @@
 {
-  "name": "@supernovaio/exporter-css-in-js",
-  "version": "2.0.0",
-  "description": "Export your design system tokens into CSS in JS variables and definitions using Supernova.io export engine",
+  "name": "@supernovaio/exporter-style-dictionary",
+  "version": "2.5.0",
+  "description": "Export your design system tokens into Style Dictionary format using Supernova.io export engine",
   "main": "index.js",
   "scripts": {
     "dev": "npx webpack --mode=development --watch",
@@ -13,18 +13,18 @@
     "@supernovaio/export-utils": "file:../../utils"
   },
   "peerDependencies": {
-    "@supernovaio/sdk-exporters": "2.0.32"
+    "@supernovaio/sdk-exporters": "2.3.3"
   },
   "devDependencies": {
-    "@supernovaio/sdk-exporters": "2.0.32",
+    "@supernovaio/sdk-exporters": "2.3.3",
     "prettier": "3.0.3",
-    "terser-webpack-plugin": "5.3.9",
+    "terser-webpack-plugin": "5.4.0",
     "ts-loader": "^7.0.5",
     "typescript": "^5.2.2",
-    "webpack": "5.98.0",
+    "webpack": "5.105.4",
     "webpack-cli": "6.0.1"
   },
   "resolutions": {
-    "@supernovaio/sdk-exporters": "2.0.32"
+    "@supernovaio/sdk-exporters": "2.3.3"
   }
 }

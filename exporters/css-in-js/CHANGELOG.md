@@ -1,6 +1,12 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
+## 2.1.4 - 2026-05-05
+
+### 🐞 Fixed
+
+Fixed invalid TypeScript output when "Export only themed tokens" is enabled — themed files now correctly import or inline references to non-overridden tokens instead of emitting undefined identifiers.
+
 ## 2.1.0 - 2025-03-12
 
 ### 🚀 New
