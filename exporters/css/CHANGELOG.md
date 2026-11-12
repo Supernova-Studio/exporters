@@ -1,6 +1,11 @@
 ### CSS exporter release notes
 All the updates to this exporter are documented in this file.
 
+## 3.5.1 - 2026-11-09
+
+### 🐞 Fixed
+- Border and gradient tokens whose color references a color token now use that color's variable, for example `1px solid var(--color-border-active)`. They were written as `rgba(var(--color-border-active), 1)`, which is not valid CSS. With references off they are written as the raw color. A border or stop whose color a shadow also uses changes from `rgba(var(--rgb-…), …)` to `var(--color-…)`; in the rgb, hashHex6 and hsl formats the color variable has no transparency, so these borders and stops are now opaque, like the color token itself.
+
 ## 3.3.0 - 2025-01-XX
 
 ### ✨ Added

@@ -25,6 +25,10 @@ export declare class CSSHelper {
      * Helper function to handle color with custom opacity, using channel-based utilities when available
      */
     private static handleColorWithCustomOpacity;
+    /** The color token that a color references, when the color adds its own opacity on top of it */
+    private static referencedColorTokenWithCustomOpacity;
+    /** IDs of the color tokens that shadow layers use with their own opacity, so they need a channels variable */
+    static shadowColorTokenIdsNeedingChannels(tokens: Array<Token>): Set<string>;
     static tokenToCSS(token: Token, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static colorTokenValueToCSS(color: ColorTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static borderTokenValueToCSS(border: BorderTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;

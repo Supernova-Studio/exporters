@@ -80,6 +80,10 @@ With `useFallbackValues: true`, the output would include fallback values:
 }
 ```
 
+## Colors with their own opacity
+
+A shadow layer can add its own opacity on top of the color it references. `rgba()` cannot take a full color such as `var(--color-…)`, so the exporter also writes that color's channels as `--rgb-…` and uses them in `rgba()`. Borders and gradient stops use the color variable directly, for example `1px solid var(--color-border-active)`.
+
 ## Configuration options
 
 Here is a list of all the configuration options this exporter provides:

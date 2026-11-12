@@ -1,7 +1,7 @@
-import { FileHelper, ThemeHelper, FileNameHelper, GeneralHelper } from "@supernovaio/export-utils"
+import { FileHelper, ThemeHelper, FileNameHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken, analyzeTokensForRgbUtilities } from "../content/token"
+import { convertedToken } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
@@ -84,7 +84,7 @@ export function styleOutputFile(
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
   // Analyze tokens to identify which color tokens need RGB utilities
-  const colorTokensNeedingRgb = analyzeTokensForRgbUtilities(tokens, tokenGroups, tokenCollections)
+  const colorTokensNeedingRgb = CSSHelper.shadowColorTokenIdsNeedingChannels(tokens)
   
   // Convert tokens to CSS variable declarations
   const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb)).join("\n")
@@ -156,7 +156,7 @@ function generateCombinedStyleFile(
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
   // Analyze tokens to identify which color tokens need RGB utilities
-  const colorTokensNeedingRgb = analyzeTokensForRgbUtilities(tokens, tokenGroups, tokenCollections)
+  const colorTokensNeedingRgb = CSSHelper.shadowColorTokenIdsNeedingChannels(tokens)
   
   // Convert all tokens to CSS variable declarations
   const cssVariables = processedTokens

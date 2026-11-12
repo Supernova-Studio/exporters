@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-11-09
+- Border tokens whose color references a color token now use that color's variable instead of the invalid `oklch(var(--color-…) / 1)`.
+
 ## [1.1.1] - 2025-09-10
 - Fix spacing token output: generate `--spacing-*` instead of `--size-*` for sizing. Thanks @mickaelnijean for contribution!
 

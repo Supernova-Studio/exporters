@@ -374,59 +374,6 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 }
 
 /**
- * Analyzes tokens to identify which color tokens need OKLCH utility variables.
- * A color token needs an OKLCH utility if it's referenced by shadow, border, or gradient tokens
- * that have custom opacity values.
- * 
- * @param tokens - Array of all tokens
- * @param tokenGroups - Array of token groups for determining token hierarchy
- * @returns Set of color token IDs that need OKLCH utility versions
- */
-export function analyzeTokensForOklchUtilities(
-  tokens: Array<Token>,
-  tokenGroups: Array<TokenGroup>
-): Set<string> {
-  const colorTokensNeedingOklch = new Set<string>()
-  const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
-
-  tokens.forEach((token) => {
-    if (token.tokenType === TokenType.shadow) {
-      const shadowToken = token as any
-      shadowToken.value.forEach((shadowLayer: any) => {
-        if (shadowLayer.opacity && shadowLayer.color.referencedTokenId) {
-          const referencedColorToken = mappedTokens.get(shadowLayer.color.referencedTokenId)
-          if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-            colorTokensNeedingOklch.add(referencedColorToken.id)
-          }
-        }
-      })
-    } else if (token.tokenType === TokenType.border) {
-      const borderToken = token as any
-      if (borderToken.value.opacity && borderToken.value.color.referencedTokenId) {
-        const referencedColorToken = mappedTokens.get(borderToken.value.color.referencedTokenId)
-        if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-          colorTokensNeedingOklch.add(referencedColorToken.id)
-        }
-      }
-    } else if (token.tokenType === TokenType.gradient) {
-      const gradientToken = token as any
-      gradientToken.value.forEach((gradientLayer: any) => {
-        gradientLayer.stops.forEach((stop: any) => {
-          if (stop.opacity && stop.color.referencedTokenId) {
-            const referencedColorToken = mappedTokens.get(stop.color.referencedTokenId)
-            if (referencedColorToken && referencedColorToken.tokenType === TokenType.color) {
-              colorTokensNeedingOklch.add(referencedColorToken.id)
-            }
-          }
-        })
-      })
-    }
-  })
-
-  return colorTokensNeedingOklch
-}
-
-/**
  * Gets the OKLCH value (L C H, no alpha) for a color token.
  * @param token - The color token
  * @returns OKLCH value string (e.g., "0.627 0.15 29.23")

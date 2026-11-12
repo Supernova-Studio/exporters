@@ -1,6 +1,12 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
+## 2.1.5 - 2026-11-09
+
+### 🐞 Fixed
+
+Border and gradient tokens whose color references a color token now use that token directly instead of the invalid `rgba(${…}, 1)`.
+
 ## 2.1.4 - 2026-05-05
 
 ### 🐞 Fixed
