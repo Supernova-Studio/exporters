@@ -276,8 +276,9 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         return null
     }
 
-    // Colors that other colors use with their own opacity get channel variables. They are found among all tokens, not
-    // only the ones this file writes, so a theme file with only themed tokens still writes the channels of its theme
+    // Colors that other colors use with their own opacity get channel variables. They are found among all tokens of the
+    // types Tailwind writes, not only the ones this file writes, so a theme file with only themed tokens still writes the
+    // channels of its theme
     const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens.filter((token) => isAllowedTokenType(token.tokenType)), exportConfiguration.useReferences)
 
     // Start with Tailwind import with prefix if configured, but only for base file

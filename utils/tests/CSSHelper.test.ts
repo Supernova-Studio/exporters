@@ -809,7 +809,7 @@ import {
       ).toBe('3px 4px 5px 6px oklch(var(--oklch-shadowColor) / 0.08)')
     })
 
-    test('shadow with its own opacity uses the resolved color when references are off', () => {
+    test('shadow with its own opacity is the resolved color when references are off', () => {
       expect(CSSHelper.shadowTokenValueToCSS([shadow], allTokens, { ...channelOptions, allowReferences: false })).toBe(
         '3px 4px 5px 6px #00000014'
       )
@@ -865,8 +865,8 @@ import {
     })
 
     test('channel values have no alpha, in RGB and OKLCH', () => {
-      expect(CSSHelper.colorChannels(brand.value, ColorFormat.smartHashHex)).toBe('49, 92, 253')
-      expect(CSSHelper.colorChannels(stopA.value, ColorFormat.smartOklch)).toBe('62.8% 0.258 29.23')
+      expect(CSSHelper.colorChannels(brand40.value, ColorFormat.smartHashHex)).toBe('49, 92, 253')
+      expect(CSSHelper.colorChannels(ownOpacity(stopA, 0.3), ColorFormat.smartOklch)).toBe('62.8% 0.258 29.23')
     })
 
     test('colors used with their own opacity need channels', () => {
