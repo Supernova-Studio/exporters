@@ -83,7 +83,6 @@ export function styleOutputFile(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
-  // Analyze tokens to identify which color tokens need channel variables
   const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
   
   // Convert tokens to CSS variable declarations
@@ -160,7 +159,6 @@ function generateCombinedStyleFile(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
-  // Analyze tokens to identify which color tokens need channel variables
   const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
   
   // Convert all tokens to CSS variable declarations
@@ -194,9 +192,9 @@ function generateCombinedStyleFile(
 }
 
 /**
- * Channel variables of the colors a file leaves out, so nothing for a file that writes every color. A theme file with
- * only themed tokens still writes them with the theme's values, because a color can change in a theme through an alias
- * or a color it references
+ * Channel variables of the colors that need one but are not among the tokens this file writes. A theme file with only
+ * themed tokens still writes them with the theme's values, because a color can change in a theme through an alias or
+ * a color it references
  */
 function missingChannelVariables(
   colorTokenIds: Set<string>,
