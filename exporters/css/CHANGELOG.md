@@ -1,7 +1,7 @@
 ### CSS exporter release notes
 All the updates to this exporter are documented in this file.
 
-## 3.5.2 - 2026-11-16
+## 3.6.0 - 2026-11-16
 
 ### 🐞 Fixed
 - Colors that reference another color with their own opacity, shown in Supernova as "Brand / 40%", now export as `rgba(var(--rgb-color-brand), 0.4)`, or `oklch(var(--oklch-color-brand) / 0.4)` in the OKLCH formats. They were the invalid `rgba(var(--color-brand), 0.4)` in the RGB formats and a fixed value in the others. An own opacity that references an opacity token uses its variable. With references off they are written as the resolved color.

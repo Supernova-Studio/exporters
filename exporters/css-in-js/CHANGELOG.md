@@ -1,7 +1,7 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
-## 2.1.6 - 2026-11-16
+## 2.2.0 - 2026-11-16
 
 ### 🐞 Fixed
 
