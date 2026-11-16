@@ -106,10 +106,11 @@ export function convertedToken(
       const variableName = tokenVariableName(t, tokenGroups, collections)
       
       if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels?.has(t.id)) {
+        const channelVariable = `--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${variableName}`
         if (exportConfiguration.useFallbackValues) {
-          return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${variableName}, ${colorTokenChannels(t)})`
+          return `var(${channelVariable}, ${colorTokenChannels(t)})`
         }
-        return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${variableName})`
+        return `var(${channelVariable})`
       }
       
       if (exportConfiguration.useFallbackValues) {
