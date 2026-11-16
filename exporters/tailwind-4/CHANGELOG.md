@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2026-11-16
+- Colors that reference another color with their own opacity now export as `oklch(var(--oklch-color-brand) / 0.4)`, or `rgba(var(--rgb-color-brand), 0.4)` in the hex, RGB and HSL formats. They were the invalid `rgba(var(--color-brand), 0.4)` in the RGB formats and a fixed value in the others.
+- `--oklch-…` keeps the `%` on lightness, so shadows with their own opacity show the right color, and the hex, RGB and HSL formats use `--rgb-…` instead of the invalid `rgba(var(--oklch-…), …)`.
+- Separate files per type and theme files write the channel variables they use, and shadows use the raw color with references off.
+
 ## [1.2.1] - 2026-11-09
 - Border tokens whose color references a color token now use that color's variable instead of the invalid `oklch(var(--color-…) / 1)`.
 

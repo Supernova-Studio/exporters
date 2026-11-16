@@ -50,6 +50,8 @@ import {
   remBase?: number
   /** Optional transformer for CSS values based on token type and value */
   valueTransformer?: (value: string, token: Token) => string | undefined
+  /** The exporter writes channel variables (`--rgb-*`, or `--oklch-*` in the OKLCH formats) for the ids in `colorTokenIdsNeedingChannels`. Without it, a color with its own opacity on a referenced color is written as the resolved color */
+  writesColorChannels?: boolean
 }
 
   /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
@@ -64,19 +66,8 @@ export class CSSHelper {
     options: TokenToCSSOptions
   ): string {
     const referencedColorToken = this.referencedColorTokenWithCustomOpacity(color, customOpacity, allTokens)
-    if (referencedColorToken) {
-      const channelVariableName = options.tokenToVariableRef(referencedColorToken, { needsRgb: true })
-      const alphaValue = ColorHelper.roundToDecimals(customOpacity.measure, options.decimals)
-      
-      // Use the appropriate function based on color format
-      if (options.colorFormat === ColorFormat.oklch || 
-          options.colorFormat === ColorFormat.oklcha || 
-          options.colorFormat === ColorFormat.smartOklch) {
-        return `oklch(${channelVariableName} / ${alphaValue})`
-      } else {
-        // Default to rgba for other formats (rgb, rgba, smartRgba, etc.)
-        return `rgba(${channelVariableName}, ${alphaValue})`
-      }
+    if (referencedColorToken && options.allowReferences) {
+      return this.colorWithOwnOpacity({ ...color, opacity: customOpacity }, referencedColorToken, null, options)
     }
     
     // Fallback to normal color processing
@@ -88,6 +79,44 @@ export class CSSHelper {
       allTokens,
       options
     )
+  }
+
+  /** Whether the format writes `oklch()` with `--oklch-*` channel variables, rather than `rgba()` with `--rgb-*` */
+  static usesOklchChannels(format: ColorFormat): boolean {
+    return format === ColorFormat.oklch || format === ColorFormat.oklcha || format === ColorFormat.smartOklch
+  }
+
+  /** The value of a channel variable: `r, g, b`, or `L% C H` in the OKLCH formats */
+  static colorChannels(color: ColorTokenValue, format: ColorFormat): string {
+    const rgb = { r: Math.round(color.color.r), g: Math.round(color.color.g), b: Math.round(color.color.b) }
+    if (this.usesOklchChannels(format)) {
+      // "oklch(62.8% 0.258 29.23)" without the function
+      return ColorHelper.colorToOklch(ColorFormat.oklch, rgb, 1, 3).slice('oklch('.length, -1)
+    }
+    return `${rgb.r}, ${rgb.g}, ${rgb.b}`
+  }
+
+  /** A color that takes its RGB from another color and adds its own opacity, as the source's channel variable with that opacity, or as the resolved color when the exporter writes no channel variables */
+  private static colorWithOwnOpacity(
+    color: ColorTokenValue,
+    sourceToken: Token,
+    opacityToken: Token | null,
+    options: TokenToCSSOptions
+  ): string {
+    if (!options.writesColorChannels) {
+      return ColorHelper.formattedColor(color, options.colorFormat, options.decimals)
+    }
+    const channels = options.tokenToVariableRef(sourceToken, { needsRgb: true })
+    const alpha =
+      opacityToken?.tokenType === TokenType.opacity
+        ? options.tokenToVariableRef(opacityToken)
+        : ColorHelper.roundToDecimals(color.opacity.measure, options.decimals)
+    return this.usesOklchChannels(options.colorFormat) ? `oklch(${channels} / ${alpha})` : `rgba(${channels}, ${alpha})`
+  }
+
+  /** The color whose RGB a color takes, when only its color part is a reference and the opacity is its own */
+  private static ownOpacitySourceId(color: ColorTokenValue): string | null {
+    return !color.referencedTokenId && color.color.referencedTokenId ? color.color.referencedTokenId : null
   }
 
   /** The color token that a color references, when the color adds its own opacity on top of it */
@@ -103,19 +132,42 @@ export class CSSHelper {
     return referencedToken?.tokenType === TokenType.color ? referencedToken : undefined
   }
 
-  /** IDs of the color tokens that shadow layers use with their own opacity, so they need a channels variable */
-  static shadowColorTokenIdsNeedingChannels(tokens: Array<Token>): Set<string> {
-    const allTokens = new Map(tokens.map((token) => [token.id, token]))
+  /** IDs of the color tokens that other colors use with their own opacity, so they need a channels variable. Empty when references are off */
+  static colorTokenIdsNeedingChannels(tokens: Array<Token>, allowReferences: boolean): Set<string> {
     const colorTokenIds = new Set<string>()
-    for (const token of tokens) {
-      if (token.tokenType !== TokenType.shadow) {
-        continue
+    if (!allowReferences) {
+      return colorTokenIds
+    }
+    const allTokens = new Map(tokens.map((token) => [token.id, token]))
+    const addSource = (color: ColorTokenValue) => {
+      const sourceId = this.ownOpacitySourceId(color)
+      if (sourceId) {
+        colorTokenIds.add(sourceId)
       }
-      for (const layer of (token as ShadowToken).value) {
-        const colorToken = this.referencedColorTokenWithCustomOpacity(layer.color, layer.opacity, allTokens)
-        if (colorToken) {
-          colorTokenIds.add(colorToken.id)
-        }
+    }
+    for (const token of tokens) {
+      switch (token.tokenType) {
+        case TokenType.color:
+          addSource((token as ColorToken).value)
+          break
+        case TokenType.border:
+          addSource((token as BorderToken).value.color)
+          break
+        case TokenType.gradient:
+          for (const layer of (token as GradientToken).value) {
+            layer.stops.forEach((stop) => addSource(stop.color))
+          }
+          break
+        case TokenType.shadow:
+          for (const layer of (token as ShadowToken).value) {
+            const colorToken = this.referencedColorTokenWithCustomOpacity(layer.color, layer.opacity, allTokens)
+            if (colorToken) {
+              colorTokenIds.add(colorToken.id)
+            } else {
+              addSource(layer.color)
+            }
+          }
+          break
       }
     }
     return colorTokenIds
@@ -194,6 +246,11 @@ export class CSSHelper {
       allTokens: Map<string, Token>,
       options: TokenToCSSOptions
     ): string {
+      const source = sureOptionalReference(this.ownOpacitySourceId(color), allTokens, options.allowReferences)
+      if (source) {
+        const opacityToken = sureOptionalReference(color.opacity.referencedTokenId, allTokens, options.allowReferences)
+        return this.colorWithOwnOpacity(color, source, opacityToken, options)
+      }
       return ColorHelper.formattedColorOrVariableName(color, allTokens, options)
     }
 

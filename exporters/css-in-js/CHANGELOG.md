@@ -1,6 +1,12 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
+## 2.1.6 - 2026-11-16
+
+### 🐞 Fixed
+
+Colors that reference another color with their own opacity, and shadows with their own opacity, export as the resolved color, for example `'#ff000066'`, instead of the invalid `rgba(${…}, 0.4)`.
+
 ## 2.1.5 - 2026-11-09
 
 ### 🐞 Fixed

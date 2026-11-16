@@ -5,6 +5,7 @@ import { ThemeExportStyle, TokenSortOrder, ExporterConfiguration } from "../conf
 import {
   tokenGroups,
   allTokens,
+  colorPrimary,
   tokensWithDarkApplied,
   tokensWithDarkShadowOnlyApplied,
   darkTheme,
@@ -174,5 +175,24 @@ describe("styleOutputFile — bucket dispatch for themed files", () => {
     expect(content).toMatch(/const colorTertiary = colorPrimary;/)
     // No imports for a base-only color file (no cross-type refs)
     expect(content).not.toMatch(/^import /m)
+  })
+
+  test("11. A color with its own opacity on a referenced color is the resolved color", () => {
+    // SDK 2.6.1 shape: the color part references c-primary, the opacity is the token's own
+    const primary40 = {
+      ...colorPrimary,
+      id: "c-primary-40",
+      idInVersion: "c-primary-40",
+      name: "Primary 40",
+      value: {
+        color: { ...colorPrimary.value.color, referencedTokenId: "c-primary" },
+        opacity: { ...colorPrimary.value.opacity, measure: 0.4 },
+        referencedTokenId: null,
+      },
+    }
+    setConfig({ colorFormat: ColorFormat.rgba })
+    const file = styleOutputFile(TokenType.color, [...allTokens, primary40], tokenGroups)
+    expect(file!.content).toContain("const colorPrimary40 = 'rgba(255, 255, 255, 0.4)';")
+    expect(file!.content).not.toContain("${")
   })
 })

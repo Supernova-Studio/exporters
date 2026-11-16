@@ -1,6 +1,6 @@
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-utils"
-import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { ColorToken, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
 import { TokenNameStructure } from "../../config"
@@ -37,56 +37,41 @@ export function getTokenRawValue(
   })
 }
 
-/**
- * Converts a color token to its raw RGB values without following references.
- * This is used to generate fallback values for RGB utility variables.
- * 
- * @param token - The color token to convert to RGB values
- * @returns RGB values string (e.g., "16, 79, 198")
- */
-export function getColorTokenRgbValue(token: Token): string {
-  if (token.tokenType !== TokenType.color) {
-    throw new Error(`Expected color token, got ${token.tokenType}`)
-  }
-  
-  const colorValue = (token as any).value
-  const r = Math.round(colorValue.color.r)
-  const g = Math.round(colorValue.color.g)
-  const b = Math.round(colorValue.color.b)
-  
-  return `${r}, ${g}, ${b}`
+/** Prefix of the channel variables, `rgb` or `oklch` in the OKLCH formats */
+function channelPrefix(): string {
+  return CSSHelper.usesOklchChannels(exportConfiguration.colorFormat) ? "oklch" : "rgb"
+}
+
+/** The channels of a color token without alpha, e.g. "16, 79, 198", or "52.4% 0.25 265.1" in the OKLCH formats */
+function colorTokenChannels(token: Token): string {
+  return CSSHelper.colorChannels((token as ColorToken).value, exportConfiguration.colorFormat)
 }
 
 /**
- * Generates an RGB utility variable for a color token.
- * This creates a CSS variable containing only the RGB values (no alpha) for use with custom opacity.
+ * Generates the channel variable of a color token (`--rgb-…`, or `--oklch-…` in the OKLCH formats).
+ * It holds only the channels (no alpha), for colors that add their own opacity on top of this color.
  * 
- * @param token - The color token to generate RGB utility for
+ * @param token - The color token to generate the channel variable for
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @param collections - Array of collections for resolving collection names
- * @returns Formatted CSS custom property string for the RGB utility variable
+ * @returns Formatted CSS custom property string for the channel variable
  */
-export function generateRgbUtilityVariable(
+export function generateChannelVariable(
   token: Token,
   tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection> = []
 ): string {
   const name = tokenVariableName(token, tokenGroups, collections)
-  const rgbName = `rgb-${name}`
-  
-  // Extract RGB values from the color token
-  const colorValue = (token as any).value
-  const r = Math.round(colorValue.color.r)
-  const g = Math.round(colorValue.color.g)
-  const b = Math.round(colorValue.color.b)
+  const prefix = channelPrefix()
+  const declaration = `--${prefix}-${name}: ${colorTokenChannels(token)};`
   
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   
   // Add description comment if enabled and description exists
   if (exportConfiguration.showDescriptions && token.description) {
-    return `${indentString}/* RGB utility for ${token.description.trim()} */\n${indentString}--${rgbName}: ${r}, ${g}, ${b};`
+    return `${indentString}/* ${prefix.toUpperCase()} utility for ${token.description.trim()} */\n${indentString}${declaration}`
   } else {
-    return `${indentString}--${rgbName}: ${r}, ${g}, ${b};`
+    return `${indentString}${declaration}`
   }
 }
 
@@ -98,7 +83,7 @@ export function generateRgbUtilityVariable(
  * @param mappedTokens - Map of all tokens for resolving references
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @param collections - Array of collections for resolving collection names
- * @param colorTokensNeedingRgb - Set of color token IDs that need RGB utility versions
+ * @param colorTokensNeedingRgb - Set of color token IDs that need a channel variable
  * @returns Formatted CSS custom property string with optional description comment and RGB utilities
  */
 export function convertedToken(
@@ -118,18 +103,18 @@ export function convertedToken(
     colorFormat: exportConfiguration.colorFormat,
     forceRemUnit: exportConfiguration.forceRemUnit,
     remBase: exportConfiguration.remBase,
+    writesColorChannels: true,
     // Custom handler for token references - converts them to CSS var() syntax
-    // When context.needsRgb is true, returns RGB utility variable for color tokens
+    // When context.needsRgb is true, returns the channel variable for color tokens
     // When useFallbackValues is enabled, includes raw token value as fallback
     tokenToVariableRef: (t, context) => {
       const variableName = tokenVariableName(t, tokenGroups, collections)
       
       if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingRgb?.has(t.id)) {
         if (exportConfiguration.useFallbackValues) {
-          const rgbValue = getColorTokenRgbValue(t)
-          return `var(--rgb-${variableName}, ${rgbValue})`
+          return `var(--${channelPrefix()}-${variableName}, ${colorTokenChannels(t)})`
         }
-        return `var(--rgb-${variableName})`
+        return `var(--${channelPrefix()}-${variableName})`
       }
       
       if (exportConfiguration.useFallbackValues) {
@@ -151,9 +136,9 @@ export function convertedToken(
   // Add the main token variable
   output += `${indentString}--${name}: ${value};`
   
-  // Generate RGB utility variable if this color token needs one
+  // Generate the channel variable if this color token needs one
   if (token.tokenType === TokenType.color && colorTokensNeedingRgb?.has(token.id)) {
-    output += `\n${generateRgbUtilityVariable(token, tokenGroups, collections)}`
+    output += `\n${generateChannelVariable(token, tokenGroups, collections)}`
   }
   
   return output
