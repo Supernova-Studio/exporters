@@ -185,7 +185,7 @@ function generateTypographyContent(tokens: Array<Token>, tokenGroups: Array<Toke
  * @param tokens - Array of tokens to process
  * @param mappedTokens - Map of tokens by ID for reference resolution
  * @param tokenGroups - Array of token groups
- * @param colorTokensNeedingOklch - Set of token IDs that need OKLCH utility variables
+ * @param colorTokensNeedingChannels - Set of color token IDs that need a channel variable
  * @param type - Specific token type (if applicable)
  * @returns CSS variable declarations as a string
  */
@@ -193,7 +193,7 @@ function generateCSSVariables(
     tokens: Array<Token>, 
     mappedTokens: Map<string, Token>, 
     tokenGroups: Array<TokenGroup>,
-    colorTokensNeedingOklch?: Set<string>,
+    colorTokensNeedingChannels?: Set<string>,
     type?: TokenType
 ): string {
     const indentString = GeneralHelper.indent(exportConfiguration.indent)
@@ -225,7 +225,7 @@ function generateCSSVariables(
         
         // Convert tokens to CSS variable declarations
         const cssDeclarations = tokensOfType
-            .map((token) => convertedToken(token, mappedTokens, tokenGroups, colorTokensNeedingOklch))
+            .map((token) => convertedToken(token, mappedTokens, tokenGroups, colorTokensNeedingChannels))
             .filter((declaration): declaration is string => declaration !== null) // Filter out null returns
             .join("\n")
         
@@ -278,7 +278,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
     // Colors that other colors use with their own opacity get channel variables. They come from all tokens with this
     // file's values, so a theme file with only themed tokens still writes the channels that change in its theme
-    const colorTokensNeedingOklch = CSSHelper.colorTokenIdsNeedingChannels(tokens.filter((token) => isAllowedTokenType(token.tokenType)), exportConfiguration.useReferences)
+    const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens.filter((token) => isAllowedTokenType(token.tokenType)), exportConfiguration.useReferences)
 
     // Start with Tailwind import with prefix if configured, but only for base file
     let content = ''
@@ -307,8 +307,8 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         cssVariables += generateResetRules(selector)
     }
     // Prepend channel variables
-    cssVariables += channelVariables(colorTokensNeedingOklch, mappedTokens, tokenGroups)
-    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, colorTokensNeedingOklch)
+    cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups)
+    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, colorTokensNeedingChannels)
 
     // Check if any tokens use references and if references are enabled
     const hasReferences = exportConfiguration.useReferences && processedTokens.some(token => 

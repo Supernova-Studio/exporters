@@ -126,7 +126,7 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @returns Formatted CSS custom property string with optional description comment or null if token type is not allowed
  */
-export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingOklch?: Set<string>): string | null {
+export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels?: Set<string>): string | null {
   // Skip tokens that are not allowed for Tailwind customization
   if (!isAllowedTokenType(token.tokenType)) {
     return null;
@@ -164,8 +164,8 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
         });
       }
       // If context requests a channel-based color variable (needsRgb), use the channel variable
-      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingOklch?.has(t.id)) {
-        return `var(--${channelPrefix()}-${tokenVariableName(t, tokenGroups)})`
+      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels?.has(t.id)) {
+        return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${tokenVariableName(t, tokenGroups)})`
       }
       return `var(--${tokenVariableName(t, tokenGroups)})`
     },
@@ -372,11 +372,6 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
   return name;
 }
 
-/** Prefix of the channel variables, `oklch` in the OKLCH formats or `rgb` in the others */
-function channelPrefix(): string {
-  return CSSHelper.usesOklchChannels(exportConfiguration.colorFormat) ? "oklch" : "rgb"
-}
-
 /**
  * Generates the channel variable of a color token (`--oklch-…` in the OKLCH formats, `--rgb-…` in the others).
  * It holds only the channels (no alpha), for colors that add their own opacity on top of this color.
@@ -389,7 +384,7 @@ export function generateChannelVariable(
   token: Token,
   tokenGroups: Array<TokenGroup>
 ): string {
-  const prefix = channelPrefix()
+  const prefix = CSSHelper.channelPrefix(exportConfiguration.colorFormat)
   const declaration = `--${prefix}-${tokenVariableName(token, tokenGroups)}: ${CSSHelper.colorChannels((token as ColorToken).value, exportConfiguration.colorFormat)};`
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   if (exportConfiguration.showDescriptions && token.description) {

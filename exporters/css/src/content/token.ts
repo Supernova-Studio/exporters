@@ -37,11 +37,6 @@ export function getTokenRawValue(
   })
 }
 
-/** Prefix of the channel variables, `rgb` or `oklch` in the OKLCH formats */
-function channelPrefix(): string {
-  return CSSHelper.usesOklchChannels(exportConfiguration.colorFormat) ? "oklch" : "rgb"
-}
-
 /** The channels of a color token without alpha, e.g. "16, 79, 198", or "52.4% 0.25 265.1" in the OKLCH formats */
 function colorTokenChannels(token: Token): string {
   return CSSHelper.colorChannels((token as ColorToken).value, exportConfiguration.colorFormat)
@@ -62,7 +57,7 @@ export function generateChannelVariable(
   collections: Array<DesignSystemCollection> = []
 ): string {
   const name = tokenVariableName(token, tokenGroups, collections)
-  const prefix = channelPrefix()
+  const prefix = CSSHelper.channelPrefix(exportConfiguration.colorFormat)
   const declaration = `--${prefix}-${name}: ${colorTokenChannels(token)};`
   
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
@@ -83,15 +78,15 @@ export function generateChannelVariable(
  * @param mappedTokens - Map of all tokens for resolving references
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @param collections - Array of collections for resolving collection names
- * @param colorTokensNeedingRgb - Set of color token IDs that need a channel variable
- * @returns Formatted CSS custom property string with optional description comment and RGB utilities
+ * @param colorTokensNeedingChannels - Set of color token IDs that need a channel variable
+ * @returns Formatted CSS custom property string with optional description comment and channel variable
  */
 export function convertedToken(
   token: Token,
   mappedTokens: Map<string, Token>,
   tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection> = [],
-  colorTokensNeedingRgb?: Set<string>
+  colorTokensNeedingChannels?: Set<string>
 ): string {
   // Generate the CSS variable name based on token properties and configuration
   const name = tokenVariableName(token, tokenGroups, collections)
@@ -110,11 +105,11 @@ export function convertedToken(
     tokenToVariableRef: (t, context) => {
       const variableName = tokenVariableName(t, tokenGroups, collections)
       
-      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingRgb?.has(t.id)) {
+      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels?.has(t.id)) {
         if (exportConfiguration.useFallbackValues) {
-          return `var(--${channelPrefix()}-${variableName}, ${colorTokenChannels(t)})`
+          return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${variableName}, ${colorTokenChannels(t)})`
         }
-        return `var(--${channelPrefix()}-${variableName})`
+        return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${variableName})`
       }
       
       if (exportConfiguration.useFallbackValues) {
@@ -137,7 +132,7 @@ export function convertedToken(
   output += `${indentString}--${name}: ${value};`
   
   // Generate the channel variable if this color token needs one
-  if (token.tokenType === TokenType.color && colorTokensNeedingRgb?.has(token.id)) {
+  if (token.tokenType === TokenType.color && colorTokensNeedingChannels?.has(token.id)) {
     output += `\n${generateChannelVariable(token, tokenGroups, collections)}`
   }
   

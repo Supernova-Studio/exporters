@@ -81,15 +81,15 @@ export class CSSHelper {
     )
   }
 
-  /** Whether the format writes `oklch()` with `--oklch-*` channel variables, rather than `rgba()` with `--rgb-*` */
-  static usesOklchChannels(format: ColorFormat): boolean {
-    return format === ColorFormat.oklch || format === ColorFormat.oklcha || format === ColorFormat.smartOklch
+  /** Prefix of the channel variables: `oklch` in the OKLCH formats, which write `oklch()`, or `rgb` in the others, which write `rgba()` */
+  static channelPrefix(format: ColorFormat): "oklch" | "rgb" {
+    return format === ColorFormat.oklch || format === ColorFormat.oklcha || format === ColorFormat.smartOklch ? "oklch" : "rgb"
   }
 
   /** The value of a channel variable: `r, g, b`, or `L% C H` in the OKLCH formats */
   static colorChannels(color: ColorTokenValue, format: ColorFormat): string {
     const rgb = { r: Math.round(color.color.r), g: Math.round(color.color.g), b: Math.round(color.color.b) }
-    if (this.usesOklchChannels(format)) {
+    if (this.channelPrefix(format) === "oklch") {
       // "oklch(62.8% 0.258 29.23)" without the function
       return ColorHelper.colorToOklch(ColorFormat.oklch, rgb, 1, 3).slice('oklch('.length, -1)
     }
@@ -111,7 +111,7 @@ export class CSSHelper {
       opacityToken?.tokenType === TokenType.opacity
         ? options.tokenToVariableRef(opacityToken)
         : ColorHelper.roundToDecimals(color.opacity.measure, options.decimals)
-    return this.usesOklchChannels(options.colorFormat) ? `oklch(${channels} / ${alpha})` : `rgba(${channels}, ${alpha})`
+    return this.channelPrefix(options.colorFormat) === "oklch" ? `oklch(${channels} / ${alpha})` : `rgba(${channels}, ${alpha})`
   }
 
   /** The color whose RGB a color takes, when only its color part is a reference and the opacity is its own */

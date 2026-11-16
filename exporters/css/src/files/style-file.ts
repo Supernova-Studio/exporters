@@ -64,10 +64,9 @@ export function styleOutputFile(
 
   // Get all tokens matching the specified token type (colors, typography, etc.)
   let tokensOfType = tokens.filter((token) => token.tokenType === type)
-  const onlyThemedTokens = Boolean(themePath && theme && exportConfiguration.exportOnlyThemedTokens)
 
   // For theme files: filter tokens to only include those that are themed
-  if (onlyThemedTokens && theme) {
+  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
     tokensOfType = ThemeHelper.filterThemedTokens(tokensOfType, theme)
     
     // Skip generating theme file if no tokens are themed for this type
@@ -85,13 +84,13 @@ export function styleOutputFile(
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
   // Analyze tokens to identify which color tokens need channel variables
-  const colorTokensNeedingRgb = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
+  const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
   
   // Convert tokens to CSS variable declarations
   const cssVariables = [
-    ...tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb)),
-    ...(onlyThemedTokens && type === TokenType.color
-      ? missingChannelVariables(colorTokensNeedingRgb, tokensOfType, mappedTokens, tokenGroups, tokenCollections)
+    ...tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingChannels)),
+    ...(type === TokenType.color
+      ? missingChannelVariables(colorTokensNeedingChannels, tokensOfType, mappedTokens, tokenGroups, tokenCollections)
       : [])
   ].join("\n")
 
@@ -142,10 +141,9 @@ function generateCombinedStyleFile(
   tokenCollections: Array<DesignSystemCollection> = []
 ): OutputTextFile | null {
   let processedTokens = tokens
-  const onlyThemedTokens = Boolean(themePath && theme && exportConfiguration.exportOnlyThemedTokens)
 
   // For theme files: filter tokens to only include those that are themed
-  if (onlyThemedTokens && theme) {
+  if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
     processedTokens = ThemeHelper.filterThemedTokens(processedTokens, theme)
     
     // Skip generating theme file if no tokens are themed
@@ -163,14 +161,12 @@ function generateCombinedStyleFile(
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
   // Analyze tokens to identify which color tokens need channel variables
-  const colorTokensNeedingRgb = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
+  const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
   
   // Convert all tokens to CSS variable declarations
   const cssVariables = [
-    ...processedTokens.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb)),
-    ...(onlyThemedTokens
-      ? missingChannelVariables(colorTokensNeedingRgb, processedTokens, mappedTokens, tokenGroups, tokenCollections)
-      : [])
+    ...processedTokens.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingChannels)),
+    ...missingChannelVariables(colorTokensNeedingChannels, processedTokens, mappedTokens, tokenGroups, tokenCollections)
   ].join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
@@ -198,8 +194,9 @@ function generateCombinedStyleFile(
 }
 
 /**
- * Channel variables of the colors a theme file leaves out. A theme file with only themed tokens still writes them
- * with the theme's values, because a color can change in a theme through an alias or a color it references
+ * Channel variables of the colors a file leaves out, so nothing for a file that writes every color. A theme file with
+ * only themed tokens still writes them with the theme's values, because a color can change in a theme through an alias
+ * or a color it references
  */
 function missingChannelVariables(
   colorTokenIds: Set<string>,

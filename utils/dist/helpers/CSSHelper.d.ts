@@ -27,8 +27,8 @@ export declare class CSSHelper {
      * Helper function to handle color with custom opacity, using channel-based utilities when available
      */
     private static handleColorWithCustomOpacity;
-    /** Whether the format writes `oklch()` with `--oklch-*` channel variables, rather than `rgba()` with `--rgb-*` */
-    static usesOklchChannels(format: ColorFormat): boolean;
+    /** Prefix of the channel variables: `oklch` in the OKLCH formats, which write `oklch()`, or `rgb` in the others, which write `rgba()` */
+    static channelPrefix(format: ColorFormat): "oklch" | "rgb";
     /** The value of a channel variable: `r, g, b`, or `L% C H` in the OKLCH formats */
     static colorChannels(color: ColorTokenValue, format: ColorFormat): string;
     /** A color that takes its RGB from another color and adds its own opacity, as the source's channel variable with that opacity, or as the resolved color when the exporter writes no channel variables */

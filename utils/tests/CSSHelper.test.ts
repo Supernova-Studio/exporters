@@ -766,7 +766,7 @@ import {
       writesColorChannels: true,
       tokenToVariableRef: (token: Token, context?: { needsRgb?: boolean }) =>
         context?.needsRgb
-          ? `var(--${CSSHelper.usesOklchChannels(colorFormat) ? 'oklch' : 'rgb'}-${token.name})`
+          ? `var(--${CSSHelper.channelPrefix(colorFormat)}-${token.name})`
           : `var(--${token.name})`
     })
     const channelOptions = channelOptionsFor(testOptions.colorFormat)
@@ -826,7 +826,7 @@ import {
     const channelTokens = new Map<string, Token>([...allTokens, ['brand40', brand40], ['opacity40', opacity40]])
 
     test.each(Object.values(ColorFormat))('color with its own opacity references the source channels in %s', (format) => {
-      const expected = CSSHelper.usesOklchChannels(format) ? 'oklch(var(--oklch-brand) / 0.4)' : 'rgba(var(--rgb-brand), 0.4)'
+      const expected = CSSHelper.channelPrefix(format) === 'oklch' ? 'oklch(var(--oklch-brand) / 0.4)' : 'rgba(var(--rgb-brand), 0.4)'
       expect(CSSHelper.tokenToCSS(brand40, channelTokens, channelOptionsFor(format))).toBe(expected)
     })
 
