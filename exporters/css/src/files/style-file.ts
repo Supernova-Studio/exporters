@@ -1,5 +1,5 @@
 import { FileHelper, ThemeHelper, FileNameHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { ColorToken, OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken, generateChannelVariable } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
@@ -206,5 +206,5 @@ function missingChannelVariables(
   const writtenIds = new Set(writtenTokens.map((token) => token.id))
   return [...colorTokenIds]
     .filter((id) => !writtenIds.has(id))
-    .map((id) => generateChannelVariable(mappedTokens.get(id)!, tokenGroups, tokenCollections))
+    .map((id) => generateChannelVariable(mappedTokens.get(id) as ColorToken, tokenGroups, tokenCollections))
 }

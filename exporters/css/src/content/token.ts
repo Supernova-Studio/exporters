@@ -38,8 +38,8 @@ export function getTokenRawValue(
 }
 
 /** The channels of a color token without alpha, e.g. "16, 79, 198", or "52.4% 0.25 265.1" in the OKLCH formats */
-function colorTokenChannels(token: Token): string {
-  return CSSHelper.colorChannels((token as ColorToken).value, exportConfiguration.colorFormat)
+function colorTokenChannels(token: ColorToken): string {
+  return CSSHelper.colorChannels(token.value, exportConfiguration.colorFormat)
 }
 
 /**
@@ -52,7 +52,7 @@ function colorTokenChannels(token: Token): string {
  * @returns Formatted CSS custom property string for the channel variable
  */
 export function generateChannelVariable(
-  token: Token,
+  token: ColorToken,
   tokenGroups: Array<TokenGroup>,
   collections: Array<DesignSystemCollection> = []
 ): string {
@@ -108,7 +108,7 @@ export function convertedToken(
       if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels?.has(t.id)) {
         const channelVariable = `--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${variableName}`
         if (exportConfiguration.useFallbackValues) {
-          return `var(${channelVariable}, ${colorTokenChannels(t)})`
+          return `var(${channelVariable}, ${colorTokenChannels(t as ColorToken)})`
         }
         return `var(${channelVariable})`
       }
@@ -134,7 +134,7 @@ export function convertedToken(
   
   // Generate the channel variable if this color token needs one
   if (token.tokenType === TokenType.color && colorTokensNeedingChannels?.has(token.id)) {
-    output += `\n${generateChannelVariable(token, tokenGroups, collections)}`
+    output += `\n${generateChannelVariable(token as ColorToken, tokenGroups, collections)}`
   }
   
   return output

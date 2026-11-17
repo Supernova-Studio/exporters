@@ -4,7 +4,7 @@
  */
 
 import { FileHelper, ThemeHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
+import { ColorToken, OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FileStructure } from "../../config"
 import { convertedToken, isAllowedTokenType, generateChannelVariable } from "../content/token"
@@ -42,7 +42,7 @@ function processTokens(tokens: Array<Token>, themePath: string = '', theme?: Tok
 
 /** Channel variables of the given color tokens, one per line */
 function channelVariables(colorTokenIds: Set<string>, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
-    return [...colorTokenIds].map((id) => generateChannelVariable(mappedTokens.get(id)!, tokenGroups) + '\n').join('')
+    return [...colorTokenIds].map((id) => generateChannelVariable(mappedTokens.get(id) as ColorToken, tokenGroups) + '\n').join('')
 }
 
 /**

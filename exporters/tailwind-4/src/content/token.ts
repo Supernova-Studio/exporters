@@ -381,11 +381,11 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
  * @returns Formatted CSS custom property string for the channel variable
  */
 export function generateChannelVariable(
-  token: Token,
+  token: ColorToken,
   tokenGroups: Array<TokenGroup>
 ): string {
   const prefix = CSSHelper.channelPrefix(exportConfiguration.colorFormat)
-  const declaration = `--${prefix}-${tokenVariableName(token, tokenGroups)}: ${CSSHelper.colorChannels((token as ColorToken).value, exportConfiguration.colorFormat)};`
+  const declaration = `--${prefix}-${tokenVariableName(token, tokenGroups)}: ${CSSHelper.colorChannels(token.value, exportConfiguration.colorFormat)};`
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   if (exportConfiguration.showDescriptions && token.description) {
     return `${indentString}/* ${prefix.toUpperCase()} utility for ${token.description.trim()} */\n${indentString}${declaration}`
