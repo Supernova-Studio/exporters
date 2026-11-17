@@ -82,7 +82,7 @@ With `useFallbackValues: true`, the output would include fallback values:
 
 ## Colors with their own opacity
 
-A shadow layer can add its own opacity on top of the color it references. `rgba()` cannot take a full color such as `var(--color-…)`, so the exporter also writes that color's channels as `--rgb-…` and uses them in `rgba()`. Borders and gradient stops use the color variable directly, for example `1px solid var(--color-border-active)`.
+A color token, a shadow layer, a border or a gradient stop can add its own opacity on top of the color it references. `rgba()` cannot take a full color such as `var(--color-…)`, so the exporter also writes that color's channels as `--rgb-…`, or `--oklch-…` in the OKLCH formats, and writes the value as `rgba(var(--rgb-…), 0.4)` or `oklch(var(--oklch-…) / 0.4)`. With references off, the value is the raw color and no channel variable is written. Borders and gradient stops that reference a color without adding their own opacity use the color variable directly, for example `1px solid var(--color-border-active)`.
 
 ## Configuration options
 

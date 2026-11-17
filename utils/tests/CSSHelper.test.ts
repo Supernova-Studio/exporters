@@ -304,7 +304,7 @@ import {
         ...testOptions,
         colorFormat: ColorFormat.smartRgba
       })
-    ).toBe('rgba(var(--colorRef), 0.5)')
+    ).toBe('rgba(135, 100, 200, 0.5)')
   })
   
   test('toCSS_colorToken_4', () => {
@@ -759,6 +759,17 @@ import {
       tokenToVariableRef: (token: Token, context?: { needsRgb?: boolean }) =>
         context?.needsRgb ? `var(--rgb-${token.name})` : `var(--${token.name})`
     }
+    /** Options of an exporter that writes channel variables, with names by format as the CSS and Tailwind exporters write them */
+    const channelOptionsFor = (colorFormat: ColorFormat) => ({
+      ...testOptions,
+      colorFormat,
+      writesColorChannels: true,
+      tokenToVariableRef: (token: Token, context?: { needsRgb?: boolean }) =>
+        context?.needsRgb
+          ? `var(--${CSSHelper.channelPrefix(colorFormat)}-${token.name})`
+          : `var(--${token.name})`
+    })
+    const channelOptions = channelOptionsFor(testOptions.colorFormat)
 
     test('border uses the referenced color variable', () => {
       expect(CSSHelper.borderTokenValueToCSS(border, allTokens, options)).toBe('1px solid var(--brand)')
@@ -783,18 +794,99 @@ import {
     })
 
     test('shadow with its own opacity uses the color channels', () => {
-      expect(CSSHelper.shadowTokenValueToCSS([shadow], allTokens, options)).toBe(
+      expect(CSSHelper.shadowTokenValueToCSS([shadow], allTokens, channelOptions)).toBe(
         '3px 4px 5px 6px rgba(var(--rgb-shadowColor), 0.08)'
       )
     })
 
-    test('only colors of shadows with their own opacity need channels', () => {
+    test('shadow with its own opacity is the resolved color when the exporter writes no channels', () => {
+      expect(CSSHelper.shadowTokenValueToCSS([shadow], allTokens, options)).toBe('3px 4px 5px 6px #00000014')
+    })
+
+    test('shadow with its own opacity uses the oklch channels in an OKLCH format', () => {
+      expect(
+        CSSHelper.shadowTokenValueToCSS([shadow], allTokens, channelOptionsFor(ColorFormat.smartOklch))
+      ).toBe('3px 4px 5px 6px oklch(var(--oklch-shadowColor) / 0.08)')
+    })
+
+    test('shadow with its own opacity is the resolved color when references are off', () => {
+      expect(CSSHelper.shadowTokenValueToCSS([shadow], allTokens, { ...channelOptions, allowReferences: false })).toBe(
+        '3px 4px 5px 6px #00000014'
+      )
+    })
+
+    /** A color that takes its RGB from another color and adds its own opacity, as SDK 2.6.1 hands it to exporters */
+    const ownOpacity = (source: ColorToken, measure: number, opacityRef: string | null = null): ColorTokenValue => ({
+      color: { ...source.value.color, referencedTokenId: source.id },
+      opacity: { measure, referencedTokenId: opacityRef, unit: Unit.raw },
+      referencedTokenId: null
+    })
+    const brand40 = colorToken('brand40', ownOpacity(brand, 0.4))
+    const opacity40 = { id: 'opacity40', name: 'opacity40', tokenType: TokenType.opacity, value: { measure: 0.4, unit: Unit.raw, referencedTokenId: null } } as OpacityToken
+    const channelTokens = new Map<string, Token>([...allTokens, ['brand40', brand40], ['opacity40', opacity40]])
+
+    test.each(Object.values(ColorFormat))('color with its own opacity references the source channels in %s', (format) => {
+      const expected = CSSHelper.channelPrefix(format) === 'oklch' ? 'oklch(var(--oklch-brand) / 0.4)' : 'rgba(var(--rgb-brand), 0.4)'
+      expect(CSSHelper.tokenToCSS(brand40, channelTokens, channelOptionsFor(format))).toBe(expected)
+    })
+
+    test('color with its own opacity is the resolved color when the exporter writes no channels', () => {
+      expect(CSSHelper.tokenToCSS(brand40, channelTokens, { ...options, colorFormat: ColorFormat.smartRgba })).toBe(
+        'rgba(49, 92, 253, 0.4)'
+      )
+      expect(CSSHelper.tokenToCSS(brand40, channelTokens, options)).toBe('#315cfd66')
+    })
+
+    test('color with its own opacity is the resolved color when references are off', () => {
+      expect(CSSHelper.tokenToCSS(brand40, channelTokens, { ...channelOptions, allowReferences: false })).toBe('#315cfd66')
+    })
+
+    test('color with its own opacity references an opacity token', () => {
+      const value = ownOpacity(brand, 0.4, 'opacity40')
+      expect(CSSHelper.colorTokenValueToCSS(value, channelTokens, channelOptions)).toBe(
+        'rgba(var(--rgb-brand), var(--opacity40))'
+      )
+    })
+
+    test('color with its own opacity always writes the alpha', () => {
+      expect(CSSHelper.colorTokenValueToCSS(ownOpacity(brand, 1), channelTokens, channelOptions)).toBe(
+        'rgba(var(--rgb-brand), 1)'
+      )
+    })
+
+    test('a color that aliases a color with its own opacity is a var() of it', () => {
+      expect(CSSHelper.colorTokenValueToCSS(referenceTo(brand40), channelTokens, channelOptions)).toBe('var(--brand40)')
+    })
+
+    test('a chain of colors with their own opacity references the direct source', () => {
+      expect(CSSHelper.colorTokenValueToCSS(ownOpacity(brand40, 0.2), channelTokens, channelOptions)).toBe(
+        'rgba(var(--rgb-brand40), 0.2)'
+      )
+    })
+
+    test('channel values have no alpha, in RGB and OKLCH', () => {
+      expect(CSSHelper.colorChannels(brand40.value, ColorFormat.smartHashHex)).toBe('49, 92, 253')
+      expect(CSSHelper.colorChannels(ownOpacity(stopA, 0.3), ColorFormat.smartOklch)).toBe('62.8% 0.258 29.23')
+    })
+
+    test('colors used with their own opacity need channels', () => {
+      const tokenList: Array<Token> = [
+        ...allTokens.values(),
+        brand40,
+        { id: 'border', name: 'border', tokenType: TokenType.border, value: { ...border, color: ownOpacity(stopB, 0.5) } } as BorderToken,
+        { id: 'gradient', name: 'gradient', tokenType: TokenType.gradient, value: [{ ...gradient, stops: [{ position: 0, color: ownOpacity(stopA, 0.3) }] }] } as GradientToken,
+        { id: 'shadow', name: 'shadow', tokenType: TokenType.shadow, value: [shadow] } as ShadowToken
+      ]
+      expect(CSSHelper.colorTokenIdsNeedingChannels(tokenList, true)).toEqual(new Set(['shadowColor', 'brand', 'b', 'a']))
+      expect(CSSHelper.colorTokenIdsNeedingChannels(tokenList, false)).toEqual(new Set())
+    })
+
+    test('a referenced border or gradient color without its own opacity needs no channels', () => {
       const tokenList: Array<Token> = [
         ...allTokens.values(),
         { id: 'border', name: 'border', tokenType: TokenType.border, value: border } as BorderToken,
-        { id: 'gradient', name: 'gradient', tokenType: TokenType.gradient, value: [gradient] } as GradientToken,
-        { id: 'shadow', name: 'shadow', tokenType: TokenType.shadow, value: [shadow] } as ShadowToken
+        { id: 'gradient', name: 'gradient', tokenType: TokenType.gradient, value: [gradient] } as GradientToken
       ]
-      expect(CSSHelper.shadowColorTokenIdsNeedingChannels(tokenList)).toEqual(new Set(['shadowColor']))
+      expect(CSSHelper.colorTokenIdsNeedingChannels(tokenList, true)).toEqual(new Set())
     })
   })

@@ -4,10 +4,10 @@
  */
 
 import { FileHelper, ThemeHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
+import { ColorToken, OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FileStructure } from "../../config"
-import { convertedToken, isAllowedTokenType, generateOklchUtilityVariable } from "../content/token"
+import { convertedToken, isAllowedTokenType, generateChannelVariable } from "../content/token"
 import { generateTypographyClass } from "../content/typography"
 import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
 
@@ -38,6 +38,11 @@ function processTokens(tokens: Array<Token>, themePath: string = '', theme?: Tok
     // Filter out tokens not allowed for Tailwind customization
     processedTokens = processedTokens.filter(token => isAllowedTokenType(token.tokenType))
     return processedTokens
+}
+
+/** Channel variables of the given color tokens, one per line */
+function channelVariables(colorTokenIds: Set<string>, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
+    return [...colorTokenIds].map((id) => generateChannelVariable(mappedTokens.get(id) as ColorToken, tokenGroups) + '\n').join('')
 }
 
 /**
@@ -180,7 +185,7 @@ function generateTypographyContent(tokens: Array<Token>, tokenGroups: Array<Toke
  * @param tokens - Array of tokens to process
  * @param mappedTokens - Map of tokens by ID for reference resolution
  * @param tokenGroups - Array of token groups
- * @param colorTokensNeedingOklch - Set of token IDs that need OKLCH utility variables
+ * @param colorTokensNeedingChannels - Set of color token IDs that need a channel variable
  * @param type - Specific token type (if applicable)
  * @returns CSS variable declarations as a string
  */
@@ -188,7 +193,7 @@ function generateCSSVariables(
     tokens: Array<Token>, 
     mappedTokens: Map<string, Token>, 
     tokenGroups: Array<TokenGroup>,
-    colorTokensNeedingOklch?: Set<string>,
+    colorTokensNeedingChannels?: Set<string>,
     type?: TokenType
 ): string {
     const indentString = GeneralHelper.indent(exportConfiguration.indent)
@@ -220,7 +225,7 @@ function generateCSSVariables(
         
         // Convert tokens to CSS variable declarations
         const cssDeclarations = tokensOfType
-            .map((token) => convertedToken(token, mappedTokens, tokenGroups, colorTokensNeedingOklch))
+            .map((token) => convertedToken(token, mappedTokens, tokenGroups, colorTokensNeedingChannels))
             .filter((declaration): declaration is string => declaration !== null) // Filter out null returns
             .join("\n")
         
@@ -271,22 +276,10 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         return null
     }
 
-    // Analyze tokens for OKLCH utility needs
-    const colorTokensNeedingOklch = CSSHelper.shadowColorTokenIdsNeedingChannels(processedTokens)
-    // Generate OKLCH utility variables
-    let oklchUtilityVariables = ''
-    if (colorTokensNeedingOklch.size > 0) {
-        oklchUtilityVariables = Array.from(colorTokensNeedingOklch)
-            .map(id => {
-                const token = mappedTokens.get(id)
-                if (token) {
-                    return generateOklchUtilityVariable(token, tokenGroups)
-                }
-                return ''
-            })
-            .filter(Boolean)
-            .join('\n') + '\n'
-    }
+    // Colors that other colors use with their own opacity get channel variables. They are found among all tokens of the
+    // types Tailwind writes, not only the ones this file writes, so a theme file with only themed tokens still writes the
+    // channels of its theme
+    const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens.filter((token) => isAllowedTokenType(token.tokenType)), exportConfiguration.useReferences)
 
     // Start with Tailwind import with prefix if configured, but only for base file
     let content = ''
@@ -314,9 +307,9 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     if (exportConfiguration.fileStructure !== FileStructure.SeparateByType) {
         cssVariables += generateResetRules(selector)
     }
-    // Prepend OKLCH utility variables
-    cssVariables += oklchUtilityVariables
-    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, colorTokensNeedingOklch)
+    // Channel variables go before the token variables
+    cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups)
+    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, colorTokensNeedingChannels)
 
     // Check if any tokens use references and if references are enabled
     const hasReferences = exportConfiguration.useReferences && processedTokens.some(token => 
@@ -367,6 +360,9 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         return []
     }
 
+    // Colors that other colors use with their own opacity get channel variables, written in the color file
+    const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens.filter((token) => isAllowedTokenType(token.tokenType)), exportConfiguration.useReferences)
+
     // Group tokens by type
     const tokensByType = new Map<TokenType, Token[]>()
     processedTokens.forEach(token => {
@@ -411,7 +407,10 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
 
         // Generate CSS variables
         let cssVariables = ''
-        cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, undefined, type)
+        if (type === TokenType.color) {
+            cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups)
+        }
+        cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, colorTokensNeedingChannels, type)
 
         // Add the CSS variables to the content
         content += `${themeDirective} {\n${cssVariables}}\n`

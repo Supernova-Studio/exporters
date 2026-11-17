@@ -18,6 +18,8 @@ export type TokenToCSSOptions = {
     remBase?: number;
     /** Optional transformer for CSS values based on token type and value */
     valueTransformer?: (value: string, token: Token) => string | undefined;
+    /** The exporter writes channel variables (`--rgb-*`, or `--oklch-*` in the OKLCH formats) for the ids in `colorTokenIdsNeedingChannels`. Without it, a color with its own opacity on a referenced color is written as the resolved color */
+    writesColorChannels?: boolean;
 };
 /** A utility class to help with transformation of tokens and Supernova token-like values to various formats */
 export declare class CSSHelper {
@@ -25,10 +27,18 @@ export declare class CSSHelper {
      * Helper function to handle color with custom opacity, using channel-based utilities when available
      */
     private static handleColorWithCustomOpacity;
+    /** Prefix of the channel variables: `oklch` in the OKLCH formats, which write `oklch()`, or `rgb` in the others, which write `rgba()` */
+    static channelPrefix(format: ColorFormat): "oklch" | "rgb";
+    /** The value of a channel variable: `r, g, b`, or `L% C H` in the OKLCH formats */
+    static colorChannels(color: ColorTokenValue, format: ColorFormat): string;
+    /** A color that takes its RGB from another color and adds its own opacity, as the source's channel variable with that opacity, or as the resolved color when the exporter writes no channel variables */
+    private static colorWithOwnOpacity;
+    /** The color whose RGB a color takes, when only its color part is a reference and the opacity is its own */
+    private static ownOpacitySourceId;
     /** The color token that a color references, when the color adds its own opacity on top of it */
     private static referencedColorTokenWithCustomOpacity;
-    /** IDs of the color tokens that shadow layers use with their own opacity, so they need a channels variable */
-    static shadowColorTokenIdsNeedingChannels(tokens: Array<Token>): Set<string>;
+    /** IDs of the color tokens that other colors use with their own opacity, so they need a channels variable. Empty when references are off */
+    static colorTokenIdsNeedingChannels(tokens: Array<Token>, allowReferences: boolean): Set<string>;
     static tokenToCSS(token: Token, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static colorTokenValueToCSS(color: ColorTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;
     static borderTokenValueToCSS(border: BorderTokenValue, allTokens: Map<string, Token>, options: TokenToCSSOptions): string;

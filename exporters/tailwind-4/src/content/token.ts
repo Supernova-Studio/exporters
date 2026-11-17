@@ -1,10 +1,8 @@
 import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
-import { Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
+import { ColorToken, Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FindReplaceTiming } from "../../config"
 import { TAILWIND_TOKEN_PREFIXES, TAILWIND_ALLOWED_CUSTOMIZATION } from "../constants/defaults"
-import { ColorHelper } from "@supernovaio/export-utils"
-import { ColorFormat } from "@supernovaio/export-utils"
 
 /**
  * Gets the prefix for a specific token type based on configuration.
@@ -128,7 +126,7 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @returns Formatted CSS custom property string with optional description comment or null if token type is not allowed
  */
-export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingOklch?: Set<string>): string | null {
+export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels?: Set<string>): string | null {
   // Skip tokens that are not allowed for Tailwind customization
   if (!isAllowedTokenType(token.tokenType)) {
     return null;
@@ -149,6 +147,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     colorFormat: exportConfiguration.colorFormat,
     forceRemUnit: exportConfiguration.forceRemUnit,
     remBase: exportConfiguration.remBase,
+    writesColorChannels: true,
     // Custom handler for token references - converts them to CSS var() syntax
     tokenToVariableRef: (t, context) => {
       // Skip references to tokens that are not allowed for Tailwind customization
@@ -164,9 +163,9 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
           valueTransformer: undefined
         });
       }
-      // If context requests a channel-based color variable (needsRgb), use the oklch utility variable in this exporter
-      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingOklch?.has(t.id)) {
-        return `var(--oklch-${tokenVariableName(t, tokenGroups)})`
+      // If context requests a channel-based color variable (needsRgb), use the channel variable
+      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels?.has(t.id)) {
+        return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${tokenVariableName(t, tokenGroups)})`
       }
       return `var(--${tokenVariableName(t, tokenGroups)})`
     },
@@ -374,53 +373,23 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 }
 
 /**
- * Gets the OKLCH value (L C H, no alpha) for a color token.
- * @param token - The color token
- * @returns OKLCH value string (e.g., "0.627 0.15 29.23")
- */
-export function getColorTokenOklchValue(token: Token): string {
-  if (token.tokenType !== TokenType.color) {
-    throw new Error(`Expected color token, got ${token.tokenType}`)
-  }
-  const colorValue = (token as any).value
-  // Use ColorHelper to get oklch values
-  // ColorHelper.colorToOklch expects (format, color, alpha, decimals)
-  // We'll use ColorFormat.oklch, and only want the L C H part
-  // ColorHelper.colorToOklch returns a string like "oklch(0.627% 0.15 29.23)"
-  // We'll extract the values inside the parentheses
-  const oklchString = ColorHelper.colorToOklch(
-    ColorFormat.oklch,
-    { r: Math.round(colorValue.color.r), g: Math.round(colorValue.color.g), b: Math.round(colorValue.color.b) },
-    colorValue.opacity.measure,
-    3
-  )
-  // Extract the part inside "oklch(...)"
-  const match = oklchString.match(/oklch\(([^)]+)\)/)
-  if (match) {
-    return match[1].replace(/%/g, '').trim()
-  }
-  return ''
-}
-
-/**
- * Generates an OKLCH utility variable for a color token.
- * This creates a CSS variable containing only the OKLCH values (no alpha) for use with custom opacity.
+ * Generates the channel variable of a color token (`--oklch-…` in the OKLCH formats, `--rgb-…` in the others).
+ * It holds only the channels (no alpha), for colors that add their own opacity on top of this color.
  * 
- * @param token - The color token to generate OKLCH utility for
+ * @param token - The color token to generate the channel variable for
  * @param tokenGroups - Array of token groups for determining token hierarchy
- * @returns Formatted CSS custom property string for the OKLCH utility variable
+ * @returns Formatted CSS custom property string for the channel variable
  */
-export function generateOklchUtilityVariable(
-  token: Token,
+export function generateChannelVariable(
+  token: ColorToken,
   tokenGroups: Array<TokenGroup>
 ): string {
-  const name = tokenVariableName(token, tokenGroups)
-  const oklchName = `oklch-${name}`
-  const oklchValue = getColorTokenOklchValue(token)
+  const prefix = CSSHelper.channelPrefix(exportConfiguration.colorFormat)
+  const declaration = `--${prefix}-${tokenVariableName(token, tokenGroups)}: ${CSSHelper.colorChannels(token.value, exportConfiguration.colorFormat)};`
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   if (exportConfiguration.showDescriptions && token.description) {
-    return `${indentString}/* OKLCH utility for ${token.description.trim()} */\n${indentString}--${oklchName}: ${oklchValue};`
+    return `${indentString}/* ${prefix.toUpperCase()} utility for ${token.description.trim()} */\n${indentString}${declaration}`
   } else {
-    return `${indentString}--${oklchName}: ${oklchValue};`
+    return `${indentString}${declaration}`
   }
 }

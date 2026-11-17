@@ -1,7 +1,7 @@
 import { FileHelper, ThemeHelper, FileNameHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
+import { ColorToken, OutputTextFile, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken } from "../content/token"
+import { convertedToken, generateChannelVariable } from "../content/token"
 import { TokenTheme } from "@supernovaio/sdk-exporters"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
@@ -83,11 +83,15 @@ export function styleOutputFile(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
-  // Analyze tokens to identify which color tokens need RGB utilities
-  const colorTokensNeedingRgb = CSSHelper.shadowColorTokenIdsNeedingChannels(tokens)
+  const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
   
   // Convert tokens to CSS variable declarations
-  const cssVariables = tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb)).join("\n")
+  const cssVariables = [
+    ...tokensOfType.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingChannels)),
+    ...(type === TokenType.color
+      ? missingChannelVariables(colorTokensNeedingChannels, tokensOfType, mappedTokens, tokenGroups, tokenCollections)
+      : [])
+  ].join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
   const selector = themePath 
@@ -155,13 +159,13 @@ function generateCombinedStyleFile(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
   
-  // Analyze tokens to identify which color tokens need RGB utilities
-  const colorTokensNeedingRgb = CSSHelper.shadowColorTokenIdsNeedingChannels(tokens)
+  const colorTokensNeedingChannels = CSSHelper.colorTokenIdsNeedingChannels(tokens, exportConfiguration.useReferences)
   
   // Convert all tokens to CSS variable declarations
-  const cssVariables = processedTokens
-    .map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingRgb))
-    .join("\n")
+  const cssVariables = [
+    ...processedTokens.map((token) => convertedToken(token, mappedTokens, tokenGroups, tokenCollections, colorTokensNeedingChannels)),
+    ...missingChannelVariables(colorTokensNeedingChannels, processedTokens, mappedTokens, tokenGroups, tokenCollections)
+  ].join("\n")
 
   // Determine the CSS selector based on whether this is a theme file
   const selector = themePath 
@@ -185,4 +189,22 @@ function generateCombinedStyleFile(
     fileName: fileName,
     content: content,
   })
+}
+
+/**
+ * Channel variables of the colors that need one but are not among the tokens this file writes. A theme file with only
+ * themed tokens still writes them with the theme's values, because a color can change in a theme through an alias or
+ * a color it references
+ */
+function missingChannelVariables(
+  colorTokenIds: Set<string>,
+  writtenTokens: Array<Token>,
+  mappedTokens: Map<string, Token>,
+  tokenGroups: Array<TokenGroup>,
+  tokenCollections: Array<DesignSystemCollection>
+): Array<string> {
+  const writtenIds = new Set(writtenTokens.map((token) => token.id))
+  return [...colorTokenIds]
+    .filter((id) => !writtenIds.has(id))
+    .map((id) => generateChannelVariable(mappedTokens.get(id) as ColorToken, tokenGroups, tokenCollections))
 }
