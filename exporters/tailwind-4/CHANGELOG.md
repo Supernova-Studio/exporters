@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-11-19
+- Duration tokens get the Tailwind class `.duration-(--duration-fast)` instead of `.duration-fast`. Tailwind 4's `duration-*` utilities don't read `--duration-*` variables, so the old class built nothing, or Tailwind's own milliseconds for a numbered name like `duration-100`. The variables don't change.
+- The README shows how to apply Duration tokens.
+
 ## [1.3.0] - 2026-11-16
 - Colors that reference another color with their own opacity now export as `oklch(var(--oklch-color-brand) / 0.4)`, or `rgba(var(--rgb-color-brand), 0.4)` in the hex, RGB and HSL formats. They were the invalid `rgba(var(--color-brand), 0.4)` in the RGB formats and a fixed value in the others.
 - `--oklch-…` keeps the `%` on lightness, so shadows with their own opacity show the right color, and the hex, RGB and HSL formats use `--rgb-…` instead of the invalid `rgba(var(--oklch-…), …)`.

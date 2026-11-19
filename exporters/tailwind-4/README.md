@@ -71,6 +71,18 @@ The exporter would produce:
 }
 ```
 
+## Using Duration Tokens
+
+Duration tokens export as `--duration-*` variables, such as `--duration-fast: 200ms;`. Tailwind's `duration-*` utilities don't read these variables: `duration-fast` builds nothing, and a numbered name like `duration-100` uses Tailwind's own 100ms, not your token's value. Put the variable in parentheses instead:
+
+```html
+<button class="transition-colors duration-(--duration-fast)">Save</button>
+```
+
+With **globalPrefix** set to `tw` and the default `@theme` selector, Tailwind renames the variables too, so write `tw:duration-(--tw-duration-fast)`. With the `:root` selector the variables keep their names: `tw:duration-(--duration-fast)`.
+
+With **writeClassnameToProperty** on, Duration tokens get this class in the Tailwind class property, such as `.duration-(--duration-fast)`.
+
 ## Configuration Options
 
 Here is a list of all the configuration options this exporter provides:
