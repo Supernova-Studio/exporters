@@ -80,7 +80,8 @@ export function variableToTailwindClassName(variableName: string): string {
                 className = `border-${parts.slice(1).join('-')}`;
             }
         } else if (parts[0] === 'duration') {
-            className = `duration-${parts.slice(1).join('-')}`;
+            // Tailwind's duration-* utilities don't read --duration-* variables, so the class points at the variable
+            className = `duration-(--${cleanName})`;
         } else if (parts[0] === 'size') {
             className = `size-${parts.slice(1).join('-')}`;
         } else if (parts[0] === 'space') {
