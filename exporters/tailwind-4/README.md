@@ -81,7 +81,7 @@ Duration tokens export as `--duration-*` variables, such as `--duration-fast: 20
 
 With **globalPrefix** set to `tw` and the default `@theme` selector, Tailwind renames the variables too, so write `tw:duration-(--tw-duration-fast)`. With the `:root` selector the variables keep their names: `tw:duration-(--duration-fast)`.
 
-With **writeClassnameToProperty** on, Duration tokens get this class in the Tailwind class property, such as `.duration-(--duration-fast)`.
+With **writeClassnameToProperty** on, Duration tokens get this class in the Tailwind class property, such as `.duration-(--duration-fast)`. The class leaves out **globalPrefix**, so with a prefix, add it as shown above.
 
 ## Configuration Options
 
