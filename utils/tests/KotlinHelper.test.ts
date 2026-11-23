@@ -68,7 +68,7 @@ const shadow = (layer: ShadowTokenValue, kotlinOptions = options) =>
   KotlinHelper.shadowTokenValueToKotlin([layer], tokens, kotlinOptions, collector())
 
 describe("KotlinHelper colors with their own opacity", () => {
-  test("color with its own opacity on a referenced color is the source with that alpha", () => {
+  test("color with its own opacity on a referenced color is the referenced color with that alpha", () => {
     expect(KotlinHelper.colorTokenValueToKotlin(ownOpacity(0.4), tokens, options, collector())).toBe(
       "gray900.copy(alpha = 0.4f)"
     )
