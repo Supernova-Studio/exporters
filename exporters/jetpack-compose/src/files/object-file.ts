@@ -7,7 +7,18 @@ import {
   StringCase,
   ThemeHelper
 } from "@supernovaio/export-utils"
-import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
+import {
+  BorderToken,
+  ColorToken,
+  ColorTokenValue,
+  GradientToken,
+  OutputTextFile,
+  ShadowToken,
+  Token,
+  TokenGroup,
+  TokenTheme,
+  TokenType
+} from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
@@ -167,15 +178,35 @@ function generateFileContent(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
 
-  // Declare each token below the token it references, so Kotlin never reads a property that is not initialized yet
-  const referenceDepth = (token: Token): number => {
-    const value = (token as any).value
-    const referencedId =
-      value?.referencedTokenId ?? (token.tokenType === TokenType.color ? value.color.referencedTokenId : null)
-    const referenced = referencedId ? mappedTokens.get(referencedId) : undefined
-    return referenced ? 1 + referenceDepth(referenced) : 0
+  // Declare each token below the aliases and colors it references, so Kotlin never reads a property that is not initialized yet
+  const colorSourceId = (color: ColorTokenValue) => color.referencedTokenId ?? color.color.referencedTokenId
+  const referencedIds = (token: Token): Array<string | null> => {
+    switch (token.tokenType) {
+      case TokenType.color:
+        return [colorSourceId((token as ColorToken).value)]
+      case TokenType.border:
+        return [(token as BorderToken).value.referencedTokenId, colorSourceId((token as BorderToken).value.color)]
+      case TokenType.gradient:
+        return (token as GradientToken).value.flatMap((layer) => [
+          layer.referencedTokenId,
+          ...layer.stops.map((stop) => colorSourceId(stop.color))
+        ])
+      case TokenType.shadow:
+        return (token as ShadowToken).value.flatMap((layer) => [layer.referencedTokenId, colorSourceId(layer.color)])
+      default:
+        return [(token as any).value?.referencedTokenId]
+    }
   }
-  const sortedTokensToExport = [...tokensToExport].sort((a, b) => referenceDepth(a) - referenceDepth(b))
+  const referenceDepth = (token: Token): number =>
+    Math.max(
+      0,
+      ...referencedIds(token).map((id) => {
+        const referenced = id ? mappedTokens.get(id) : undefined
+        return referenced ? 1 + referenceDepth(referenced) : 0
+      })
+    )
+  const depths = new Map(tokensToExport.map((token) => [token.id, referenceDepth(token)]))
+  const sortedTokensToExport = [...tokensToExport].sort((a, b) => depths.get(a.id)! - depths.get(b.id)!)
 
   // Convert tokens to Kotlin property declarations
   const tokenPropertiesLiteral = sortedTokensToExport

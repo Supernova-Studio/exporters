@@ -6,7 +6,7 @@ All the updates to this exporter are documented in this file.
 ### 🐞 Fixed
 - Shadows keep their own opacity when their color references a color token: a shadow on Gray 900 at 20% now exports as `ColorTokens.colorGray900.copy(alpha = 0.2f)`. It was exported as the solid color.
 - Colors that reference another color with their own opacity, shown in Supernova as "Brand / 40%", now export as `colorBrand.copy(alpha = 0.4f)`, so they follow the source color. They were a fixed `Color(0x66…)`. With references off they are written as the resolved color.
-- A token is always declared below the token it references, so a reference to an alias no longer stops the generated file from compiling.
+- A token is declared below the aliases and colors that it references, so a chain of aliases or a color with its own opacity on an alias no longer stops the generated file from compiling.
 
 ## 1.0.0 - 2026-11-23
 
