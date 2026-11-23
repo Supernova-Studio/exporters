@@ -224,6 +224,15 @@ export class KotlinHelper {
     importCollector: ImportCollector
   ): string {
     importCollector.use(ImportFlag.Color)
+    const source = color.referencedTokenId
+      ? null
+      : sureOptionalReference(color.color.referencedTokenId, allTokens, options.allowReferences)
+    if (source) {
+      return `${options.tokenToVariableRef(source)}.copy(alpha = ${ColorHelper.roundToDecimals(
+        color.opacity.measure,
+        3
+      )}f)`
+    }
     const colorOptions = {
       ...options,
       colorFormat: ColorFormat.argbInt
@@ -355,7 +364,16 @@ export class KotlinHelper {
     importCollector.use(ImportFlag.Shadow, ImportFlag.Offset)
 
     const colorLit = this.colorTokenValueToKotlin(
-      { ...value.color, ...(value.opacity && { opacity: value.opacity }) },
+      value.opacity
+        ? {
+            color: {
+              ...value.color.color,
+              referencedTokenId: value.color.referencedTokenId ?? value.color.color.referencedTokenId
+            },
+            opacity: value.opacity,
+            referencedTokenId: null
+          }
+        : value.color,
       allTokens,
       options,
       importCollector

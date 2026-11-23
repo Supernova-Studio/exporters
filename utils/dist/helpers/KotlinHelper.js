@@ -164,6 +164,12 @@ class KotlinHelper {
     }
     static colorTokenValueToKotlin(color, allTokens, options, importCollector) {
         importCollector.use(ImportFlag.Color);
+        const source = color.referencedTokenId
+            ? null
+            : (0, TokenHelper_1.sureOptionalReference)(color.color.referencedTokenId, allTokens, options.allowReferences);
+        if (source) {
+            return `${options.tokenToVariableRef(source)}.copy(alpha = ${ColorHelper_1.ColorHelper.roundToDecimals(color.opacity.measure, 3)}f)`;
+        }
         const colorOptions = {
             ...options,
             colorFormat: ColorFormat_1.ColorFormat.argbInt
@@ -243,7 +249,16 @@ class KotlinHelper {
             return options.tokenToVariableRef(reference);
         }
         importCollector.use(ImportFlag.Shadow, ImportFlag.Offset);
-        const colorLit = this.colorTokenValueToKotlin({ ...value.color, ...(value.opacity && { opacity: value.opacity }) }, allTokens, options, importCollector);
+        const colorLit = this.colorTokenValueToKotlin(value.opacity
+            ? {
+                color: {
+                    ...value.color.color,
+                    referencedTokenId: value.color.referencedTokenId ?? value.color.color.referencedTokenId
+                },
+                opacity: value.opacity,
+                referencedTokenId: null
+            }
+            : value.color, allTokens, options, importCollector);
         // Unsupported in Compose and therefore ignored: spread, inner-shadow
         const offsetX = ColorHelper_1.ColorHelper.roundToDecimals(value.x, options.decimals);
         const offsetY = ColorHelper_1.ColorHelper.roundToDecimals(value.y, options.decimals);

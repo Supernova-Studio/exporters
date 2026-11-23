@@ -167,15 +167,15 @@ function generateFileContent(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
 
-  // Sort tokens to ensure proper declaration order:
-  // - Tokens with direct values come first
-  // - Tokens that reference other tokens come after
-  // This prevents reference errors where a token tries to use another token that hasn't been declared yet
-  const sortedTokensToExport = [...tokensToExport].sort((a, b) => {
-    const aHasRef = !!(a as any)?.value?.referencedTokenId
-    const bHasRef = !!(b as any)?.value?.referencedTokenId
-    return aHasRef === bHasRef ? 0 : aHasRef ? 1 : -1
-  })
+  // Declare each token below the token it references, so Kotlin never reads a property that is not initialized yet
+  const referenceDepth = (token: Token): number => {
+    const value = (token as any).value
+    const referencedId =
+      value?.referencedTokenId ?? (token.tokenType === TokenType.color ? value.color.referencedTokenId : null)
+    const referenced = referencedId ? mappedTokens.get(referencedId) : undefined
+    return referenced ? 1 + referenceDepth(referenced) : 0
+  }
+  const sortedTokensToExport = [...tokensToExport].sort((a, b) => referenceDepth(a) - referenceDepth(b))
 
   // Convert tokens to Kotlin property declarations
   const tokenPropertiesLiteral = sortedTokensToExport
