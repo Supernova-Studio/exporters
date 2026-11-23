@@ -5,7 +5,7 @@
     "author": "Supernova.io",
     "organization": "Supernova.io",
     "homepage": "https://supernova.io",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "usesBrands": true,
     "usesThemes": true,
     "executable": "/dist/build.js",
@@ -14,7 +14,6 @@
         "Jetpack Compose",
         "Android",
         "Tokens",
-        "New",
-        "Beta"
+        "New"
     ]
 }

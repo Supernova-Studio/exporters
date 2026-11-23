@@ -327,14 +327,17 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
           : tokenPath
 
         // Combine remaining path with token name
-        const segments = [...remainingPath, token.name]
-        const cleanName = segments.join('-').toLowerCase()
-          .trim()
-          .replace(/^[-\s]+|[-\s]+$/g, '') // Remove leading/trailing hyphens and spaces
+        const segments = [...remainingPath, token.name].map((segment) => segment.toLowerCase())
+        const utilityIndex = segments.findIndex((segment) => segment.includes(utilityName))
 
         // Construct the name as: utility-color-path-name
-        // We also remove the utility name from the cleanName to avoid redundancy
-        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, findReplaceForNamingHelper, true)
+        // We also remove the utility name from the first segment that has it to avoid redundancy
+        let name = NamingHelper.codeSafeVariableName(
+          [utilityName, 'color', ...segments.map((segment, index) => (index === utilityIndex ? segment.replace(utilityName, '') : segment))],
+          StringCase.kebabCase,
+          findReplaceForNamingHelper,
+          true
+        )
 
         name = normalizeForTailwindConfig(name);
         

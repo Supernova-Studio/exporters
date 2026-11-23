@@ -38,7 +38,7 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
 
   // Generate class name from token path and name
   const className = NamingHelper.codeSafeVariableName(
-    [...(token.tokenPath || []), token.name].join('-'),
+    [...(token.tokenPath || []), token.name],
     StringCase.kebabCase,
     exportConfiguration.findReplace,
     true // Add removeDuplicateFragments parameter to prevent duplicated fragments

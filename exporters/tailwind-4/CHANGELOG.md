@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-11-23
+- A word repeated inside one token or group name now stays in variable names, color utility classes and typography classes. "Fast-fast themed ref" exports as `--duration-fast-fast-themed-ref` instead of sharing `--duration-fast-themed-ref` with "Fast themed ref", which now always belongs to "Fast themed ref". A color token in the group "Brand brand" gets `bg-color-brand-brand-500`, and a typography token "Heading heading XL" in Typography/Heading gets `typography-heading-heading-xl`. A word repeated where the prefix, a group and the token name meet is still written once.
+- With "Apply find/replace" set to "Before prefix is added", find and replace runs on each group name and on the token name separately, so a find text that spans two parts of the name (two group names, or a group name and the token name) no longer matches. Set "Apply find/replace" to "After prefix is added" to match across parts.
+
 ## [1.3.1] - 2026-11-19
 - Duration tokens get the Tailwind class `.duration-(--duration-fast)` instead of `.duration-fast`. Tailwind 4's `duration-*` utilities don't read `--duration-*` variables, so the old class built nothing, or Tailwind's own milliseconds for a numbered name like `duration-100`. The variables don't change.
 - The README shows how to apply Duration tokens.

@@ -8,12 +8,18 @@ export declare class NamingHelper {
      * @returns The text with all replacements applied
      */
     private static applyFindReplace;
+    /**
+     * Builds a token's variable name from the prefix, its group path and its name. A word repeated where two of these
+     * parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
+     */
     static codeSafeVariableNameForToken(token: Pick<Token, 'name'>, format: StringCase, parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null, prefix: string | null, findReplace?: Record<string, string>, removeDuplicateFragments?: boolean): string;
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
      * if they contain spaces, case changes from one letter to another and so on.
      *
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
+     *
+     * With removeDuplicateFragments, a word equal to the word before it is written once: anywhere in a string, and in an array only where two fragments meet.
      */
     static codeSafeVariableName(fragments: Array<string> | string, format: StringCase, findReplace?: Record<string, string>, removeDuplicateFragments?: boolean): string;
     /** Convert any string to CSS variable reference */
