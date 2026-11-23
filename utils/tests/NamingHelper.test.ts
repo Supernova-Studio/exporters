@@ -414,6 +414,9 @@ test('codeSafeVariableName_with_removeDuplicateFragments', () => {
   expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, true)).toBe(
     'color_bg_fill_warning'
   )
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, true)).toBe(
+    'color-bg-fill-warning'
+  )
 })
 
 test('keeps a word repeated inside the token name, so it does not collide with the name without the repeat', () => {
