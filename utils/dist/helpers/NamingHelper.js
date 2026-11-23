@@ -81,9 +81,10 @@ class NamingHelper {
     static codeSafeVariableName(fragments, format, findReplace, removeDuplicateFragments = false) {
         // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
         const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_'));
-        // With removeDuplicateFragments, a word repeated where two fragments meet is written once; a word repeated inside one fragment is kept
+        // With removeDuplicateFragments, a word repeated where two fragments meet is written once; a word repeated inside one fragment is kept.
+        // A string counts each of its words as a fragment
         let sentence = removeDuplicateFragments
-            ? cleanFragments
+            ? (typeof fragments === 'string' ? (0, change_case_1.kebabCase)(cleanFragments[0]).split('-') : cleanFragments)
                 .reduce((words, fragment) => {
                 const fragmentWords = (0, change_case_1.kebabCase)(fragment).split('-').filter((word) => word.length > 0);
                 return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)];
