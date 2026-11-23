@@ -466,7 +466,7 @@ test('keeps a word repeated inside one fragment of an array, and collapses it wh
   )
 })
 
-test('keeps a word repeated inside the token name when the group name matches its first word', () => {
+test('keeps a word repeated inside the token name when the group name matches the first word of the token name', () => {
   const tokenGroup = { name: 'Fast', path: [], isRoot: false }
   expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast-fast themed ref' }, StringCase.kebabCase, tokenGroup, 'duration')).toBe(
     'duration-fast-fast-themed-ref'
