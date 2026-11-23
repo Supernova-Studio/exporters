@@ -82,7 +82,7 @@ export class NamingHelper {
     const tokenNameParts = token.name.split(/[\s-_]+/)
     
     // This checks if the first word of token name matches the last fragment (case insensitive)
-    // and if so, appends the remaining parts of the token name to that fragment, so the dedupe doesn't drop a second word
+    // and if so, appends the remaining parts of the token name to that fragment
     if (fragments.length > 0 && tokenNameParts.length > 1 && 
         tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase()) {
       fragments[fragments.length - 1] += ` ${tokenNameParts.slice(1).join(' ')}`
@@ -108,8 +108,6 @@ export class NamingHelper {
    * if they contain spaces, case changes from one letter to another and so on.
    *
    * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
-   *
-   * With removeDuplicateFragments, a word equal to the word before it is written once: anywhere in a string, and in an array only where two fragments meet.
    */
   static codeSafeVariableName(
     fragments: Array<string> | string,
@@ -125,9 +123,8 @@ export class NamingHelper {
 
     // Remove duplicates if requested
     if (removeDuplicateFragments) {
-      // A string counts each of its words as a fragment
-      const dedupeFragments = typeof fragments === 'string' ? kebabCase(sentence).split('-') : cleanFragments
-      sentence = dedupeFragments
+      // A word repeated where two fragments meet is written once; a word repeated inside one fragment is kept
+      sentence = cleanFragments
         .reduce<Array<string>>((words, fragment) => {
           const fragmentWords = kebabCase(fragment).split('-').filter((word) => word.length > 0)
           return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)]

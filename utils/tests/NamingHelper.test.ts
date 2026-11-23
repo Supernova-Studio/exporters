@@ -405,13 +405,13 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
 
 test('codeSafeVariableName_with_removeDuplicateFragments', () => {
   // Test the removeDuplicateFragments parameter directly on codeSafeVariableName
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, true)).toBe(
     'color-bg-fill-warning'
   )
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.camelCase, undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.camelCase, undefined, true)).toBe(
     'colorBgFillWarning'
   )
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.snakeCase, undefined, true)).toBe(
     'color_bg_fill_warning'
   )
 })

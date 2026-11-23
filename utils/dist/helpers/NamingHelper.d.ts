@@ -18,8 +18,6 @@ export declare class NamingHelper {
      * if they contain spaces, case changes from one letter to another and so on.
      *
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
-     *
-     * With removeDuplicateFragments, a word equal to the word before it is written once: anywhere in a string, and in an array only where two fragments meet.
      */
     static codeSafeVariableName(fragments: Array<string> | string, format: StringCase, findReplace?: Record<string, string>, removeDuplicateFragments?: boolean): string;
     /** Convert any string to CSS variable reference */
