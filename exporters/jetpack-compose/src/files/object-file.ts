@@ -3,6 +3,7 @@ import {
   FileNameHelper,
   GeneralHelper,
   ImportCollector,
+  KotlinHelper,
   NamingHelper,
   StringCase,
   ThemeHelper
@@ -10,7 +11,6 @@ import {
 import {
   BorderToken,
   ColorToken,
-  ColorTokenValue,
   GradientToken,
   OutputTextFile,
   ShadowToken,
@@ -178,21 +178,27 @@ function generateFileContent(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
 
-  // Declare each token below the aliases and colors it references, so Kotlin never reads a property that is not initialized yet
-  const colorSourceId = (color: ColorTokenValue) => color.referencedTokenId ?? color.color.referencedTokenId
+  // Declare each token below the aliases and colors in this file that it references, so Kotlin never reads a property that is not initialized yet
+  const exportedTokens = new Map(tokensToExport.map((token) => [token.id, token]))
   const referencedIds = (token: Token): Array<string | null> => {
     switch (token.tokenType) {
       case TokenType.color:
-        return [colorSourceId((token as ColorToken).value)]
+        return [KotlinHelper.colorSourceTokenId((token as ColorToken).value)]
       case TokenType.border:
-        return [(token as BorderToken).value.referencedTokenId, colorSourceId((token as BorderToken).value.color)]
+        return [
+          (token as BorderToken).value.referencedTokenId,
+          KotlinHelper.colorSourceTokenId((token as BorderToken).value.color)
+        ]
       case TokenType.gradient:
         return (token as GradientToken).value.flatMap((layer) => [
           layer.referencedTokenId,
-          ...layer.stops.map((stop) => colorSourceId(stop.color))
+          ...layer.stops.map((stop) => KotlinHelper.colorSourceTokenId(stop.color))
         ])
       case TokenType.shadow:
-        return (token as ShadowToken).value.flatMap((layer) => [layer.referencedTokenId, colorSourceId(layer.color)])
+        return (token as ShadowToken).value.flatMap((layer) => [
+          layer.referencedTokenId,
+          KotlinHelper.colorSourceTokenId(layer.color)
+        ])
       default:
         return [(token as any).value?.referencedTokenId]
     }
@@ -201,7 +207,7 @@ function generateFileContent(
     Math.max(
       0,
       ...referencedIds(token).map((id) => {
-        const referenced = id ? mappedTokens.get(id) : undefined
+        const referenced = id ? exportedTokens.get(id) : undefined
         return referenced ? 1 + referenceDepth(referenced) : 0
       })
     )

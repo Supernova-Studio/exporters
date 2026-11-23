@@ -217,6 +217,11 @@ export class KotlinHelper {
     return value
   }
 
+  /** The token that a color is written from: its alias, else the color that its color part references */
+  static colorSourceTokenId(color: ColorTokenValue): string | null {
+    return color.referencedTokenId ?? color.color.referencedTokenId
+  }
+
   static colorTokenValueToKotlin(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,
@@ -368,7 +373,7 @@ export class KotlinHelper {
         ? {
             color: {
               ...value.color.color,
-              referencedTokenId: value.color.referencedTokenId ?? value.color.color.referencedTokenId
+              referencedTokenId: this.colorSourceTokenId(value.color)
             },
             opacity: value.opacity,
             referencedTokenId: null

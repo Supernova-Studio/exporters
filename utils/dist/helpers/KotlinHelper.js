@@ -162,6 +162,10 @@ class KotlinHelper {
         }
         return value;
     }
+    /** The token that a color is written from: its alias, else the color that its color part references */
+    static colorSourceTokenId(color) {
+        return color.referencedTokenId ?? color.color.referencedTokenId;
+    }
     static colorTokenValueToKotlin(color, allTokens, options, importCollector) {
         importCollector.use(ImportFlag.Color);
         const source = color.referencedTokenId
@@ -253,7 +257,7 @@ class KotlinHelper {
             ? {
                 color: {
                     ...value.color.color,
-                    referencedTokenId: value.color.referencedTokenId ?? value.color.color.referencedTokenId
+                    referencedTokenId: this.colorSourceTokenId(value.color)
                 },
                 opacity: value.opacity,
                 referencedTokenId: null

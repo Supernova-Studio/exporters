@@ -76,6 +76,8 @@ export declare class KotlinHelper {
     options: TokenToKotlinOptions,
     importCollector: ImportCollector
   ): string
+  /** The token that a color is written from: its alias, else the color that its color part references */
+  static colorSourceTokenId(color: ColorTokenValue): string | null
   static colorTokenValueToKotlin(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,
