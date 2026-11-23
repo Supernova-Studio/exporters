@@ -78,6 +78,8 @@ export declare class KotlinHelper {
   ): string
   /** The token that a color is written from: its alias, else the color that its color part references */
   static colorSourceTokenId(color: ColorTokenValue): string | null
+  /** The ids of the tokens that a token's Kotlin value names, which must be declared above it */
+  static referencedTokenIds(token: Token): Array<string | null>
   static colorTokenValueToKotlin(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,

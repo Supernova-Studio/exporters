@@ -9,20 +9,11 @@ import {
   ThemeHelper
 } from "@supernovaio/export-utils"
 import {
-  AnyDimensionToken,
-  AnyOptionToken,
-  AnyStringToken,
-  BlurToken,
-  BorderToken,
-  ColorToken,
-  GradientToken,
   OutputTextFile,
-  ShadowToken,
   Token,
   TokenGroup,
   TokenTheme,
   TokenType,
-  TypographyToken,
   UnreachableCaseError
 } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
@@ -186,68 +177,10 @@ function generateFileContent(
 
   // Declare each token below the tokens in this file that it references, so Kotlin never reads a property that is not initialized yet
   const exportedTokens = new Map(tokensToExport.map((token) => [token.id, token]))
-  const referencedIds = (token: Token): Array<string | null> => {
-    switch (token.tokenType) {
-      case TokenType.color:
-        return [KotlinHelper.colorSourceTokenId((token as ColorToken).value)]
-      case TokenType.border: {
-        const { value } = token as BorderToken
-        return [value.referencedTokenId, value.width.referencedTokenId, KotlinHelper.colorSourceTokenId(value.color)]
-      }
-      case TokenType.gradient:
-        return (token as GradientToken).value.flatMap((layer) => [
-          layer.referencedTokenId,
-          ...layer.stops.map((stop) => KotlinHelper.colorSourceTokenId(stop.color))
-        ])
-      case TokenType.shadow:
-        return (token as ShadowToken).value.flatMap((layer) => [
-          layer.referencedTokenId,
-          KotlinHelper.colorSourceTokenId(layer.color)
-        ])
-      case TokenType.blur: {
-        const { value } = token as BlurToken
-        return [value.referencedTokenId, value.radius.referencedTokenId]
-      }
-      case TokenType.typography: {
-        const { value } = token as TypographyToken
-        return [
-          value.referencedTokenId,
-          value.fontFamily.referencedTokenId,
-          value.fontWeight.referencedTokenId,
-          value.fontSize.referencedTokenId,
-          value.lineHeight?.referencedTokenId ?? null,
-          value.letterSpacing.referencedTokenId,
-          value.textDecoration.referencedTokenId
-        ]
-      }
-      case TokenType.dimension:
-      case TokenType.size:
-      case TokenType.space:
-      case TokenType.opacity:
-      case TokenType.fontSize:
-      case TokenType.lineHeight:
-      case TokenType.letterSpacing:
-      case TokenType.paragraphSpacing:
-      case TokenType.borderWidth:
-      case TokenType.radius:
-      case TokenType.duration:
-      case TokenType.zIndex:
-      case TokenType.fontWeight:
-      case TokenType.fontFamily:
-      case TokenType.productCopy:
-      case TokenType.string:
-      case TokenType.textCase:
-      case TokenType.textDecoration:
-      case TokenType.visibility:
-        return [(token as AnyDimensionToken | AnyStringToken | AnyOptionToken).value.referencedTokenId]
-      default:
-        throw new UnreachableCaseError(token.tokenType, "Unsupported token type for declaration order:")
-    }
-  }
   const referenceDepth = (token: Token): number =>
     Math.max(
       0,
-      ...referencedIds(token).map((id) => {
+      ...KotlinHelper.referencedTokenIds(token).map((id) => {
         const referenced = id ? exportedTokens.get(id) : undefined
         return referenced ? 1 + referenceDepth(referenced) : 0
       })

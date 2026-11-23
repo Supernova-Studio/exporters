@@ -222,6 +222,66 @@ export class KotlinHelper {
     return color.referencedTokenId ?? color.color.referencedTokenId
   }
 
+  /** The ids of the tokens that a token's Kotlin value names, which must be declared above it */
+  static referencedTokenIds(token: Token): Array<string | null> {
+    switch (token.tokenType) {
+      case TokenType.color:
+        return [this.colorSourceTokenId((token as ColorToken).value)]
+      case TokenType.border: {
+        const { value } = token as BorderToken
+        return [value.referencedTokenId, value.width.referencedTokenId, this.colorSourceTokenId(value.color)]
+      }
+      case TokenType.gradient:
+        return (token as GradientToken).value.flatMap((layer) => [
+          layer.referencedTokenId,
+          ...layer.stops.map((stop) => this.colorSourceTokenId(stop.color))
+        ])
+      case TokenType.shadow:
+        return (token as ShadowToken).value.flatMap((layer) => [
+          layer.referencedTokenId,
+          this.colorSourceTokenId(layer.color)
+        ])
+      case TokenType.blur: {
+        const { value } = token as BlurToken
+        return [value.referencedTokenId, value.radius.referencedTokenId]
+      }
+      case TokenType.typography: {
+        const { value } = token as TypographyToken
+        return [
+          value.referencedTokenId,
+          value.fontFamily.referencedTokenId,
+          value.fontWeight.referencedTokenId,
+          value.fontSize.referencedTokenId,
+          value.lineHeight?.referencedTokenId ?? null,
+          value.letterSpacing.referencedTokenId,
+          value.textDecoration.referencedTokenId
+        ]
+      }
+      case TokenType.dimension:
+      case TokenType.size:
+      case TokenType.space:
+      case TokenType.opacity:
+      case TokenType.fontSize:
+      case TokenType.lineHeight:
+      case TokenType.letterSpacing:
+      case TokenType.paragraphSpacing:
+      case TokenType.borderWidth:
+      case TokenType.radius:
+      case TokenType.duration:
+      case TokenType.zIndex:
+      case TokenType.fontWeight:
+      case TokenType.fontFamily:
+      case TokenType.productCopy:
+      case TokenType.string:
+      case TokenType.textCase:
+      case TokenType.textDecoration:
+      case TokenType.visibility:
+        return [(token as AnyDimensionToken | AnyStringToken | AnyOptionToken).value.referencedTokenId]
+      default:
+        throw new UnreachableCaseError(token.tokenType, "Unsupported token type for declaration order:")
+    }
+  }
+
   static colorTokenValueToKotlin(
     color: ColorTokenValue,
     allTokens: Map<string, Token>,

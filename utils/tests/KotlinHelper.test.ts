@@ -161,3 +161,44 @@ describe("KotlinHelper shadow layer opacity", () => {
     )
   })
 })
+
+describe("KotlinHelper.referencedTokenIds", () => {
+  test("a color with its own opacity names its source color", () => {
+    expect(KotlinHelper.referencedTokenIds(colorToken("brand40", ownOpacity(0.4)))).toEqual([gray900.id])
+  })
+
+  test("a shadow names each layer alias and each layer color", () => {
+    const token = {
+      id: "shadow",
+      tokenType: TokenType.shadow,
+      value: [shadowLayer(gray900Alias, 0.2), { ...shadowLayer(gray900.value), referencedTokenId: "shadowBase" }]
+    } as unknown as Token
+    expect(KotlinHelper.referencedTokenIds(token)).toEqual([null, gray900.id, "shadowBase", null])
+  })
+
+  test("a typography token names the tokens that its parts reference", () => {
+    const part = (referencedTokenId: string | null) => ({ referencedTokenId })
+    const token = {
+      id: "body",
+      tokenType: TokenType.typography,
+      value: {
+        referencedTokenId: null,
+        fontFamily: part("fontFamilyBase"),
+        fontWeight: part(null),
+        fontSize: part("fontSizeMd"),
+        lineHeight: null,
+        letterSpacing: part(null),
+        textDecoration: part(null)
+      }
+    } as unknown as Token
+    expect(KotlinHelper.referencedTokenIds(token)).toEqual([
+      null,
+      "fontFamilyBase",
+      null,
+      "fontSizeMd",
+      null,
+      null,
+      null
+    ])
+  })
+})
