@@ -119,18 +119,15 @@ export class NamingHelper {
     const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) =>
       NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_')
     )
-    let sentence = cleanFragments.join('_')
-
-    // Remove duplicates if requested
-    if (removeDuplicateFragments) {
-      // A word repeated where two fragments meet is written once; a word repeated inside one fragment is kept
-      sentence = cleanFragments
-        .reduce<Array<string>>((words, fragment) => {
-          const fragmentWords = kebabCase(fragment).split('-').filter((word) => word.length > 0)
-          return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)]
-        }, [])
-        .join(' ')
-    }
+    // With removeDuplicateFragments, a word repeated where two fragments meet is written once; a word repeated inside one fragment is kept
+    let sentence = removeDuplicateFragments
+      ? cleanFragments
+          .reduce<Array<string>>((words, fragment) => {
+            const fragmentWords = kebabCase(fragment).split('-').filter((word) => word.length > 0)
+            return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)]
+          }, [])
+          .join(' ')
+      : cleanFragments.join('_')
 
     switch (format) {
       case StringCase.camelCase:
