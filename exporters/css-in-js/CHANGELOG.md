@@ -5,7 +5,7 @@ All the updates to this exporter are documented in this file.
 
 ### 🐞 Fixed
 
-A word repeated inside one token or group name now stays in the key: "Fast-fast themed ref" and "Fast themed ref" get `durationFastFastThemedRef` and `durationFastThemedRef` instead of one of them getting a `_copy_1` suffix. `durationFastThemedRef` now always belongs to "Fast themed ref". Keys of tokens and groups with a repeated word inside one name change.
+A word repeated inside one token or group name now stays in the key: "Fast-fast themed ref" and "Fast themed ref" get `durationFastFastThemedRef` and `durationFastThemedRef` instead of one of them getting a `_copy_1` suffix. `durationFastThemedRef` now always belongs to "Fast themed ref". Tokens and groups with a repeated word inside one name get new keys after this update.
 
 ## 2.2.0 - 2026-11-16
 

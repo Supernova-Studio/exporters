@@ -414,9 +414,6 @@ test('codeSafeVariableName_with_removeDuplicateFragments', () => {
   expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, true)).toBe(
     'color_bg_fill_warning'
   )
-  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, true)).toBe(
-    'color-bg-fill-warning'
-  )
 })
 
 test('keeps a word repeated inside the token name, so it does not collide with the name without the repeat', () => {
@@ -463,6 +460,9 @@ test('drops the group name from the start of the token name once, even when the 
 test('keeps a word repeated inside one fragment of an array, and collapses it where fragments meet', () => {
   expect(NamingHelper.codeSafeVariableName(['Typography', 'Heading', 'Heading heading XL'], StringCase.kebabCase, {}, true)).toBe(
     'typography-heading-heading-xl'
+  )
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, true)).toBe(
+    'color-bg-fill-warning'
   )
 })
 
