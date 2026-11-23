@@ -415,3 +415,70 @@ test('codeSafeVariableName_with_removeDuplicateFragments', () => {
     'color_bg_fill_warning'
   )
 })
+
+test('keeps a word repeated inside the token name, so it does not collide with the name without the repeat', () => {
+  const rootGroup = { name: 'Duration', path: [], isRoot: true }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast-fast themed ref' }, StringCase.kebabCase, rootGroup, 'duration')).toBe(
+    'duration-fast-fast-themed-ref'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast themed ref' }, StringCase.kebabCase, rootGroup, 'duration')).toBe(
+    'duration-fast-themed-ref'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast-fast themed ref' }, StringCase.camelCase, rootGroup, 'duration')).toBe(
+    'durationFastFastThemedRef'
+  )
+})
+
+test('keeps a word repeated inside the token name with an empty find and replace, the Tailwind default', () => {
+  const rootGroup = { name: 'Duration', path: [], isRoot: true }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast-fast themed ref' }, StringCase.kebabCase, rootGroup, 'duration', {})).toBe(
+    'duration-fast-fast-themed-ref'
+  )
+})
+
+test('keeps a word repeated inside a group name', () => {
+  const tokenGroup = { name: 'Neutral Neutral', path: ['Color'], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: '500' }, StringCase.kebabCase, tokenGroup, null)).toBe(
+    'color-neutral-neutral-500'
+  )
+})
+
+test('still collapses a word repeated inside the prefix, such as the type prefix and a collection named after it', () => {
+  const tokenGroup = { name: 'Text', path: [], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Primary' }, StringCase.kebabCase, tokenGroup, 'color-Color tokens')).toBe(
+    'color-tokens-text-primary'
+  )
+})
+
+test('drops the group name from the start of the token name once, even when the group name is camelCase', () => {
+  const tokenGroup = { name: 'BgColor', path: [], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'BgColor Hover' }, StringCase.kebabCase, tokenGroup, 'color')).toBe(
+    'color-bg-color-hover'
+  )
+})
+
+test('keeps a word repeated inside one fragment of an array, and collapses it where fragments meet', () => {
+  expect(NamingHelper.codeSafeVariableName(['Typography', 'Heading', 'Heading heading XL'], StringCase.kebabCase, {}, true)).toBe(
+    'typography-heading-heading-xl'
+  )
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, true)).toBe(
+    'color-bg-fill-warning'
+  )
+})
+
+test('keeps a word repeated inside the token name when the group name matches the first word of the token name', () => {
+  const tokenGroup = { name: 'Fast', path: [], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast-fast themed ref' }, StringCase.kebabCase, tokenGroup, 'duration')).toBe(
+    'duration-fast-fast-themed-ref'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast themed ref' }, StringCase.kebabCase, tokenGroup, 'duration')).toBe(
+    'duration-fast-themed-ref'
+  )
+})
+
+test('leaves no empty segment when find and replace removes a whole group name', () => {
+  const tokenGroup = { name: 'Blue', path: ['Primitives'], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: '500' }, StringCase.kebabCase, tokenGroup, null, { Primitives: '' })).toBe(
+    'blue-500'
+  )
+})

@@ -1,6 +1,11 @@
 ### Style Dictionary Exporter
 All the updates to this exporter are documented in this file.
 
+## 2.7.0 - 2026-11-23
+
+### 🐞 Fixed
+- With alphabetical sort order, a token with a word repeated inside its name, such as "Fast-fast themed ref", sorts by its full name. Token keys don't change.
+
 ## 2.6.0 - 2026-11-16
 
 ### 🐞 Fixed

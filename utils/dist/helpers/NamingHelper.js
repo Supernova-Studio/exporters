@@ -35,6 +35,10 @@ class NamingHelper {
         }
         return result;
     }
+    /**
+     * Builds a token's variable name from the prefix, its group path and its name. A word repeated where two of these
+     * parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
+     */
     static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, removeDuplicateFragments = true) {
         // Create array with all path segments and token name at the end
         let fragments = [];
@@ -50,30 +54,20 @@ class NamingHelper {
         // we only want to add "500" to avoid "Red Red 500"
         const tokenNameParts = token.name.split(/[\s-_]+/);
         // This checks if the first word of token name matches the last fragment (case insensitive)
-        // and if so, only adds the remaining parts of the token name
+        // and if so, appends the remaining parts of the token name to that fragment
         if (fragments.length > 0 && tokenNameParts.length > 1 &&
             tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase()) {
-            fragments.push(tokenNameParts.slice(1).join(' '));
+            fragments[fragments.length - 1] += ` ${tokenNameParts.slice(1).join(' ')}`;
         }
         else {
             fragments.push(token.name);
         }
-        // Step 3: Apply find/replace to path and name fragments only (not prefix)
-        // This allows for custom text replacements in the variable name
-        if (findReplace) {
-            // Join path and name for find/replace processing
-            let pathAndName = fragments.join(' ');
-            // Apply find/replace using the helper method
-            pathAndName = NamingHelper.applyFindReplace(pathAndName, findReplace);
-            // Split back into fragments and clean up
-            fragments = pathAndName
-                .split(/\s+/)
-                .filter(f => f.length > 0)
-                .map(f => f.trim());
-        }
+        // Step 3: Apply find/replace to each path and name fragment (not prefix), keeping the fragments apart
+        fragments = fragments.map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace));
         // Step 4: Add prefix after find/replace (prefix should not be affected by find/replace)
+        // Each prefix word is its own fragment, so "color" + collection "Color tokens" still collapses to color-tokens
         if (prefix && prefix.length > 0) {
-            fragments.unshift(prefix);
+            fragments.unshift(...(0, change_case_1.kebabCase)(prefix).split('-'));
         }
         // Step 5: Apply case formatting to the final fragments
         return NamingHelper.codeSafeVariableName(fragments, format, undefined, removeDuplicateFragments);
@@ -85,26 +79,18 @@ class NamingHelper {
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
      */
     static codeSafeVariableName(fragments, format, findReplace, removeDuplicateFragments = false) {
-        // Convert fragments to a single sentence for processing
-        let sentence = typeof fragments === 'string' ? fragments : fragments.join(' ');
-        // Apply find/replace if provided using the helper method
-        sentence = NamingHelper.applyFindReplace(sentence, findReplace);
-        // Only allow letters, digits, underscore and hyphen
-        sentence = sentence.replaceAll(/[^a-zA-Z0-9_-]/g, '_');
-        // Remove duplicates if requested
-        if (removeDuplicateFragments) {
-            // First convert to kebabCase for normalization
-            const normalizedString = (0, change_case_1.kebabCase)(sentence);
-            // Split by "-" to get new fragments
-            const normalizedFragments = normalizedString.split('-').filter(f => f.length > 0);
-            // Remove duplicates from normalized fragments
-            const uniqueFragments = normalizedFragments.filter((fragment, index) => {
-                // Keep if it's first element or different from previous
-                return index === 0 || fragment !== normalizedFragments[index - 1];
-            });
-            // Join back into a sentence
-            sentence = uniqueFragments.join(' ');
-        }
+        // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
+        const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_'));
+        // With removeDuplicateFragments, a word repeated where two fragments meet is written once; a word repeated inside one fragment is kept.
+        // A string counts each of its words as a fragment
+        let sentence = removeDuplicateFragments
+            ? (typeof fragments === 'string' ? (0, change_case_1.kebabCase)(cleanFragments[0]).split('-') : cleanFragments)
+                .reduce((words, fragment) => {
+                const fragmentWords = (0, change_case_1.kebabCase)(fragment).split('-').filter((word) => word.length > 0);
+                return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)];
+            }, [])
+                .join(' ')
+            : cleanFragments.join('_');
         switch (format) {
             case StringCase_1.StringCase.camelCase:
                 sentence = (0, change_case_1.camelCase)(sentence);

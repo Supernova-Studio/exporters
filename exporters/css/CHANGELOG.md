@@ -1,6 +1,11 @@
 ### CSS exporter release notes
 All the updates to this exporter are documented in this file.
 
+## 3.7.0 - 2026-11-23
+
+### 🐞 Fixed
+- A word repeated inside one token or group name now stays in the variable name. A token "Fast-fast themed ref" exports as `--duration-fast-fast-themed-ref` instead of `--duration-fast-themed-ref`, the name of "Fast themed ref". A word repeated where the prefix, a group and the token name meet is still written once, as in `--color-neutral-500` for the token "Neutral 500" in the group "Neutral". Tokens and groups with a repeated word inside one name get new variable names after this update.
+
 ## 3.6.0 - 2026-11-16
 
 ### 🐞 Fixed
