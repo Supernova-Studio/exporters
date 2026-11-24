@@ -9,7 +9,7 @@ import {
 } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken, resetTokenNameTracking } from "../content/token"
+import { convertedToken, referencedTokens, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
@@ -167,15 +167,24 @@ function generateFileContent(
   // Create a map of all tokens by ID for reference resolution
   const mappedTokens = new Map(allTokens.map((token) => [token.id, token]))
 
-  // Sort tokens to ensure proper declaration order:
-  // - Tokens with direct values come first
-  // - Tokens that reference other tokens come after
-  // This prevents reference errors where a token tries to use another token that hasn't been declared yet
-  const sortedTokensToExport = [...tokensToExport].sort((a, b) => {
-    const aHasRef = !!(a as any)?.value?.referencedTokenId
-    const bHasRef = !!(b as any)?.value?.referencedTokenId
-    return aHasRef === bHasRef ? 0 : aHasRef ? 1 : -1
-  })
+  // Declare each token below the tokens in this file that it references, so Kotlin never reads a property that is not initialized yet
+  const exportedTokens = new Map(tokensToExport.map((token) => [token.id, token]))
+  const depths = new Map<string, number>()
+  const referenceDepth = (token: Token): number => {
+    if (!depths.has(token.id)) {
+      depths.set(
+        token.id,
+        Math.max(
+          0,
+          ...referencedTokens(token, mappedTokens).map((refToken) =>
+            exportedTokens.has(refToken.id) ? 1 + referenceDepth(exportedTokens.get(refToken.id)!) : 0
+          )
+        )
+      )
+    }
+    return depths.get(token.id)!
+  }
+  const sortedTokensToExport = [...tokensToExport].sort((a, b) => referenceDepth(a) - referenceDepth(b))
 
   // Convert tokens to Kotlin property declarations
   const tokenPropertiesLiteral = sortedTokensToExport

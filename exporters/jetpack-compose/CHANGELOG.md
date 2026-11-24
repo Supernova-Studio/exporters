@@ -1,6 +1,13 @@
 ### Jetpack Compose exporter release notes
 All the updates to this exporter are documented in this file.
 
+## 1.0.1 - 2026-11-23
+
+### 🐞 Fixed
+- Shadows keep their own opacity when their color references a color token: a shadow on Gray 900 at 20% now exports as `ColorTokens.colorGray900.copy(alpha = 0.2f)`. It was exported as the solid color.
+- Colors that reference another color with their own opacity, shown in Supernova as "Brand / 40%", now export as `colorBrand.copy(alpha = 0.4f)`, so they follow the source color. They were a fixed `Color(0x66…)`. With references off they are written as the resolved color.
+- A token is declared below the tokens in its file that it references, so a chain of aliases, a color with its own opacity on an alias, or a typography token whose parts reference other tokens no longer stops the generated file from compiling.
+
 ## 1.0.0 - 2026-11-23
 
 ### 🚀 New

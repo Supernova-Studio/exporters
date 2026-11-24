@@ -71,6 +71,32 @@ export function tokenPropertyName(
   return tokenNameTracker.getTokenName(token, tokenGroups, StringCase.camelCase, prefix, false, "Copy")
 }
 
+/** The options that every Kotlin writer call uses, so declaration order and output name the same references */
+function kotlinOptions(tokenToVariableRef: (refToken: Token) => string) {
+  return {
+    colorFormat: ColorFormat.hex8,
+    allowReferences: exportConfiguration.useReferences,
+    decimals: 0,
+    indent: exportConfiguration.indent,
+    tokenToVariableRef
+  } satisfies TokenToKotlinOptions
+}
+
+/** The tokens that the Kotlin writer looks up for a token's value */
+export function referencedTokens(token: Token, mappedTokens: Map<string, Token>): Array<Token> {
+  const referenced: Array<Token> = []
+  KotlinHelper.tokenValue(
+    token,
+    mappedTokens,
+    kotlinOptions((refToken) => {
+      referenced.push(refToken)
+      return ""
+    }),
+    new ImportCollector("")
+  )
+  return referenced
+}
+
 /**
  * Converts a design token into its Kotlin representation.
  * Handles formatting of the token value, references, and optional description comments.
@@ -92,27 +118,21 @@ export function convertedToken(
   // Generate the property name
   const name = tokenPropertyName(token, tokenGroups, collections)
 
-  const options = {
-    colorFormat: ColorFormat.hex8,
-    allowReferences: exportConfiguration.useReferences,
-    decimals: 0,
-    indent: exportConfiguration.indent,
-    tokenToVariableRef: (refToken: Token) => {
-      const name = tokenPropertyName(refToken, tokenGroups, collections)
+  const options = kotlinOptions((refToken: Token) => {
+    const name = tokenPropertyName(refToken, tokenGroups, collections)
 
-      if (refToken.tokenType === token.tokenType || exportConfiguration.fileStructure === FileStructure.SingleFile) {
-        // Both tokens in the same file - no need to do anything additionally
+    if (refToken.tokenType === token.tokenType || exportConfiguration.fileStructure === FileStructure.SingleFile) {
+      // Both tokens in the same file - no need to do anything additionally
 
-        return name
-      } else {
-        // Tokens are stored separately - we need to add a prefix.
-        // Imports are not necessary - all files in the same package.
+      return name
+    } else {
+      // Tokens are stored separately - we need to add a prefix.
+      // Imports are not necessary - all files in the same package.
 
-        const prefix = getObjectNameFromTokenType(refToken.tokenType)
-        return `${prefix}.${name}`
-      }
+      const prefix = getObjectNameFromTokenType(refToken.tokenType)
+      return `${prefix}.${name}`
     }
-  } satisfies TokenToKotlinOptions
+  })
 
   // Convert token value to object instance, handling references and formatting according to configuration
   const value = KotlinHelper.tokenValue(token, mappedTokens, options, importCollector)
