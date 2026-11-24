@@ -118,7 +118,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     }
   }
 
-  const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
+  const themes = isThemeDirectiveSelector() || context.themeIds?.length ? await sdk.tokens.getTokenThemes(remoteVersionIdentifier) : []
   // Every theme counts, not only the exported ones, so a base file and theme files from separate pipelines agree
   const themedShadowIds = isThemeDirectiveSelector()
     ? new Set(themes.flatMap((theme) => theme.overriddenTokens.flatMap((token) => (token.tokenType === TokenType.shadow ? [token.id] : []))))

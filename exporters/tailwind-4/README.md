@@ -142,7 +142,7 @@ Here is a list of all the configuration options this exporter provides:
   - `separateFiles`: Generate separate files for each theme
   - `mergedTheme`: Generate a single merged theme file
 - **exportOnlyThemedTokens:** When enabled, themed files will only include tokens that have different values from the base theme, and the tokens that reference them.
-- **exportBaseValues:** When enabled, base token values will be exported along with themes. Typography classes are written with the base values, so a theme export with this option off needs a base export, for example from another pipeline.
+- **exportBaseValues:** When enabled, base token values will be exported along with themes. Only the base file holds the typography classes, so when separate or merged theme files are exported with this option off, export the base values from another pipeline too.
 
 ### Reset Rules
 - **disableAllDefaults:** When enabled, removes all default Tailwind utilities by adding --*: initial; to reset group.

@@ -156,7 +156,6 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 
   // Generate the CSS variable name based on token properties and configuration
   let name = tokenVariableName(token, tokenGroups)
-  const value = tokenValue(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   let output = ""
@@ -181,21 +180,25 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   const declaredName = declaredVariableName(name, options.isThemeFile)
   // Tailwind copies a shadow's value into its class, so a themed shadow's class must read a variable that theme files override
   if (options.themedShadowIds.has(token.id)) {
-    output += `${indentString}--${declaredName}: var(--value-${name});`
+    output += `${indentString}--${declaredName}: var(--${shadowValueVariableName(token, tokenGroups)});`
     if (options.isThemeFile) {
       output += `\n${shadowValueVariable(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)}`
     }
     return output
   }
 
-  output += `${indentString}--${declaredName}: ${value};`
+  output += `${indentString}--${declaredName}: ${tokenValue(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)};`
   return output
+}
+
+function shadowValueVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
+  return `value-${tokenVariableName(token, tokenGroups)}`
 }
 
 /** The variable that holds a themed shadow's value, which the shadow's class reads */
 export function shadowValueVariable(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels: Set<string>): string {
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
-  return `${indentString}--value-${tokenVariableName(token, tokenGroups)}: ${tokenValue(token, mappedTokens, tokenGroups, colorTokensNeedingChannels)};`
+  return `${indentString}--${shadowValueVariableName(token, tokenGroups)}: ${tokenValue(token, mappedTokens, tokenGroups, colorTokensNeedingChannels)};`
 }
 
 /** The CSS value of a token, with references written as `var()` */
