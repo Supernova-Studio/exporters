@@ -16,11 +16,11 @@ import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
  * This function filters tokens based on theme settings and ensures only allowed token types are included
  * 
  * @param tokens - Array of tokens to process
- * @param themePath - Path of the theme (if applicable)
+ * @param isThemeFile - Whether the file is a theme file
  * @param themes - Themes that the file writes (if applicable)
  * @returns Filtered array of tokens
  */
-function processTokens(tokens: Array<Token>, themePath: string, themes: Array<TokenTheme>): Array<Token> {
+function processTokens(tokens: Array<Token>, isThemeFile: boolean, themes: Array<TokenTheme>): Array<Token> {
     // Skip if no tokens and empty files are disabled
     if (!exportConfiguration.generateEmptyFiles && tokens.length === 0) {
         return []
@@ -28,7 +28,7 @@ function processTokens(tokens: Array<Token>, themePath: string, themes: Array<To
 
     // For theme files: filter tokens to only include those that are themed
     let processedTokens = tokens
-    if (themePath && themes.length > 0 && exportConfiguration.exportOnlyThemedTokens) {
+    if (isThemeFile && exportConfiguration.exportOnlyThemedTokens) {
         const themeTokenIds = themeFileTokenIds(tokens, themes)
         processedTokens = tokens.filter((token) => themeTokenIds.has(token.id))
         if (processedTokens.length === 0) {
@@ -41,7 +41,7 @@ function processTokens(tokens: Array<Token>, themePath: string, themes: Array<To
     return processedTokens
 }
 
-/** Ids of every token a value references, at any depth of the value (layers, parts, color and opacity) */
+/** Ids of every token that a value references, at any depth of the value (layers, parts, color and opacity) */
 function referencedTokenIds(value: unknown): Array<string> {
     if (!value || typeof value !== 'object') return []
     return Object.entries(value).flatMap(([key, child]) =>
@@ -50,7 +50,7 @@ function referencedTokenIds(value: unknown): Array<string> {
 }
 
 /**
- * Ids of the tokens a theme file writes: the ones the themes override, and every token that references one of them.
+ * Ids of the tokens that a theme file writes: the ones the themes override, and every token that references one of them.
  * A reference resolves where it is declared, so a token that reads a themed token keeps its base value unless the theme file declares it again
  */
 function themeFileTokenIds(tokens: Array<Token>, themes: Array<TokenTheme>): Set<string> {
@@ -294,7 +294,7 @@ function getStyleFileName(type: TokenType): string {
  * 
  * @param tokens - Array of tokens to process
  * @param tokenGroups - Array of token groups
- * @param themedShadowIds - Shadows that some theme of the brand overrides
+ * @param themedShadowIds - Shadows that some theme of the version overrides
  * @param themePath - Path of the theme (if applicable)
  * @param themes - Themes that the file writes (if applicable)
  * @returns OutputTextFile object or null if no tokens
@@ -305,7 +305,8 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
     // Process tokens to get only themed ones if needed
-    const processedTokens = processTokens(tokens, themePath, themes)
+    const isThemeFile = !!themePath && themes.length > 0
+    const processedTokens = processTokens(tokens, isThemeFile, themes)
     if (processedTokens.length === 0) {
         return null
     }
@@ -331,7 +332,6 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     )
 
     // Use configured selector for base tokens or theme selector for themed tokens
-    const isThemeFile = !!themePath && themes.length > 0
     const selector = isThemeFile
         ? exportConfiguration.themeSelector.replace('{theme}', themePath)
         : exportConfiguration.cssSelector
@@ -349,9 +349,12 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
     content += `${selector} {\n${cssVariables}}\n`
 
-    // Theme files override variables only: the base file writes the typography classes and the base values of themed shadows
+    // Theme files override variables only: the base file writes the base values of themed shadows, and the typography
+    // classes unless no base file is exported
     if (!isThemeFile) {
         content += shadowValueBlock(processedTokens, mappedTokens, tokenGroups, variableOptions)
+    }
+    if (!isThemeFile || !exportConfiguration.exportBaseValues) {
         content += generateTypographyContent(processedTokens, tokenGroups)
     }
 
@@ -376,7 +379,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
  * 
  * @param tokens - Array of tokens to process
  * @param tokenGroups - Array of token groups
- * @param themedShadowIds - Shadows that some theme of the brand overrides
+ * @param themedShadowIds - Shadows that some theme of the version overrides
  * @param themePath - Path of the theme (if applicable)
  * @param themes - Themes that the files write (if applicable)
  * @returns Array of OutputTextFile objects
@@ -387,7 +390,8 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
     const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
     // Process tokens to get only themed ones if needed
-    const processedTokens = processTokens(tokens, themePath, themes)
+    const isThemeFile = !!themePath && themes.length > 0
+    const processedTokens = processTokens(tokens, isThemeFile, themes)
     if (processedTokens.length === 0) {
         return []
     }
@@ -406,7 +410,6 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
     })
 
     // Use configured selector for base tokens or theme selector for themed tokens
-    const isThemeFile = !!themePath && themes.length > 0
     const selector = isThemeFile
         ? exportConfiguration.themeSelector.replace('{theme}', themePath)
         : exportConfiguration.cssSelector
@@ -440,12 +443,13 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         // Add the CSS variables to the content
         content += `${selector} {\n${cssVariables}}\n`
 
-        // Theme files override variables only: the base files write the typography classes and the base values of themed shadows
+        // Theme files override variables only: the base files write the base values of themed shadows, and the
+        // typography classes unless no base file is exported
         if (!isThemeFile) {
             content += shadowValueBlock(tokensOfType, mappedTokens, tokenGroups, variableOptions)
-            if (type === TokenType.typography) {
-                content += generateTypographyContent(tokensOfType, tokenGroups)
-            }
+        }
+        if (type === TokenType.typography && (!isThemeFile || !exportConfiguration.exportBaseValues)) {
+            content += generateTypographyContent(tokensOfType, tokenGroups)
         }
 
         // Add disclaimer if enabled

@@ -3,7 +3,7 @@ import { Token, TokenGroup, TokenType, TypographyTokenValue } from "@supernovaio
 import { exportConfiguration } from ".."
 import { runtimeVariableName, tokenVariableName, TYPOGRAPHY_VARIABLE_SUFFIXES, TypographyPart } from "./token"
 
-/** The CSS property that a typography class sets from each part, in the order the class writes them */
+/** The CSS property that a typography class sets from each part, in the order that the class writes them */
 const CLASS_PROPERTIES: Record<TypographyPart, string> = {
   fontFamily: 'font-family',
   fontSize: 'font-size',

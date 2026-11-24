@@ -232,7 +232,7 @@ describe("Tailwind classes follow a token's theme value", () => {
     expect(computedValue(css, ".shadow-card", "--tw-shadow", false)).toMatch(/^0px 2px 8px 0px /)
   })
 
-  test("a shadow that references a shadow Dark overrides shows the Dark value", async () => {
+  test("a shadow that references a shadow that Dark overrides shows the Dark value", async () => {
     const css = await singleFileCss(["shadow-card-alias"])
     expect(computedValue(css, ".shadow-card-alias", "--tw-shadow")).toMatch(/^0px 12px 8px 0px /)
   })
@@ -325,6 +325,13 @@ describe("Tailwind classes follow a token's theme value", () => {
     )
   })
 
+  test("with base values off, a Dark file writes the typography classes", () => {
+    mockConfig.exportBaseValues = false
+    expect(styleOutputFile(darkTokens, tokenGroups, themedShadowIds, "dark", [darkTheme])!.content).toContain(
+      ".caption {"
+    )
+  })
+
   test("with a global prefix, a color class, an alias, a themed shadow and a typography class show their Dark values", async () => {
     mockConfig.globalPrefix = "tw"
     const css = await singleFileCss(["tw:bg-primary", "tw:bg-accent", "tw:bg-brand", "tw:shadow-card", "body"])
@@ -360,7 +367,7 @@ describe("Tailwind classes follow a token's theme value", () => {
     expect(indexOutputFile(baseTokens, [sizeTheme])!.content).toContain("./dark/tailwind.typography.css")
   })
 
-  test("mergedTheme writes a token that references a token only the second theme overrides", () => {
+  test("mergedTheme writes the tokens that reference a token of either theme", () => {
     const secondTheme = {
       id: "contrast",
       name: "Contrast",
@@ -371,13 +378,13 @@ describe("Tailwind classes follow a token's theme value", () => {
       id: "dark",
       name: "Dark",
       codeName: "dark",
-      overriddenTokens: [tokensWithDarkValues.dark.primary]
+      overriddenTokens: [tokensWithDarkValues.dark.card]
     } as unknown as TokenTheme
     const merged = baseTokens.map((t) =>
-      t.id === "brand" ? brandDark : t.id === "primary" ? tokensWithDarkValues.dark.primary : t
+      t.id === "brand" ? brandDark : t.id === "card" ? tokensWithDarkValues.dark.card : t
     )
-    expect(styleOutputFile(merged, tokenGroups, new Set(), "themed", [firstTheme, secondTheme])!.content).toContain(
-      "--color-accent:"
-    )
+    const content = styleOutputFile(merged, tokenGroups, new Set(), "themed", [firstTheme, secondTheme])!.content
+    expect(content).toContain("--color-accent:")
+    expect(content).toContain("--shadow-card-alias:")
   })
 })

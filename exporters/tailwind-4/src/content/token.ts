@@ -257,7 +257,7 @@ export type TokenVariableOptions = {
   isThemeFile: boolean
 }
 
-/** The name Tailwind gives a variable that `@theme` declares: with a global prefix it renames the declaration, but not the names that `var()` reads */
+/** The name that Tailwind gives a variable that `@theme` declares: with a global prefix it renames the declaration, but not the names that `var()` reads */
 export function runtimeVariableName(name: string): string {
   const prefix = exportConfiguration.globalPrefix
   return prefix && isThemeDirectiveSelector() ? `${prefix}-${name}` : name
