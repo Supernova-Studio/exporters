@@ -360,7 +360,7 @@ describe("Tailwind classes follow a token's theme value", () => {
     expect(indexOutputFile(baseTokens, [sizeTheme])!.content).toContain("./dark/tailwind.typography.css")
   })
 
-  test("mergedTheme writes dependents of the second theme", () => {
+  test("mergedTheme writes a token that references a token only the second theme overrides", () => {
     const secondTheme = {
       id: "contrast",
       name: "Contrast",
