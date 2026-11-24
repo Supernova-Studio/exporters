@@ -360,6 +360,14 @@ describe("Tailwind classes follow a token's theme value", () => {
     expect(indexOutputFile(baseTokens, [sizeTheme])!.content).toContain("./dark/tailwind.typography.css")
   })
 
+  test("separate files: a merged theme index imports only the type files that the merged theme writes", () => {
+    mockConfig.fileStructure = "separateByType"
+    mockConfig.generateIndexFile = true
+    const index = indexOutputFile(baseTokens, ["themed"], [darkTheme])!.content
+    expect(index).toContain("./themed/tailwind.shadow.css")
+    expect(index).not.toContain("./themed/tailwind.font-size.css")
+  })
+
   test("mergedTheme writes the tokens that reference a token of either theme", () => {
     const secondTheme = {
       id: "contrast",

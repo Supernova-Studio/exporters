@@ -531,9 +531,10 @@ export function resetOutputFile(): OutputTextFile | null {
  * 
  * @param tokens - Array of tokens to process
  * @param themes - Array of themes to include
+ * @param mergedThemes - Themes that a merged theme file, named by a string in `themes`, writes
  * @returns OutputTextFile object or null if index file generation is disabled
  */
-export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = []): OutputTextFile | null {
+export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme | string> = [], mergedThemes: Array<TokenTheme> = []): OutputTextFile | null {
     if (!exportConfiguration.generateIndexFile) {
         return null
     }
@@ -582,7 +583,8 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
             // Import separate theme type files
             const tokenTypes = Array.from(new Set(tokens.map(t => t.tokenType)))
                 .filter(type => isAllowedTokenType(type))
-            const themeTokenIds = exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string' ? themeFileTokenIds(tokens, [theme]) : null
+            const fileThemes = typeof theme === 'string' ? mergedThemes : [theme]
+            const themeTokenIds = exportConfiguration.exportOnlyThemedTokens && fileThemes.length > 0 ? themeFileTokenIds(tokens, fileThemes) : null
             
             // For each token type, check if there are themed tokens before importing
             tokenTypes.forEach(type => {

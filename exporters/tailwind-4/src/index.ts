@@ -248,7 +248,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         }
         
         // Add index file
-        const mergedIndexFile = indexOutputFile(tokens, ['themed'])
+        const mergedIndexFile = indexOutputFile(tokens, ['themed'], themesToApply)
         if (mergedIndexFile) mergedOutputFiles.push(mergedIndexFile)
         
         return mergedOutputFiles
