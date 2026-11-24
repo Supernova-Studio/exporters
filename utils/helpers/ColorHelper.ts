@@ -188,13 +188,15 @@ export class ColorHelper {
       h /= 6
     }
 
+    const hue = Math.round(h * 360)
+    const saturation = Math.round(s * 100)
+    const lightness = Math.round(l * 100)
+
     let resultingHsl: string
     if (format === ColorFormat.hsla || (format === ColorFormat.smartHsla && alpha < 1)) {
-      resultingHsl = `hsla(${Math.round(h * 360)}%, ${Math.round(s * 100)}%, ${Math.round(
-        l * 100
-      )}%, ${this.roundToDecimals(alpha, decimals)})`
+      resultingHsl = `hsla(${hue}, ${saturation}%, ${lightness}%, ${this.roundToDecimals(alpha, decimals)})`
     } else {
-      resultingHsl = `hsl(${Math.round(h * 360)}%, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`
+      resultingHsl = `hsl(${hue}, ${saturation}%, ${lightness}%)`
     }
 
     return resultingHsl
