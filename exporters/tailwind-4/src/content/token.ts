@@ -224,7 +224,7 @@ function tokenValue(token: Token, mappedTokens: Map<string, Token>, tokenGroups:
   })
 }
 
-/** How a value reads the token it references: `var()` of its variable, or the raw value for a type that Tailwind does not take */
+/** How a value reads the token that it references: `var()` of its variable, or the raw value for a type that Tailwind does not take */
 function tokenReference(
   t: Token,
   context: { needsRgb?: boolean } | undefined,
@@ -250,7 +250,7 @@ function tokenReference(
   return `var(--${runtimeVariableName(tokenVariableName(t, tokenGroups))})`
 }
 
-/** What changes how a token's variable is written: the file it goes into and the tokens that need extra variables */
+/** What changes how a token's variable is written: the file that it goes into and the tokens that need extra variables */
 export type TokenVariableOptions = {
   colorTokensNeedingChannels: Set<string>
   themedShadowIds: Set<string>
