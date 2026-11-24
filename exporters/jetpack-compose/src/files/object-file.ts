@@ -1,17 +1,15 @@
 import {
-  ColorFormat,
   FileHelper,
   FileNameHelper,
   GeneralHelper,
   ImportCollector,
-  KotlinHelper,
   NamingHelper,
   StringCase,
   ThemeHelper
 } from "@supernovaio/export-utils"
 import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { convertedToken, resetTokenNameTracking } from "../content/token"
+import { convertedToken, referencedTokens, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
 import { getTokenTypeFileName } from "../utils/file-utils"
@@ -171,34 +169,22 @@ function generateFileContent(
 
   // Declare each token below the tokens in this file that it references, so Kotlin never reads a property that is not initialized yet
   const exportedTokens = new Map(tokensToExport.map((token) => [token.id, token]))
-  const referencedTokens = (token: Token): Array<Token> => {
-    const referenced: Array<Token> = []
-    KotlinHelper.tokenValue(
-      token,
-      mappedTokens,
-      {
-        colorFormat: ColorFormat.hex8,
-        allowReferences: exportConfiguration.useReferences,
-        decimals: 0,
-        indent: exportConfiguration.indent,
-        tokenToVariableRef: (refToken) => {
-          referenced.push(refToken)
-          return ""
-        }
-      },
-      new ImportCollector("")
-    )
-    return referenced
-  }
-  const referenceDepth = (token: Token): number =>
-    Math.max(
-      0,
-      ...referencedTokens(token).map((refToken) =>
-        exportedTokens.has(refToken.id) ? 1 + referenceDepth(exportedTokens.get(refToken.id)!) : 0
+  const depths = new Map<string, number>()
+  const referenceDepth = (token: Token): number => {
+    if (!depths.has(token.id)) {
+      depths.set(
+        token.id,
+        Math.max(
+          0,
+          ...referencedTokens(token, mappedTokens).map((refToken) =>
+            exportedTokens.has(refToken.id) ? 1 + referenceDepth(exportedTokens.get(refToken.id)!) : 0
+          )
+        )
       )
-    )
-  const depths = new Map(tokensToExport.map((token) => [token.id, referenceDepth(token)]))
-  const sortedTokensToExport = [...tokensToExport].sort((a, b) => depths.get(a.id)! - depths.get(b.id)!)
+    }
+    return depths.get(token.id)!
+  }
+  const sortedTokensToExport = [...tokensToExport].sort((a, b) => referenceDepth(a) - referenceDepth(b))
 
   // Convert tokens to Kotlin property declarations
   const tokenPropertiesLiteral = sortedTokensToExport

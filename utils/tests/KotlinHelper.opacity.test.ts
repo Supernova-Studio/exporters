@@ -46,7 +46,6 @@ const options: TokenToKotlinOptions = {
 const noReferences: TokenToKotlinOptions = { ...options, allowReferences: false }
 const collector = () => new ImportCollector("")
 
-/** A color that takes its RGB from gray900 and adds its own opacity, as SDK 2.6.x hands it to exporters */
 const ownOpacity = (measure: number, opacityRef: string | null = null): ColorTokenValue => ({
   color: { ...gray900.value.color, referencedTokenId: gray900.id },
   opacity: opacity(measure, opacityRef),
