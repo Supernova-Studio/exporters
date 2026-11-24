@@ -313,7 +313,7 @@
         "type": "boolean",
         "default": true,
         "title": "Export only themed tokens",
-        "description": "Theme files will only include tokens that have different values from the base value.",
+        "description": "Theme files will only include tokens that have different values from the base value, and the tokens that reference them.",
         "category": "Themes"
     },
     {

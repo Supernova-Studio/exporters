@@ -1,7 +1,20 @@
-import { NamingHelper, StringCase, CSSHelper } from "@supernovaio/export-utils"
-import { Token, TokenGroup, TokenType, TypographyTokenValue, FontFamilyTokenValue, TextDecorationTokenValue, TextCaseTokenValue, ParagraphSpacingTokenValue } from "@supernovaio/sdk-exporters"
+import { NamingHelper, StringCase } from "@supernovaio/export-utils"
+import { Token, TokenGroup, TokenType, TypographyTokenValue } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { tokenVariableName } from "./token"
+import { runtimeVariableName, tokenVariableName, TYPOGRAPHY_VARIABLE_SUFFIXES, TypographyPart } from "./token"
+
+/** The CSS property that a typography class sets from each part, in the order that the class writes them */
+const CLASS_PROPERTIES: Record<TypographyPart, string> = {
+  fontFamily: 'font-family',
+  fontSize: 'font-size',
+  fontWeight: 'font-weight',
+  lineHeight: 'line-height',
+  letterSpacing: 'letter-spacing',
+  textDecoration: 'text-decoration',
+  textCase: 'text-transform',
+  paragraphIndent: 'text-indent',
+  paragraphSpacing: 'margin-bottom'
+}
 
 /**
  * Generates a CSS class for a typography token
@@ -47,68 +60,11 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
   // Get the CSS variable name for reference
   const variableName = tokenVariableName(token, tokenGroups)
 
-  // Get the typography value
-  const typographyValue = (token as unknown as { value: TypographyTokenValue }).value
-
-  // Create empty token map since we're not using references here
-  const emptyTokenMap = new Map<string, Token>()
-
-  // Create CSS options
-  const cssOptions = {
-    allowReferences: false,
-    decimals: exportConfiguration.colorPrecision,
-    colorFormat: exportConfiguration.colorFormat,
-    tokenToVariableRef: () => "",
-    forceRemUnit: exportConfiguration.forceRemUnit,
-    remBase: exportConfiguration.remBase
-  }
-
-  // Generate the class with all typography properties
+  // Every property reads the variable that the base file declares and theme files override
   output += `${indentString}.${className} {\n`
-  
-  // Font family
-  if (typographyValue.fontFamily) {
-    const fontFamilyValue = typographyValue.fontFamily as FontFamilyTokenValue
-    output += `${indentString}  font-family: ${CSSHelper.stringTokenValueToCSS(fontFamilyValue, emptyTokenMap, cssOptions)};\n`
-  }
-  
-  // Font size
-  output += `${indentString}  font-size: var(--${variableName});\n`
-  
-  // Font weight
-  output += `${indentString}  font-weight: var(--${variableName}--font-weight);\n`
-  
-  // Line height
-  if (typographyValue.lineHeight) {
-    output += `${indentString}  line-height: var(--${variableName}--line-height);\n`
-  }
-  
-  // Letter spacing
-  output += `${indentString}  letter-spacing: var(--${variableName}--letter-spacing);\n`
-  
-  // Text decoration
-  if (typographyValue.textDecoration) {
-    const textDecorationValue = typographyValue.textDecoration as TextDecorationTokenValue
-    output += `${indentString}  text-decoration: ${CSSHelper.optionTokenValueToCSS(textDecorationValue, emptyTokenMap, cssOptions, TokenType.textDecoration)};\n`
-  }
-  
-  // Text case
-  if (typographyValue.textCase) {
-    const textCaseValue = typographyValue.textCase as TextCaseTokenValue
-    output += `${indentString}  text-transform: ${CSSHelper.optionTokenValueToCSS(textCaseValue, emptyTokenMap, cssOptions, TokenType.textCase)};\n`
-  }
-  
-  // Paragraph indent
-  if (typographyValue.paragraphIndent) {
-    const paragraphIndentValue = typographyValue.paragraphIndent as ParagraphSpacingTokenValue
-    output += `${indentString}  text-indent: ${CSSHelper.dimensionTokenValueToCSS(paragraphIndentValue, emptyTokenMap, cssOptions)};\n`
-  }
-  
-  // Paragraph spacing
-  if (typographyValue.paragraphSpacing) {
-    const paragraphSpacingValue = typographyValue.paragraphSpacing as ParagraphSpacingTokenValue
-    output += `${indentString}  margin-bottom: ${CSSHelper.dimensionTokenValueToCSS(paragraphSpacingValue, emptyTokenMap, cssOptions)};\n`
-  }
+  Object.entries(CLASS_PROPERTIES).forEach(([part, cssProperty]) => {
+    output += `${indentString}  ${cssProperty}: var(--${runtimeVariableName(`${variableName}${TYPOGRAPHY_VARIABLE_SUFFIXES[part as TypographyPart]}`)});\n`
+  })
   
   output += `${indentString}}\n`
 

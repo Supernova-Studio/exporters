@@ -48,6 +48,21 @@ function generateDebugInfo(token: Token, indentString: string): string {
          })} */\n`
 }
 
+export type TypographyPart = keyof Omit<TypographyTokenValue, 'referencedTokenId'>
+
+/** The suffix that each part of a typography token adds to the token's variable name */
+export const TYPOGRAPHY_VARIABLE_SUFFIXES: Record<TypographyPart, string> = {
+  fontSize: '',
+  lineHeight: '--line-height',
+  letterSpacing: '--letter-spacing',
+  fontWeight: '--font-weight',
+  fontFamily: '--font-family',
+  textDecoration: '--text-decoration',
+  textCase: '--text-transform',
+  paragraphIndent: '--text-indent',
+  paragraphSpacing: '--paragraph-spacing'
+}
+
 /**
  * Handles the conversion of a typography token into CSS custom properties
  * @param token - The typography token to convert
@@ -55,7 +70,7 @@ function generateDebugInfo(token: Token, indentString: string): string {
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @returns Formatted CSS custom property string
  */
-function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
+function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, options: TokenVariableOptions): string {
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   let output = ""
   
@@ -75,7 +90,12 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
   const typographyValue = token.value as TypographyTokenValue
 
   // Helper function to create CSS variable for a typography property
-  const createTypographyProperty = (property: keyof Omit<TypographyTokenValue, 'referencedTokenId'>, suffix: string = '') => {
+  const createTypographyProperty = (property: TypographyPart) => {
+    const suffix = TYPOGRAPHY_VARIABLE_SUFFIXES[property]
+    // An auto line height is written as normal, so a theme can switch between auto and a fixed line height
+    if (property === 'lineHeight' && !typographyValue.lineHeight) {
+      output += `${indentString}--${declaredVariableName(`${baseName}${suffix}`, options.isThemeFile)}: normal;\n`
+    }
     if (typographyValue[property]) {
       const propertyValue = typographyValue[property] as AnyDimensionTokenValue
       const value = {
@@ -97,22 +117,19 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
       }
 
       // @ts-ignore
-      output += `${indentString}--${baseName}${suffix}: ${CSSHelper.tokenToCSS({ ...token, value, tokenType: tokenTypeMap[property] }, mappedTokens, {
+      output += `${indentString}--${declaredVariableName(`${baseName}${suffix}`, options.isThemeFile)}: ${CSSHelper.tokenToCSS({ ...token, value, tokenType: tokenTypeMap[property] }, mappedTokens, {
         allowReferences: exportConfiguration.useReferences,
         decimals: exportConfiguration.colorPrecision,
         colorFormat: exportConfiguration.colorFormat,
         forceRemUnit: exportConfiguration.forceRemUnit,
         remBase: exportConfiguration.remBase,
-        tokenToVariableRef: (t) => `var(--${tokenVariableName(t, tokenGroups)})`
+        tokenToVariableRef: (t, context) => tokenReference(t, context, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)
       })};\n`
     }
   }
 
   // Create CSS variables for each typography property
-  createTypographyProperty('fontSize') // Base font size
-  createTypographyProperty('lineHeight', '--line-height')
-  createTypographyProperty('letterSpacing', '--letter-spacing')
-  createTypographyProperty('fontWeight', '--font-weight')
+  Object.keys(TYPOGRAPHY_VARIABLE_SUFFIXES).forEach((property) => createTypographyProperty(property as TypographyPart))
 
   return output
 }
@@ -126,7 +143,7 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
  * @param tokenGroups - Array of token groups for determining token hierarchy
  * @returns Formatted CSS custom property string with optional description comment or null if token type is not allowed
  */
-export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels?: Set<string>): string | null {
+export function convertedToken(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, options: TokenVariableOptions): string | null {
   // Skip tokens that are not allowed for Tailwind customization
   if (!isAllowedTokenType(token.tokenType)) {
     return null;
@@ -134,55 +151,11 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
 
   // Special handling for typography tokens
   if (token.tokenType === TokenType.typography) {
-    return handleTypographyToken(token, mappedTokens, tokenGroups)
+    return handleTypographyToken(token, mappedTokens, tokenGroups, options)
   }
 
   // Generate the CSS variable name based on token properties and configuration
   let name = tokenVariableName(token, tokenGroups)
-
-  // Convert token value to CSS, handling references and formatting according to configuration
-  const value = CSSHelper.tokenToCSS(token, mappedTokens, {
-    allowReferences: exportConfiguration.useReferences,
-    decimals: exportConfiguration.colorPrecision,
-    colorFormat: exportConfiguration.colorFormat,
-    forceRemUnit: exportConfiguration.forceRemUnit,
-    remBase: exportConfiguration.remBase,
-    writesColorChannels: true,
-    // Custom handler for token references - converts them to CSS var() syntax
-    tokenToVariableRef: (t, context) => {
-      // Skip references to tokens that are not allowed for Tailwind customization
-      if (!isAllowedTokenType(t.tokenType)) {
-        // Return the raw value instead of a reference
-        return CSSHelper.tokenToCSS(t, mappedTokens, {
-          allowReferences: false, // Don't follow nested references
-          decimals: exportConfiguration.colorPrecision,
-          colorFormat: exportConfiguration.colorFormat,
-          forceRemUnit: exportConfiguration.forceRemUnit,
-          remBase: exportConfiguration.remBase,
-          tokenToVariableRef: () => "", // Stub function that never gets called since allowReferences is false
-          valueTransformer: undefined
-        });
-      }
-      // If context requests a channel-based color variable (needsRgb), use the channel variable
-      if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels?.has(t.id)) {
-        return `var(--${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${tokenVariableName(t, tokenGroups)})`
-      }
-      return `var(--${tokenVariableName(t, tokenGroups)})`
-    },
-    // Handle blur values - extract just the dimension
-    valueTransformer: (value: string, t: Token) => {
-      if (t.tokenType === TokenType.blur) {
-        // For blur(12px) -> extract 12px
-        const match = value.match(/^blur\((.*)\)$/)
-        if (match) {
-          return match[1]
-        }
-        // For direct values (background blur) just return as is
-        return value
-      }
-      return undefined
-    }
-  })
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
 
   let output = ""
@@ -203,9 +176,104 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
     const blurName = isBackdropBlur ? 'backdrop-blur' : (token.name.toLowerCase() === 'blur' ? 'blur-default' : `blur-${token.name}`)
     name = NamingHelper.codeSafeVariableName(blurName, StringCase.kebabCase)
   }
-  
-  output += `${indentString}--${name}: ${value};`
+
+  const declaredName = declaredVariableName(name, options.isThemeFile)
+  // Tailwind copies a shadow's value into its class, so a themed shadow's class must read a variable that theme files override
+  if (options.themedShadowIds.has(token.id)) {
+    output += `${indentString}--${declaredName}: var(--${shadowValueVariableName(token, tokenGroups)});`
+    if (options.isThemeFile) {
+      output += `\n${shadowValueVariable(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)}`
+    }
+    return output
+  }
+
+  output += `${indentString}--${declaredName}: ${tokenValue(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)};`
   return output
+}
+
+function shadowValueVariableName(token: Token, tokenGroups: Array<TokenGroup>): string {
+  return `value-${tokenVariableName(token, tokenGroups)}`
+}
+
+/** The variable that holds a themed shadow's value, which the shadow's class reads */
+export function shadowValueVariable(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels: Set<string>): string {
+  const indentString = GeneralHelper.indent(exportConfiguration.indent)
+  return `${indentString}--${shadowValueVariableName(token, tokenGroups)}: ${tokenValue(token, mappedTokens, tokenGroups, colorTokensNeedingChannels)};`
+}
+
+/** The CSS value of a token, with references written as `var()` */
+function tokenValue(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels: Set<string>): string {
+  return CSSHelper.tokenToCSS(token, mappedTokens, {
+    allowReferences: exportConfiguration.useReferences,
+    decimals: exportConfiguration.colorPrecision,
+    colorFormat: exportConfiguration.colorFormat,
+    forceRemUnit: exportConfiguration.forceRemUnit,
+    remBase: exportConfiguration.remBase,
+    writesColorChannels: true,
+    tokenToVariableRef: (t, context) => tokenReference(t, context, mappedTokens, tokenGroups, colorTokensNeedingChannels),
+    // Handle blur values - extract just the dimension
+    valueTransformer: (value: string, t: Token) => {
+      if (t.tokenType === TokenType.blur) {
+        // For blur(12px) -> extract 12px
+        const match = value.match(/^blur\((.*)\)$/)
+        if (match) {
+          return match[1]
+        }
+        // For direct values (background blur) just return as is
+        return value
+      }
+      return undefined
+    }
+  })
+}
+
+/** How a value reads the token that it references: `var()` of its variable, or the raw value for a type that Tailwind does not take */
+function tokenReference(
+  t: Token,
+  context: { needsRgb?: boolean } | undefined,
+  mappedTokens: Map<string, Token>,
+  tokenGroups: Array<TokenGroup>,
+  colorTokensNeedingChannels: Set<string>
+): string {
+  if (!isAllowedTokenType(t.tokenType)) {
+    return CSSHelper.tokenToCSS(t, mappedTokens, {
+      allowReferences: false, // Don't follow nested references
+      decimals: exportConfiguration.colorPrecision,
+      colorFormat: exportConfiguration.colorFormat,
+      forceRemUnit: exportConfiguration.forceRemUnit,
+      remBase: exportConfiguration.remBase,
+      tokenToVariableRef: () => "", // Stub function that never gets called since allowReferences is false
+      valueTransformer: undefined
+    });
+  }
+  // If context requests a channel-based color variable (needsRgb), use the channel variable
+  if (context?.needsRgb && t.tokenType === TokenType.color && colorTokensNeedingChannels.has(t.id)) {
+    return `var(--${runtimeVariableName(`${CSSHelper.channelPrefix(exportConfiguration.colorFormat)}-${tokenVariableName(t, tokenGroups)}`)})`
+  }
+  return `var(--${runtimeVariableName(tokenVariableName(t, tokenGroups))})`
+}
+
+/** What changes how a token's variable is written: the file that it goes into and the tokens that need extra variables */
+export type TokenVariableOptions = {
+  colorTokensNeedingChannels: Set<string>
+  themedShadowIds: Set<string>
+  isThemeFile: boolean
+}
+
+/** The name that Tailwind gives a variable that `@theme` declares: with a global prefix it renames the declaration, but not the names that `var()` reads */
+export function runtimeVariableName(name: string): string {
+  const prefix = exportConfiguration.globalPrefix
+  return prefix && isThemeDirectiveSelector() ? `${prefix}-${name}` : name
+}
+
+/** Whether the base selector is a Tailwind `@theme` directive, which Tailwind turns into utility classes */
+export function isThemeDirectiveSelector(): boolean {
+  return exportConfiguration.cssSelector.trim().startsWith('@theme')
+}
+
+/** A theme file declares variables under the name that Tailwind gave the base declaration */
+function declaredVariableName(name: string, isThemeFile: boolean): string {
+  return isThemeFile ? runtimeVariableName(name) : name
 }
 
 /**
@@ -382,10 +450,11 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
  */
 export function generateChannelVariable(
   token: ColorToken,
-  tokenGroups: Array<TokenGroup>
+  tokenGroups: Array<TokenGroup>,
+  isThemeFile: boolean
 ): string {
   const prefix = CSSHelper.channelPrefix(exportConfiguration.colorFormat)
-  const declaration = `--${prefix}-${tokenVariableName(token, tokenGroups)}: ${CSSHelper.colorChannels(token.value, exportConfiguration.colorFormat)};`
+  const declaration = `--${declaredVariableName(`${prefix}-${tokenVariableName(token, tokenGroups)}`, isThemeFile)}: ${CSSHelper.colorChannels(token.value, exportConfiguration.colorFormat)};`
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   if (exportConfiguration.showDescriptions && token.description) {
     return `${indentString}/* ${prefix.toUpperCase()} utility for ${token.description.trim()} */\n${indentString}${declaration}`
