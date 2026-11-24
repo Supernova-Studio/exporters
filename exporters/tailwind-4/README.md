@@ -83,6 +83,14 @@ With **globalPrefix** set to `tw` and the default `@theme` selector, Tailwind re
 
 With **writeClassnameToProperty** on, Duration tokens get this class in the Tailwind class property, such as `.duration-(--duration-fast)`. The class leaves out **globalPrefix**, so with a prefix, add it as shown above.
 
+## Using Themes
+
+Theme files override the same variables as the base file under the theme selector (`.theme-dark` by default), so a utility class such as `text-primary` or `shadow-card` shows the theme value on an element that matches the theme selector, or on any element inside one. Tokens that reference a themed token are written into the theme file too.
+
+A shadow that a theme overrides reads its value from `--value-shadow-<name>`. Tailwind's `shadow-<color>` and `/<opacity>` modifiers do not change such a shadow.
+
+If you set the CSS selector to `@theme inline`, Tailwind copies each token's base value into its class, so a theme file cannot change it. Aliases and shadows that a theme overrides still follow the theme.
+
 ## Configuration Options
 
 Here is a list of all the configuration options this exporter provides:
@@ -133,7 +141,7 @@ Here is a list of all the configuration options this exporter provides:
   - `applyDirectly`: Apply themes directly to tokens
   - `separateFiles`: Generate separate files for each theme
   - `mergedTheme`: Generate a single merged theme file
-- **exportOnlyThemedTokens:** When enabled, themed files will only include tokens that have different values from the base theme.
+- **exportOnlyThemedTokens:** When enabled, themed files will only include tokens that have different values from the base theme, and the tokens that reference them.
 - **exportBaseValues:** When enabled, base token values will be exported along with themes.
 
 ### Reset Rules

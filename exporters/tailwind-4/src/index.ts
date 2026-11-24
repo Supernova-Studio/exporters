@@ -118,9 +118,14 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
     }
   }
 
+  const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
+  // Every theme counts, not only the exported ones, so a base file and theme files from separate pipelines agree
+  const themedShadowIds = exportConfiguration.cssSelector.trim().startsWith('@theme')
+    ? new Set(themes.flatMap((theme) => theme.overriddenTokens.filter((token) => token.tokenType === TokenType.shadow).map((token) => token.id)))
+    : new Set<string>()
+
   // Process themes if specified
   if (context.themeIds && context.themeIds.length > 0) {
-    const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
 
     // Find and validate requested themes
     const themesToApply = context.themeIds.map((themeId) => {
@@ -138,11 +143,11 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
           return processOutputFiles([
-            styleOutputFile(tokens, tokenGroups),
+            styleOutputFile(tokens, tokenGroups, themedShadowIds),
             indexOutputFile(tokens)
           ])
         } else {
-          const styleFiles = generateStyleFiles(tokens, tokenGroups)
+          const styleFiles = generateStyleFiles(tokens, tokenGroups, themedShadowIds)
           const resetFile = resetOutputFile()
           const indexFile = indexOutputFile(tokens)
           return [...styleFiles, ...(resetFile ? [resetFile] : []), ...(indexFile ? [indexFile] : [])]
@@ -161,10 +166,10 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         // Generate base files if exportBaseValues is true
         if (exportConfiguration.exportBaseValues) {
           if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-            const baseFile = styleOutputFile(tokens, tokenGroups)
+            const baseFile = styleOutputFile(tokens, tokenGroups, themedShadowIds)
             if (baseFile) outputFiles.push(baseFile)
           } else {
-            const baseFiles = generateStyleFiles(tokens, tokenGroups)
+            const baseFiles = generateStyleFiles(tokens, tokenGroups, themedShadowIds)
             outputFiles = [...outputFiles, ...baseFiles]
           }
         }
@@ -176,16 +181,18 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
             const themeFile = styleOutputFile(
               themedTokens, 
               tokenGroups, 
+              themedShadowIds,
               ThemeHelper.getThemeIdentifier(theme),
-              theme
+              [theme]
             )
             if (themeFile) outputFiles.push(themeFile)
           } else {
             const themeFiles = generateStyleFiles(
               themedTokens, 
               tokenGroups, 
+              themedShadowIds,
               ThemeHelper.getThemeIdentifier(theme),
-              theme
+              [theme]
             )
             outputFiles = [...outputFiles, ...themeFiles]
           }
@@ -210,10 +217,10 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         // Generate base files if exportBaseValues is true
         if (exportConfiguration.exportBaseValues) {
           if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-            const baseFile = styleOutputFile(tokens, tokenGroups)
+            const baseFile = styleOutputFile(tokens, tokenGroups, themedShadowIds)
             if (baseFile) mergedOutputFiles.push(baseFile)
           } else {
-            const baseFiles = generateStyleFiles(tokens, tokenGroups)
+            const baseFiles = generateStyleFiles(tokens, tokenGroups, themedShadowIds)
             mergedOutputFiles = [...mergedOutputFiles, ...baseFiles]
           }
         }
@@ -224,16 +231,18 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
           const mergedThemeFile = styleOutputFile(
             themedTokens, 
             tokenGroups, 
+            themedShadowIds,
             'themed',
-            themesToApply[0]
+            themesToApply
           )
           if (mergedThemeFile) mergedOutputFiles.push(mergedThemeFile)
         } else {
           const mergedThemeFiles = generateStyleFiles(
             themedTokens, 
             tokenGroups, 
+            themedShadowIds,
             'themed',
-            themesToApply[0]
+            themesToApply
           )
           mergedOutputFiles = [...mergedOutputFiles, ...mergedThemeFiles]
         }
@@ -249,12 +258,12 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
   // Default case: Generate files without themes
   if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
     return processOutputFiles([
-        exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups) : null,
+        exportConfiguration.exportBaseValues ? styleOutputFile(tokens, tokenGroups, themedShadowIds) : null,
         indexOutputFile(tokens)
     ])
   } else {
     const styleFiles = exportConfiguration.exportBaseValues 
-    ? generateStyleFiles(tokens, tokenGroups) 
+    ? generateStyleFiles(tokens, tokenGroups, themedShadowIds) 
     : []
     const resetFile = exportConfiguration.fileStructure === FileStructure.SeparateByType && shouldDisableDefaultTailwindConfiguration() ? resetOutputFile() : null
     const indexFile = indexOutputFile(tokens)
@@ -271,7 +280,7 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
  * @param themes - Array of themes to include
  * @returns Array of OutputTextFile objects
  */
-export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themes: Array<TokenTheme> = []): Array<OutputTextFile> {
+export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themedShadowIds: Set<string>, themes: Array<TokenTheme> = []): Array<OutputTextFile> {
     const files: Array<OutputTextFile> = []
 
     // Add reset file only if file structure is separate per type
@@ -284,12 +293,12 @@ export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGrou
 
     // Generate the main Tailwind CSS file
     if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
-        const mainFile = styleOutputFile(tokens, tokenGroups)
+        const mainFile = styleOutputFile(tokens, tokenGroups, themedShadowIds)
         if (mainFile) {
             files.push(mainFile)
         }
     } else {
-        const mainFiles = generateStyleFiles(tokens, tokenGroups)
+        const mainFiles = generateStyleFiles(tokens, tokenGroups, themedShadowIds)
         files.push(...mainFiles)
     }
 
@@ -299,8 +308,9 @@ export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGrou
             const themedFile = styleOutputFile(
                 tokens, 
                 tokenGroups, 
+                themedShadowIds,
                 ThemeHelper.getThemeIdentifier(theme), 
-                theme
+                [theme]
             )
             if (themedFile) {
                 files.push(themedFile)
@@ -309,8 +319,9 @@ export function generateFiles(tokens: Array<Token>, tokenGroups: Array<TokenGrou
             const themedFiles = generateStyleFiles(
                 tokens, 
                 tokenGroups, 
+                themedShadowIds,
                 ThemeHelper.getThemeIdentifier(theme), 
-                theme
+                [theme]
             )
             files.push(...themedFiles)
         }

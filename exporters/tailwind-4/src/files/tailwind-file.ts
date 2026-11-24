@@ -4,10 +4,10 @@
  */
 
 import { FileHelper, ThemeHelper, GeneralHelper, CSSHelper } from "@supernovaio/export-utils"
-import { ColorToken, OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
+import { AnyToken, ColorToken, OutputTextFile, Token, TokenGroup, TokenType, TokenTheme } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FileStructure } from "../../config"
-import { convertedToken, isAllowedTokenType, generateChannelVariable } from "../content/token"
+import { convertedToken, isAllowedTokenType, generateChannelVariable, shadowValueVariable, TokenVariableOptions } from "../content/token"
 import { generateTypographyClass } from "../content/typography"
 import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
 
@@ -17,10 +17,10 @@ import { DEFAULT_CONFIG_FILE_NAMES } from "../constants/defaults"
  * 
  * @param tokens - Array of tokens to process
  * @param themePath - Path of the theme (if applicable)
- * @param theme - Theme object (if applicable)
+ * @param themes - Themes that the file writes (if applicable)
  * @returns Filtered array of tokens
  */
-function processTokens(tokens: Array<Token>, themePath: string = '', theme?: TokenTheme): Array<Token> {
+function processTokens(tokens: Array<Token>, themePath: string, themes: Array<TokenTheme>): Array<Token> {
     // Skip if no tokens and empty files are disabled
     if (!exportConfiguration.generateEmptyFiles && tokens.length === 0) {
         return []
@@ -28,8 +28,9 @@ function processTokens(tokens: Array<Token>, themePath: string = '', theme?: Tok
 
     // For theme files: filter tokens to only include those that are themed
     let processedTokens = tokens
-    if (themePath && theme && exportConfiguration.exportOnlyThemedTokens) {
-        processedTokens = ThemeHelper.filterThemedTokens(tokens, theme)
+    if (themePath && themes.length > 0 && exportConfiguration.exportOnlyThemedTokens) {
+        const themeTokenIds = themeFileTokenIds(tokens, themes)
+        processedTokens = tokens.filter((token) => themeTokenIds.has(token.id))
         if (processedTokens.length === 0) {
             return []
         }
@@ -40,9 +41,41 @@ function processTokens(tokens: Array<Token>, themePath: string = '', theme?: Tok
     return processedTokens
 }
 
+/** Ids of every token a value references, at any depth of the value (layers, parts, color and opacity) */
+function referencedTokenIds(value: unknown): Array<string> {
+    if (!value || typeof value !== 'object') return []
+    return Object.entries(value).flatMap(([key, child]) =>
+        key === 'referencedTokenId' ? (typeof child === 'string' ? [child] : []) : referencedTokenIds(child)
+    )
+}
+
+/**
+ * Ids of the tokens a theme file writes: the ones the themes override, and every token that references one of them.
+ * A reference resolves where it is declared, so a token that reads a themed token keeps its base value unless the theme file declares it again
+ */
+export function themeFileTokenIds(tokens: Array<Token>, themes: Array<TokenTheme>): Set<string> {
+    const references = tokens.map((token) => ({ id: token.id, referenced: referencedTokenIds((token as AnyToken).value) }))
+    const ids = new Set(themes.flatMap((theme) => theme.overriddenTokens.map((token) => token.id)))
+    let isGrowing = true
+    while (isGrowing) {
+        const dependents = references.filter(({ id, referenced }) => !ids.has(id) && referenced.some((referencedId) => ids.has(referencedId)))
+        dependents.forEach(({ id }) => ids.add(id))
+        isGrowing = dependents.length > 0
+    }
+    return ids
+}
+
 /** Channel variables of the given color tokens, one per line */
-function channelVariables(colorTokenIds: Set<string>, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>): string {
-    return [...colorTokenIds].map((id) => generateChannelVariable(mappedTokens.get(id) as ColorToken, tokenGroups) + '\n').join('')
+function channelVariables(colorTokenIds: Set<string>, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, isThemeFile: boolean): string {
+    return [...colorTokenIds].map((id) => generateChannelVariable(mappedTokens.get(id) as ColorToken, tokenGroups, isThemeFile) + '\n').join('')
+}
+
+/** The block that declares the values of themed shadows outside `@theme`, so a global prefix does not rename them */
+function shadowValueBlock(tokens: Array<Token>, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, options: TokenVariableOptions): string {
+    const declarations = tokens
+        .filter((token) => options.themedShadowIds.has(token.id))
+        .map((token) => shadowValueVariable(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels))
+    return declarations.length > 0 ? `\n@layer theme {\n:root, :host {\n${declarations.join('\n')}\n}\n}\n` : ''
 }
 
 /**
@@ -185,7 +218,7 @@ function generateTypographyContent(tokens: Array<Token>, tokenGroups: Array<Toke
  * @param tokens - Array of tokens to process
  * @param mappedTokens - Map of tokens by ID for reference resolution
  * @param tokenGroups - Array of token groups
- * @param colorTokensNeedingChannels - Set of color token IDs that need a channel variable
+ * @param options - What changes how each variable is written
  * @param type - Specific token type (if applicable)
  * @returns CSS variable declarations as a string
  */
@@ -193,7 +226,7 @@ function generateCSSVariables(
     tokens: Array<Token>, 
     mappedTokens: Map<string, Token>, 
     tokenGroups: Array<TokenGroup>,
-    colorTokensNeedingChannels?: Set<string>,
+    options: TokenVariableOptions,
     type?: TokenType
 ): string {
     const indentString = GeneralHelper.indent(exportConfiguration.indent)
@@ -225,7 +258,7 @@ function generateCSSVariables(
         
         // Convert tokens to CSS variable declarations
         const cssDeclarations = tokensOfType
-            .map((token) => convertedToken(token, mappedTokens, tokenGroups, colorTokensNeedingChannels))
+            .map((token) => convertedToken(token, mappedTokens, tokenGroups, options))
             .filter((declaration): declaration is string => declaration !== null) // Filter out null returns
             .join("\n")
         
@@ -261,17 +294,18 @@ function getStyleFileName(type: TokenType): string {
  * 
  * @param tokens - Array of tokens to process
  * @param tokenGroups - Array of token groups
+ * @param themedShadowIds - Shadows that some theme of the brand overrides
  * @param themePath - Path of the theme (if applicable)
- * @param theme - Theme object (if applicable)
+ * @param themes - Themes that the file writes (if applicable)
  * @returns OutputTextFile object or null if no tokens
  */
-export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): OutputTextFile | null {
+export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themedShadowIds: Set<string>, themePath: string = '', themes: Array<TokenTheme> = []): OutputTextFile | null {
     // Create a map of all tokens by ID for reference resolution
     // This includes ALL tokens to ensure references can be resolved, even to non-themed tokens
     const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
     // Process tokens to get only themed ones if needed
-    const processedTokens = processTokens(tokens, themePath, theme)
+    const processedTokens = processTokens(tokens, themePath, themes)
     if (processedTokens.length === 0) {
         return null
     }
@@ -297,9 +331,11 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
     )
 
     // Use configured selector for base tokens or theme selector for themed tokens
-    const selector = themePath && theme 
+    const isThemeFile = !!themePath && themes.length > 0
+    const selector = isThemeFile
         ? exportConfiguration.themeSelector.replace('{theme}', themePath)
         : exportConfiguration.cssSelector
+    const variableOptions: TokenVariableOptions = { colorTokensNeedingChannels, themedShadowIds, isThemeFile }
 
     // Generate CSS variables
     let cssVariables = ''
@@ -308,21 +344,16 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
         cssVariables += generateResetRules(selector)
     }
     // Channel variables go before the token variables
-    cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups)
-    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, colorTokensNeedingChannels)
+    cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups, isThemeFile)
+    cssVariables += generateCSSVariables(processedTokens, mappedTokens, tokenGroups, variableOptions)
 
-    // Check if any tokens use references and if references are enabled
-    const hasReferences = exportConfiguration.useReferences && processedTokens.some(token => 
-        // @ts-ignore
-        token.value.referencedTokenId && token.value.referencedTokenId !== null && token.value.referencedTokenId !== undefined
-    )
+    content += `${selector} {\n${cssVariables}}\n`
 
-    // Add inline flag for @theme if it's the base selector and there are references
-    const themeDirective = selector === '@theme' && hasReferences ? '@theme inline' : selector
-    content += `${themeDirective} {\n${cssVariables}}\n`
-
-    // Add typography classes
-    content += generateTypographyContent(processedTokens, tokenGroups)
+    // Typography classes read variables, so only the base file writes them
+    if (!isThemeFile) {
+        content += shadowValueBlock(processedTokens, mappedTokens, tokenGroups, variableOptions)
+        content += generateTypographyContent(processedTokens, tokenGroups)
+    }
 
     // Add disclaimer if enabled
     if (exportConfiguration.showGeneratedFileDisclaimer) {
@@ -345,17 +376,18 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
  * 
  * @param tokens - Array of tokens to process
  * @param tokenGroups - Array of token groups
+ * @param themedShadowIds - Shadows that some theme of the brand overrides
  * @param themePath - Path of the theme (if applicable)
- * @param theme - Theme object (if applicable)
+ * @param themes - Themes that the files write (if applicable)
  * @returns Array of OutputTextFile objects
  */
-export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themePath: string = '', theme?: TokenTheme): Array<OutputTextFile> {
+export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<TokenGroup>, themedShadowIds: Set<string>, themePath: string = '', themes: Array<TokenTheme> = []): Array<OutputTextFile> {
     // Create a map of all tokens by ID for reference resolution
     // This includes ALL tokens to ensure references can be resolved, even to non-themed tokens
     const mappedTokens = new Map(tokens.map((token) => [token.id, token]))
 
     // Process tokens to get only themed ones if needed
-    const processedTokens = processTokens(tokens, themePath, theme)
+    const processedTokens = processTokens(tokens, themePath, themes)
     if (processedTokens.length === 0) {
         return []
     }
@@ -374,18 +406,11 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
     })
 
     // Use configured selector for base tokens or theme selector for themed tokens
-    const selector = themePath && theme 
+    const isThemeFile = !!themePath && themes.length > 0
+    const selector = isThemeFile
         ? exportConfiguration.themeSelector.replace('{theme}', themePath)
         : exportConfiguration.cssSelector
-
-    // Check if any tokens use references and if references are enabled
-    const hasReferences = exportConfiguration.useReferences && processedTokens.some(token => 
-        // @ts-ignore
-        token.value.referencedTokenId && token.value.referencedTokenId !== null && token.value.referencedTokenId !== undefined
-    )
-
-    // Add inline flag for @theme if it's the base selector and there are references
-    const themeDirective = selector === '@theme' && hasReferences ? '@theme inline' : selector
+    const variableOptions: TokenVariableOptions = { colorTokensNeedingChannels, themedShadowIds, isThemeFile }
 
     // Generate a file for each token type
     return Array.from(tokensByType.entries()).map(([type, tokensOfType]) => {
@@ -408,16 +433,19 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         // Generate CSS variables
         let cssVariables = ''
         if (type === TokenType.color) {
-            cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups)
+            cssVariables += channelVariables(colorTokensNeedingChannels, mappedTokens, tokenGroups, isThemeFile)
         }
-        cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, colorTokensNeedingChannels, type)
+        cssVariables += generateCSSVariables(tokensOfType, mappedTokens, tokenGroups, variableOptions, type)
 
         // Add the CSS variables to the content
-        content += `${themeDirective} {\n${cssVariables}}\n`
+        content += `${selector} {\n${cssVariables}}\n`
 
-        // Add typography classes if this is the typography type
-        if (type === TokenType.typography) {
-            content += generateTypographyContent(tokensOfType, tokenGroups)
+        // Typography classes read variables, so only the base files write them
+        if (!isThemeFile) {
+            content += shadowValueBlock(tokensOfType, mappedTokens, tokenGroups, variableOptions)
+            if (type === TokenType.typography) {
+                content += generateTypographyContent(tokensOfType, tokenGroups)
+            }
         }
 
         // Add disclaimer if enabled
@@ -559,13 +587,10 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
             tokenTypes.forEach(type => {
                 // Skip if exportOnlyThemedTokens is true and there are no themed tokens of this type
                 if (exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string') {
-                    const themedTokens = ThemeHelper.filterThemedTokens(
-                        tokens.filter(t => t.tokenType === type),
-                        theme as TokenTheme
-                    )
+                    const themeTokenIds = themeFileTokenIds(tokens, [theme])
                     
-                    // Skip this type if there are no themed tokens
-                    if (themedTokens.length === 0) {
+                    // Skip this type if the theme file writes no token of it
+                    if (!tokens.some((token) => token.tokenType === type && themeTokenIds.has(token.id))) {
                         return
                     }
                 }
