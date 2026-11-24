@@ -1,7 +1,20 @@
 import { NamingHelper, StringCase } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType, TypographyTokenValue } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
-import { runtimeVariableName, tokenVariableName } from "./token"
+import { runtimeVariableName, tokenVariableName, TYPOGRAPHY_VARIABLE_SUFFIXES, TypographyPart } from "./token"
+
+/** The CSS property that a typography class sets from each part, in the order the class writes them */
+const CLASS_PROPERTIES: Record<TypographyPart, string> = {
+  fontFamily: 'font-family',
+  fontSize: 'font-size',
+  fontWeight: 'font-weight',
+  lineHeight: 'line-height',
+  letterSpacing: 'letter-spacing',
+  textDecoration: 'text-decoration',
+  textCase: 'text-transform',
+  paragraphIndent: 'text-indent',
+  paragraphSpacing: 'margin-bottom'
+}
 
 /**
  * Generates a CSS class for a typography token
@@ -47,24 +60,11 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
   // Get the CSS variable name for reference
   const variableName = tokenVariableName(token, tokenGroups)
 
-  // Get the typography value
-  const typographyValue = (token as unknown as { value: TypographyTokenValue }).value
-
   // Every property reads the variable that the base file declares and theme files override
-  const property = (cssProperty: string, suffix: string) =>
-    `${indentString}  ${cssProperty}: var(--${runtimeVariableName(`${variableName}${suffix}`)});\n`
-
-  // Generate the class with all typography properties
   output += `${indentString}.${className} {\n`
-  if (typographyValue.fontFamily) output += property('font-family', '--font-family')
-  output += property('font-size', '')
-  output += property('font-weight', '--font-weight')
-  output += property('line-height', '--line-height')
-  output += property('letter-spacing', '--letter-spacing')
-  if (typographyValue.textDecoration) output += property('text-decoration', '--text-decoration')
-  if (typographyValue.textCase) output += property('text-transform', '--text-transform')
-  if (typographyValue.paragraphIndent) output += property('text-indent', '--text-indent')
-  if (typographyValue.paragraphSpacing) output += property('margin-bottom', '--paragraph-spacing')
+  Object.entries(CLASS_PROPERTIES).forEach(([part, cssProperty]) => {
+    output += `${indentString}  ${cssProperty}: var(--${runtimeVariableName(`${variableName}${TYPOGRAPHY_VARIABLE_SUFFIXES[part as TypographyPart]}`)});\n`
+  })
   
   output += `${indentString}}\n`
 

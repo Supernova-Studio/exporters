@@ -53,7 +53,7 @@ function referencedTokenIds(value: unknown): Array<string> {
  * Ids of the tokens a theme file writes: the ones the themes override, and every token that references one of them.
  * A reference resolves where it is declared, so a token that reads a themed token keeps its base value unless the theme file declares it again
  */
-export function themeFileTokenIds(tokens: Array<Token>, themes: Array<TokenTheme>): Set<string> {
+function themeFileTokenIds(tokens: Array<Token>, themes: Array<TokenTheme>): Set<string> {
     const references = tokens.map((token) => ({ id: token.id, referenced: referencedTokenIds((token as AnyToken).value) }))
     const ids = new Set(themes.flatMap((theme) => theme.overriddenTokens.map((token) => token.id)))
     let isGrowing = true

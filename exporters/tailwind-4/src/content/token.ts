@@ -48,6 +48,21 @@ function generateDebugInfo(token: Token, indentString: string): string {
          })} */\n`
 }
 
+export type TypographyPart = keyof Omit<TypographyTokenValue, 'referencedTokenId'>
+
+/** The suffix that each part of a typography token adds to the token's variable name */
+export const TYPOGRAPHY_VARIABLE_SUFFIXES: Record<TypographyPart, string> = {
+  fontSize: '',
+  lineHeight: '--line-height',
+  letterSpacing: '--letter-spacing',
+  fontWeight: '--font-weight',
+  fontFamily: '--font-family',
+  textDecoration: '--text-decoration',
+  textCase: '--text-transform',
+  paragraphIndent: '--text-indent',
+  paragraphSpacing: '--paragraph-spacing'
+}
+
 /**
  * Handles the conversion of a typography token into CSS custom properties
  * @param token - The typography token to convert
@@ -75,7 +90,12 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
   const typographyValue = token.value as TypographyTokenValue
 
   // Helper function to create CSS variable for a typography property
-  const createTypographyProperty = (property: keyof Omit<TypographyTokenValue, 'referencedTokenId'>, suffix: string = '') => {
+  const createTypographyProperty = (property: TypographyPart) => {
+    const suffix = TYPOGRAPHY_VARIABLE_SUFFIXES[property]
+    // An auto line height is written as normal, so a theme can switch between auto and a fixed line height
+    if (property === 'lineHeight' && !typographyValue.lineHeight) {
+      output += `${indentString}--${declaredVariableName(`${baseName}${suffix}`, options.isThemeFile)}: normal;\n`
+    }
     if (typographyValue[property]) {
       const propertyValue = typographyValue[property] as AnyDimensionTokenValue
       const value = {
@@ -109,15 +129,7 @@ function handleTypographyToken(token: Token, mappedTokens: Map<string, Token>, t
   }
 
   // Create CSS variables for each typography property
-  createTypographyProperty('fontSize') // Base font size
-  createTypographyProperty('lineHeight', '--line-height')
-  createTypographyProperty('letterSpacing', '--letter-spacing')
-  createTypographyProperty('fontWeight', '--font-weight')
-  createTypographyProperty('fontFamily', '--font-family')
-  createTypographyProperty('textDecoration', '--text-decoration')
-  createTypographyProperty('textCase', '--text-transform')
-  createTypographyProperty('paragraphIndent', '--text-indent')
-  createTypographyProperty('paragraphSpacing', '--paragraph-spacing')
+  Object.keys(TYPOGRAPHY_VARIABLE_SUFFIXES).forEach((property) => createTypographyProperty(property as TypographyPart))
 
   return output
 }
@@ -171,7 +183,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   if (options.themedShadowIds.has(token.id)) {
     output += `${indentString}--${declaredName}: var(--value-${name});`
     if (options.isThemeFile) {
-      output += `\n${indentString}--value-${name}: ${value};`
+      output += `\n${shadowValueVariable(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)}`
     }
     return output
   }

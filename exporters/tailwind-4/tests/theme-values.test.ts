@@ -82,7 +82,7 @@ const shadow = (id: string, y: number, layerColor: ColorTokenValue, referencedTo
     { color: layerColor, x: 0, y, radius: 8, spread: 0, opacity: null, type: ShadowType.drop, referencedTokenId }
   ])
 const fontFamily = (id: string, text: string) => token(id, TokenType.fontFamily, { text, referencedTokenId: null })
-const typography = (id: string, fontSizeId: string, fontFamilyId: string) =>
+const typography = ({ id, fontSizeId, fontFamilyId }: { id: string; fontSizeId: string; fontFamilyId: string }) =>
   token(id, TokenType.typography, {
     fontFamily: { text: "Inter", referencedTokenId: fontFamilyId },
     fontWeight: { text: "400", referencedTokenId: null },
@@ -93,7 +93,8 @@ const typography = (id: string, fontSizeId: string, fontFamilyId: string) =>
     referencedTokenId: null
   })
 
-const captionValue = (typography("caption", "body-size", "body-font") as AnyToken).value
+const captionValue = (typography({ id: "caption", fontSizeId: "body-size", fontFamilyId: "body-font" }) as AnyToken)
+  .value
 const brand = color("brand", 0, 0, 255)
 const brandDark = color("brand", 255, 255, 0)
 const tokensWithDarkValues = {
@@ -116,8 +117,9 @@ const tokensWithDarkValues = {
     fontFamily("body-font", "Inter"),
     token("body-size", TokenType.fontSize, { measure: 16, unit: Unit.pixels, referencedTokenId: null }),
     token("case-upper", TokenType.textCase, { value: TextCase.upper, referencedTokenId: null }),
-    typography("body", "body-size", "body-font"),
-    token("caption", TokenType.typography, { ...captionValue, lineHeight: null })
+    typography({ id: "body", fontSizeId: "body-size", fontFamilyId: "body-font" }),
+    token("caption", TokenType.typography, { ...captionValue, lineHeight: null }),
+    token("label", TokenType.typography, captionValue)
   ],
   dark: {
     brand: brandDark,
@@ -128,7 +130,8 @@ const tokensWithDarkValues = {
     caption: token("caption", TokenType.typography, {
       ...captionValue,
       lineHeight: { measure: 2, unit: Unit.raw, referencedTokenId: null }
-    })
+    }),
+    label: token("label", TokenType.typography, { ...captionValue, lineHeight: null })
   } as Record<string, Token>
 }
 const baseTokens = tokensWithDarkValues.base
@@ -290,6 +293,13 @@ describe("Tailwind classes follow a token's theme value", () => {
   test("a typography class shows the Dark line height when only Dark sets one", async () => {
     const css = await singleFileCss(["caption"])
     expect(computedValue(css, ".caption", "line-height")).toBe("2")
+    expect(computedValue(css, ".caption", "line-height", false)).toBe("normal")
+  })
+
+  test("a typography class shows normal line height when Dark sets it to auto", async () => {
+    const css = await singleFileCss(["label"])
+    expect(computedValue(css, ".label", "line-height")).toBe("normal")
+    expect(computedValue(css, ".label", "line-height", false)).toBe("1.5")
   })
 
   test("a Dark file writes no typography classes", () => {

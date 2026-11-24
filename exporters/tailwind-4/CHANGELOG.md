@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - With "Separate by type", a theme folder can now hold more type files, such as `dark/tailwind.typography.css` for typography tokens that reference a themed font size. If you import theme files yourself instead of `index.css`, import these too.
 - With merged themes, the theme file now also holds tokens that only a later theme overrides, so their classes follow that theme.
 - Typography classes read font family, text decoration, text case, indent and paragraph spacing from variables, as they already did for size and weight, so a theme that changes them changes the class. Theme files no longer write typography classes.
+- A typography token with an auto line height now writes `line-height: normal`, so its class and its `text-<name>` class show normal line height instead of the parent's, and a theme can switch a token between auto and a fixed line height.
 - With a global prefix, references and theme files use the prefixed variable names (`--tw-color-primary`), so theme values reach classes.
 
 ## [1.4.0] - 2026-11-23
