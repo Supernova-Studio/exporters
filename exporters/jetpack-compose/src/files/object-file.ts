@@ -1,4 +1,5 @@
 import {
+  ColorFormat,
   FileHelper,
   FileNameHelper,
   GeneralHelper,
@@ -8,14 +9,7 @@ import {
   StringCase,
   ThemeHelper
 } from "@supernovaio/export-utils"
-import {
-  OutputTextFile,
-  Token,
-  TokenGroup,
-  TokenTheme,
-  TokenType,
-  UnreachableCaseError
-} from "@supernovaio/sdk-exporters"
+import { OutputTextFile, Token, TokenGroup, TokenTheme, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { convertedToken, resetTokenNameTracking } from "../content/token"
 import { FileStructure } from "../../config"
@@ -177,13 +171,31 @@ function generateFileContent(
 
   // Declare each token below the tokens in this file that it references, so Kotlin never reads a property that is not initialized yet
   const exportedTokens = new Map(tokensToExport.map((token) => [token.id, token]))
+  const referencedTokens = (token: Token): Array<Token> => {
+    const referenced: Array<Token> = []
+    KotlinHelper.tokenValue(
+      token,
+      mappedTokens,
+      {
+        colorFormat: ColorFormat.hex8,
+        allowReferences: exportConfiguration.useReferences,
+        decimals: 0,
+        indent: exportConfiguration.indent,
+        tokenToVariableRef: (refToken) => {
+          referenced.push(refToken)
+          return ""
+        }
+      },
+      new ImportCollector("")
+    )
+    return referenced
+  }
   const referenceDepth = (token: Token): number =>
     Math.max(
       0,
-      ...KotlinHelper.referencedTokenIds(token).map((id) => {
-        const referenced = id ? exportedTokens.get(id) : undefined
-        return referenced ? 1 + referenceDepth(referenced) : 0
-      })
+      ...referencedTokens(token).map((refToken) =>
+        exportedTokens.has(refToken.id) ? 1 + referenceDepth(exportedTokens.get(refToken.id)!) : 0
+      )
     )
   const depths = new Map(tokensToExport.map((token) => [token.id, referenceDepth(token)]))
   const sortedTokensToExport = [...tokensToExport].sort((a, b) => depths.get(a.id)! - depths.get(b.id)!)

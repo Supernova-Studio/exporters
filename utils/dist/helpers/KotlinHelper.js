@@ -162,69 +162,6 @@ class KotlinHelper {
         }
         return value;
     }
-    /** The token that a color is written from: its alias, else the color that its color part references */
-    static colorSourceTokenId(color) {
-        return color.referencedTokenId ?? color.color.referencedTokenId;
-    }
-    /** The ids of the tokens that a token's Kotlin value names, which must be declared above it */
-    static referencedTokenIds(token) {
-        switch (token.tokenType) {
-            case sdk_exporters_1.TokenType.color:
-                return [this.colorSourceTokenId(token.value)];
-            case sdk_exporters_1.TokenType.border: {
-                const { value } = token;
-                return [value.referencedTokenId, value.width.referencedTokenId, this.colorSourceTokenId(value.color)];
-            }
-            case sdk_exporters_1.TokenType.gradient:
-                return token.value.flatMap((layer) => [
-                    layer.referencedTokenId,
-                    ...layer.stops.map((stop) => this.colorSourceTokenId(stop.color))
-                ]);
-            case sdk_exporters_1.TokenType.shadow:
-                return token.value.flatMap((layer) => [
-                    layer.referencedTokenId,
-                    this.colorSourceTokenId(layer.color)
-                ]);
-            case sdk_exporters_1.TokenType.blur: {
-                const { value } = token;
-                return [value.referencedTokenId, value.radius.referencedTokenId];
-            }
-            case sdk_exporters_1.TokenType.typography: {
-                const { value } = token;
-                return [
-                    value.referencedTokenId,
-                    value.fontFamily.referencedTokenId,
-                    value.fontWeight.referencedTokenId,
-                    value.fontSize.referencedTokenId,
-                    value.lineHeight?.referencedTokenId ?? null,
-                    value.letterSpacing.referencedTokenId,
-                    value.textDecoration.referencedTokenId
-                ];
-            }
-            case sdk_exporters_1.TokenType.dimension:
-            case sdk_exporters_1.TokenType.size:
-            case sdk_exporters_1.TokenType.space:
-            case sdk_exporters_1.TokenType.opacity:
-            case sdk_exporters_1.TokenType.fontSize:
-            case sdk_exporters_1.TokenType.lineHeight:
-            case sdk_exporters_1.TokenType.letterSpacing:
-            case sdk_exporters_1.TokenType.paragraphSpacing:
-            case sdk_exporters_1.TokenType.borderWidth:
-            case sdk_exporters_1.TokenType.radius:
-            case sdk_exporters_1.TokenType.duration:
-            case sdk_exporters_1.TokenType.zIndex:
-            case sdk_exporters_1.TokenType.fontWeight:
-            case sdk_exporters_1.TokenType.fontFamily:
-            case sdk_exporters_1.TokenType.productCopy:
-            case sdk_exporters_1.TokenType.string:
-            case sdk_exporters_1.TokenType.textCase:
-            case sdk_exporters_1.TokenType.textDecoration:
-            case sdk_exporters_1.TokenType.visibility:
-                return [token.value.referencedTokenId];
-            default:
-                throw new sdk_exporters_1.UnreachableCaseError(token.tokenType, "Unsupported token type for declaration order:");
-        }
-    }
     static colorTokenValueToKotlin(color, allTokens, options, importCollector) {
         importCollector.use(ImportFlag.Color);
         const source = color.referencedTokenId
@@ -316,7 +253,7 @@ class KotlinHelper {
             ? {
                 color: {
                     ...value.color.color,
-                    referencedTokenId: this.colorSourceTokenId(value.color)
+                    referencedTokenId: value.color.referencedTokenId ?? value.color.color.referencedTokenId
                 },
                 opacity: value.opacity,
                 referencedTokenId: null
