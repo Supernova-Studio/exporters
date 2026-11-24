@@ -82,7 +82,7 @@ function kotlinOptions(tokenToVariableRef: (refToken: Token) => string) {
   } satisfies TokenToKotlinOptions
 }
 
-/** The tokens that a token's Kotlin value names */
+/** The tokens that the Kotlin writer looks up for a token's value */
 export function referencedTokens(token: Token, mappedTokens: Map<string, Token>): Array<Token> {
   const referenced: Array<Token> = []
   KotlinHelper.tokenValue(
