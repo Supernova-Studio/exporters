@@ -586,12 +586,9 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
             
             // For each token type, check if there are themed tokens before importing
             tokenTypes.forEach(type => {
-                // Skip if exportOnlyThemedTokens is true and there are no themed tokens of this type
-                if (themeTokenIds) {
-                    // Skip this type if the theme file writes no token of it
-                    if (!tokens.some((token) => token.tokenType === type && themeTokenIds.has(token.id))) {
-                        return
-                    }
+                // Skip this type if the theme file writes no token of it
+                if (themeTokenIds && !tokens.some((token) => token.tokenType === type && themeTokenIds.has(token.id))) {
+                    return
                 }
                 
                 const fileName = getStyleFileName(type)
