@@ -81,7 +81,8 @@ const shadow = (id: string, y: number, layerColor: ColorTokenValue, referencedTo
   token(id, TokenType.shadow, [
     { color: layerColor, x: 0, y, radius: 8, spread: 0, opacity: null, type: ShadowType.drop, referencedTokenId }
   ])
-const fontFamily = (id: string, text: string) => token(id, TokenType.fontFamily, { text, referencedTokenId: null })
+const fontFamily = ({ id, text }: { id: string; text: string }) =>
+  token(id, TokenType.fontFamily, { text, referencedTokenId: null })
 const typography = ({ id, fontSizeId, fontFamilyId }: { id: string; fontSizeId: string; fontFamilyId: string }) =>
   token(id, TokenType.typography, {
     fontFamily: { text: "Inter", referencedTokenId: fontFamilyId },
@@ -114,7 +115,7 @@ const tokensWithDarkValues = {
     shadow("card-alias", 2, colorValue(255, 0, 0), "card"),
     shadow("tint", 2, colorValue(0, 0, 255, "brand")),
     shadow("plain", 2, colorValue(0, 0, 0)),
-    fontFamily("body-font", "Inter"),
+    fontFamily({ id: "body-font", text: "Inter" }),
     token("body-size", TokenType.fontSize, { measure: 16, unit: Unit.pixels, referencedTokenId: null }),
     token("case-upper", TokenType.textCase, { value: TextCase.upper, referencedTokenId: null }),
     typography({ id: "body", fontSizeId: "body-size", fontFamilyId: "body-font" }),
@@ -126,7 +127,7 @@ const tokensWithDarkValues = {
     primary: color("primary", 238, 238, 238),
     scrim: color("scrim", 0, 0, 0, "ink"),
     card: shadow("card", 12, colorValue(0, 255, 0)),
-    "body-font": fontFamily("body-font", "Georgia"),
+    "body-font": fontFamily({ id: "body-font", text: "Georgia" }),
     caption: token("caption", TokenType.typography, {
       ...captionValue,
       lineHeight: { measure: 2, unit: Unit.raw, referencedTokenId: null }
