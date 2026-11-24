@@ -61,7 +61,7 @@ export type ExporterConfiguration = {
   themeSelector: string
   /** Controls how themes are exported in the CSS files */
   exportThemesAs: ThemeExportStyle
-  /** When enabled, themed files will only include tokens that have different values from the base theme */
+  /** When enabled, themed files will only include tokens that have different values from the base theme, and the tokens that reference them */
   exportOnlyThemedTokens: boolean
   /** When enabled, base token values will be exported along with themes */
   exportBaseValues: boolean

@@ -64,20 +64,36 @@ const token = (id: string, tokenType: TokenType, value: unknown): Token =>
     properties: [],
     propertyValues: {}
   }) as unknown as Token
-const colorValue = (
-  r: number,
-  g: number,
-  b: number,
-  referencedTokenId: string | null = null,
+const colorValue = ({
+  r,
+  g,
+  b,
+  referencedTokenId = null,
   opacity = 1
-): ColorTokenValue => ({
+}: {
+  r: number
+  g: number
+  b: number
+  referencedTokenId?: string | null
+  opacity?: number
+}): ColorTokenValue => ({
   color: { r, g, b, referencedTokenId: null },
   opacity: { measure: opacity, unit: Unit.raw, referencedTokenId: null },
   referencedTokenId
 })
-const color = (id: string, r: number, g: number, b: number, referencedTokenId: string | null = null) =>
-  token(id, TokenType.color, colorValue(r, g, b, referencedTokenId))
-const shadow = (id: string, y: number, layerColor: ColorTokenValue, referencedTokenId: string | null = null) =>
+const color = ({ id, ...value }: { id: string; r: number; g: number; b: number; referencedTokenId?: string | null }) =>
+  token(id, TokenType.color, colorValue(value))
+const shadow = ({
+  id,
+  y,
+  layerColor,
+  referencedTokenId = null
+}: {
+  id: string
+  y: number
+  layerColor: ColorTokenValue
+  referencedTokenId?: string | null
+}) =>
   token(id, TokenType.shadow, [
     { color: layerColor, x: 0, y, radius: 8, spread: 0, opacity: null, type: ShadowType.drop, referencedTokenId }
   ])
@@ -96,25 +112,25 @@ const typography = ({ id, fontSizeId, fontFamilyId }: { id: string; fontSizeId: 
 
 const captionValue = (typography({ id: "caption", fontSizeId: "body-size", fontFamilyId: "body-font" }) as AnyToken)
   .value
-const brand = color("brand", 0, 0, 255)
-const brandDark = color("brand", 255, 255, 0)
+const brand = color({ id: "brand", r: 0, g: 0, b: 255 })
+const brandDark = color({ id: "brand", r: 255, g: 255, b: 0 })
 const tokensWithDarkValues = {
   base: [
     brand,
-    color("primary", 17, 17, 17),
-    color("scrim", 0, 0, 0, "brand"),
-    color("accent", 0, 0, 255, "brand"),
-    color("accent-deep", 0, 0, 255, "accent"),
+    color({ id: "primary", r: 17, g: 17, b: 17 }),
+    color({ id: "scrim", r: 0, g: 0, b: 0, referencedTokenId: "brand" }),
+    color({ id: "accent", r: 0, g: 0, b: 255, referencedTokenId: "brand" }),
+    color({ id: "accent-deep", r: 0, g: 0, b: 255, referencedTokenId: "accent" }),
     token("faded", TokenType.color, {
-      ...colorValue(0, 0, 255),
+      ...colorValue({ r: 0, g: 0, b: 255 }),
       color: { r: 0, g: 0, b: 255, referencedTokenId: "brand" },
       opacity: { measure: 0.5, unit: Unit.raw, referencedTokenId: null }
     }),
-    color("ink", 0, 0, 0),
-    shadow("card", 2, colorValue(255, 0, 0)),
-    shadow("card-alias", 2, colorValue(255, 0, 0), "card"),
-    shadow("tint", 2, colorValue(0, 0, 255, "brand")),
-    shadow("plain", 2, colorValue(0, 0, 0)),
+    color({ id: "ink", r: 0, g: 0, b: 0 }),
+    shadow({ id: "card", y: 2, layerColor: colorValue({ r: 255, g: 0, b: 0 }) }),
+    shadow({ id: "card-alias", y: 2, layerColor: colorValue({ r: 255, g: 0, b: 0 }), referencedTokenId: "card" }),
+    shadow({ id: "tint", y: 2, layerColor: colorValue({ r: 0, g: 0, b: 255, referencedTokenId: "brand" }) }),
+    shadow({ id: "plain", y: 2, layerColor: colorValue({ r: 0, g: 0, b: 0 }) }),
     fontFamily({ id: "body-font", text: "Inter" }),
     token("body-size", TokenType.fontSize, { measure: 16, unit: Unit.pixels, referencedTokenId: null }),
     token("case-upper", TokenType.textCase, { value: TextCase.upper, referencedTokenId: null }),
@@ -124,9 +140,9 @@ const tokensWithDarkValues = {
   ],
   dark: {
     brand: brandDark,
-    primary: color("primary", 238, 238, 238),
-    scrim: color("scrim", 0, 0, 0, "ink"),
-    card: shadow("card", 12, colorValue(0, 255, 0)),
+    primary: color({ id: "primary", r: 238, g: 238, b: 238 }),
+    scrim: color({ id: "scrim", r: 0, g: 0, b: 0, referencedTokenId: "ink" }),
+    card: shadow({ id: "card", y: 12, layerColor: colorValue({ r: 0, g: 255, b: 0 }) }),
     "body-font": fontFamily({ id: "body-font", text: "Georgia" }),
     caption: token("caption", TokenType.typography, {
       ...captionValue,
