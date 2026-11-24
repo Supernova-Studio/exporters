@@ -72,9 +72,9 @@ function channelVariables(colorTokenIds: Set<string>, mappedTokens: Map<string, 
 
 /** The block that declares the values of themed shadows outside `@theme`, so a global prefix does not rename them */
 function shadowValueBlock(tokens: Array<Token>, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, options: TokenVariableOptions): string {
-    const declarations = tokens
-        .filter((token) => options.themedShadowIds.has(token.id))
-        .map((token) => shadowValueVariable(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels))
+    const declarations = tokens.flatMap((token) =>
+        options.themedShadowIds.has(token.id) ? [shadowValueVariable(token, mappedTokens, tokenGroups, options.colorTokensNeedingChannels)] : []
+    )
     return declarations.length > 0 ? `\n@layer theme {\n:root, :host {\n${declarations.join('\n')}\n}\n}\n` : ''
 }
 
@@ -349,7 +349,7 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
     content += `${selector} {\n${cssVariables}}\n`
 
-    // Typography classes read variables, so only the base file writes them
+    // Theme files override variables only: the base file writes the typography classes and the base values of themed shadows
     if (!isThemeFile) {
         content += shadowValueBlock(processedTokens, mappedTokens, tokenGroups, variableOptions)
         content += generateTypographyContent(processedTokens, tokenGroups)
@@ -440,7 +440,7 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         // Add the CSS variables to the content
         content += `${selector} {\n${cssVariables}}\n`
 
-        // Typography classes read variables, so only the base files write them
+        // Theme files override variables only: the base files write the typography classes and the base values of themed shadows
         if (!isThemeFile) {
             content += shadowValueBlock(tokensOfType, mappedTokens, tokenGroups, variableOptions)
             if (type === TokenType.typography) {
@@ -582,13 +582,12 @@ export function indexOutputFile(tokens: Array<Token>, themes: Array<TokenTheme |
             // Import separate theme type files
             const tokenTypes = Array.from(new Set(tokens.map(t => t.tokenType)))
                 .filter(type => isAllowedTokenType(type))
+            const themeTokenIds = exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string' ? themeFileTokenIds(tokens, [theme]) : null
             
             // For each token type, check if there are themed tokens before importing
             tokenTypes.forEach(type => {
                 // Skip if exportOnlyThemedTokens is true and there are no themed tokens of this type
-                if (exportConfiguration.exportOnlyThemedTokens && typeof theme !== 'string') {
-                    const themeTokenIds = themeFileTokenIds(tokens, [theme])
-                    
+                if (themeTokenIds) {
                     // Skip this type if the theme file writes no token of it
                     if (!tokens.some((token) => token.tokenType === type && themeTokenIds.has(token.id))) {
                         return

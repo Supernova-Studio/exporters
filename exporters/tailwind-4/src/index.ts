@@ -8,7 +8,7 @@ import { Supernova, PulsarContext, RemoteVersionIdentifier, AnyOutputFile, Token
 import { ExporterConfiguration, ThemeExportStyle, FileStructure } from "../config"
 import { styleOutputFile, generateStyleFiles, indexOutputFile, resetOutputFile } from "./files/tailwind-file"
 import { ThemeHelper, WriteTokenPropStore } from "@supernovaio/export-utils"
-import { tokenVariableName, isAllowedTokenType } from "./content/token"
+import { tokenVariableName, isAllowedTokenType, isThemeDirectiveSelector } from "./content/token"
 import { variableToTailwindClassName } from "./utils/tailwind-class"
 
 /** Exporter configuration from the resolved default configuration and user overrides */
@@ -120,8 +120,8 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
 
   const themes = await sdk.tokens.getTokenThemes(remoteVersionIdentifier)
   // Every theme counts, not only the exported ones, so a base file and theme files from separate pipelines agree
-  const themedShadowIds = exportConfiguration.cssSelector.trim().startsWith('@theme')
-    ? new Set(themes.flatMap((theme) => theme.overriddenTokens.filter((token) => token.tokenType === TokenType.shadow).map((token) => token.id)))
+  const themedShadowIds = isThemeDirectiveSelector()
+    ? new Set(themes.flatMap((theme) => theme.overriddenTokens.flatMap((token) => (token.tokenType === TokenType.shadow ? [token.id] : []))))
     : new Set<string>()
 
   // Process themes if specified
@@ -143,11 +143,11 @@ Pulsar.export(async (sdk: Supernova, context: PulsarContext): Promise<Array<AnyO
         tokens = sdk.tokens.computeTokensByApplyingThemes(tokens, tokens, themesToApply)
         if (exportConfiguration.fileStructure === FileStructure.SingleFile) {
           return processOutputFiles([
-            styleOutputFile(tokens, tokenGroups, themedShadowIds),
+            styleOutputFile(tokens, tokenGroups, new Set()),
             indexOutputFile(tokens)
           ])
         } else {
-          const styleFiles = generateStyleFiles(tokens, tokenGroups, themedShadowIds)
+          const styleFiles = generateStyleFiles(tokens, tokenGroups, new Set())
           const resetFile = resetOutputFile()
           const indexFile = indexOutputFile(tokens)
           return [...styleFiles, ...(resetFile ? [resetFile] : []), ...(indexFile ? [indexFile] : [])]

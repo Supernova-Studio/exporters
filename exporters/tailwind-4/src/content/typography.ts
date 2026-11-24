@@ -59,7 +59,7 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
   if (typographyValue.fontFamily) output += property('font-family', '--font-family')
   output += property('font-size', '')
   output += property('font-weight', '--font-weight')
-  if (typographyValue.lineHeight) output += property('line-height', '--line-height')
+  output += property('line-height', '--line-height')
   output += property('letter-spacing', '--letter-spacing')
   if (typographyValue.textDecoration) output += property('text-decoration', '--text-decoration')
   if (typographyValue.textCase) output += property('text-transform', '--text-transform')

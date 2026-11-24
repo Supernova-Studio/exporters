@@ -1,6 +1,7 @@
 import { describe, test, expect, afterEach } from "@jest/globals"
 import { readFileSync } from "fs"
 import {
+  AnyToken,
   ColorTokenValue,
   ShadowType,
   TextCase,
@@ -92,6 +93,7 @@ const typography = (id: string, fontSizeId: string, fontFamilyId: string) =>
     referencedTokenId: null
   })
 
+const captionValue = (typography("caption", "body-size", "body-font") as AnyToken).value
 const brand = color("brand", 0, 0, 255)
 const brandDark = color("brand", 255, 255, 0)
 const tokensWithDarkValues = {
@@ -114,14 +116,19 @@ const tokensWithDarkValues = {
     fontFamily("body-font", "Inter"),
     token("body-size", TokenType.fontSize, { measure: 16, unit: Unit.pixels, referencedTokenId: null }),
     token("case-upper", TokenType.textCase, { value: TextCase.upper, referencedTokenId: null }),
-    typography("body", "body-size", "body-font")
+    typography("body", "body-size", "body-font"),
+    token("caption", TokenType.typography, { ...captionValue, lineHeight: null })
   ],
   dark: {
     brand: brandDark,
     primary: color("primary", 238, 238, 238),
     scrim: color("scrim", 0, 0, 0, "ink"),
     card: shadow("card", 12, colorValue(0, 255, 0)),
-    "body-font": fontFamily("body-font", "Georgia")
+    "body-font": fontFamily("body-font", "Georgia"),
+    caption: token("caption", TokenType.typography, {
+      ...captionValue,
+      lineHeight: { measure: 2, unit: Unit.raw, referencedTokenId: null }
+    })
   } as Record<string, Token>
 }
 const baseTokens = tokensWithDarkValues.base
@@ -278,6 +285,11 @@ describe("Tailwind classes follow a token's theme value", () => {
     const css = await singleFileCss(["body"])
     expect(computedValue(css, ".body", "text-transform", false)).toBe("uppercase")
     expect(computedValue(css, ".body", "text-transform")).toBe("uppercase")
+  })
+
+  test("a typography class shows the Dark line height when only Dark sets one", async () => {
+    const css = await singleFileCss(["caption"])
+    expect(computedValue(css, ".caption", "line-height")).toBe("2")
   })
 
   test("a Dark file writes no typography classes", () => {
