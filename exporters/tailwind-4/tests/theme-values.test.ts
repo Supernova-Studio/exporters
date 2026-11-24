@@ -325,13 +325,6 @@ describe("Tailwind classes follow a token's theme value", () => {
     )
   })
 
-  test("with base values off, a Dark file writes the typography classes", () => {
-    mockConfig.exportBaseValues = false
-    expect(styleOutputFile(darkTokens, tokenGroups, themedShadowIds, "dark", [darkTheme])!.content).toContain(
-      ".caption {"
-    )
-  })
-
   test("with a global prefix, a color class, an alias, a themed shadow and a typography class show their Dark values", async () => {
     mockConfig.globalPrefix = "tw"
     const css = await singleFileCss(["tw:bg-primary", "tw:bg-accent", "tw:bg-brand", "tw:shadow-card", "body"])

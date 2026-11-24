@@ -50,7 +50,7 @@ function referencedTokenIds(value: unknown): Array<string> {
 }
 
 /**
- * Ids of the tokens that a theme file writes: the ones the themes override, and every token that references one of them.
+ * Ids of the tokens that a theme file writes: the ones that the themes override, and every token that references one of them.
  * A reference resolves where it is declared, so a token that reads a themed token keeps its base value unless the theme file declares it again
  */
 function themeFileTokenIds(tokens: Array<Token>, themes: Array<TokenTheme>): Set<string> {
@@ -349,12 +349,9 @@ export function styleOutputFile(tokens: Array<Token>, tokenGroups: Array<TokenGr
 
     content += `${selector} {\n${cssVariables}}\n`
 
-    // Theme files override variables only: the base file writes the base values of themed shadows, and the typography
-    // classes unless no base file is exported
+    // Theme files override variables only: the base file writes the typography classes and the base values of themed shadows
     if (!isThemeFile) {
         content += shadowValueBlock(processedTokens, mappedTokens, tokenGroups, variableOptions)
-    }
-    if (!isThemeFile || !exportConfiguration.exportBaseValues) {
         content += generateTypographyContent(processedTokens, tokenGroups)
     }
 
@@ -443,13 +440,12 @@ export function generateStyleFiles(tokens: Array<Token>, tokenGroups: Array<Toke
         // Add the CSS variables to the content
         content += `${selector} {\n${cssVariables}}\n`
 
-        // Theme files override variables only: the base files write the base values of themed shadows, and the
-        // typography classes unless no base file is exported
+        // Theme files override variables only: the base files write the typography classes and the base values of themed shadows
         if (!isThemeFile) {
             content += shadowValueBlock(tokensOfType, mappedTokens, tokenGroups, variableOptions)
-        }
-        if (type === TokenType.typography && (!isThemeFile || !exportConfiguration.exportBaseValues)) {
-            content += generateTypographyContent(tokensOfType, tokenGroups)
+            if (type === TokenType.typography) {
+                content += generateTypographyContent(tokensOfType, tokenGroups)
+            }
         }
 
         // Add disclaimer if enabled

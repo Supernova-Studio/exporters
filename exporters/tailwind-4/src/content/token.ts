@@ -192,7 +192,7 @@ export function convertedToken(token: Token, mappedTokens: Map<string, Token>, t
   return output
 }
 
-/** The value variable of a themed shadow, which the base file declares outside `@theme` */
+/** The variable that holds a themed shadow's value, which the shadow's class reads */
 export function shadowValueVariable(token: Token, mappedTokens: Map<string, Token>, tokenGroups: Array<TokenGroup>, colorTokensNeedingChannels: Set<string>): string {
   const indentString = GeneralHelper.indent(exportConfiguration.indent)
   return `${indentString}--value-${tokenVariableName(token, tokenGroups)}: ${tokenValue(token, mappedTokens, tokenGroups, colorTokensNeedingChannels)};`
