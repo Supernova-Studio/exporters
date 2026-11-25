@@ -488,7 +488,7 @@ test('leaves no empty segment when find and replace removes a whole group name',
   )
 })
 
-test('RemoveAll writes a word repeated inside one name part once, as before RCT-10874', () => {
+test('RemoveAll writes a word repeated inside one name part once', () => {
   const rootGroup = { name: 'Color', path: [], isRoot: true }
   expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Super super token' }, StringCase.kebabCase, rootGroup, 'color', undefined, RepeatedWords.RemoveAll)).toBe(
     'color-super-token'
