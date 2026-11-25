@@ -77,9 +77,9 @@ export class TokenNameTracker {
    * @param tokenGroups - Array of all token groups, used to find the token's parent group
    * @param format - The desired case format for the generated name (e.g., camelCase, snake_case)
    * @param prefix - Optional prefix to add to the generated name
-   * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
    * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
    * @param repeatedWords - Which repeated words the name keeps
+   * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
    * @returns A unique, code-safe name for the token
    */
   getTokenName(
