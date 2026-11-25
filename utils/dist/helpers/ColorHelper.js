@@ -146,10 +146,10 @@ class ColorHelper {
         }
         let resultingHsl;
         if (format === ColorFormat_1.ColorFormat.hsla || (format === ColorFormat_1.ColorFormat.smartHsla && alpha < 1)) {
-            resultingHsl = `hsla(${Math.round(h * 360)}%, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%, ${this.roundToDecimals(alpha, decimals)})`;
+            resultingHsl = `hsla(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%, ${this.roundToDecimals(alpha, decimals)})`;
         }
         else {
-            resultingHsl = `hsl(${Math.round(h * 360)}%, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+            resultingHsl = `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
         }
         return resultingHsl;
     }

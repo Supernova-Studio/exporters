@@ -190,11 +190,11 @@ export class ColorHelper {
 
     let resultingHsl: string
     if (format === ColorFormat.hsla || (format === ColorFormat.smartHsla && alpha < 1)) {
-      resultingHsl = `hsla(${Math.round(h * 360)}%, ${Math.round(s * 100)}%, ${Math.round(
+      resultingHsl = `hsla(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(
         l * 100
       )}%, ${this.roundToDecimals(alpha, decimals)})`
     } else {
-      resultingHsl = `hsl(${Math.round(h * 360)}%, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`
+      resultingHsl = `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`
     }
 
     return resultingHsl

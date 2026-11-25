@@ -1,6 +1,12 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
+## 2.3.1 - 2026-11-25
+
+### 🐞 Fixed
+
+Colors in the HSL formats are written as `hsl(222, 84%, 52%)` and `hsla(222, 84%, 52%, 0.256)`. They were `hsl(222%, 84%, 52%)`, with a percent on the hue, which browsers do not accept, so the color did not show.
+
 ## 2.3.0 - 2026-11-23
 
 ### 🐞 Fixed
