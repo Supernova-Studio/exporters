@@ -1,5 +1,6 @@
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
 import { StringCase } from "../enums/StringCase"
+import { RepeatedWords } from "../enums/RepeatedWords"
 import {
   camelCase,
   capitalCase,
@@ -54,8 +55,8 @@ export class NamingHelper {
   }
 
   /**
-   * Builds a token's variable name from the prefix, its group path and its name. A word repeated where two of these
-   * parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
+   * Builds a token's variable name from the prefix, its group path and its name. By default, a word repeated where two
+   * of these parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
    */
   static codeSafeVariableNameForToken(
     token: Pick<Token, 'name'>,
@@ -63,7 +64,7 @@ export class NamingHelper {
     parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null,
     prefix: string | null,
     findReplace?: Record<string, string>,
-    removeDuplicateFragments: boolean = true
+    repeatedWords: RepeatedWords = RepeatedWords.RemoveWhereFragmentsMeet
   ): string {
     // Create array with all path segments and token name at the end
     let fragments: Array<string> = []
@@ -100,7 +101,7 @@ export class NamingHelper {
     }
 
     // Step 5: Apply case formatting to the final fragments
-    return NamingHelper.codeSafeVariableName(fragments, format, undefined, removeDuplicateFragments)
+    return NamingHelper.codeSafeVariableName(fragments, format, undefined, repeatedWords)
   }
 
   /**
@@ -113,16 +114,17 @@ export class NamingHelper {
     fragments: Array<string> | string,
     format: StringCase,
     findReplace?: Record<string, string>,
-    removeDuplicateFragments: boolean = false
+    repeatedWords: RepeatedWords = RepeatedWords.Keep
   ): string {
     // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
     const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) =>
       NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_')
     )
-    // With removeDuplicateFragments, a word repeated where two fragments meet is written once; a word repeated inside one fragment is kept.
-    // A string counts each of its words as a fragment
-    let sentence = removeDuplicateFragments
-      ? (typeof fragments === 'string' ? kebabCase(cleanFragments[0]).split('-') : cleanFragments)
+    // A word repeated where two fragments meet is written once. A string, or RemoveAll, counts each word as a fragment
+    let sentence = repeatedWords !== RepeatedWords.Keep
+      ? (typeof fragments === 'string' || repeatedWords === RepeatedWords.RemoveAll
+          ? cleanFragments.flatMap((fragment) => kebabCase(fragment).split('-'))
+          : cleanFragments)
           .reduce<Array<string>>((words, fragment) => {
             const fragmentWords = kebabCase(fragment).split('-').filter((word) => word.length > 0)
             return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)]

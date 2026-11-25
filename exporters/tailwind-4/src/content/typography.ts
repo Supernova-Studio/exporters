@@ -1,4 +1,4 @@
-import { NamingHelper, StringCase } from "@supernovaio/export-utils"
+import { NamingHelper, repeatedWordsFromSetting, StringCase } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType, TypographyTokenValue } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { runtimeVariableName, tokenVariableName, TYPOGRAPHY_VARIABLE_SUFFIXES, TypographyPart } from "./token"
@@ -54,7 +54,7 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
     [...(token.tokenPath || []), token.name],
     StringCase.kebabCase,
     exportConfiguration.findReplace,
-    true // Add removeDuplicateFragments parameter to prevent duplicated fragments
+    repeatedWordsFromSetting(exportConfiguration.removeRepeatedWords)
   )
 
   // Get the CSS variable name for reference

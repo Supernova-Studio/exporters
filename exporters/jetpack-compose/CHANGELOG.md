@@ -1,6 +1,11 @@
 ### Jetpack Compose exporter release notes
 All the updates to this exporter are documented in this file.
 
+## 1.1.0 - 2026-11-25
+
+### 🚀 New
+- New "Remove repeated words" setting in Token names, on by default. A word repeated inside one token or group name is again written only once, as before 1.0.0: "Super super token" exports as `colorSuperToken`. Turn it off to keep the 1.0.0 names, for example when "Fast-fast themed ref" and "Fast themed ref" would otherwise get `durationFastThemedRef` and `durationFastThemedRefCopy1`.
+
 ## 1.0.1 - 2026-11-23
 
 ### 🐞 Fixed

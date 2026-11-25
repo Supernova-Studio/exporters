@@ -1,4 +1,4 @@
-import { NamingHelper, CSSHelper, TokenNameTracker } from "@supernovaio/export-utils"
+import { NamingHelper, CSSHelper, TokenNameTracker, repeatedWordsFromSetting } from "@supernovaio/export-utils"
 import { Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
@@ -13,7 +13,14 @@ export function getTokenPrefix(tokenType: TokenType): string {
 
 export function tokenObjectKeyName(token: Token, tokenGroups: Array<TokenGroup>, forExport: boolean = false): string {
   const prefix = getTokenPrefix(token.tokenType)
-  let name = tokenNameTracker.getTokenName(token, tokenGroups, exportConfiguration.tokenNameStyle, prefix, forExport)
+  let name = tokenNameTracker.getTokenName(
+    token,
+    tokenGroups,
+    exportConfiguration.tokenNameStyle,
+    prefix,
+    forExport,
+    repeatedWordsFromSetting(exportConfiguration.removeRepeatedWords)
+  )
 
   // Apply global prefix if configured
   if (exportConfiguration.globalNamePrefix) {

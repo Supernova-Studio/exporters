@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NamingHelper = void 0;
 const StringCase_1 = require("../enums/StringCase");
+const RepeatedWords_1 = require("../enums/RepeatedWords");
 const change_case_1 = require("change-case");
 class NamingHelper {
     /**
@@ -36,10 +37,10 @@ class NamingHelper {
         return result;
     }
     /**
-     * Builds a token's variable name from the prefix, its group path and its name. A word repeated where two of these
-     * parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
+     * Builds a token's variable name from the prefix, its group path and its name. By default, a word repeated where two
+     * of these parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
      */
-    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, removeDuplicateFragments = true) {
+    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet) {
         // Create array with all path segments and token name at the end
         let fragments = [];
         // Add parent path and name
@@ -70,7 +71,7 @@ class NamingHelper {
             fragments.unshift(...(0, change_case_1.kebabCase)(prefix).split('-'));
         }
         // Step 5: Apply case formatting to the final fragments
-        return NamingHelper.codeSafeVariableName(fragments, format, undefined, removeDuplicateFragments);
+        return NamingHelper.codeSafeVariableName(fragments, format, undefined, repeatedWords);
     }
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
@@ -78,13 +79,14 @@ class NamingHelper {
      *
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
      */
-    static codeSafeVariableName(fragments, format, findReplace, removeDuplicateFragments = false) {
+    static codeSafeVariableName(fragments, format, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.Keep) {
         // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
         const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_'));
-        // With removeDuplicateFragments, a word repeated where two fragments meet is written once; a word repeated inside one fragment is kept.
-        // A string counts each of its words as a fragment
-        let sentence = removeDuplicateFragments
-            ? (typeof fragments === 'string' ? (0, change_case_1.kebabCase)(cleanFragments[0]).split('-') : cleanFragments)
+        // A word repeated where two fragments meet is written once. A string, or RemoveAll, counts each word as a fragment
+        let sentence = repeatedWords !== RepeatedWords_1.RepeatedWords.Keep
+            ? (typeof fragments === 'string' || repeatedWords === RepeatedWords_1.RepeatedWords.RemoveAll
+                ? cleanFragments.flatMap((fragment) => (0, change_case_1.kebabCase)(fragment).split('-'))
+                : cleanFragments)
                 .reduce((words, fragment) => {
                 const fragmentWords = (0, change_case_1.kebabCase)(fragment).split('-').filter((word) => word.length > 0);
                 return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)];

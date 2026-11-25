@@ -34,6 +34,7 @@ const baseConfig: ExporterConfiguration = {
   customizeStyleFileNames: false,
   customizeTokenPrefixes: false,
   globalNamePrefix: "",
+  removeRepeatedWords: true,
   generateTypeDefinitions: false,
   tokenSortOrder: TokenSortOrder.Default,
   writeNameToProperty: false,

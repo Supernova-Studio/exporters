@@ -106,6 +106,8 @@ Here is a list of all the configuration options this exporter provides:
 
 - **globalNamePrefix:** Prefix all variable names (e.g., '--ds-color-primary').
 
+- **removeRepeatedWords:** When a word repeats inside a group or token name, write it only once (default: on). When off, the word stays, e.g. `--color-super-super-token` instead of `--color-super-token`. A word repeated where the prefix, a group and the token name meet is always written once.
+
 - **customizeTokenPrefixes:** Customize the prefixes for each design token type.
 
 - **tokenPrefixes:** Each token of a specific type is prefixed with the following identifier (requires customizeTokenPrefixes: true).

@@ -533,6 +533,14 @@
         "category": "CSS selectors"
     },
     {
+        "key": "removeRepeatedWords",
+        "type": "boolean",
+        "default": true,
+        "title": "Remove repeated words",
+        "description": "When a word repeats inside a group or token name, write it only once in variables and typography classes (e.g., 'Super super token' → '--color-super-token'). When off, the word stays ('--color-super-super-token'). A word repeated where the prefix, a group and the token name meet, or in a color with a color utility prefix (e.g., '--bg-color-…'), is always written once.",
+        "category": "Token names"
+    },
+    {
         "key": "findReplace",
         "type": "object",
         "title": "Find and replace",

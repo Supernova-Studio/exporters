@@ -73,6 +73,8 @@ export type ExporterConfiguration = {
   customizeStyleFileNames: boolean
   /** Prefix for Tailwind classes and CSS variables */
   globalPrefix: string
+  /** When enabled, a word repeated inside a group or token name is written once */
+  removeRepeatedWords: boolean
   /** When enabled, uses specific prefixes for different color utilities */
   useColorUtilityPrefixes: boolean
   /** Configuration for color utility prefixes and their patterns */

@@ -5,6 +5,7 @@ import {
   ImportCollector,
   KotlinHelper,
   NamingHelper,
+  repeatedWordsFromSetting,
   StringCase,
   TokenNameTracker,
   TokenToKotlinOptions
@@ -68,7 +69,15 @@ export function tokenPropertyName(
     .filter(Boolean)
     .join("")
 
-  return tokenNameTracker.getTokenName(token, tokenGroups, StringCase.camelCase, prefix, false, "Copy")
+  return tokenNameTracker.getTokenName(
+    token,
+    tokenGroups,
+    StringCase.camelCase,
+    prefix,
+    false,
+    repeatedWordsFromSetting(exportConfiguration.removeRepeatedWords),
+    "Copy"
+  )
 }
 
 /** The options that every Kotlin writer call uses, so declaration order and output name the same references */

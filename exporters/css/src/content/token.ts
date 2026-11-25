@@ -1,5 +1,5 @@
 import { DesignSystemCollection } from "@supernovaio/sdk-exporters/build/sdk-typescript/src/model/base/SDKDesignSystemCollection"
-import { NamingHelper, CSSHelper, GeneralHelper } from "@supernovaio/export-utils"
+import { NamingHelper, CSSHelper, GeneralHelper, repeatedWordsFromSetting } from "@supernovaio/export-utils"
 import { ColorToken, Token, TokenGroup, TokenType } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { DEFAULT_TOKEN_PREFIXES } from "../constants/defaults"
@@ -163,6 +163,8 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, 
     token,
     exportConfiguration.tokenNameStyle,
     exportConfiguration.tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
-    [exportConfiguration.globalNamePrefix, prefix, collection?.name].filter(Boolean).join('-')
+    [exportConfiguration.globalNamePrefix, prefix, collection?.name].filter(Boolean).join('-'),
+    undefined,
+    repeatedWordsFromSetting(exportConfiguration.removeRepeatedWords)
   )
 }

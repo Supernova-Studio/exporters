@@ -8,6 +8,7 @@ export * from "./helpers/FileNameHelper";
 export * from "./helpers/GeneralHelper";
 export * from "./enums/StringCase";
 export * from "./enums/ColorFormat";
+export * from "./enums/RepeatedWords";
 export * from "./helpers/TokenNameTracker";
 export * from "./helpers/WriteTokenPropStore";
 export * from "./helpers/KotlinHelper";

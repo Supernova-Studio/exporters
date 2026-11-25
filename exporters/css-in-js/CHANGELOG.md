@@ -1,6 +1,12 @@
 ### CSS in JS Exporter Release Notes
 All the updates to this exporter are documented in this file.
 
+## 2.4.0 - 2026-11-25
+
+### 🚀 New
+
+New "Remove repeated words" setting in Token names, on by default. A word repeated inside one token or group name is again written only once, as before 2.3.0: "Super super token" exports as `colorSuperToken`. Turn it off to keep the 2.3.0 names, for example when "Fast-fast themed ref" and "Fast themed ref" would otherwise get `durationFastThemedRef` and `durationFastThemedRef_copy_1`.
+
 ## 2.3.0 - 2026-11-23
 
 ### 🐞 Fixed
