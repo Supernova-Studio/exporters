@@ -10,6 +10,7 @@ const mockConfig: Record<string, unknown> = { ...mockDefaults }
 jest.mock("../src/index", () => ({ exportConfiguration: mockConfig }))
 
 afterEach(() => {
+  Object.keys(mockConfig).forEach((key) => delete mockConfig[key])
   Object.assign(mockConfig, mockDefaults)
 })
 

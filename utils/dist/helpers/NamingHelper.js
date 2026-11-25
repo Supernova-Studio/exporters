@@ -82,9 +82,9 @@ class NamingHelper {
     static codeSafeVariableName(fragments, format, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.Keep) {
         // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
         const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_'));
-        // A word repeated where two fragments meet is written once. A string, or RemoveAll, counts each word as a fragment
+        // A word repeated where two fragments meet is written once. RemoveAll counts each word as a fragment
         let sentence = repeatedWords !== RepeatedWords_1.RepeatedWords.Keep
-            ? (typeof fragments === 'string' || repeatedWords === RepeatedWords_1.RepeatedWords.RemoveAll
+            ? (repeatedWords === RepeatedWords_1.RepeatedWords.RemoveAll
                 ? cleanFragments.flatMap((fragment) => (0, change_case_1.kebabCase)(fragment).split('-'))
                 : cleanFragments)
                 .reduce((words, fragment) => {

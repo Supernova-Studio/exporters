@@ -401,7 +401,7 @@
         "type": "boolean",
         "default": true,
         "title": "Remove repeated words",
-        "description": "When a word repeats inside a group or token name, write it only once (e.g., 'Super super token' → 'colorSuperToken'). When off, the word stays ('colorSuperSuperToken'). A word repeated where the prefix, a group and the token name meet is always written once.",
+        "description": "When a word repeats inside a group or token name, write it only once (e.g., 'Super super token' → 'colorSuperToken'). When off, the word stays ('colorSuperSuperToken'). A word repeated where the token type prefix, a group and the token name meet is always written once.",
         "category": "Token names"
     },
     {

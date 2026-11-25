@@ -392,7 +392,6 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
     path: ['Color', 'bg', 'fill'],
     isRoot: false
   }
-  // Test with different case formats to ensure no deduplication happens when removeDuplicateFragments is false
   expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, RepeatedWords.Keep)).toBe(
     'color-color-bg-fill-fill-warning'
   )
@@ -404,15 +403,14 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
   )
 })
 
-test('codeSafeVariableName_with_removeDuplicateFragments', () => {
-  // Test the removeDuplicateFragments parameter directly on codeSafeVariableName
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, RepeatedWords.RemoveWhereFragmentsMeet)).toBe(
+test('RemoveAll on a string writes every repeated word once', () => {
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, RepeatedWords.RemoveAll)).toBe(
     'color-bg-fill-warning'
   )
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.camelCase, undefined, RepeatedWords.RemoveWhereFragmentsMeet)).toBe(
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.camelCase, undefined, RepeatedWords.RemoveAll)).toBe(
     'colorBgFillWarning'
   )
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, RepeatedWords.RemoveWhereFragmentsMeet)).toBe(
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, RepeatedWords.RemoveAll)).toBe(
     'color_bg_fill_warning'
   )
 })

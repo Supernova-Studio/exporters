@@ -120,9 +120,9 @@ export class NamingHelper {
     const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) =>
       NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_')
     )
-    // A word repeated where two fragments meet is written once. A string, or RemoveAll, counts each word as a fragment
+    // A word repeated where two fragments meet is written once. RemoveAll counts each word as a fragment
     let sentence = repeatedWords !== RepeatedWords.Keep
-      ? (typeof fragments === 'string' || repeatedWords === RepeatedWords.RemoveAll
+      ? (repeatedWords === RepeatedWords.RemoveAll
           ? cleanFragments.flatMap((fragment) => kebabCase(fragment).split('-'))
           : cleanFragments)
           .reduce<Array<string>>((words, fragment) => {

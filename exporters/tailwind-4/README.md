@@ -178,5 +178,5 @@ Here is a list of all the configuration options this exporter provides:
 ### Token Formatting
 - **tokenPrefixes:** Prefix each token type with a specific identifier.
 - **globalPrefix:** Prefix for Tailwind classes and CSS variables.
-- **removeRepeatedWords:** When a word repeats inside a group or token name, write it only once in variables and typography classes (default: on). When off, the word stays, e.g. `--color-super-super-token` instead of `--color-super-token`. A word repeated where the prefix, a group and the token name meet is always written once.
+- **removeRepeatedWords:** When a word repeats inside a group or token name, write it only once in variables and typography classes (default: on). When off, the word stays, e.g. `--color-super-super-token` instead of `--color-super-token`. A word repeated where the prefix, a group and the token name meet, or in a color with a color utility prefix (e.g., `--bg-color-…`), is always written once.
 - **findReplace:** Find and replace strings in token paths and names.
