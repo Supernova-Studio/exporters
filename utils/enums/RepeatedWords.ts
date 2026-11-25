@@ -5,7 +5,7 @@ export enum RepeatedWords {
   /** A word repeated where two fragments meet is written once; a word repeated inside one fragment is kept */
   RemoveWhereFragmentsMeet = "removeWhereFragmentsMeet",
   /** Any word equal to the word before it is written once */
-  RemoveAll = "removeAll",
+  RemoveAll = "removeAll"
 }
 
 /** Maps an exporter's "Remove repeated words" setting to the mode for token names */

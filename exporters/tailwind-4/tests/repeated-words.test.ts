@@ -20,7 +20,12 @@ const durationGroup = { id: "duration", name: "Duration", isRoot: true, path: []
 const headingGroup = { id: "heading", name: "Heading", isRoot: false, path: ["Typography"] } as unknown as TokenGroup
 const tokenGroups = [durationGroup, headingGroup]
 
-const durationToken = { id: "fast", name: "Fast-fast themed ref", tokenType: TokenType.duration, parentGroupId: "duration" } as unknown as Token
+const durationToken = {
+  id: "fast",
+  name: "Fast-fast themed ref",
+  tokenType: TokenType.duration,
+  parentGroupId: "duration"
+} as unknown as Token
 const typographyToken = {
   id: "xl",
   name: "Heading heading XL",
