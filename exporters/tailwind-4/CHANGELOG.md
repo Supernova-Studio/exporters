@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2026-11-25
+- Colors in the HSL formats are written as `hsl(222, 84%, 52%)` and `hsla(222, 84%, 52%, 0.256)`. They were `hsl(222%, 84%, 52%)`, with a percent on the hue, which browsers do not accept, so the color did not show.
+
 ## [1.5.0] - 2026-11-24
 - Utility classes now show a token's theme value. The base file opens `@theme` instead of `@theme inline`, so a class such as `text-primary` reads `var(--text-color-primary)` and a theme file that overrides it changes the class.
 - Theme files also write every token that references a themed token, such as an alias of a themed color or a color with its own opacity over it, so these keep following the theme.
