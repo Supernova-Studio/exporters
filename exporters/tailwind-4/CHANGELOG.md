@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [1.6.0] - 2026-11-25
-- New "Remove repeated words" setting in Token names, on by default. A word repeated inside one token or group name is again written only once in variables and typography classes, as before 1.4.0: "Super super token" exports as `--color-super-token`. Turn it off to keep the 1.4.0 names, for example when "Fast-fast themed ref" and "Fast themed ref" would otherwise share `--duration-fast-themed-ref`. Color tokens with a color utility prefix keep their names in both modes. Find and replace still runs on each group name and on the token name separately: in typography classes always, and in variables when "Apply find/replace" is set to "Before prefix is added".
+- New "Remove repeated words" setting in Token names, on by default. A word repeated inside one token or group name is again written only once in variables and typography classes, as before 1.4.0: "Super super token" exports as `--color-super-token`. Turn it off to keep the 1.4.0 names, for example when "Fast-fast themed ref" and "Fast themed ref" would otherwise share `--duration-fast-themed-ref`. Color tokens with a color utility prefix keep their names in both modes.
 
 ## [1.5.0] - 2026-11-24
 - Utility classes now show a token's theme value. The base file opens `@theme` instead of `@theme inline`, so a class such as `text-primary` reads `var(--text-color-primary)` and a theme file that overrides it changes the class.

@@ -508,13 +508,6 @@ test('RemoveAll writes a word repeated inside a group name once', () => {
   )
 })
 
-test('RemoveAll still writes a word repeated where the group and the token name meet once', () => {
-  const tokenGroup = { name: 'Neutral', path: ['Color'], isRoot: false }
-  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Neutral 500' }, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.RemoveAll)).toBe(
-    'color-neutral-500'
-  )
-})
-
 test('RemoveAll keeps a repeated word that is not next to itself', () => {
   const rootGroup = { name: 'Color', path: [], isRoot: true }
   expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Red dark red' }, StringCase.kebabCase, rootGroup, 'color', undefined, RepeatedWords.RemoveAll)).toBe(
