@@ -82,17 +82,29 @@ class NamingHelper {
     static codeSafeVariableName(fragments, format, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.Keep) {
         // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
         const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_'));
-        // A word repeated where two fragments meet is written once. RemoveAll counts each word as a fragment
-        let sentence = repeatedWords !== RepeatedWords_1.RepeatedWords.Keep
-            ? (repeatedWords === RepeatedWords_1.RepeatedWords.RemoveAll
-                ? cleanFragments.flatMap((fragment) => (0, change_case_1.kebabCase)(fragment).split('-'))
-                : cleanFragments)
-                .reduce((words, fragment) => {
-                const fragmentWords = (0, change_case_1.kebabCase)(fragment).split('-').filter((word) => word.length > 0);
-                return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)];
-            }, [])
-                .join(' ')
-            : cleanFragments.join('_');
+        // A word repeated where two fragments meet is written once
+        const removeWhereFragmentsMeet = (fragmentsToJoin) => fragmentsToJoin
+            .reduce((words, fragment) => {
+            const fragmentWords = (0, change_case_1.kebabCase)(fragment).split('-').filter((word) => word.length > 0);
+            return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)];
+        }, [])
+            .join(' ');
+        let sentence;
+        switch (repeatedWords) {
+            case RepeatedWords_1.RepeatedWords.Keep:
+                sentence = cleanFragments.join('_');
+                break;
+            case RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet:
+                sentence = removeWhereFragmentsMeet(cleanFragments);
+                break;
+            case RepeatedWords_1.RepeatedWords.RemoveAll:
+                // Each word counts as a fragment
+                sentence = removeWhereFragmentsMeet(cleanFragments.flatMap((fragment) => (0, change_case_1.kebabCase)(fragment).split('-')));
+                break;
+            default:
+                repeatedWords;
+                throw new Error(`Unknown repeated words mode: ${repeatedWords}`);
+        }
         switch (format) {
             case StringCase_1.StringCase.camelCase:
                 sentence = (0, change_case_1.camelCase)(sentence);

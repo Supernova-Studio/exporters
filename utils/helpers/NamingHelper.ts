@@ -120,17 +120,30 @@ export class NamingHelper {
     const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) =>
       NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_')
     )
-    // A word repeated where two fragments meet is written once. RemoveAll counts each word as a fragment
-    let sentence = repeatedWords !== RepeatedWords.Keep
-      ? (repeatedWords === RepeatedWords.RemoveAll
-          ? cleanFragments.flatMap((fragment) => kebabCase(fragment).split('-'))
-          : cleanFragments)
-          .reduce<Array<string>>((words, fragment) => {
-            const fragmentWords = kebabCase(fragment).split('-').filter((word) => word.length > 0)
-            return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)]
-          }, [])
-          .join(' ')
-      : cleanFragments.join('_')
+    // A word repeated where two fragments meet is written once
+    const removeWhereFragmentsMeet = (fragmentsToJoin: Array<string>) =>
+      fragmentsToJoin
+        .reduce<Array<string>>((words, fragment) => {
+          const fragmentWords = kebabCase(fragment).split('-').filter((word) => word.length > 0)
+          return [...words, ...(fragmentWords[0] === words[words.length - 1] ? fragmentWords.slice(1) : fragmentWords)]
+        }, [])
+        .join(' ')
+    let sentence: string
+    switch (repeatedWords) {
+      case RepeatedWords.Keep:
+        sentence = cleanFragments.join('_')
+        break
+      case RepeatedWords.RemoveWhereFragmentsMeet:
+        sentence = removeWhereFragmentsMeet(cleanFragments)
+        break
+      case RepeatedWords.RemoveAll:
+        // Each word counts as a fragment
+        sentence = removeWhereFragmentsMeet(cleanFragments.flatMap((fragment) => kebabCase(fragment).split('-')))
+        break
+      default:
+        repeatedWords satisfies never
+        throw new Error(`Unknown repeated words mode: ${repeatedWords}`)
+    }
 
     switch (format) {
       case StringCase.camelCase:

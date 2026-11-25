@@ -403,6 +403,12 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
   )
 })
 
+test('RemoveWhereFragmentsMeet keeps every word of a single string, which is one fragment', () => {
+  expect(NamingHelper.codeSafeVariableName('color color bg', StringCase.kebabCase, undefined, RepeatedWords.RemoveWhereFragmentsMeet)).toBe(
+    'color-color-bg'
+  )
+})
+
 test('RemoveAll on a string writes every repeated word once', () => {
   expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, RepeatedWords.RemoveAll)).toBe(
     'color-bg-fill-warning'
