@@ -5,7 +5,6 @@ import {
   ImportCollector,
   KotlinHelper,
   NamingHelper,
-  repeatedWordsFromSetting,
   StringCase,
   TokenNameTracker,
   TokenToKotlinOptions
@@ -75,7 +74,7 @@ export function tokenPropertyName(
     StringCase.camelCase,
     prefix,
     false,
-    repeatedWordsFromSetting(exportConfiguration.removeRepeatedWords),
+    exportConfiguration.repeatedWords,
     "Copy"
   )
 }

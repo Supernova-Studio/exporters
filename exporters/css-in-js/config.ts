@@ -1,4 +1,4 @@
-import { StringCase, ColorFormat } from "@supernovaio/export-utils"
+import { StringCase, ColorFormat, RepeatedWords } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 
 /**
@@ -64,8 +64,8 @@ export type ExporterConfiguration = {
   customizeTokenPrefixes: boolean
   /** Global prefix for all token names. When set, all tokens will be prefixed with this value */
   globalNamePrefix: string
-  /** When enabled, a word repeated inside a group or token name is written once */
-  removeRepeatedWords: boolean
+  /** Which repeated words token names keep */
+  repeatedWords: RepeatedWords
   /** When enabled, generates TypeScript type definitions file */
   generateTypeDefinitions: boolean
   /** Controls how tokens are sorted in the generated files */

@@ -533,12 +533,26 @@
         "category": "CSS selectors"
     },
     {
-        "key": "removeRepeatedWords",
-        "type": "boolean",
-        "default": true,
-        "title": "Remove repeated words",
-        "description": "When a word repeats inside a group or token name, write it only once in variables and typography classes (e.g., 'Super super token' → '--color-super-token'). When off, the word stays ('--color-super-super-token'). A word repeated where the token type prefix, a group and the token name meet, or in a color with a color utility prefix (e.g., '--bg-color-…'), is always written once. Blur token names do not change.",
-        "category": "Token names"
+        "key": "repeatedWords",
+        "type": "enum",
+        "default": "removeAll",
+        "title": "Repeated words",
+        "description": "Choose which repeated words stay in variable names and typography classes. The examples are a 'Super super token' color and a 'Neutral 500' color in the 'Neutral' group. Keep all also keeps a word repeated where the token type prefix meets a group ('Red' in a 'Color' group → '--color-color-red'); the Remove options write it once. Colors with a color utility prefix (e.g., '--bg-color-…') and blur tokens keep their names in every option.",
+        "category": "Token names",
+        "options": {
+            "removeAll": {
+                "label": "Remove all",
+                "description": "Example: --color-super-token, --color-neutral-500"
+            },
+            "removeWhereFragmentsMeet": {
+                "label": "Remove where names meet",
+                "description": "Example: --color-super-super-token, --color-neutral-500"
+            },
+            "keep": {
+                "label": "Keep all",
+                "description": "Example: --color-super-super-token, --color-neutral-neutral-500"
+            }
+        }
     },
     {
         "key": "findReplace",

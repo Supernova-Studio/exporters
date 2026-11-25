@@ -35,15 +35,19 @@ const typographyToken = {
   tokenPath: ["Typography", "Heading"]
 } as unknown as Token
 
-describe("Remove repeated words", () => {
-  test("is on by default and writes a word repeated inside the token name once", () => {
-    expect(tokenVariableName(durationToken, tokenGroups)).toBe("duration-fast-themed-ref")
-    expect(generateTypographyClass(typographyToken, tokenGroups)).toContain(".typography-heading-xl {")
+describe("Repeated words", () => {
+  test("defaults to removing every repeated word", () => {
+    expect(mockConfig.repeatedWords).toBe("removeAll")
   })
 
-  test("keeps a word repeated inside the token name when off", () => {
-    mockConfig.removeRepeatedWords = false
-    expect(tokenVariableName(durationToken, tokenGroups)).toBe("duration-fast-fast-themed-ref")
-    expect(generateTypographyClass(typographyToken, tokenGroups)).toContain(".typography-heading-heading-xl {")
+  test.each([
+    ["removeAll", "duration-fast-themed-ref", "typography-heading-xl"],
+    ["removeWhereFragmentsMeet", "duration-fast-fast-themed-ref", "typography-heading-heading-xl"],
+    ["keep", "duration-fast-fast-themed-ref", "typography-heading-heading-heading-xl"],
+  ])("%s names the variables and the typography class", (option, durationName, typographyName) => {
+    mockConfig.repeatedWords = option
+    expect(tokenVariableName(durationToken, tokenGroups)).toBe(durationName)
+    expect(tokenVariableName(typographyToken, tokenGroups)).toBe(`text-${typographyName}`)
+    expect(generateTypographyClass(typographyToken, tokenGroups)).toContain(`.${typographyName} {`)
   })
 })

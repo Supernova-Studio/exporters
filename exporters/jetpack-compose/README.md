@@ -102,7 +102,10 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Token names
 - **globalNamePrefix:** Prefix added to every generated property name.
-- **removeRepeatedWords:** When a word repeats inside a group or token name, write it only once (default: on). When off, the word stays, e.g. `colorSuperSuperToken` instead of `colorSuperToken`.
+- **repeatedWords:** Choose which repeated words stay in token names. Examples for a 'Super super token' color and a 'Neutral 500' color in the 'Neutral' group:
+  - `removeAll` (default): `colorSuperToken`, `colorNeutral500`. The names from before 1.0.0
+  - `removeWhereFragmentsMeet`: `colorSuperSuperToken`, `colorNeutral500`. The 1.0.0 names
+  - `keep`: `colorSuperSuperToken`, `colorNeutralNeutral500`. Also keeps a word repeated where the token type prefix meets a group, e.g. `colorColorRed`
 - **customizeTokenPrefixes:** Customize the prefixes for each design token type.
 - **tokenPrefixes:** Each token of a specific type is prefixed with the following identifier (requires customizeTokenPrefixes).
 

@@ -106,7 +106,10 @@ Here is a list of all the configuration options this exporter provides:
 
 - **globalNamePrefix:** Prefix all variable names (e.g., '--ds-color-primary').
 
-- **removeRepeatedWords:** When a word repeats inside a group or token name, write it only once (default: on). When off, the word stays, e.g. `--color-super-super-token` instead of `--color-super-token`. A word repeated where the prefix, a group and the token name meet is always written once.
+- **repeatedWords:** Choose which repeated words stay in token names. Examples for a 'Super super token' color and a 'Neutral 500' color in the 'Neutral' group:
+  - `removeAll` (default): `--color-super-token`, `--color-neutral-500`. The names from before 3.7.0
+  - `removeWhereFragmentsMeet`: `--color-super-super-token`, `--color-neutral-500`. The 3.7.0 names
+  - `keep`: `--color-super-super-token`, `--color-neutral-neutral-500`. Also keeps a word repeated where the prefix meets a group, e.g. `--color-color-red`
 
 - **customizeTokenPrefixes:** Customize the prefixes for each design token type.
 

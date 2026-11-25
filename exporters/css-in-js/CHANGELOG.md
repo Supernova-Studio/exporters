@@ -5,7 +5,7 @@ All the updates to this exporter are documented in this file.
 
 ### 🚀 New
 
-New "Remove repeated words" setting in Token names, on by default. A word repeated inside one token or group name is again written only once, as before 2.3.0: "Super super token" exports as `colorSuperToken`. Turn it off to keep the 2.3.0 names, for example when "Fast-fast themed ref" and "Fast themed ref" would otherwise get `durationFastThemedRef` and `durationFastThemedRef_copy_1`.
+New "Repeated words" setting in Token names. "Remove all" (default) writes a word repeated inside one token or group name once again, as before 2.3.0: "Super super token" exports as `colorSuperToken`. "Remove where names meet" keeps the 2.3.0 names. If two tokens now share a name, for example "Fast-fast themed ref" and "Fast themed ref" → `durationFastThemedRef` and `durationFastThemedRef_copy_1`, pick "Remove where names meet" or "Keep all". "Keep all" also keeps a word repeated where a group meets the token name or the token type prefix meets a group: "Neutral 500" in the "Neutral" group exports as `colorNeutralNeutral500`.
 
 ## 2.3.0 - 2026-11-23
 

@@ -419,12 +419,26 @@
         }
     },
     {
-        "key": "removeRepeatedWords",
-        "type": "boolean",
-        "default": true,
-        "title": "Remove repeated words",
-        "description": "When a word repeats inside a group or token name, write it only once (e.g., 'Super super token' → '--color-super-token'). When off, the word stays ('--color-super-super-token'). A word repeated where the prefix, a group and the token name meet is always written once.",
-        "category": "Token names"
+        "key": "repeatedWords",
+        "type": "enum",
+        "default": "removeAll",
+        "title": "Repeated words",
+        "description": "Choose which repeated words stay in token names. The examples are a 'Super super token' color and a 'Neutral 500' color in the 'Neutral' group. Keep all also keeps a word repeated where the prefix meets a group ('Red' in a 'Color' group → '--color-color-red'); the Remove options write it once.",
+        "category": "Token names",
+        "options": {
+            "removeAll": {
+                "label": "Remove all",
+                "description": "Example: --color-super-token, --color-neutral-500"
+            },
+            "removeWhereFragmentsMeet": {
+                "label": "Remove where names meet",
+                "description": "Example: --color-super-super-token, --color-neutral-500"
+            },
+            "keep": {
+                "label": "Keep all",
+                "description": "Example: --color-super-super-token, --color-neutral-neutral-500"
+            }
+        }
     },
     {
         "key": "cssSelector",

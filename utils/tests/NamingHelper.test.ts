@@ -389,7 +389,7 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
   }
   const tokenGroup = {
     name: 'fill',
-    path: ['Color', 'bg', 'fill'],
+    path: ['Color', 'bg'],
     isRoot: false
   }
   expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, RepeatedWords.Keep)).toBe(
@@ -528,4 +528,36 @@ test('RemoveAll runs find and replace on each fragment, before words are removed
   expect(NamingHelper.codeSafeVariableName(['Brand', 'Brand brand'], StringCase.kebabCase, { Brand: 'Accent' }, RepeatedWords.RemoveAll)).toBe(
     'accent'
   )
+})
+
+test('Keep writes a word repeated where a group meets the token name', () => {
+  const tokenGroup = { name: 'Neutral', path: ['Color'], isRoot: false }
+  const token = { name: 'Neutral 500' }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.Keep)).toBe(
+    'color-neutral-neutral-500'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.constantCase, tokenGroup, null, undefined, RepeatedWords.Keep)).toBe(
+    'COLOR_NEUTRAL_NEUTRAL_500'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.RemoveWhereFragmentsMeet)).toBe(
+    'color-neutral-500'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.RemoveAll)).toBe(
+    'color-neutral-500'
+  )
+})
+
+test('Keep writes a word repeated where the prefix meets a group', () => {
+  const tokenGroup = { name: 'Color', path: [], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Red' }, StringCase.kebabCase, tokenGroup, 'color', undefined, RepeatedWords.Keep)).toBe(
+    'color-color-red'
+  )
+})
+
+test('Keep gives two names to tokens that the Remove modes name alike', () => {
+  const tokenGroup = { name: 'Fast', path: ['Duration'], isRoot: false }
+  const keep = (name: string) =>
+    NamingHelper.codeSafeVariableNameForToken({ name }, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.Keep)
+  expect(keep('Fast-fast themed ref')).toBe('duration-fast-fast-fast-themed-ref')
+  expect(keep('Fast themed ref')).toBe('duration-fast-fast-themed-ref')
 })

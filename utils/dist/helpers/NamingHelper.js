@@ -39,6 +39,7 @@ class NamingHelper {
     /**
      * Builds a token's variable name from the prefix, its group path and its name. By default, a word repeated where two
      * of these parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
+     * Keep writes every word ("Neutral" + "Neutral 500" → neutral-neutral-500)
      */
     static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet) {
         // Create array with all path segments and token name at the end
@@ -56,8 +57,22 @@ class NamingHelper {
         const tokenNameParts = token.name.split(/[\s-_]+/);
         // This checks if the first word of token name matches the last fragment (case insensitive)
         // and if so, appends the remaining parts of the token name to that fragment
-        if (fragments.length > 0 && tokenNameParts.length > 1 &&
-            tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase()) {
+        const startsWithGroupName = fragments.length > 0 && tokenNameParts.length > 1 &&
+            tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase();
+        let mergesIntoGroup;
+        switch (repeatedWords) {
+            case RepeatedWords_1.RepeatedWords.Keep:
+                mergesIntoGroup = false;
+                break;
+            case RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet:
+            case RepeatedWords_1.RepeatedWords.RemoveAll:
+                mergesIntoGroup = startsWithGroupName;
+                break;
+            default:
+                repeatedWords;
+                throw new Error(`Unknown repeated words mode: ${repeatedWords}`);
+        }
+        if (mergesIntoGroup) {
             fragments[fragments.length - 1] += ` ${tokenNameParts.slice(1).join(' ')}`;
         }
         else {
