@@ -1,4 +1,4 @@
-import { RepeatedWords } from "@supernovaio/export-utils"
+import { RepeatedWordsMode } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 
 /**
@@ -45,7 +45,7 @@ export type ExporterConfiguration = {
   /** Prefix added to every generated property name. */
   globalNamePrefix: string
   /** Which repeated words token names keep */
-  repeatedWords: RepeatedWords
+  repeatedWords: RepeatedWordsMode
   /** Customize the prefixes for each design token type. */
   customizeTokenPrefixes: boolean
   /** Each token of a specific type is prefixed with the following identifier. */

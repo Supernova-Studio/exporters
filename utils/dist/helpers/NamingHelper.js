@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NamingHelper = void 0;
 const StringCase_1 = require("../enums/StringCase");
-const RepeatedWords_1 = require("../enums/RepeatedWords");
+const RepeatedWordsMode_1 = require("../enums/RepeatedWordsMode");
 const change_case_1 = require("change-case");
 class NamingHelper {
     /**
@@ -41,7 +41,7 @@ class NamingHelper {
      * of these parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
      * Keep writes every word ("Neutral" + "Neutral 500" → neutral-neutral-500)
      */
-    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet) {
+    static codeSafeVariableNameForToken(token, format, parent, prefix, findReplace, repeatedWordsMode = RepeatedWordsMode_1.RepeatedWordsMode.RemoveWhereFragmentsMeet) {
         // Create array with all path segments and token name at the end
         let fragments = [];
         // Add parent path and name
@@ -59,17 +59,17 @@ class NamingHelper {
         const startsWithGroupName = fragments.length > 0 && tokenNameParts.length > 1 &&
             tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase();
         let mergesIntoGroup;
-        switch (repeatedWords) {
-            case RepeatedWords_1.RepeatedWords.Keep:
+        switch (repeatedWordsMode) {
+            case RepeatedWordsMode_1.RepeatedWordsMode.Keep:
                 mergesIntoGroup = false;
                 break;
-            case RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet:
-            case RepeatedWords_1.RepeatedWords.RemoveAll:
+            case RepeatedWordsMode_1.RepeatedWordsMode.RemoveWhereFragmentsMeet:
+            case RepeatedWordsMode_1.RepeatedWordsMode.RemoveAll:
                 mergesIntoGroup = startsWithGroupName;
                 break;
             default:
-                repeatedWords;
-                throw new Error(`Unknown repeated words mode: ${repeatedWords}`);
+                repeatedWordsMode;
+                throw new Error(`Unknown repeated words mode: ${repeatedWordsMode}`);
         }
         if (mergesIntoGroup) {
             fragments[fragments.length - 1] += ` ${tokenNameParts.slice(1).join(' ')}`;
@@ -85,7 +85,7 @@ class NamingHelper {
             fragments.unshift(...(0, change_case_1.kebabCase)(prefix).split('-'));
         }
         // Step 5: Apply case formatting to the final fragments
-        return NamingHelper.codeSafeVariableName(fragments, format, undefined, repeatedWords);
+        return NamingHelper.codeSafeVariableName(fragments, format, undefined, repeatedWordsMode);
     }
     /**
      * Transforms name into specific case from provided path fragments. Will also smartly split fragments into subfragments -
@@ -93,7 +93,7 @@ class NamingHelper {
      *
      * Also fixes additional problems, like the fact that variable name can't start with numbers - variable will be prefixed with "_" in that case
      */
-    static codeSafeVariableName(fragments, format, findReplace, repeatedWords = RepeatedWords_1.RepeatedWords.Keep) {
+    static codeSafeVariableName(fragments, format, findReplace, repeatedWordsMode = RepeatedWordsMode_1.RepeatedWordsMode.Keep) {
         // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
         const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) => NamingHelper.applyFindReplace(fragment, findReplace).replaceAll(/[^a-zA-Z0-9_-]/g, '_'));
         // A word repeated where two fragments meet is written once
@@ -104,20 +104,20 @@ class NamingHelper {
         }, [])
             .join(' ');
         let sentence;
-        switch (repeatedWords) {
-            case RepeatedWords_1.RepeatedWords.Keep:
+        switch (repeatedWordsMode) {
+            case RepeatedWordsMode_1.RepeatedWordsMode.Keep:
                 sentence = cleanFragments.join('_');
                 break;
-            case RepeatedWords_1.RepeatedWords.RemoveWhereFragmentsMeet:
+            case RepeatedWordsMode_1.RepeatedWordsMode.RemoveWhereFragmentsMeet:
                 sentence = removeWhereFragmentsMeet(cleanFragments);
                 break;
-            case RepeatedWords_1.RepeatedWords.RemoveAll:
+            case RepeatedWordsMode_1.RepeatedWordsMode.RemoveAll:
                 // Each word counts as a fragment
                 sentence = removeWhereFragmentsMeet(cleanFragments.flatMap((fragment) => (0, change_case_1.kebabCase)(fragment).split('-')));
                 break;
             default:
-                repeatedWords;
-                throw new Error(`Unknown repeated words mode: ${repeatedWords}`);
+                repeatedWordsMode;
+                throw new Error(`Unknown repeated words mode: ${repeatedWordsMode}`);
         }
         switch (format) {
             case StringCase_1.StringCase.camelCase:

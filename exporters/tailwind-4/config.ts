@@ -1,4 +1,4 @@
-import { StringCase, ColorFormat, RepeatedWords } from "@supernovaio/export-utils"
+import { StringCase, ColorFormat, RepeatedWordsMode } from "@supernovaio/export-utils"
 import { TokenType } from "@supernovaio/sdk-exporters"
 
 /**
@@ -74,7 +74,7 @@ export type ExporterConfiguration = {
   /** Prefix for Tailwind classes and CSS variables */
   globalPrefix: string
   /** Which repeated words token names keep */
-  repeatedWords: RepeatedWords
+  repeatedWords: RepeatedWordsMode
   /** When enabled, uses specific prefixes for different color utilities */
   useColorUtilityPrefixes: boolean
   /** Configuration for color utility prefixes and their patterns */

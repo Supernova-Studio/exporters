@@ -1,6 +1,6 @@
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
 import { StringCase } from "../enums/StringCase"
-import { RepeatedWords } from "../enums/RepeatedWords"
+import { RepeatedWordsMode } from "../enums/RepeatedWordsMode"
 import {
   camelCase,
   capitalCase,
@@ -65,7 +65,7 @@ export class NamingHelper {
     parent: Pick<TokenGroup, 'path' | 'isRoot' | 'name'> | null,
     prefix: string | null,
     findReplace?: Record<string, string>,
-    repeatedWords: RepeatedWords = RepeatedWords.RemoveWhereFragmentsMeet
+    repeatedWordsMode: RepeatedWordsMode = RepeatedWordsMode.RemoveWhereFragmentsMeet
   ): string {
     // Create array with all path segments and token name at the end
     let fragments: Array<string> = []
@@ -87,17 +87,17 @@ export class NamingHelper {
     const startsWithGroupName = fragments.length > 0 && tokenNameParts.length > 1 &&
       tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase()
     let mergesIntoGroup: boolean
-    switch (repeatedWords) {
-      case RepeatedWords.Keep:
+    switch (repeatedWordsMode) {
+      case RepeatedWordsMode.Keep:
         mergesIntoGroup = false
         break
-      case RepeatedWords.RemoveWhereFragmentsMeet:
-      case RepeatedWords.RemoveAll:
+      case RepeatedWordsMode.RemoveWhereFragmentsMeet:
+      case RepeatedWordsMode.RemoveAll:
         mergesIntoGroup = startsWithGroupName
         break
       default:
-        repeatedWords satisfies never
-        throw new Error(`Unknown repeated words mode: ${repeatedWords}`)
+        repeatedWordsMode satisfies never
+        throw new Error(`Unknown repeated words mode: ${repeatedWordsMode}`)
     }
     if (mergesIntoGroup) {
       fragments[fragments.length - 1] += ` ${tokenNameParts.slice(1).join(' ')}`
@@ -115,7 +115,7 @@ export class NamingHelper {
     }
 
     // Step 5: Apply case formatting to the final fragments
-    return NamingHelper.codeSafeVariableName(fragments, format, undefined, repeatedWords)
+    return NamingHelper.codeSafeVariableName(fragments, format, undefined, repeatedWordsMode)
   }
 
   /**
@@ -128,7 +128,7 @@ export class NamingHelper {
     fragments: Array<string> | string,
     format: StringCase,
     findReplace?: Record<string, string>,
-    repeatedWords: RepeatedWords = RepeatedWords.Keep
+    repeatedWordsMode: RepeatedWordsMode = RepeatedWordsMode.Keep
   ): string {
     // Apply find/replace to each fragment, then only allow letters, digits, underscore and hyphen
     const cleanFragments = (typeof fragments === 'string' ? [fragments] : fragments).map((fragment) =>
@@ -143,20 +143,20 @@ export class NamingHelper {
         }, [])
         .join(' ')
     let sentence: string
-    switch (repeatedWords) {
-      case RepeatedWords.Keep:
+    switch (repeatedWordsMode) {
+      case RepeatedWordsMode.Keep:
         sentence = cleanFragments.join('_')
         break
-      case RepeatedWords.RemoveWhereFragmentsMeet:
+      case RepeatedWordsMode.RemoveWhereFragmentsMeet:
         sentence = removeWhereFragmentsMeet(cleanFragments)
         break
-      case RepeatedWords.RemoveAll:
+      case RepeatedWordsMode.RemoveAll:
         // Each word counts as a fragment
         sentence = removeWhereFragmentsMeet(cleanFragments.flatMap((fragment) => kebabCase(fragment).split('-')))
         break
       default:
-        repeatedWords satisfies never
-        throw new Error(`Unknown repeated words mode: ${repeatedWords}`)
+        repeatedWordsMode satisfies never
+        throw new Error(`Unknown repeated words mode: ${repeatedWordsMode}`)
     }
 
     switch (format) {

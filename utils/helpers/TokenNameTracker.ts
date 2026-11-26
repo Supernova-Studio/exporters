@@ -1,7 +1,7 @@
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters"
 import { NamingHelper } from "./NamingHelper"
 import { StringCase } from "../enums/StringCase"
-import { RepeatedWords } from "../enums/RepeatedWords"
+import { RepeatedWordsMode } from "../enums/RepeatedWordsMode"
 
 /**
  * Tracks and generates unique names for design tokens while maintaining consistency
@@ -78,7 +78,7 @@ export class TokenNameTracker {
    * @param format - The desired case format for the generated name (e.g., camelCase, snake_case)
    * @param prefix - Optional prefix to add to the generated name
    * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
-   * @param repeatedWords - Which repeated words the name keeps
+   * @param repeatedWordsMode - Which repeated words the name keeps
    * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
    * @returns A unique, code-safe name for the token
    */
@@ -88,7 +88,7 @@ export class TokenNameTracker {
     format: StringCase,
     prefix: string | null,
     forExport: boolean,
-    repeatedWords: RepeatedWords,
+    repeatedWordsMode: RepeatedWordsMode,
     uniqueSuffix: string = "_copy_"
   ): string {
     // If we're looking up a name for reference and it was already generated, use that
@@ -99,7 +99,7 @@ export class TokenNameTracker {
     const parent = tokenGroups.find((group) => group.id === token.parentGroupId)!
 
     // Get the base name
-    let name = NamingHelper.codeSafeVariableNameForToken(token, format, parent, prefix, undefined, repeatedWords)
+    let name = NamingHelper.codeSafeVariableNameForToken(token, format, parent, prefix, undefined, repeatedWordsMode)
     let counter = 1
 
     // If name is taken by a different token, add a suffix

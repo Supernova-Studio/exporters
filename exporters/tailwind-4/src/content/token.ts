@@ -1,4 +1,4 @@
-import { NamingHelper, CSSHelper, GeneralHelper, StringCase, RepeatedWords } from "@supernovaio/export-utils"
+import { NamingHelper, CSSHelper, GeneralHelper, StringCase, RepeatedWordsMode } from "@supernovaio/export-utils"
 import { ColorToken, Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FindReplaceTiming } from "../../config"
@@ -402,7 +402,7 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
         // Construct the name as: utility-color-path-name
         // We also remove the utility name from the cleanName to avoid redundancy
-        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, findReplaceForNamingHelper, RepeatedWords.RemoveAll)
+        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, findReplaceForNamingHelper, RepeatedWordsMode.RemoveAll)
 
         name = normalizeForTailwindConfig(name);
         
