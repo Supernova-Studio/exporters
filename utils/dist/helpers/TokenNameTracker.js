@@ -69,7 +69,7 @@ class TokenNameTracker {
      * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
      * @returns A unique, code-safe name for the token
      */
-    getTokenName(token, tokenGroups, format, prefix, forExport = false, repeatedWords, uniqueSuffix = "_copy_") {
+    getTokenName(token, tokenGroups, format, prefix, forExport, repeatedWords, uniqueSuffix = "_copy_") {
         // If we're looking up a name for reference and it was already generated, use that
         if (!forExport && this.tokenNameMap.has(token.id)) {
             return this.tokenNameMap.get(token.id);

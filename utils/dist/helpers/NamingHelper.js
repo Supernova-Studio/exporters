@@ -55,7 +55,7 @@ class NamingHelper {
         // only "500" is added to avoid "Red Red 500"
         const tokenNameParts = token.name.split(/[\s-_]+/);
         // This checks if the first word of token name matches the last fragment (case insensitive)
-        // and if so, appends the remaining parts of the token name to that fragment
+        // and if so, the Remove modes append the remaining parts of the token name to that fragment
         const startsWithGroupName = fragments.length > 0 && tokenNameParts.length > 1 &&
             tokenNameParts[0].toLowerCase() === fragments[fragments.length - 1].toLowerCase();
         let mergesIntoGroup;

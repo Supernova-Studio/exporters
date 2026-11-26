@@ -556,8 +556,10 @@ test('Keep writes a word repeated where the prefix meets a group', () => {
 
 test('Keep gives different names to two tokens that Remove all names the same', () => {
   const tokenGroup = { name: 'Fast', path: ['Duration'], isRoot: false }
-  const keep = (name: string) =>
-    NamingHelper.codeSafeVariableNameForToken({ name }, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.Keep)
-  expect(keep('Fast-fast themed ref')).toBe('duration-fast-fast-fast-themed-ref')
-  expect(keep('Fast themed ref')).toBe('duration-fast-fast-themed-ref')
+  const name = (tokenName: string, repeatedWords: RepeatedWords) =>
+    NamingHelper.codeSafeVariableNameForToken({ name: tokenName }, StringCase.kebabCase, tokenGroup, null, undefined, repeatedWords)
+  expect(name('Fast-fast themed ref', RepeatedWords.RemoveAll)).toBe('duration-fast-themed-ref')
+  expect(name('Fast themed ref', RepeatedWords.RemoveAll)).toBe('duration-fast-themed-ref')
+  expect(name('Fast-fast themed ref', RepeatedWords.Keep)).toBe('duration-fast-fast-fast-themed-ref')
+  expect(name('Fast themed ref', RepeatedWords.Keep)).toBe('duration-fast-fast-themed-ref')
 })

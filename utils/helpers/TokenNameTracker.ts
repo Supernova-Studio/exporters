@@ -87,7 +87,7 @@ export class TokenNameTracker {
     tokenGroups: Array<TokenGroup>,
     format: StringCase,
     prefix: string | null,
-    forExport: boolean = false,
+    forExport: boolean,
     repeatedWords: RepeatedWords,
     uniqueSuffix: string = "_copy_"
   ): string {
