@@ -51,9 +51,8 @@ class NamingHelper {
                 fragments.push(parent.name);
             }
         }
-        // Step 2: Handle token name intelligently to avoid word-level duplication
-        // For example, if the path ends with "Red" and token name is "Red 500",
-        // we only want to add "500" to avoid "Red Red 500"
+        // Step 2: In the Remove modes, if the path ends with "Red" and token name is "Red 500",
+        // only "500" is added to avoid "Red Red 500"
         const tokenNameParts = token.name.split(/[\s-_]+/);
         // This checks if the first word of token name matches the last fragment (case insensitive)
         // and if so, appends the remaining parts of the token name to that fragment

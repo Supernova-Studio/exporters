@@ -554,7 +554,7 @@ test('Keep writes a word repeated where the prefix meets a group', () => {
   )
 })
 
-test('Keep gives two names to tokens that the Remove modes name alike', () => {
+test('Keep gives different names to two tokens that Remove all names the same', () => {
   const tokenGroup = { name: 'Fast', path: ['Duration'], isRoot: false }
   const keep = (name: string) =>
     NamingHelper.codeSafeVariableNameForToken({ name }, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWords.Keep)

@@ -179,7 +179,7 @@ Here is a list of all the configuration options this exporter provides:
 - **tokenPrefixes:** Prefix each token type with a specific identifier.
 - **globalPrefix:** Prefix for Tailwind classes and CSS variables.
 - **repeatedWords:** Choose which repeated words stay in variable names and typography classes. Colors with a color utility prefix (e.g., `--bg-color-…`) and blur tokens keep their names in every option. Examples for a 'Super super token' color and a 'Neutral 500' color in the 'Neutral' group:
-  - `removeAll` (default): `--color-super-token`, `--color-neutral-500`. The names from before 1.4.0
+  - `removeAll` (default): `--color-super-token`, `--color-neutral-500`. Repeated words as before 1.4.0
   - `removeWhereFragmentsMeet`: `--color-super-super-token`, `--color-neutral-500`. The 1.4.0 names
   - `keep`: `--color-super-super-token`, `--color-neutral-neutral-500`. Also keeps a word repeated where the token type prefix meets a group, e.g. `--color-color-red`
 - **findReplace:** Find and replace strings in token paths and names.

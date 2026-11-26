@@ -88,7 +88,7 @@ export class TokenNameTracker {
     format: StringCase,
     prefix: string | null,
     forExport: boolean = false,
-    repeatedWords?: RepeatedWords,
+    repeatedWords: RepeatedWords,
     uniqueSuffix: string = "_copy_"
   ): string {
     // If we're looking up a name for reference and it was already generated, use that

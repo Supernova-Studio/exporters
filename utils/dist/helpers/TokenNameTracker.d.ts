@@ -34,5 +34,5 @@ export declare class TokenNameTracker {
      * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
      * @returns A unique, code-safe name for the token
      */
-    getTokenName(token: Token, tokenGroups: Array<TokenGroup>, format: StringCase, prefix: string | null, forExport?: boolean, repeatedWords?: RepeatedWords, uniqueSuffix?: string): string;
+    getTokenName(token: Token, tokenGroups: Array<TokenGroup>, format: StringCase, prefix: string | null, forExport: boolean | undefined, repeatedWords: RepeatedWords, uniqueSuffix?: string): string;
 }
