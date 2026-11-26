@@ -55,7 +55,7 @@ export class NamingHelper {
   }
 
   /**
-   * Builds a token's variable name from the prefix, its group path and its name. By default, a word repeated where two
+   * Builds a token's variable name from the prefix, its group path and its name. Without a mode, a word repeated where two
    * of these parts meet is written once ("Neutral" + "Neutral 500" → neutral-500); a word repeated inside one part is kept.
    * Keep writes every word ("Neutral" + "Neutral 500" → neutral-neutral-500)
    */
