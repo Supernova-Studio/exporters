@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from "@jest/globals"
-import { StringCase, ColorFormat } from "@supernovaio/export-utils"
+import { StringCase, ColorFormat, RepeatedWordsMode } from "@supernovaio/export-utils"
 import { ThemeExportStyle, TokenSortOrder, ExporterConfiguration } from "../config"
 import {
   allTokens,
@@ -34,6 +34,7 @@ const baseConfig: ExporterConfiguration = {
   customizeStyleFileNames: false,
   customizeTokenPrefixes: false,
   globalNamePrefix: "",
+  repeatedWords: RepeatedWordsMode.RemoveAll,
   generateTypeDefinitions: false,
   tokenSortOrder: TokenSortOrder.Default,
   writeNameToProperty: false,

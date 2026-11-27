@@ -64,18 +64,19 @@ class TokenNameTracker {
      * @param tokenGroups - Array of all token groups, used to find the token's parent group
      * @param format - The desired case format for the generated name (e.g., camelCase, snake_case)
      * @param prefix - Optional prefix to add to the generated name
-     * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
      * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
+     * @param repeatedWordsMode - Which repeated words the name keeps
+     * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
      * @returns A unique, code-safe name for the token
      */
-    getTokenName(token, tokenGroups, format, prefix, forExport = false, uniqueSuffix = "_copy_") {
+    getTokenName(token, tokenGroups, format, prefix, forExport, repeatedWordsMode, uniqueSuffix = "_copy_") {
         // If we're looking up a name for reference and it was already generated, use that
         if (!forExport && this.tokenNameMap.has(token.id)) {
             return this.tokenNameMap.get(token.id);
         }
         const parent = tokenGroups.find((group) => group.id === token.parentGroupId);
         // Get the base name
-        let name = NamingHelper_1.NamingHelper.codeSafeVariableNameForToken(token, format, parent, prefix);
+        let name = NamingHelper_1.NamingHelper.codeSafeVariableNameForToken(token, format, parent, prefix, undefined, repeatedWordsMode);
         let counter = 1;
         // If name is taken by a different token, add a suffix
         while (this.nameToTokenMap.has(name) && this.nameToTokenMap.get(name) !== token.id) {

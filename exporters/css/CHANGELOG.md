@@ -1,6 +1,11 @@
 ### CSS exporter release notes
 All the updates to this exporter are documented in this file.
 
+## 3.8.0 - 2026-11-25
+
+### ✨ Added
+- New "Repeated words" setting in Token names. "Remove all" (default) writes a word repeated inside one token or group name once again, as before 3.7.0: "Super super token" exports as `--color-super-token`. "Remove where names meet" keeps the 3.7.0 names. If two tokens now share a name, for example "Fast-fast themed ref" and "Fast themed ref" → `--duration-fast-themed-ref`, pick "Remove where names meet" or "Keep all". "Keep all" also keeps a word repeated where a group meets the token name or the prefix meets a group: "Neutral 500" in the "Neutral" group exports as `--color-neutral-neutral-500`.
+
 ## 3.7.0 - 2026-11-23
 
 ### 🐞 Fixed

@@ -1,5 +1,6 @@
 import { Token, TokenGroup } from "@supernovaio/sdk-exporters";
 import { StringCase } from "../enums/StringCase";
+import { RepeatedWordsMode } from "../enums/RepeatedWordsMode";
 /**
  * Tracks and generates unique names for design tokens while maintaining consistency
  * across multiple references to the same token. This ensures that each token gets
@@ -28,9 +29,10 @@ export declare class TokenNameTracker {
      * @param tokenGroups - Array of all token groups, used to find the token's parent group
      * @param format - The desired case format for the generated name (e.g., camelCase, snake_case)
      * @param prefix - Optional prefix to add to the generated name
-     * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
      * @param forExport - If true, generates a new name without storing it. If false, stores and reuses names
+     * @param repeatedWordsMode - Which repeated words the name keeps
+     * @param uniqueSuffix - Suffix that will be added to names to make them unique (if necessary)
      * @returns A unique, code-safe name for the token
      */
-    getTokenName(token: Token, tokenGroups: Array<TokenGroup>, format: StringCase, prefix: string | null, forExport?: boolean, uniqueSuffix?: string): string;
+    getTokenName(token: Token, tokenGroups: Array<TokenGroup>, format: StringCase, prefix: string | null, forExport: boolean, repeatedWordsMode: RepeatedWordsMode, uniqueSuffix?: string): string;
 }

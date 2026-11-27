@@ -1,4 +1,4 @@
-import { NamingHelper, CSSHelper, GeneralHelper, StringCase } from "@supernovaio/export-utils"
+import { NamingHelper, CSSHelper, GeneralHelper, StringCase, RepeatedWordsMode } from "@supernovaio/export-utils"
 import { ColorToken, Token, TokenGroup, TokenType, TypographyTokenValue, FontSizeTokenValue, LineHeightTokenValue, LetterSpacingTokenValue, FontWeightTokenValue, TypographyToken, AnyDimensionTokenValue, AnyTokenValue, AnyToken } from "@supernovaio/sdk-exporters"
 import { exportConfiguration } from ".."
 import { FindReplaceTiming } from "../../config"
@@ -402,7 +402,7 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
         // Construct the name as: utility-color-path-name
         // We also remove the utility name from the cleanName to avoid redundancy
-        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, findReplaceForNamingHelper, true)
+        let name = NamingHelper.codeSafeVariableName(`${utilityName}-color-${cleanName.replace(utilityName, '')}`, StringCase.kebabCase, findReplaceForNamingHelper, RepeatedWordsMode.RemoveAll)
 
         name = normalizeForTailwindConfig(name);
         
@@ -416,7 +416,7 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
     }
 
     // If no utility match, use standard naming
-    let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, findReplaceForNamingHelper)
+    let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, findReplaceForNamingHelper, exportConfiguration.repeatedWords)
     name = normalizeForTailwindConfig(name);
     
     // Apply find/replace after prefix if timing is set to afterPrefix
@@ -429,7 +429,7 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
   // For non-color tokens or when color utility prefixes are disabled
   const parent = tokenGroups.find((group) => group.id === token.parentGroupId)
-  let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, findReplaceForNamingHelper)
+  let name = NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, parent || null, prefix, findReplaceForNamingHelper, exportConfiguration.repeatedWords)
   name = normalizeForTailwindConfig(name);
   
   // Apply find/replace after prefix if timing is set to afterPrefix

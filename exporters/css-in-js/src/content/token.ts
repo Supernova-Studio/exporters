@@ -13,7 +13,14 @@ export function getTokenPrefix(tokenType: TokenType): string {
 
 export function tokenObjectKeyName(token: Token, tokenGroups: Array<TokenGroup>, forExport: boolean = false): string {
   const prefix = getTokenPrefix(token.tokenType)
-  let name = tokenNameTracker.getTokenName(token, tokenGroups, exportConfiguration.tokenNameStyle, prefix, forExport)
+  let name = tokenNameTracker.getTokenName(
+    token,
+    tokenGroups,
+    exportConfiguration.tokenNameStyle,
+    prefix,
+    forExport,
+    exportConfiguration.repeatedWords
+  )
 
   // Apply global prefix if configured
   if (exportConfiguration.globalNamePrefix) {

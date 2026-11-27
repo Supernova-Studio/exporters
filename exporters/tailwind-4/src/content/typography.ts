@@ -54,7 +54,7 @@ export function generateTypographyClass(token: Token, tokenGroups: Array<TokenGr
     [...(token.tokenPath || []), token.name],
     StringCase.kebabCase,
     exportConfiguration.findReplace,
-    true // Add removeDuplicateFragments parameter to prevent duplicated fragments
+    exportConfiguration.repeatedWords
   )
 
   // Get the CSS variable name for reference

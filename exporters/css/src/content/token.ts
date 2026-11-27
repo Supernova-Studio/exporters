@@ -163,6 +163,8 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>, 
     token,
     exportConfiguration.tokenNameStyle,
     exportConfiguration.tokenNameStructure !== TokenNameStructure.NameOnly ? parent : null,
-    [exportConfiguration.globalNamePrefix, prefix, collection?.name].filter(Boolean).join('-')
+    [exportConfiguration.globalNamePrefix, prefix, collection?.name].filter(Boolean).join('-'),
+    undefined,
+    exportConfiguration.repeatedWords
   )
 }

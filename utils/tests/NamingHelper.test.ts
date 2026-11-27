@@ -1,5 +1,6 @@
 import { NamingHelper } from '../helpers/NamingHelper'
 import { StringCase } from '../enums/StringCase'
+import { RepeatedWordsMode } from '../enums/RepeatedWordsMode'
 import { test, expect } from '@jest/globals'
 
 test('codeSafeVariableName_autosplit_1', () => {
@@ -370,13 +371,13 @@ test('codeSafeVariableNameForToken_deduplication_with_kebabCase', () => {
     isRoot: false
   }
   // Test with different case formats to ensure deduplication works in all cases
-  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
     'color-bg-fill-warning'
   )
-  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, tokenGroup, 'color', undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, tokenGroup, 'color', undefined, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
     'colorBgFillWarning'
   )
-  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.snakeCase, tokenGroup, 'color', undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.snakeCase, tokenGroup, 'color', undefined, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
     'color_bg_fill_warning'
   )
 })
@@ -388,11 +389,10 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
   }
   const tokenGroup = {
     name: 'fill',
-    path: ['Color', 'bg', 'fill'],
+    path: ['Color', 'bg'],
     isRoot: false
   }
-  // Test with different case formats to ensure no deduplication happens when removeDuplicateFragments is false
-  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, false)).toBe(
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, 'color', undefined, RepeatedWordsMode.Keep)).toBe(
     'color-color-bg-fill-fill-warning'
   )
   expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.camelCase, tokenGroup, 'color')).toBe(
@@ -403,15 +403,20 @@ test('codeSafeVariableNameForToken_without_deduplication', () => {
   )
 })
 
-test('codeSafeVariableName_with_removeDuplicateFragments', () => {
-  // Test the removeDuplicateFragments parameter directly on codeSafeVariableName
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, true)).toBe(
+test('RemoveWhereFragmentsMeet keeps every word of a single string, which is one fragment', () => {
+  expect(NamingHelper.codeSafeVariableName('color color bg', StringCase.kebabCase, undefined, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
+    'color-color-bg'
+  )
+})
+
+test('RemoveAll on a string writes every repeated word once', () => {
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.kebabCase, undefined, RepeatedWordsMode.RemoveAll)).toBe(
     'color-bg-fill-warning'
   )
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.camelCase, undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.camelCase, undefined, RepeatedWordsMode.RemoveAll)).toBe(
     'colorBgFillWarning'
   )
-  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName('color color bg fill fill warning', StringCase.snakeCase, undefined, RepeatedWordsMode.RemoveAll)).toBe(
     'color_bg_fill_warning'
   )
 })
@@ -458,10 +463,10 @@ test('drops the group name from the start of the token name once, even when the 
 })
 
 test('keeps a word repeated inside one fragment of an array, and collapses it where fragments meet', () => {
-  expect(NamingHelper.codeSafeVariableName(['Typography', 'Heading', 'Heading heading XL'], StringCase.kebabCase, {}, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName(['Typography', 'Heading', 'Heading heading XL'], StringCase.kebabCase, {}, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
     'typography-heading-heading-xl'
   )
-  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, true)).toBe(
+  expect(NamingHelper.codeSafeVariableName(['color', 'color', 'bg', 'fill', 'fill', 'warning'], StringCase.kebabCase, undefined, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
     'color-bg-fill-warning'
   )
 })
@@ -481,4 +486,80 @@ test('leaves no empty segment when find and replace removes a whole group name',
   expect(NamingHelper.codeSafeVariableNameForToken({ name: '500' }, StringCase.kebabCase, tokenGroup, null, { Primitives: '' })).toBe(
     'blue-500'
   )
+})
+
+test('RemoveAll writes a word repeated inside the token name once', () => {
+  const rootGroup = { name: 'Color', path: [], isRoot: true }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Super super token' }, StringCase.kebabCase, rootGroup, 'color', undefined, RepeatedWordsMode.RemoveAll)).toBe(
+    'color-super-token'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Fast-fast themed ref' }, StringCase.camelCase, rootGroup, 'duration', undefined, RepeatedWordsMode.RemoveAll)).toBe(
+    'durationFastThemedRef'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Super super token' }, StringCase.constantCase, rootGroup, 'color', undefined, RepeatedWordsMode.RemoveAll)).toBe(
+    'COLOR_SUPER_TOKEN'
+  )
+})
+
+test('RemoveAll writes a word repeated inside a group name once', () => {
+  const tokenGroup = { name: 'Neutral Neutral', path: ['Color'], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: '500' }, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWordsMode.RemoveAll)).toBe(
+    'color-neutral-500'
+  )
+})
+
+test('RemoveAll keeps a repeated word that is not next to itself', () => {
+  const rootGroup = { name: 'Color', path: [], isRoot: true }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Red dark red' }, StringCase.kebabCase, rootGroup, 'color', undefined, RepeatedWordsMode.RemoveAll)).toBe(
+    'color-red-dark-red'
+  )
+})
+
+test('RemoveAll on an array of fragments writes a word repeated inside one fragment once', () => {
+  expect(NamingHelper.codeSafeVariableName(['Typography', 'Heading', 'Heading heading XL'], StringCase.kebabCase, {}, RepeatedWordsMode.RemoveAll)).toBe(
+    'typography-heading-xl'
+  )
+})
+
+test('RemoveAll runs find and replace on each fragment, before words are removed', () => {
+  expect(NamingHelper.codeSafeVariableName(['Theme', 'Icon', 'Primary'], StringCase.kebabCase, { 'theme icon': 'ti' }, RepeatedWordsMode.RemoveAll)).toBe(
+    'theme-icon-primary'
+  )
+  expect(NamingHelper.codeSafeVariableName(['Brand', 'Brand brand'], StringCase.kebabCase, { Brand: 'Accent' }, RepeatedWordsMode.RemoveAll)).toBe(
+    'accent'
+  )
+})
+
+test('Keep writes a word repeated where a group meets the token name', () => {
+  const tokenGroup = { name: 'Neutral', path: ['Color'], isRoot: false }
+  const token = { name: 'Neutral 500' }
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWordsMode.Keep)).toBe(
+    'color-neutral-neutral-500'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.constantCase, tokenGroup, null, undefined, RepeatedWordsMode.Keep)).toBe(
+    'COLOR_NEUTRAL_NEUTRAL_500'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWordsMode.RemoveWhereFragmentsMeet)).toBe(
+    'color-neutral-500'
+  )
+  expect(NamingHelper.codeSafeVariableNameForToken(token, StringCase.kebabCase, tokenGroup, null, undefined, RepeatedWordsMode.RemoveAll)).toBe(
+    'color-neutral-500'
+  )
+})
+
+test('Keep writes a word repeated where the prefix meets a group', () => {
+  const tokenGroup = { name: 'Color', path: [], isRoot: false }
+  expect(NamingHelper.codeSafeVariableNameForToken({ name: 'Red' }, StringCase.kebabCase, tokenGroup, 'color', undefined, RepeatedWordsMode.Keep)).toBe(
+    'color-color-red'
+  )
+})
+
+test('Keep gives different names to two tokens that Remove all names the same', () => {
+  const tokenGroup = { name: 'Fast', path: ['Duration'], isRoot: false }
+  const name = (tokenName: string, repeatedWordsMode: RepeatedWordsMode) =>
+    NamingHelper.codeSafeVariableNameForToken({ name: tokenName }, StringCase.kebabCase, tokenGroup, null, undefined, repeatedWordsMode)
+  expect(name('Fast-fast themed ref', RepeatedWordsMode.RemoveAll)).toBe('duration-fast-themed-ref')
+  expect(name('Fast themed ref', RepeatedWordsMode.RemoveAll)).toBe('duration-fast-themed-ref')
+  expect(name('Fast-fast themed ref', RepeatedWordsMode.Keep)).toBe('duration-fast-fast-fast-themed-ref')
+  expect(name('Fast themed ref', RepeatedWordsMode.Keep)).toBe('duration-fast-fast-themed-ref')
 })

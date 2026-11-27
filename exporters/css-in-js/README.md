@@ -73,6 +73,10 @@ Here is a list of all the configuration options this exporter provides:
 
 ### Token names
 - **globalNamePrefix:** Prefix all token names (e.g., 'ds_color_primary').
+- **repeatedWords:** Choose which repeated words stay in token names. Examples for a 'Super super token' color and a 'Neutral 500' color in the 'Neutral' group:
+  - `removeAll` (default): `colorSuperToken`, `colorNeutral500`. Removes repeated words as before 2.3.0
+  - `removeWhereFragmentsMeet`: `colorSuperSuperToken`, `colorNeutral500`. The 2.3.0 names
+  - `keep`: `colorSuperSuperToken`, `colorNeutralNeutral500`. Also keeps a word repeated where the token type prefix meets a group, e.g. `colorColorRed`
 - **customizeTokenPrefixes:** Customize the prefixes for each design token type.
 - **tokenPrefixes:** Define specific prefixes for each token type (when customizeTokenPrefixes is enabled).
 - **tokenNameStyle:** Define the naming convention of the exported tokens (camelCase, constantCase, flatCase, pascalCase, or snakeCase).
